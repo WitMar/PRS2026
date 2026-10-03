@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Przetwarzanie równoległe i strumieniowe</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+<style>
+  /* Slide = 1280x720; base font scaled to match H5P text metrics */
+  .reveal { font-size: 24px; font-family: "Open Sans", Arial, sans-serif; color: #000; }
+  .reveal .slides section { position: absolute; width: 100%; height: 100%; padding: 0; text-align: left; }
+  .reveal .el { position: absolute; box-sizing: border-box; overflow: visible; }
+  .reveal .el.text { padding: .375em .5em; line-height: 1.25; }
+  .reveal .el.text p, .reveal .el.text li { margin: 0 0 .5em 0; line-height: 1.25; }
+  .reveal .el.text ul { display: block; margin: 0 0 .5em 1.25em; padding: 0; }
+  .reveal .el.text h3 { font-size: 1em; text-transform: none; margin: 0 0 .5em; color: #000; font-family: inherit; }
+  .reveal .el.img img { width: 100%; height: 100%; object-fit: contain; margin: 0; max-width: none; max-height: none; }
+  .reveal .el.shape { display: flex; flex-direction: column; justify-content: center; }
+  .reveal .el.vertical-line { flex-direction: row; justify-content: center; }
+  .reveal .el.vertical-line > div { height: 100%; }
+  .reveal .el.link { display: flex; align-items: center; justify-content: center; font-size: 1.5em; }
+  .reveal .el.table table { margin: 0 auto; border-collapse: collapse; font-size: 1em; }
+  .reveal .el.table td { border: 1px solid #555; padding: .3em .5em; vertical-align: top; }
+  .reveal a { color: #1a73d9; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section data-background-color="#ffffff" data-keywords="PRS">
+<div class="el text" style="left:2.179%;top:58.254%;width:47.930%;height:33.102%;"><p><a href="https://usosweb.amu.edu.pl/kontroler.php?_action=katalog2/przedmioty/pokazPrzedmiot&amp;kod=06-DPRSUA0">Przetwarzanie równoległe i strumieniowe</a> [06-S2APD04]</p>
+
+<p>Środa</p>
+
+<p>Wykład 8.15 - 9.45 (lub zdalnie!)</p>
+
+<p>Laboratoria 10.00 - 11.30</p>
+</div>
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie równoległe i strumieniowe</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:23.733%;width:61.002%;height:32.364%;"><p><span style="font-size:1.25em"><strong>dr inż. Marcin Witkowski</strong></span></p>
+
+<p>Mail: <strong>mw@amu.edu.pl</strong>&nbsp;lub <strong>@Teams</strong></p>
+
+<p><strong>Pokój : B3-37</strong></p>
+</div>
+<div class="el img" style="left:64.270%;top:21.576%;width:23.125%;height:40.000%;"><img src="images/image-OIisGY56.jpg" alt="UAM"></div>
+<div class="el img" style="left:47.930%;top:66.885%;width:19.608%;height:25.820%;"><img src="images/image-B0lnvCw5.png" alt=""></div>
+<div class="el img" style="left:82.438%;top:71.200%;width:17.564%;height:18.215%;"><img src="images/image-6UxZJl1s.png" alt=""></div>
+<div class="el img" style="left:67.538%;top:73.357%;width:16.340%;height:16.944%;"><img src="images/image-ECvTwTWc.png" alt=""></div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Zaliczenie">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zaliczenie</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:23.733%;width:94.771%;height:73.357%;"><h3><span style="font-size:1.125em"><strong>Wykład</strong></span></h3>
+
+<ul>
+	<li><span style="font-size:1.125em">Pytania testowe - moodle</span></li>
+	<li><span style="font-size:1.125em">Egzamin w sesji</span></li>
+</ul>
+
+<h3><span style="font-size:1.125em"><strong>Laboratoria</strong></span></h3>
+
+<ul>
+	<li><span style="font-size:1.125em">Projekt I -&nbsp; python, proste przetwarzanie 25%.</span></li>
+	<li><span style="font-size:1.125em">Projekt II - przetwarzanie strumieniowe w Apache Flink 25%.</span></li>
+	<li><span style="font-size:1.125em">Zadania ćwiczenia - moodle 50%.</span></li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zaliczenie</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el img" style="left:2.179%;top:19.418%;width:39.209%;height:80.579%;"><img src="images/file-66f94f1088499.png" alt=""></div>
+<div class="el text link" style="left:56.645%;top:58.254%;width:40.000%;height:40.000%;"><a href="https://mw.home.amu.edu.pl" target="_blank">mw.home.amu.edu.pl</a></div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Wątki">
+<div class="el text" style="left:2.179%;top:51.782%;width:49.020%;height:38.836%;"><p><span style="font-size:1.5em">Procesory w naszych komputerach wykonują wiele <strong>programów</strong>: systemowych i użytkownika.&nbsp;<br>
+Wykonania (uruchomienia) programów nazywamy <strong>procesami</strong>.</span></p>
+</div>
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie równoległe</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:23.733%;width:94.771%;height:32.364%;"><p><span style="font-size:1.5em"><strong>"Przetwarzanie równoległe" -</strong> dotyczy programów, w których wiele czynności może odbywać się równocześnie.&nbsp;</span></p>
+</div>
+<div class="el img" style="left:59.913%;top:32.364%;width:36.067%;height:67.633%;"><img src="images/image-ILClDb1B.png" alt=""></div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el img" style="left:72.004%;top:28.048%;width:28.013%;height:52.530%;"><img src="images/image-ILClDb1B.png" alt=""></div>
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Procesory</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:19.418%;width:71.895%;height:75.515%;"><p><span style="font-size:1.5em">Każdy <strong>program</strong>, aplikacja, działa na zasadzie instrukcji, które są wykonywane w tym samym czasie, podzielone na tzw. wątki.</span></p>
+
+<p><span style="font-size:1.5em">Istnieje wątek główny, który np. w przypadku aplikacji odpowiada za interakcję z użytkownikiem oraz wątki poboczne.&nbsp;</span></p>
+
+<p><span style="font-size:1.5em">Procesor o N rdzeniach potrafi obsługiwać 2*N wątków <strong>równolegle</strong>.</span></p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Procesory</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el img" style="left:13.072%;top:19.418%;width:70.806%;height:73.391%;"><img src="images/image-DYWEyxNo.png" alt=""></div>
+<div class="el text" style="left:21.786%;top:90.618%;width:64.270%;height:9.358%;"><p>Źródło: https://www.pcmag.com/reviews/intel-core-i9-10900k</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Proces vs Program</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:36.679%;width:55.556%;height:58.254%;"><p><span style="font-size:1.5em"><strong>Program</strong> jest zbiorem instrukcji do wykonania.&nbsp;</span></p>
+
+<p><br>
+<span style="font-size:1.5em"><strong>Procesem</strong> jest cały kontekst niezbędny do wykonania programu (procesor, pamięć, dane).</span></p>
+</div>
+<div class="el img" style="left:58.824%;top:23.733%;width:38.126%;height:75.309%;"><img src="images/image-WJbTUhFo.png" alt=""></div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Proces</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:1.089%;top:23.733%;width:98.039%;height:75.515%;"><p><span style="font-size:1.5em"><strong>Proces</strong> (nazywany też czasem <strong>zadaniem</strong>) jest odseparowany od innych instancji procesów. </span></p>
+
+<ul>
+	<li><span style="font-size:1.5em">Procesy to <strong>programy</strong>, które są wykonywane na procesorze. </span></li>
+	<li><span style="font-size:1.5em">Proces może tworzyć inne procesy, które są znane jako procesy <strong>potomne</strong> (child processes). </span></li>
+	<li><span style="font-size:1.5em">Procesy są <strong>odizolowane</strong>, co oznacza, że ​​nie współdzielą pamięci z żadnym innym procesem.</span><br>
+	&nbsp;</li>
+</ul>
+
+<p>&nbsp;</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Proces a zasoby</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:23.733%;width:96.950%;height:73.357%;"><p><span style="font-size:1.25em"><strong>Proces</strong> potrzebuje zasobów: <strong>czasu procesora, pamięci operacyjnej, plików, urządzeń wejścia, wyjścia</strong> itd.</span></p>
+
+<p><span style="font-size:1.25em">Każdy proces ma własny obszar przydzielonej mu <strong>pamięci operacyjnej.</strong> Pamięć operacyjna zwykle jest podzielona na cztery części (nazywane segmentami):</span></p>
+
+<ul>
+	<li><span style="font-size:1.25em">&nbsp; &nbsp; <strong>segment kodu</strong> -- zawiera instrukcje wykonywanego programu,</span></li>
+	<li><span style="font-size:1.25em">&nbsp; &nbsp; <strong>segment danych</strong> -- zawiera zmienne globalne programu,</span></li>
+	<li><span style="font-size:1.25em">&nbsp; &nbsp; <strong>stos</strong> -- jest używany do wywoływania procedur, przekazywania parametrów i wyników, oraz przechowywania zmiennych lokalnych,</span></li>
+	<li><span style="font-size:1.25em">&nbsp; &nbsp; <strong>sterta</strong> -- z tego obszaru przydzielana jest pamięć dla zmiennych dynamicznych.&nbsp;</span></li>
+</ul>
+</div>
+<aside class="notes"><p>Każdy proces ma własny licznik instrukcji, który wskazuje następną instrukcję do wykonania, oraz własny obszar przydzielonej mu pamięci operacyjnej.</p>
+</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Proces</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:1.089%;top:23.733%;width:93.682%;height:75.515%;"><p><span style="font-size:1.5em">W systemie może istnieć <strong>wiele procesów</strong> (wiele niezależnych przetwarzań), stąd ważne jest utrzymanie informacji o tym, które zasoby przedzielone na potrzeby każdego przetwarzania.&nbsp;</span></p>
+</div>
+<div class="el img" style="left:17.429%;top:47.035%;width:66.449%;height:53.043%;"><img src="images/image-NrjAAr8M.png" alt=""></div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przełączanie kontekstu</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:23.733%;width:95.861%;height:71.200%;"><p><span style="font-size:1.5em"><strong>Przełączanie</strong> między procesami jest kosztowne. </span></p>
+
+<p><span style="font-size:1.5em">Zmiana wykonywanego procesu (gdy procesor jest przydzielany innemu procesowi z jakiegokolwiek powodu) wiąże się ze złożonymi operacjami zapisania <strong>stanu</strong> obliczenia poprzedniego procesu i odtworzenia stanu obliczeń nowego procesu.&nbsp;</span></p>
+
+<p><span style="font-size:1.5em">Planowanie procesów nie może więc zbyt często powodować zmiany wykonywanego procesu, ponieważ wówczas większość czasu pracy będzie poświęcona na ciągłe <strong>przełączanie kontekstu</strong>.&nbsp;</span></p>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Procesy">
+<div class="el text" style="left:59.913%;top:77.673%;width:37.037%;height:15.103%;"><p><span style="font-size:0.6875em">Source: Time Vectors by Vecteezy - https://www.vecteezy.com/free-vector/time </span></p>
+</div>
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Programy w systemie</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:1.089%;top:23.733%;width:56.645%;height:69.042%;"><p><span style="font-size:1.5em">Odpowiednio częste przełączanie sprawia, że użytkownik ma wrażenie, że <strong>wyłącznie</strong> <strong>jego</strong> zadania są wykonywane przez system. </span></p>
+
+<p><span style="font-size:1.5em">Użytkownik nie odczuwa zatem dyskomfortu, gdy zasoby systemu są w rzeczywistości <strong>współdzielone</strong> przez współbieżnie działające procesy wielu użytkowników.</span></p>
+</div>
+<div class="el img" style="left:58.824%;top:23.733%;width:37.037%;height:53.649%;"><img src="images/image-MjYftUJ9.jpg" alt=""></div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el img" style="left:49.020%;top:17.261%;width:49.625%;height:78.421%;"><img src="images/image-ywr2AC9r.jpg" alt=""></div>
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wątki</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:21.576%;width:51.198%;height:73.357%;"><p><span style="font-size:1.5em"><strong>Proces</strong> jest złożoną i kosztowną strukturą (ma swój segment kodu, stos, stertę i segment danych). </span></p>
+
+<p><span style="font-size:1.5em">Z tego powodu zwykłe procesy nazywamy <strong>ciężkimi</strong>.</span></p>
+
+<p><span style="font-size:1.5em">W ramach procesu można powołać do życia kilka lżejszych struktur nazywanych <strong>wątkami</strong> (ang.<strong>thread</strong>) albo <strong>procesami lekkimi</strong>.</span></p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el img" style="left:27.233%;top:64.727%;width:21.082%;height:33.318%;"><img src="images/image-rwxJD73F.jpg" alt=""></div>
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wątki a zasoby</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:21.576%;width:96.950%;height:73.357%;"><p><span style="font-size:1.5em"><strong>Wątki</strong> jednego procesu są wykonywane <strong>współbieżnie</strong>. </span></p>
+
+<p><span style="font-size:1.5em">Każdy z nich ma oddzielne rejestry i stos wywołań, jednak <strong>współdzieli</strong> z innymi wątkami w ramach tego samego procesu <strong>segment danych, segment kodu, stertę, tablicę otwartych plików</strong> itp. </span></p>
+
+<p><span style="font-size:1.5em">Można powiedzieć, że <strong>proces</strong> to grupa wykonujących go wątków (przynajmniej jednego).</span></p>
+</div>
+<div class="el img" style="left:61.002%;top:64.727%;width:20.697%;height:32.707%;"><img src="images/image-sifDKxPl.jpg" alt=""></div>
+<div class="el img" style="left:78.431%;top:64.727%;width:21.082%;height:33.318%;"><img src="images/image-rwxJD73F.jpg" alt=""></div>
+<div class="el img" style="left:43.573%;top:64.727%;width:20.697%;height:32.707%;"><img src="images/image-sifDKxPl.jpg" alt=""></div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Cechy wątków</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:23.733%;width:94.771%;height:71.200%;"><ul>
+	<li><span style="font-size:1.5em">Każdy wątek należy do dokładnie <strong>jednego procesu</strong> i żaden wątek nie może istnieć w oderwaniu od procesu.</span></li>
+	<li><span style="font-size:1.5em">Każdy wątek reprezentuje <strong>oddzielny</strong> przepływ sterowania.</span></li>
+	<li><span style="font-size:1.5em">Wątki zostały z powodzeniem zastosowane w implementacji rozwiązań internetowych, serwerów, stron WWW itp.</span></li>
+	<li><span style="font-size:1.5em">Mogą być wykonywane na <strong>jednym</strong> procesorze lub na <strong>wielu</strong> procesorach (rdzeniach)</span></li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zalety wątków</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:23.733%;width:95.861%;height:71.200%;"><p><span style="font-size:1.5em">Korzyści ze stosowania wątków są rozmaite. Przede wszystkim <strong>wydajność</strong>: powołanie do życia wielu wątków jest znacznie tańsze niż stworzenie wielu <strong>ciężkich procesów.</strong> </span></p>
+
+<p><span style="font-size:1.5em">Wątki mogą bez ograniczeń <strong>współdzielić</strong> przestrzeń danych procesu. Tak samo skomunikowane procesy (przez wspólny obszar pamięci), musiałyby korzystać ze złożonej usługi systemu operacyjnego, jaką jest pamięć dzielona.&nbsp;</span></p>
+
+<p><span style="font-size:1.5em">Wątki współdzielą zasoby (procesor, pamięć, kod) w ramach <strong>jednego procesu</strong>.</span></p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wątek zasoby</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:21.576%;width:45.752%;height:73.357%;"><p><span style="font-size:1.25em">Każdy <strong>wątek</strong> (inna nazwa: proces lekki, ang. lightweight)</span></p>
+
+<p><span style="font-size:1.25em">– Ma swój własny <strong>stan</strong> (Aktywny, Gotowy, Zablokowany)</span></p>
+
+<p><span style="font-size:1.25em">– Ma swoje <strong>wartości rejestrów </strong>i <strong>licznika rozkazów</strong>.</span></p>
+
+<p><span style="font-size:1.25em">– Ma swój własny <strong>stos</strong> (zmienne lokalne funkcji).</span></p>
+
+<p><span style="font-size:1.25em">– Ma dostęp do przestrzeni adresowej, plików i innych zasobów <strong>procesu</strong></span></p>
+</div>
+<div class="el img" style="left:49.020%;top:23.733%;width:49.112%;height:71.200%;"><img src="images/image-uf40f88Z.png" alt=""></div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Proces vs Wątek podsumowanie</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text table" style="left:0.000%;top:21.576%;width:100.000%;height:74.106%;"><div>&nbsp;</div>
+
+<div>
+<table align="center" border="1" cellpadding="1" cellspacing="1">
+	<thead>
+	</thead>
+	<tbody>
+		<tr>
+			<td><strong>ciężki</strong> lub wymaga dużej ilości zasobów</td>
+			<td><strong>lekki</strong>, zużywa mniej zasobów niż proces</td>
+		</tr>
+		<tr>
+			<td><strong>przełączanie</strong> wymaga interakcji z systemem operacyjnym</td>
+			<td><strong>przełączanie</strong> nie wymaga interakcji z systemem operacyjnym</td>
+		</tr>
+		<tr>
+			<td><strong>własna</strong> pamięć i zasoby</td>
+			<td><strong>współdzielą</strong> pamięć, pliki&nbsp;</td>
+		</tr>
+		<tr>
+			<td>gdy jeden jest <strong>zablokowany</strong> nie możemy uruchomić nowego</td>
+			<td>gdy jeden jest <strong>zablokowany</strong> inny może zostać uruchomiony</td>
+		</tr>
+		<tr>
+			<td>każdy działa <strong>niezależnie</strong> od innych</td>
+			<td>może<strong> odczytywać, zapisywać i zmieniać</strong> <strong>dane</strong> innego wątku</td>
+		</tr>
+	</tbody>
+</table>
+
+<div>&nbsp;</div>
+</div>
+</div>
+<div class="el text" style="left:28.322%;top:19.418%;width:23.157%;height:9.584%;"><p><span style="font-size:1.5em"><strong>Proces</strong></span></p>
+</div>
+<div class="el text" style="left:61.002%;top:19.418%;width:23.157%;height:9.584%;"><p><span style="font-size:1.5em"><strong>Wątek</strong></span></p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wielowątkowość</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:23.733%;width:57.734%;height:66.885%;"><p><span style="font-size:1.5em">Kiedy wiele wątków jest wykonywanych w procesie w tym samym czasie, otrzymujemy termin „<strong>wielowątkowość</strong>". </span></p>
+
+<p><span style="font-size:1.5em">W przeglądarce wiele kart może być różnymi wątkami. MS Word wykorzystuje wiele wątków: jeden wątek do formatowania tekstu, inny wątek do przetwarzania danych wejściowych.</span></p>
+</div>
+<div class="el img" style="left:61.002%;top:28.048%;width:37.908%;height:52.416%;"><img src="images/image-lBynAI9j.jpg" alt=""></div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Współbieżne vs równoległe</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:28.048%;width:96.950%;height:64.727%;"><p><span style="font-size:1.5em">Przetwarzanie <strong>współbieżne</strong> (ang. concurrent computing) – przetwarzanie oparte na współistnieniu wielu wątków lub procesów, operujących na współdzielonych danych. </span></p>
+
+<p>&nbsp;</p>
+
+<p><span style="font-size:1.5em">Wątki uruchomione na tym samym procesorze są przełączane w krótkich przedziałach czasu, co sprawia wrażenie, że wykonują się <strong>równolegle</strong>.&nbsp;</span></p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Współbieżne vs równoległe</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:28.048%;width:96.950%;height:67.532%;"><p><span style="font-size:1.5em">W przypadku procesorów <strong>wielordzeniowych</strong> lub <strong>wielowątkowych</strong>, możliwe jest faktycznie współbieżne przetwarzanie.&nbsp;</span></p>
+
+<p>&nbsp;</p>
+
+<p><span style="font-size:1.5em">W architekturach <strong>jednowątkowych</strong> w celu zapobieżenia zatrzymaniu przetwarzania wątków przez duże zadanie, stosuje się technikę <strong>wywłaszczania</strong> i <strong>multitaskingu</strong>.</span></p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Współbieżne vs równoległe</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:1.089%;top:23.733%;width:97.821%;height:73.357%;"><p><span style="font-size:1.5em">Przetwarzanie <strong>współbieżne</strong> to sytuacja, w której rozkazy jednego wątku wykonują się w momencie, gdy poprzedni wątek nie jest jeszcze zakończony (wątki się nakładają). Jeżeli przynajmniej dwa rozkazy wątków wykonywanych współbieżnie są realizowane w tym samym czasie, to wtedy mamy do czynienia z przetwarzaniem <strong>równoległym</strong>.&nbsp;</span></p>
+
+<p><span style="font-size:1.5em">Przetwarzanie <strong>współbieżne</strong> jest pojęciem bardziej ogólnym w stosunku do przetwarzania <strong>równoległego</strong>. W związku z tym każde przetwarzanie <strong>równoległe</strong> jest przetwarzaniem <strong>współbieżnym</strong>, ale nie każde przetwarzanie <strong>współbieżne</strong> jest przetwarzaniem <strong>równoległym.</strong></span></p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el img" style="left:69.717%;top:54.587%;width:22.937%;height:45.309%;"><img src="images/image-5NJG3f1H.jpg" alt=""></div>
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Program współbieżny</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:30.206%;width:66.445%;height:65.374%;"><p><span style="font-size:1.5em">Program <strong>współbieżny</strong> jest poprawny jeśli posiada własności <strong>bezpieczeństwa</strong> i <strong>żywotności</strong>.</span></p>
+
+<p><span style="font-size:1.5em">● Własność bezpieczeństwa - nigdy nie dojdzie do niepożądanej sytuacji (wejścia w niepożądany stan)&nbsp;</span></p>
+
+<p><span style="font-size:1.5em">● Własność żywotności – jeżeli proces jest wstrzymany w oczekiwaniu na zdarzenie to zdarzenie to zajdzie w skończonym czasie</span></p>
+</div>
+<div class="el img" style="left:68.627%;top:21.576%;width:27.233%;height:37.849%;"><img src="images/image-wPiX9s1m.jpg" alt=""></div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wielowątkowość</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:23.733%;width:97.821%;height:65.374%;"><p><span style="font-size:1.5em"><strong>Wielowątkowość</strong> to model wykonywania programu, który pozwala na tworzenie wielu wykonywanych niezależnie wątków.</span></p>
+
+<p><span style="font-size:1.5em">Algorytmy nazywane <strong>równoległymi </strong>są<strong>&nbsp;</strong>trudniejsze w implementacji niż sekwencyjne, ponieważ współbieżność wprowadza dodatkowe możliwości popełnienia <strong>błędu.</strong></span></p>
+</div>
+<div class="el img" style="left:45.752%;top:58.254%;width:27.233%;height:37.849%;"><img src="images/image-wPiX9s1m.jpg" alt=""></div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wielowątkowość - problemy</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:1.089%;top:23.733%;width:97.821%;height:71.200%;"><ul>
+	<li><span style="font-size:1.5em">Problemy z <strong>dostępem do danych</strong>, w których dwa wątki odczytują i modyfikują te same dane. Bez odpowiedniego wykorzystania mechanizmów blokujących może dojść do niespójności danych.</span></li>
+	<li><span style="font-size:1.5em">Problemy z <strong>brakiem wątków</strong> i rywalizacją o zasoby pojawiają się, gdy wiele wątków próbuje uzyskać dostęp do pojedynczego chronionego zasobu.</span></li>
+	<li><span style="font-size:1.5em">Problemy <strong>rożnych ścieżek wywołań</strong> w zależności od przydziału zasobów procesora.</span></li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie strumieniowe</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:1.089%;top:23.733%;width:97.821%;height:71.200%;"><p><span style="font-size:1.5em"><strong>Przetwarzanie strumieniowe</strong> to paradygmat przetwarzania danych w oparciu o równoległe przetwarzanie danych z wielu źródeł.</span></p>
+
+<p><span style="font-size:1.5em">W przeszłości dane były zazwyczaj przetwarzane w partiach na podstawie <strong>harmonogramu</strong> lub określonego wcześniej progu (np. co noc o 1 w nocy, co sto wierszy lub za każdym razem, gdy wolumen osiąga dwa megabajty). Jest to tzw. <strong>przetwarzanie wsadowe.</strong></span></p>
+</div>
+<div class="el img" style="left:52.288%;top:62.570%;width:28.322%;height:33.975%;"><img src="images/image-DDaMZOYn.jpg" alt=""></div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el img" style="left:1.089%;top:54.587%;width:98.039%;height:45.309%;"><img src="images/image-ZgbOf73l.jpg" alt=""></div>
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie strumieniowe</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:1.089%;top:21.576%;width:97.821%;height:71.200%;"><p><span style="font-size:1.5em">Zamiast grupować dane i zbierać je w określonych odstępach czasu, aplikacje przetwarzania strumieniowego gromadzą i przetwarzają dane <strong>natychmiast</strong> po ich otrzymaniu.</span></p>
+
+<p><span style="font-size:1.5em">Przetwarzanie strumieniowe umożliwia aplikacjom reagowanie na nowe zdarzenia w danych (np. przekroczenie zakresu alarmowego) <strong>w momencie ich wystąpienia</strong>.<strong> </strong></span></p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie strumieniowe</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:21.576%;width:95.861%;height:75.515%;"><p><span style="font-size:1.25em">Działania, które przetwarzanie strumieniowe wykonuje na danych, obejmują </span></p>
+
+<ul>
+	<li><span style="font-size:1.25em"><strong>agregacje</strong> (np. obliczenia, takie jak suma, średnia, odchylenie standardowe), </span></li>
+	<li><span style="font-size:1.25em"><strong>analizy</strong> (np. przewidywanie przyszłego zdarzenia na podstawie wzorców danych), </span></li>
+	<li><span style="font-size:1.25em"><strong>przekształcenia</strong> (np. zmiana liczby na format daty ), </span></li>
+	<li><span style="font-size:1.25em"><strong>wzbogacanie</strong> (np. łączenie punktu danych z innymi źródłami danych w celu stworzenia większego kontekstu i znaczenia) </span></li>
+	<li><span style="font-size:1.25em"><strong>przetwarzanie</strong> (np. wstawianie danych do bazy danych).</span></li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie strumieniowe</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:21.576%;width:95.861%;height:75.515%;"><p><span style="font-size:1.5em">Przetwarzanie strumieni jest najczęściej stosowane do danych generowanych jako <strong>seria zdarzeń,</strong> takich jak dane z sensorów, systemów przetwarzania płatności oraz logów aplikacji.&nbsp;</span></p>
+
+<p><span style="font-size:1.5em">Z przetwarzaniem w tym modelu związane są pojęcia brokera danych takiego jak <strong>Apache Kafka®</strong> oraz biblioteki przetwarzającymi dane <strong>Apache Spark, Hadoop czy też Apache Flink</strong>.</span></p>
+
+<p><span style="font-size:1.5em">Będą one tematem drugiej części przedmiotu.</span></p>
+</div>
+</section>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script>
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.02,
+    center: false, hash: true, slideNumber: 'c/t',
+    transition: 'slide',
+    plugins: [RevealNotes]
+  });
+</script>
+</body>
+</html>
