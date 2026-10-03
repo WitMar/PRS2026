@@ -1,0 +1,412 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>PRA08.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="pracownia-programowania">
+<h2>Pracownia Programowania</h2>
+<section id="spring-boot-hibernate">
+<h3>Spring Boot + Hibernate</h3>
+<p class="important">Uwaga! cały kod znajduje się na gałęzi <strong>SpringHibernateStart</strong> w repozytorium <a class="reference external" href="https://github.com/WitMar/PRA2025">https://github.com/WitMar/PRA2025</a> . Kod końcowy w gałęzi <strong>SpringHibernateStop</strong>.</p>
+<p>Jeżeli nie widzisz odpowiednich gałęzi na GitHubie wykonaj <strong>Ctr+T</strong>, a jak to nie pomoże to wybierz z menu <strong>VCS-&gt;Git-&gt;Fetch</strong>.</p>
+<p>Na tych zajęciach pokażemy sobie jak Hibernate łączy się ze Spring Bootem. Wykorzystamy kod końcowy z zajęć SpringBoot.</p>
+<p>Pierwszy element to konfiguracja, która zostaje przeniesiona z pliku <strong>persistence.xml</strong> do pliku <strong>application.yaml</strong>.</p>
+<pre class="code xml literal-block"><code>spring:<span class="whitespace">
+      </span>jpa:<span class="whitespace">
+            </span>properties:<span class="whitespace">
+              </span>hibernate:<span class="whitespace">
+        </span>dialect:<span class="whitespace"> </span>org.hibernate.dialect.HSQLDialect<span class="whitespace">
+        </span>ddl-auto:<span class="whitespace"> </span>create<span class="whitespace">
+    </span>show-sql:<span class="whitespace"> </span>true<span class="whitespace">
+  </span>database:<span class="whitespace">
+    </span>driverClassName:<span class="whitespace"> </span>org.hsqldb.jdbcDriver<span class="whitespace">
+  </span>datasource:<span class="whitespace">
+    </span>url:<span class="whitespace"> </span>jdbc:hsqldb:mem:spring<span class="whitespace">
+    </span>username:<span class="whitespace"> </span>sa<span class="whitespace">
+    </span>password:</code></pre>
+<p>Naszym celem będzie zamiana Beana <strong>DataSet</strong> na wywołania zapytań do relacyjnej bazy danych.</p>
+<p class="tag">Zadanie</p>
+<p>Dodaj w głównej klasie SpringApp adnotację &quot;EnableJpaRepositories&quot;.</p>
+<section id="repository">
+<h4>Repository</h4>
+<p>Do zarządzania danymi (wykonywaniem zapytań na bazie danych) w projekcie springowym służą <strong>repozytoria</strong>. Repozytoria będą definiować jakie operacje możemy wykonać na naszych danych. Podstawowe operacje CRUD (Create, Read, Update, Delete) dostajemy od Springa, inne operacje jak wyszukiwanie po polach musimy dodać sami.</p>
+<p>Żeby używać repozytoriów musimy do klasy Main musimy dodać adnotację <strong>&#64;EnableJpaRepositories</strong> i (opcjonalnie) określić ścieżkę, w której się znajdują.</p>
+<p>Najprostsze repozytoria tworzone są jako interfejsy. Repozytorium definiujemy osobno dla każdej encji - czyli dla każdej tabeli w bazie. Poprawna implementacja interfejsu, która jest potrzebna do wykonania metod jest generowana przez Springa.</p>
+<pre class="code java literal-block"><code><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">interface</span> <span class="name class">ProductRepository</span><span class="whitespace"> </span><span class="keyword declaration">extends</span><span class="whitespace"> </span><span class="name">CrudRepository</span><span class="operator">&lt;</span><span class="name">Product</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">Integer</span><span class="operator">&gt;</span></code></pre>
+<p>Definiuje najprostsze repozytorium, które dziedziczy najprostsze operacje CRUD ze springowego repozytorium Crud (nie musimy sami już pisać tych zapytań).</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><strong>Product</strong> to klasa (obiekt) jaki chcemy przechowywać - w bazie danych będzie to tabela, u nas w projekcie jest to klasa modelu.</div>
+<div class="line"><strong>Integer</strong> to typ klucza dla tabeli productów.</div>
+</div>
+</blockquote>
+<dl>
+<dt>Lista operacji z interfejsu CRUD:</dt>
+<dd><div class="line-block">
+<div class="line">Product save(Product t) – zapisz produkt do bazy danych</div>
+<div class="line">Iterable save(Iterable t) – zapisanie kolekcji obiektów</div>
+<div class="line">Product findOne(Integer id) – znajduje wpis z kluczem podanym jako parametr</div>
+<div class="line">boolean exists(Integer id) – sprawdź czy wpis z kluczem istnieje</div>
+<div class="line">Iterable findAll() – pobierz wszystkie wpisy z tabli</div>
+<div class="line">Iterable findAll(Iterable IDs) – znajdź wszystkie elementy z kluczami na liście IDs</div>
+<div class="line">long count() – policz elementy w tabeli</div>
+<div class="line">void delete(Integer id) – usuń element z kluczem id</div>
+<div class="line">void delete(Product r) – usuń obiekt z tabelki</div>
+<div class="line">void delete(Iterable IDs) – usuń wszystkie obiekty których klucze znajdują się na liście IDs</div>
+<div class="line">deleteAll() – wyczyść tabelę</div>
+</div>
+</dd>
+</dl>
+<p>Oczywiście możemy dziedziczyć po więcej niż jednym interfejsie, co będziemy robić za chwilę dodając stronnicowane zapytania.</p>
+<p class="tag">Zadanie</p>
+<p>Dodaj katalog repositories i w nim interface ProductRepository. Zauważ, że dla repository nie mamy adnotacji nad klasą!</p>
+<p>package com.pracownia.spring.repositories;</p>
+<pre class="code java literal-block"><code><span class="whitespace">    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">com.pracownia.spring.model.Product</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">org.springframework.data.repository.CrudRepository</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">interface</span> <span class="name class">ProductRepository</span><span class="whitespace"> </span><span class="keyword declaration">extends</span><span class="whitespace"> </span><span class="name">CrudRepository</span><span class="operator">&lt;</span><span class="name">Product</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">Integer</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Zapytania SQL możemy w Springu tworzyć na 4 sposoby:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">* Zapytania &quot;nazwane&quot;</div>
+<div class="line">* Query DSL</div>
+<div class="line">* Z nazw metod</div>
+<div class="line">* &#64;Query Annotation</div>
+</div>
+</blockquote>
+<p>DSL to zapytania tworzone w kodzie:</p>
+<pre class="code java literal-block"><code><span class="name">queryFactory</span><span class="punctuation">.</span><span class="name attribute">selectFrom</span><span class="punctuation">(</span><span class="name">person</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="punctuation">.</span><span class="name attribute">where</span><span class="punctuation">(</span><span class="whitespace">
+        </span><span class="name">person</span><span class="punctuation">.</span><span class="name attribute">firstName</span><span class="punctuation">.</span><span class="name attribute">eq</span><span class="punctuation">(</span><span class="literal string">&quot;John&quot;</span><span class="punctuation">),</span><span class="whitespace">
+        </span><span class="name">person</span><span class="punctuation">.</span><span class="name attribute">lastName</span><span class="punctuation">.</span><span class="name attribute">eq</span><span class="punctuation">(</span><span class="literal string">&quot;Doe&quot;</span><span class="punctuation">))</span><span class="whitespace">
+    </span><span class="punctuation">.</span><span class="name attribute">fetch</span><span class="punctuation">();</span></code></pre>
+<p>Więcej przykładów na <a class="reference external" href="https://www.baeldung.com/querydsl-with-jpa-tutorial">https://www.baeldung.com/querydsl-with-jpa-tutorial</a> .</p>
+<p>Poniżej przedstawimy dwa ostatnie sposoby:</p>
+<p>Definiowanie własnych zapytań odbywa się poprzez:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">Zdefiniowanie metody w interfejsie</div>
+</div>
+</blockquote>
+<pre class="code java literal-block"><code><span class="name">List</span><span class="operator">&lt;</span><span class="name">Product</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">findByName</span><span class="punctuation">(</span><span class="name">String</span><span class="whitespace"> </span><span class="name">name</span><span class="punctuation">);</span></code></pre>
+<p>Spring automatycznie zmienia metodę na zapytanie SQL (za nas) jeżeli stosujemy się do odpowiedniej konwencji nazewniczej.</p>
+<p>Kluczowe frazy to <strong>find…By, read…By, and get…By</strong> możemy do tego używać nazw pól oraz logicznych spójników <strong>And</strong> i <strong>Or</strong>.</p>
+<p>Tutaj Spring domyśla się co ma zrobić po nazwie metody. Można by w podobny sposób zapisać findByName(String name). Możemy również łączyć warunki i tworzyć nazwy takie jak findByDoneAndName(Boolean done, String name). Przykład:</p>
+<pre class="code java literal-block"><code><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">interface</span> <span class="name class">PersonRepository</span><span class="whitespace"> </span><span class="keyword declaration">extends</span><span class="whitespace"> </span><span class="name">Repository</span><span class="operator">&lt;</span><span class="name">User</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">Long</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+    </span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Person</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">findByEmailAddressAndLastname</span><span class="punctuation">(</span><span class="name">EmailAddress</span><span class="whitespace"> </span><span class="name">emailAddress</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name">lastname</span><span class="punctuation">);</span><span class="whitespace">
+
+    </span><span class="comment single">// Enables the distinct flag for the query</span><span class="whitespace">
+    </span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Person</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">findDistinctPeopleByLastnameOrFirstname</span><span class="punctuation">(</span><span class="name">String</span><span class="whitespace"> </span><span class="name">lastname</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name">firstname</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Person</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">findPeopleDistinctByLastnameOrFirstname</span><span class="punctuation">(</span><span class="name">String</span><span class="whitespace"> </span><span class="name">lastname</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name">firstname</span><span class="punctuation">);</span><span class="whitespace">
+
+    </span><span class="comment single">// Enabling ignoring case for an individual property</span><span class="whitespace">
+    </span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Person</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">findByLastnameIgnoreCase</span><span class="punctuation">(</span><span class="name">String</span><span class="whitespace"> </span><span class="name">lastname</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="comment single">// Enabling ignoring case for all suitable properties</span><span class="whitespace">
+    </span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Person</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">findByLastnameAndFirstnameAllIgnoreCase</span><span class="punctuation">(</span><span class="name">String</span><span class="whitespace"> </span><span class="name">lastname</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name">firstname</span><span class="punctuation">);</span><span class="whitespace">
+
+    </span><span class="comment single">// Enabling static ORDER BY for a query</span><span class="whitespace">
+    </span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Person</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">findByLastnameOrderByFirstnameAsc</span><span class="punctuation">(</span><span class="name">String</span><span class="whitespace"> </span><span class="name">lastname</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Person</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">findByLastnameOrderByFirstnameDesc</span><span class="punctuation">(</span><span class="name">String</span><span class="whitespace"> </span><span class="name">lastname</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Więcej przykładowych słów kluczowych w użyciu:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="http://www.thejavageek.com/2017/02/25/spring-data-jpa-query-methods/">http://www.thejavageek.com/2017/02/25/spring-data-jpa-query-methods/</a></div>
+<div class="line"><a class="reference external" href="https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods.query-creation">https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#jpa.query-methods.query-creation</a></div>
+</div>
+</blockquote>
+<p class="tag">Zadanie</p>
+<p>Dodaj plik SellerRepository. Usuń Beana i klasę Data z projektu i zamień wywołania korzystające z tego beana w servicach na wywołania metod z repository.</p>
+<p>Klasa SellerServiceImpl powinna wyglądać następująco:</p>
+<pre class="code java literal-block"><code><span class="whitespace">    </span><span class="keyword namespace">package</span><span class="whitespace"> </span><span class="name namespace">com.pracownia.spring.services</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">com.pracownia.spring.model.DataSet</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">com.pracownia.spring.model.Seller</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">com.pracownia.spring.model.Product</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">com.pracownia.spring.repositories.ProductRepository</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">com.pracownia.spring.repositories.SellerRepository</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">org.springframework.beans.factory.annotation.Autowired</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">org.springframework.stereotype.Service</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">java.util.ArrayList</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">java.util.List</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">java.util.Optional</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">java.util.Random</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">java.util.stream.Collectors</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Service</span><span class="whitespace">
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">SellerServiceImpl</span><span class="whitespace"> </span><span class="keyword declaration">implements</span><span class="whitespace"> </span><span class="name">SellerService</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Autowired</span><span class="whitespace">
+</span><span class="name">SellerRepository</span><span class="whitespace"> </span><span class="name">data</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Autowired</span><span class="whitespace">
+</span><span class="name">ProductRepository</span><span class="whitespace"> </span><span class="name">dataPr</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Autowired</span><span class="whitespace">
+</span><span class="name">ProductService</span><span class="whitespace"> </span><span class="name">productService</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Override</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">Iterable</span><span class="operator">&lt;</span><span class="name">Seller</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">listAllSellers</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">data</span><span class="punctuation">.</span><span class="name attribute">findAll</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Override</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">Optional</span><span class="operator">&lt;</span><span class="name">Seller</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">getSellerById</span><span class="punctuation">(</span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">data</span><span class="punctuation">.</span><span class="name attribute">findById</span><span class="punctuation">(</span><span class="name">id</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Override</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">Seller</span><span class="whitespace"> </span><span class="name function">saveSeller</span><span class="punctuation">(</span><span class="name">Seller</span><span class="whitespace"> </span><span class="name">seller</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">data</span><span class="punctuation">.</span><span class="name attribute">save</span><span class="punctuation">(</span><span class="name">seller</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">seller</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Override</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">deleteSeller</span><span class="punctuation">(</span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">data</span><span class="punctuation">.</span><span class="name attribute">deleteById</span><span class="punctuation">(</span><span class="name">id</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Override</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Seller</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">getByName</span><span class="punctuation">(</span><span class="name">String</span><span class="whitespace"> </span><span class="name">name</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">data</span><span class="punctuation">.</span><span class="name attribute">findByName</span><span class="punctuation">(</span><span class="name">name</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Override</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">Integer</span><span class="whitespace"> </span><span class="name function">getNumberOfProducts</span><span class="punctuation">(</span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">return</span><span class="whitespace">  </span><span class="name">data</span><span class="punctuation">.</span><span class="name attribute">countProductsById</span><span class="punctuation">(</span><span class="name">id</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Override</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">Optional</span><span class="operator">&lt;</span><span class="name">Seller</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">getBestSeller</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword type">double</span><span class="whitespace"> </span><span class="name">max</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal number integer">0</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name">maxId</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal number integer">0</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="name">Iterable</span><span class="operator">&lt;</span><span class="name">Seller</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">sellers</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">data</span><span class="punctuation">.</span><span class="name attribute">findAll</span><span class="punctuation">();</span><span class="whitespace">
+    </span><span class="keyword">for</span><span class="punctuation">(</span><span class="name">Seller</span><span class="whitespace"> </span><span class="name">s</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="name">sellers</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword type">double</span><span class="whitespace"> </span><span class="name">sum</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal number float">0.0</span><span class="punctuation">;</span><span class="whitespace">
+        </span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Product</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">products</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">dataPr</span><span class="punctuation">.</span><span class="name attribute">findBySellerId</span><span class="punctuation">(</span><span class="name">s</span><span class="punctuation">.</span><span class="name attribute">getId</span><span class="punctuation">());</span><span class="whitespace">
+        </span><span class="keyword">for</span><span class="punctuation">(</span><span class="name">Product</span><span class="whitespace"> </span><span class="name">pid</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="name">products</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+            </span><span class="name">sum</span><span class="whitespace"> </span><span class="operator">+=</span><span class="whitespace"> </span><span class="name">pid</span><span class="punctuation">.</span><span class="name attribute">getPrice</span><span class="punctuation">().</span><span class="name attribute">doubleValue</span><span class="punctuation">();</span><span class="whitespace">
+        </span><span class="punctuation">}</span><span class="whitespace">
+        </span><span class="keyword">if</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">sum</span><span class="whitespace"> </span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">max</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+            </span><span class="name">max</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">sum</span><span class="punctuation">;</span><span class="whitespace">
+            </span><span class="name">maxId</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">s</span><span class="punctuation">.</span><span class="name attribute">getId</span><span class="punctuation">();</span><span class="whitespace">
+        </span><span class="punctuation">}</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">data</span><span class="punctuation">.</span><span class="name attribute">findById</span><span class="punctuation">(</span><span class="name">maxId</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+    </span><span class="punctuation">}</span></code></pre>
+<p>Jeżeli podaliśmy w repository metodę findBySeller(Seller seller) to powinniśmy zobaczyć błąd. W tym wypadku hibernate nie radzi sobie dobrze z zapytaniem, w przypadku joinów łatwiej będzie nam wykorzystać drugi sposób definiowania zapytań.</p>
+<p>Drugi sposób to zdefiniowanie zapytania samemu korzystając z adnotacji <strong>&#64;Query</strong> przed nazwą metody w interfejsie. Zapytania definiujemy w znanym z Hibernate standardzie JPQL, który jest wzorowany na HQL i w większości jest jego podzbiorem.</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;Query</span><span class="punctuation">(</span><span class="literal string">&quot;select u from User u where u.age = ?1&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">List</span><span class="operator">&lt;</span><span class="name">User</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">findUsersByAge</span><span class="punctuation">(</span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name">age</span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Query</span><span class="punctuation">(</span><span class="literal string">&quot;select u from User u where u.firstname = :#{#customer.firstname}&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">List</span><span class="operator">&lt;</span><span class="name">User</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">findUsersByCustomersFirstname</span><span class="punctuation">(</span><span class="name decorator">&#64;Param</span><span class="punctuation">(</span><span class="literal string">&quot;customer&quot;</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="name">Customer</span><span class="whitespace"> </span><span class="name">customer</span><span class="punctuation">);</span></code></pre>
+<p>Parametry zapytań są definiowane poprzez adnotacje <strong>&#64;Param</strong> lub poprzez numer parametru w definicji <strong>?1</strong>.</p>
+<p class="tag">Zadanie</p>
+<p>Dodaj dla ProductRepository zapytanie:</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;Query</span><span class="punctuation">(</span><span class="literal string">&quot;select p from Product p join p.sellers s where s.id = ?1&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Product</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">findBySellerId</span><span class="punctuation">(</span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">);</span></code></pre>
+<p>Uruchom program, dodaj dane za pomocą swaggera i wywołaj endpoint <strong>/api/seller/best</strong>.</p>
+<p>Zapytania join są najtrudniejsze do wykonania, poniżej przykłady dwóch różnych implementacji join dla połączenia Product - Seller :</p>
+<p><strong>&gt;</strong> Zapytanie wyszukujące produkty które sprzedaje sprzedawca.</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;Query</span><span class="punctuation">(</span><span class="literal string">&quot;select p from Seller s join s.productsOb p where s.id = ?1&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Product</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">getProductsById</span><span class="punctuation">(</span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">);</span></code></pre>
+<p><strong>&gt;</strong> Druga wersja tego zapytania (przy wykorzystaniu tablicy productId):</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;Query</span><span class="punctuation">(</span><span class="literal string">&quot;select p from Seller s join s.products ps, Product p where p.productId = ps.id and s.id = ?1&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Product</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">getProductsById</span><span class="punctuation">(</span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">);</span></code></pre>
+<p class="tag">Zadanie</p>
+<p>Sprawdź czy endpoint <strong>/api/seller/products/{id}</strong> zwraca to co powinien.</p>
+<p><strong>&gt;</strong> Dodaj do repository Seller zapytanie podające liczbę produktów danego sprzedawcy</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;Query</span><span class="punctuation">(</span><span class="literal string">&quot;select count(*) from Seller s join s.productsOb p where s.id = ?1&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">Long</span><span class="whitespace"> </span><span class="name function">countProductsObById</span><span class="punctuation">(</span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">);</span></code></pre>
+</section>
+<section id="stronnicowanie">
+<h4>Stronnicowanie</h4>
+<p class="tag">Zadanie</p>
+<p>Dodaj do Product repository : PagingAndSortingRepository.</p>
+<pre class="code java literal-block"><code><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">interface</span> <span class="name class">ProductRepository</span><span class="whitespace"> </span><span class="keyword declaration">extends</span><span class="whitespace"> </span><span class="name">CrudRepository</span><span class="operator">&lt;</span><span class="name">Product</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">Integer</span><span class="operator">&gt;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">PagingAndSortingRepository</span><span class="operator">&lt;</span><span class="name">Product</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">Integer</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span></code></pre>
+<p>Dodaj do serwisu zapytanie stronnicowane o produkty (zwróć uwagę, że teraz findAll może przyjmować parametr PageRequest - nr strony, wielkość strony). Uwaga strony są numerowane od <strong>zera</strong>!</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;Override</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">Iterable</span><span class="operator">&lt;</span><span class="name">Product</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">listAllProductsPaging</span><span class="punctuation">(</span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">pageNr</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">howManyOnPage</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">productRepository</span><span class="punctuation">.</span><span class="name attribute">findAll</span><span class="punctuation">(</span><span class="name">PageRequest</span><span class="punctuation">.</span><span class="name attribute">of</span><span class="punctuation">(</span><span class="name">pageNr</span><span class="punctuation">,</span><span class="name">howManyOnPage</span><span class="punctuation">));</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Dodaj kontroler:</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;GetMapping</span><span class="punctuation">(</span><span class="name">value</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;/products/{page}&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">produces</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">MediaType</span><span class="punctuation">.</span><span class="name attribute">APPLICATION_JSON_VALUE</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">Iterable</span><span class="operator">&lt;</span><span class="name">Product</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">list</span><span class="punctuation">(</span><span class="name decorator">&#64;PathVariable</span><span class="punctuation">(</span><span class="literal string">&quot;page&quot;</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">pageNr</span><span class="punctuation">,</span><span class="name decorator">&#64;RequestParam</span><span class="punctuation">(</span><span class="name">value</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;size&quot;</span><span class="punctuation">,</span><span class="name">required</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword constant">false</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="name">Optional</span><span class="operator">&lt;</span><span class="name">Integer</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">howManyOnPage</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">productService</span><span class="punctuation">.</span><span class="name attribute">listAllProductsPaging</span><span class="punctuation">(</span><span class="name">pageNr</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">howManyOnPage</span><span class="punctuation">.</span><span class="name attribute">orElse</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">));</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Zwróć uwagę na parametr size, który jest opcjonalny (i przy nie podaniu żadnej wartości ustawiamy go jako 2).</p>
+</section>
+<section id="criteria-query">
+<h4>Criteria Query</h4>
+<p>Istnieje trzeci sposób tworzenia zapytania w Hibernate, który nazywa się Criteria Query. Możemy go wykorzystać w repozytorium ale musimy wtedy zbudować własne zapytanie w oparciu o EntityManager.</p>
+<p>Musimy dodać interface</p>
+<pre class="code java literal-block"><code><span class="keyword namespace">package</span><span class="whitespace"> </span><span class="name namespace">com.pracownia.spring.repositories</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">com.pracownia.spring.model.Product</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">java.util.List</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">interface</span> <span class="name class">ProductRepositoryCustomInterface</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+                </span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Product</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">listAffordableProducts</span><span class="punctuation">(</span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">price</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Oraz implementację</p>
+<pre class="code java literal-block"><code><span class="whitespace">    </span><span class="keyword namespace">package</span><span class="whitespace"> </span><span class="name namespace">com.pracownia.spring.repositories</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">com.pracownia.spring.model.Product</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">jakarta.persistence.EntityManager</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">jakarta.persistence.criteria.CriteriaBuilder</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">jakarta.persistence.criteria.CriteriaQuery</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">jakarta.persistence.criteria.Predicate</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">jakarta.persistence.criteria.Root</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">org.springframework.beans.factory.annotation.Autowired</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">org.springframework.stereotype.Component</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">java.util.ArrayList</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">java.util.List</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Component</span><span class="whitespace">
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">ProductRepositoryCustom</span><span class="whitespace"> </span><span class="keyword declaration">implements</span><span class="whitespace"> </span><span class="name">ProductRepositoryCustomInterface</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Autowired</span><span class="whitespace">
+</span><span class="name">EntityManager</span><span class="whitespace"> </span><span class="name">em</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Override</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Product</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">listAffordableProducts</span><span class="punctuation">(</span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">price</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">CriteriaBuilder</span><span class="whitespace"> </span><span class="name">cb</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">em</span><span class="punctuation">.</span><span class="name attribute">getCriteriaBuilder</span><span class="punctuation">();</span><span class="whitespace">
+    </span><span class="name">CriteriaQuery</span><span class="operator">&lt;</span><span class="name">Product</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">cq</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">cb</span><span class="punctuation">.</span><span class="name attribute">createQuery</span><span class="punctuation">(</span><span class="name">Product</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">);</span><span class="whitespace">
+
+    </span><span class="name">Root</span><span class="operator">&lt;</span><span class="name">Product</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">product</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">cq</span><span class="punctuation">.</span><span class="name attribute">from</span><span class="punctuation">(</span><span class="name">Product</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Predicate</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">predicates</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">ArrayList</span><span class="operator">&lt;&gt;</span><span class="punctuation">();</span><span class="whitespace">
+
+    </span><span class="name">predicates</span><span class="punctuation">.</span><span class="name attribute">add</span><span class="punctuation">(</span><span class="name">cb</span><span class="punctuation">.</span><span class="name attribute">lessThanOrEqualTo</span><span class="punctuation">(</span><span class="name">product</span><span class="punctuation">.</span><span class="name attribute">get</span><span class="punctuation">(</span><span class="literal string">&quot;price&quot;</span><span class="punctuation">),</span><span class="whitespace"> </span><span class="name">price</span><span class="punctuation">));</span><span class="whitespace">
+
+    </span><span class="name">cq</span><span class="punctuation">.</span><span class="name attribute">where</span><span class="punctuation">(</span><span class="name">predicates</span><span class="punctuation">.</span><span class="name attribute">toArray</span><span class="punctuation">(</span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">Predicate</span><span class="operator">[</span><span class="literal number integer">0</span><span class="operator">]</span><span class="punctuation">));</span><span class="whitespace">
+
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">em</span><span class="punctuation">.</span><span class="name attribute">createQuery</span><span class="punctuation">(</span><span class="name">cq</span><span class="punctuation">).</span><span class="name attribute">getResultList</span><span class="punctuation">();</span><span class="whitespace">
+            </span><span class="punctuation">}</span><span class="whitespace">
+    </span><span class="punctuation">}</span></code></pre>
+<p>Możemy teraz użyć go w service i controlerze.</p>
+<pre class="code java literal-block"><code><span class="whitespace">    </span><span class="name decorator">&#64;Autowired</span><span class="whitespace">
+</span><span class="name">ProductRepositoryCustom</span><span class="whitespace"> </span><span class="name">productRepositoryWithCQ</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Override</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">Iterable</span><span class="operator">&lt;</span><span class="name">Product</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">listAllBelowPrice</span><span class="punctuation">(</span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">price</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">productRepositoryWithCQ</span><span class="punctuation">.</span><span class="name attribute">listAffordableProducts</span><span class="punctuation">(</span><span class="name">price</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;GetMapping</span><span class="punctuation">(</span><span class="name">value</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;/products/promo/{price}&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">produces</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">MediaType</span><span class="punctuation">.</span><span class="name attribute">APPLICATION_JSON_VALUE</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">Iterable</span><span class="operator">&lt;</span><span class="name">Product</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">list</span><span class="punctuation">(</span><span class="name decorator">&#64;PathVariable</span><span class="punctuation">(</span><span class="literal string">&quot;price&quot;</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">price</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">productService</span><span class="punctuation">.</span><span class="name attribute">listAllBelowPrice</span><span class="punctuation">(</span><span class="name">price</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<section id="audytowanie-danych-w-bazie-danych">
+<h5>Audytowanie danych w bazie danych</h5>
+<p>Audytowanie danych w bazie danych polega na śledzeniu i zapisywaniu zmian w danych,
+takich jak tworzenie, aktualizacja czy usuwanie rekordów. Celem audytowania jest zapewnienie
+możliwości odtworzenia historii zmian dla danego obiektu lub rekordu oraz wspieranie procesów
+kontroli, zgodności z regulacjami (compliance) i debugowania.</p>
+<p>Typowe zastosowania audytu:
+- Śledzenie zmian danych użytkowników
+- Odzyskiwanie przypadkowo zmodyfikowanych lub usuniętych informacji
+- Analizowanie działań użytkowników w systemie
+- Spełnienie wymogów prawnych dotyczących przechowywania historii zmian</p>
+</section>
+<section id="hibernate-envers">
+<h5>Hibernate Envers</h5>
+<p>Hibernate Envers to moduł biblioteki Hibernate, który automatycznie zarządza audytem danych.
+Envers zapisuje zmiany w specjalnych tabelach audytowych i umożliwia łatwe odczytywanie
+wersji historycznych encji.</p>
+<p>Jak działa Envers:
+- Dla każdej audytowanej encji tworzona jest osobna tabela (np. <span class="docutils literal">user_AUD</span>).
+- Każda zmiana (INSERT, UPDATE, DELETE) jest rejestrowana w tabeli audytowej.
+- Zapytania mogą być kierowane na konkretne wersje danych.</p>
+</section>
+<section id="przyklad-uzycia-hibernate-envers">
+<h5>Przykład użycia Hibernate Envers</h5>
+</section>
+</section>
+<section id="konfiguracja">
+<h4>Konfiguracja</h4>
+<p>Aby włączyć Envers, należy dodać odpowiednią zależność Maven:</p>
+<pre class="code xml literal-block"><code><span class="name tag">&lt;dependency&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;groupId&gt;</span>org.hibernate.orm<span class="name tag">&lt;/groupId&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;artifactId&gt;</span>hibernate-envers<span class="name tag">&lt;/artifactId&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;version&gt;</span>6.4.4.Final<span class="name tag">&lt;/version&gt;</span><span class="whitespace"> </span><span class="comment multiline">&lt;!-- przykład wersji --&gt;</span><span class="whitespace">
+</span><span class="name tag">&lt;/dependency&gt;</span></code></pre>
+</section>
+<section id="audytowanie-encji">
+<h4>Audytowanie encji</h4>
+<p>Oznacz encję adnotacją <span class="docutils literal">&#64;Audited</span>:</p>
+<pre class="code java literal-block"><code><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">jakarta.persistence.Entity</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">jakarta.persistence.Id</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">org.hibernate.envers.Audited</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Entity</span><span class="whitespace">
+</span><span class="name decorator">&#64;Audited</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">User</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name decorator">&#64;Id</span><span class="whitespace">
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">Long</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name">username</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name">email</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="comment single">// Gettery i settery</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+</section>
+<section id="tabela-audytowa">
+<h4>Tabela audytowa</h4>
+<p>Hibernate Envers automatycznie stworzy tabelę <span class="docutils literal">User_AUD</span>, zawierającą:
+- Kolumny odpowiadające polom z encji <span class="docutils literal">User</span>
+- Kolumnę <span class="docutils literal">REV</span> wskazującą na identyfikator rewizji
+- Kolumnę <span class="docutils literal">REVTYPE</span> określającą typ operacji (0 = dodanie, 1 = modyfikacja, 2 = usunięcie)</p>
+</section>
+<section id="pobieranie-historii-zmian">
+<h4>Pobieranie historii zmian</h4>
+<p>Do pobierania wersji obiektów służy <span class="docutils literal">AuditReader</span>:</p>
+<pre class="code java literal-block"><code><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">org.hibernate.envers.AuditReader</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">org.hibernate.envers.AuditReaderFactory</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="comment single">// Wewnątrz transakcji Hibernate</span><span class="whitespace">
+</span><span class="name">AuditReader</span><span class="whitespace"> </span><span class="name">auditReader</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">AuditReaderFactory</span><span class="punctuation">.</span><span class="name attribute">get</span><span class="punctuation">(</span><span class="name">entityManager</span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="comment single">// Pobierz wszystkie rewizje danego użytkownika</span><span class="whitespace">
+</span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Number</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">revisions</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">auditReader</span><span class="punctuation">.</span><span class="name attribute">getRevisions</span><span class="punctuation">(</span><span class="name">User</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">userId</span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="comment single">// Pobierz konkretną wersję użytkownika</span><span class="whitespace">
+</span><span class="name">User</span><span class="whitespace"> </span><span class="name">userAtRevision</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">auditReader</span><span class="punctuation">.</span><span class="name attribute">find</span><span class="punctuation">(</span><span class="name">User</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">userId</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">revisionNumber</span><span class="punctuation">);</span></code></pre>
+<p class="tag">Zadanie</p>
+<p>Zobacz jakie tabele tworzą audyty i jak wygląda tworzenie danych przy włączonym audytowaniu.</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="footnote-1" role="note">
+<span class="label"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></span>
+<p>Wykorzystano materiały z:</p>
+</aside>
+</aside>
+<p><a class="reference external" href="http://silversableprog.blogspot.com/2015/11/javaspring-boot-jak-rozpoczac-pisanie-w.html">http://silversableprog.blogspot.com/2015/11/javaspring-boot-jak-rozpoczac-pisanie-w.html</a></p>
+<p><a class="reference external" href="http://blog.mloza.pl/spring-boot-szybkie-tworzenie-aplikacji-web-w-javie/">http://blog.mloza.pl/spring-boot-szybkie-tworzenie-aplikacji-web-w-javie/</a></p>
+<p><a class="reference external" href="http://blog.mloza.pl/spring-boot-interakcja-z-baza-danych-czyli-spring-data-jpa/#more-70">http://blog.mloza.pl/spring-boot-interakcja-z-baza-danych-czyli-spring-data-jpa/#more-70</a></p>
+<p><a class="reference external" href="https://www.callicoder.com/spring-boot-rest-api-tutorial-with-mysql-jpa-hibernate/">https://www.callicoder.com/spring-boot-rest-api-tutorial-with-mysql-jpa-hibernate/</a></p>
+<p><a class="reference external" href="https://spring.io/guides/tutorials/bookmarks/">https://spring.io/guides/tutorials/bookmarks/</a></p>
+<p><a class="reference external" href="https://fastfoodcoding.com/tutorials/1505105199524/crud-operations-using-spring-boot-jpa-hibernate-postgresql">https://fastfoodcoding.com/tutorials/1505105199524/crud-operations-using-spring-boot-jpa-hibernate-postgresql</a></p>
+<p><a class="reference external" href="https://shakeelosmani.wordpress.com/2017/02/13/step-by-step-spring-boot-hibernate-crud-web-application-tutorial/">https://shakeelosmani.wordpress.com/2017/02/13/step-by-step-spring-boot-hibernate-crud-web-application-tutorial/</a></p>
+<p><a class="reference external" href="https://github.com/Zianwar/springboot-crud-demo">https://github.com/Zianwar/springboot-crud-demo</a></p>
+<p><a class="reference external" href="https://kobietydokodu.pl/09-spring-mvc/">https://kobietydokodu.pl/09-spring-mvc/</a></p>
+<p><a class="reference external" href="https://www.ibm.com/developerworks/library/j-spring-boot-basics-perry/index.html">https://www.ibm.com/developerworks/library/j-spring-boot-basics-perry/index.html</a></p>
+<p><a class="reference external" href="https://sites.google.com/site/telosystutorial/springmvc-jpa-springdatajpa/presentation/architecture">https://sites.google.com/site/telosystutorial/springmvc-jpa-springdatajpa/presentation/architecture</a></p>
+</section>
+</section>
+</section></body>
+</html>
+

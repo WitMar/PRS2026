@@ -1,0 +1,369 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>PRA11.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="programming-laboratory">
+<h2>Programming Laboratory</h2>
+<section id="spring-security">
+<h3>Spring Security</h3>
+<p class="important">Uwaga! cały kod znajduje się na gałęziach (backend/frontend) <strong>SpringSecurityStart / SpringSecurityReactStart</strong> w repozytorium <a class="reference external" href="https://github.com/WitMar/PRA2025">https://github.com/WitMar/PRA2025</a> .</p>
+<p>Jeżeli nie widzisz odpowiednich gałęzi na GitHubie wykonaj <strong>Ctr+T</strong>, a jak to nie pomoże to wybierz z menu <strong>VCS-&gt;Git-&gt;Fetch</strong>.</p>
+<p>Uwaga! Kod należy uruchamiać przy pomocy JAVA wersji <strong>17</strong>.</p>
+<section id="autoryzacja-oauth">
+<h4>Autoryzacja OAuth</h4>
+<p>OAuth 2.0 to protokół autoryzacji, który pozwala użytkownikowi przyznać stronie internetowej lub aplikacji dostęp do chronionych zasobów użytkownika bez konieczności ujawniania jego haseł, a nawet tożsamości.</p>
+<p>Zamiast używać poświadczeń właściciela zasobu w celu uzyskania dostępu do chronionych zasobów, klient uzyskuje token dostępu — ciąg znaków oznaczający określony zakres, okres istnienia i inne atrybuty dostępu. Tokeny dostępu są wydawane klientom zewnętrznym przez serwer autoryzacji za zgodą właściciela zasobu. Następnie klient używa tokenu dostępu, aby uzyskać dostęp do chronionych zasobów hostowanych przez serwer zasobów.</p>
+<p>OAuth generuje tokeny dostępu dla scenariuszy autoryzacji API w formacie JSON web token (JWT). Uprawnienia reprezentowane przez token dostępu w warunkach OAuth są znane jako zakresy (an. scopes). Gdy aplikacja uwierzytelnia się za pomocą OAuth, określa żądane zakresy. Jeśli te zakresy są autoryzowane przez użytkownika, token dostępu będzie reprezentował te autoryzowane zakresy.</p>
+<p>W naszym przypadku nasz serwer jest zarówno klientem (względem zewnętrznego API) jak i dostarczycielem tokenów (dla aplikacji frontendowej).</p>
+<p>Przepływ danych w przypadku autoryzacji przez zewnętrzny serwis autoryzujący:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">1. Aplikacja chce uzyskać dane użytkownika, pobierając je z bazy dostawcy tożsamości, w tym celu wykonywane jest przekierowanie do serwera autoryzującego.</div>
+<div class="line">2. Serwer autoryzujący przedstawia formularz z informacją o tym, że aplikacja chce uzyskać dostęp do określonych elementów profilu (np. pobrać podstawowe dane personalne oraz adres e-mail).</div>
+<div class="line">3. Użytkownik w zależności od tego, czy akceptuje wymagania aplikacji, wydaje jej autoryzację lub nie.</div>
+<div class="line">4. W przypadku udzielenia autoryzacji serwer wykonuje przekierowanie z powrotem do aplikacji, a ta otrzymuje specjalny token, za pomocą którego może pobrać wybrane dane z profilu użytkownika.</div>
+</div>
+</blockquote>
+<p class="center"><img alt="a0" src="auth00.png" /></p>
+<p>Przepływ danych przy autoryzacji zewnętrznym serwerem Auth0 :</p>
+<p class="center"><img alt="a1" src="auth.png" /></p>
+</section>
+<section id="token">
+<h4>Token</h4>
+<p>Uwierzytelnianie (authentication) to proces, w którym aplikacja potwierdza tożsamość użytkownika. Aplikacje tradycyjnie utrwalają tożsamość za pomocą plików cookie sesji, opierając się na identyfikatorach sesji przechowywanych po stronie serwera. Zmusza to programistów do tworzenia pamięci sesji, która jest unikalna dla każdego serwera lub zaimplementowana jako całkowicie oddzielna warstwa pamięci sesji.</p>
+<p>Uwierzytelnianie tokenem jest bardziej nowoczesnym podejściem i ma na celu rozwiązanie problemów istniejących przy wykorzystywaniu identyfikatory sesji. Używanie tokenów zamiast identyfikatorów sesji może zmniejszyć obciążenie serwera, usprawnić zarządzanie uprawnieniami i zapewnić lepsze narzędzia do obsługi infrastruktury rozproszonej lub opartej na chmurze.</p>
+<p class="center"><img alt="a3" src="token.png" /></p>
+<p>Jak widać na powyższym diagramie, po wymianie danych uwierzytelniających użytkownika na token na serwerze, klient może użyć tokena do walidacji każdego kolejnego żądania.</p>
+<p>Wszystkie metadane użytkownika są zakodowane bezpośrednio w samym tokenie, więc każdy komputer w Twojej sieci może zweryfikować dowolnego użytkownika. Serwer i klient mogą przekazywać token w nieskończoność i nigdy nie przechowywać żadnych danych użytkownika ani sesji. To jest „bezstanowość” i jest kluczem do skalowalności aplikacji.</p>
+</section>
+<section id="jwt-token">
+<h4>JWT token</h4>
+<p>JWT to kompaktowy, bezpieczny dla adresów URL, szyfrowany obiekt JSON, który szybko staje się standardem implementacji tokenów w Internecie.</p>
+<p>Prawidłowo uformowany token JWT składa się z trzech połączonych ciągów zakodowanych w Base64url i oddzielonych kropkami (.):</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><strong>JOSE Header</strong>: zawiera metadane dotyczące typu tokena i algorytmów kryptograficznych użytych do zabezpieczenia jego zawartości.</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Payloda JWS</strong> (zestaw oświadczeń): zawiera weryfikowalne oświadczenia dotyczące bezpieczeństwa, takie jak tożsamość użytkownika i przyznane mu uprawnienia.</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Signature JWS</strong>: służy do sprawdzania, czy token jest godny zaufania i nie został naruszony. Gdy używasz tokena JWT, musisz sprawdzić jego podpis przed jego zapisaniem i użyciem.</div>
+</div>
+</blockquote>
+<p>Tokeny są podpisywane w celu ochrony przed manipulacją, same dane główne nie są za to szyfrowane. Oznacza to, że token można łatwo zdekodować, a jego zawartość ujawnić. Istnieje wiele stron internetowych, które potrafią odczytać nagłówek i ładunek – ale bez prawidłowego sekretu / podpisu token jest bezużyteczny.</p>
+<p>Możesz zakodować lub odszyfrować token JWT na przykład za pomocą</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://www.jsonwebtoken.io/">https://www.jsonwebtoken.io/</a></div>
+</div>
+</blockquote>
+<p>W rzeczywistym scenariuszu klient wysyła żądanie do serwera i przekazuje token wraz z żądaniem. Serwer próbuje zweryfikować token i jeśli się powiedzie, będzie kontynuował przetwarzanie żądania. Jeśli serwer nie mógł zweryfikować tokenu, wysłałby 401 Unauthorized i komunikat informujący, że żądanie nie może zostać przetworzone, ponieważ nie można zweryfikować autoryzacji.</p>
+</section>
+<section id="google-api">
+<h4>Google API</h4>
+<p>Uzyskaj dane logowania OAuth 2.0 z konsoli Google API. Odwiedź konsolę interfejsu API Google, aby uzyskać dane uwierzytelniające OAuth 2.0, takie jak identyfikator klienta i klucz klienta, które są znane zarówno firmie Google, jak i Twojej aplikacji. Zestaw wartości różni się w zależności od typu tworzonej aplikacji. Na przykład aplikacja JavaScript nie wymaga klucza tajnego, ale aplikacja serwera WWW tak.</p>
+<p class="center"><img alt="a34" src="APIgogle.png" /></p>
+</section>
+<section id="nasza-aplikacja">
+<h4>Nasza aplikacja</h4>
+<p>W naszym przykładzie aplikacja backendowa wykorzystywana jest w komunikacji z serwerem google. Frontent wysyła zapytanie o logowanie do serwera google, po podaniu credentialu google odpowiada na podany endpoint redirect do backendu z informacją o sukcesie logowania i danymi użytkownika. Dane te są
+zapisywane w bazie danych w backendzie i tworzony jest token z id użytkownika i sekretnym podpisem. Token ten jest następnie wysyłany na frontend i każde kolejne zapytanie frontendu korzysta z tego tokenu do autoryzacji zapytań.</p>
+<p>Jest to inne podejście niż wyżej na diagramie, gdzie to frontend komunikował się z serwerem googla i otrzymywał od niego token (wtedy backend też musi pytać serwer googla za każdym razem o to czy token jest poprawny). W naszym przypadku latwiej jest zarządzać użytkownikami gdyż każdy nowy użytkownik trafia do bazy danych
+w przypadku gdy bakcend nie znałby użytkownika byłoby to trochę trudniejsze do przeprowadzenia.</p>
+</section>
+<section id="spring-security-1">
+<h4>Spring Security</h4>
+<p>Spring Security to potężna i wysoce konfigurowalna platforma uwierzytelniania i kontroli dostępu.</p>
+<section id="configurationproperties">
+<h5>&#64;ConfigurationProperties</h5>
+<p>&#64;ConfigurationProperties wiąże dane z application.yml z komponentem, klasą w kodzie aplikacji. Możesz wstrzykiwać i używać tej klasy w całym kodzie aplikacji, tak jak każdy inny bean springowy.</p>
+<p>Aplikacja Spring Boot domyślnie ładuje właściwości konfiguracyjne z pliku application.yml znajdującego się w ścieżce klas. może powiązać właściwości zdefiniowane w pliku application.properties z klasą POJO przy użyciu &#64;ConfigurationProperties. Adnotacja &#64;ConfigurationProperties przyjmuje parametr prefiksu i wiąże wszystkie właściwości z określonym prefiksem z klasą POJO.</p>
+<p>Własności z pliku konfiguracyjnego</p>
+<pre class="code java literal-block"><code><span class="name label">app</span><span class="punctuation">:</span><span class="whitespace">
+  </span><span class="name">auth</span><span class="punctuation">:</span><span class="whitespace">
+    </span><span class="name">tokenSecret</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="name">PRACOWNIAPROGRAMOWANIA</span><span class="whitespace">
+    </span><span class="name">tokenExpirationMsec</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal number integer">864000000</span><span class="whitespace">
+  </span><span class="name">oauth2</span><span class="punctuation">:</span><span class="whitespace">
+    </span><span class="error">#</span><span class="whitespace"> </span><span class="name">After</span><span class="whitespace"> </span><span class="name">successfully</span><span class="whitespace"> </span><span class="name">authenticating</span><span class="whitespace"> </span><span class="name">with</span><span class="whitespace"> </span><span class="name">the</span><span class="whitespace"> </span><span class="name">OAuth2</span><span class="whitespace"> </span><span class="name">Provider</span><span class="punctuation">,</span><span class="whitespace">
+    </span><span class="error">#</span><span class="whitespace"> </span><span class="name">we</span><span class="error">'</span><span class="name">ll</span><span class="whitespace"> </span><span class="name">be</span><span class="whitespace"> </span><span class="name">generating</span><span class="whitespace"> </span><span class="name">an</span><span class="whitespace"> </span><span class="name">auth</span><span class="whitespace"> </span><span class="name">token</span><span class="whitespace"> </span><span class="keyword">for</span><span class="whitespace"> </span><span class="name">the</span><span class="whitespace"> </span><span class="name">user</span><span class="whitespace"> </span><span class="name">and</span><span class="whitespace"> </span><span class="name">sending</span><span class="whitespace"> </span><span class="name">the</span><span class="whitespace"> </span><span class="name">token</span><span class="whitespace"> </span><span class="name">to</span><span class="whitespace"> </span><span class="name">the</span><span class="whitespace">
+    </span><span class="error">#</span><span class="whitespace"> </span><span class="name">redirectUri</span><span class="whitespace"> </span><span class="name">mentioned</span><span class="whitespace"> </span><span class="name">by</span><span class="whitespace"> </span><span class="name">the</span><span class="whitespace"> </span><span class="name">client</span><span class="whitespace"> </span><span class="name">in</span><span class="whitespace"> </span><span class="name">the</span><span class="whitespace"> </span><span class="operator">/</span><span class="name">oauth2</span><span class="operator">/</span><span class="name">authorize</span><span class="whitespace"> </span><span class="name">request</span><span class="punctuation">.</span><span class="whitespace">
+  </span><span class="name">authorizedRedirectUris</span><span class="punctuation">:</span><span class="whitespace">
+    </span><span class="operator">-</span><span class="whitespace"> </span><span class="name">http</span><span class="punctuation">:</span><span class="comment single">//localhost:3000/oauth2/redirect</span></code></pre>
+<p>Aplikacja żądająca tokenu dostępu musi znać klucz tajny, aby odczytać podpis tokenu. Uniemożliwia to złośliwym aplikacjom, które nie zostały autoryzowane za pomocą z tokenów przed uzyskaniem dostępu.</p>
+<p>Podajemy też tutaj własny adres aplikacji frontendowej (liste adresów w powyższym przykładzie) na którym czekać będzie ona na przesłanie przez nas tokenu.</p>
+</section>
+<section id="controller">
+<h5>Controller</h5>
+<p>W naszej aplikacji będziemy posiadać dwa endpointy, jeden pobierający aktualnie zautoryzowanego użytkownika i drugi do pobrania danych. Oba endpointy będą dostępne tylko dla użytkowników o roli USER (czyli zautoryzowanych).</p>
+<pre class="code java literal-block"><code><span class="whitespace">    </span><span class="name decorator">&#64;GetMapping</span><span class="punctuation">(</span><span class="literal string">&quot;/user/me&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name decorator">&#64;PreAuthorize</span><span class="punctuation">(</span><span class="literal string">&quot;hasRole('USER')&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">User</span><span class="whitespace"> </span><span class="name function">getCurrentUser</span><span class="punctuation">(</span><span class="name">Authentication</span><span class="whitespace"> </span><span class="name">authentication</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">UserPrincipal</span><span class="whitespace"> </span><span class="name">userDetails</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">UserPrincipal</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="name">authentication</span><span class="punctuation">.</span><span class="name attribute">getPrincipal</span><span class="punctuation">();</span><span class="whitespace">
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">userRepository</span><span class="punctuation">.</span><span class="name attribute">findById</span><span class="punctuation">(</span><span class="name">userDetails</span><span class="punctuation">.</span><span class="name attribute">getId</span><span class="punctuation">())</span><span class="whitespace">
+            </span><span class="punctuation">.</span><span class="name attribute">orElseThrow</span><span class="punctuation">(()</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">ResourceNotFoundException</span><span class="punctuation">(</span><span class="literal string">&quot;User&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;id&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">userDetails</span><span class="punctuation">.</span><span class="name attribute">getId</span><span class="punctuation">()));</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;GetMapping</span><span class="punctuation">(</span><span class="name">value</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;/data&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">produces</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;application/json&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name decorator">&#64;PreAuthorize</span><span class="punctuation">(</span><span class="literal string">&quot;hasRole('USER')&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name function">getUserSecretData</span><span class="punctuation">(</span><span class="name">Authentication</span><span class="whitespace"> </span><span class="name">authentication</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="literal string">&quot;Now server can reveal user's secret data&quot;</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Zauważmy, że elementem requestu jest klasa Authentication zawierająca dane autoryzacji i z niej pobieramy obiekt przechowujący informację o użytkowniku wywołującym zapytanie, jego credentiale itp.</p>
+</section>
+</section>
+<section id="spring-security-configuration">
+<h4>Spring Security Configuration</h4>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;EnableGlobalMethodSecurity</span><span class="punctuation">(</span><span class="whitespace">
+        </span><span class="name">jsr250Enabled</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword constant">true</span><span class="punctuation">,</span><span class="whitespace">
+        </span><span class="name">prePostEnabled</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword constant">true</span><span class="whitespace">
+</span><span class="punctuation">)</span></code></pre>
+<p>Umożliwia bardziej złożoną składnię kontroli dostępu opartą na wyrażeniach z adnotacjami &#64;PreAuthorize i &#64;PostAuthorize. Włącza adnotację &#64;RolesAllowed.</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;PreAuthorize</span><span class="whitespace"> </span><span class="name">decides</span><span class="whitespace"> </span><span class="name">whether</span><span class="whitespace"> </span><span class="name">a</span><span class="whitespace"> </span><span class="name">method</span><span class="whitespace"> </span><span class="name">can</span><span class="whitespace"> </span><span class="name">actually</span><span class="whitespace"> </span><span class="name">be</span><span class="whitespace"> </span><span class="name">invoked</span><span class="whitespace"> </span><span class="name">or</span><span class="whitespace"> </span><span class="name">not</span><span class="punctuation">.</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;PreAuthorize</span><span class="punctuation">(</span><span class="literal string">&quot;hasRole('USER')&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">create</span><span class="punctuation">(</span><span class="name">Contact</span><span class="whitespace"> </span><span class="name">contact</span><span class="punctuation">);</span></code></pre>
+<p>oznacza, że dostęp będą mieli tylko użytkownicy z rolą „ROLE_USER”.</p>
+<section id="http-security">
+<h5>Http security</h5>
+<p>Konfiguracje HttpSecurity służą do konfigurowania dostępu do zasobów, takich jak csrf (rodzaj ataku), sessionManagement i dodawania reguł w celu ochrony zasobów w oparciu o różne warunki. Tj. zezwalanie na dostęp do zasobów statycznych i kilku innych publicznych interfejsów API dla wszystkich oraz ograniczanie dostępu do innych interfejsów API tylko do uwierzytelnionych użytkowników.</p>
+<pre class="code java literal-block"><code><span class="punctuation">.</span><span class="name attribute">authorizeRequests</span><span class="punctuation">()</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">antMatchers</span><span class="punctuation">(</span><span class="literal string">&quot;/&quot;</span><span class="punctuation">,</span><span class="whitespace">
+                    </span><span class="literal string">&quot;/error&quot;</span><span class="punctuation">,</span><span class="whitespace">
+                    </span><span class="literal string">&quot;/favicon.ico&quot;</span><span class="punctuation">,</span><span class="whitespace">
+                    </span><span class="literal string">&quot;/**/*.png&quot;</span><span class="punctuation">,</span><span class="whitespace">
+                    </span><span class="literal string">&quot;/**/*.gif&quot;</span><span class="punctuation">,</span><span class="whitespace">
+                    </span><span class="literal string">&quot;/**/*.svg&quot;</span><span class="punctuation">,</span><span class="whitespace">
+                    </span><span class="literal string">&quot;/**/*.jpg&quot;</span><span class="punctuation">,</span><span class="whitespace">
+                    </span><span class="literal string">&quot;/**/*.html&quot;</span><span class="punctuation">,</span><span class="whitespace">
+                    </span><span class="literal string">&quot;/**/*.css&quot;</span><span class="punctuation">,</span><span class="whitespace">
+                    </span><span class="literal string">&quot;/**/*.js&quot;</span><span class="punctuation">)</span><span class="whitespace">
+                    </span><span class="punctuation">.</span><span class="name attribute">permitAll</span><span class="punctuation">()</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">antMatchers</span><span class="punctuation">(</span><span class="literal string">&quot;/auth/**&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;/oauth2/**&quot;</span><span class="punctuation">)</span><span class="whitespace">
+                    </span><span class="punctuation">.</span><span class="name attribute">permitAll</span><span class="punctuation">()</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">anyRequest</span><span class="punctuation">()</span><span class="whitespace">
+                    </span><span class="punctuation">.</span><span class="name attribute">authenticated</span><span class="punctuation">()</span></code></pre>
+<p>Umożliwiamy każdemu dostęp do /auth i /oauth2/ oraz pobieranie plików, ale ograniczamy dostęp do wszystkich innych punktów końcowych tylko dla zautoryzowanych użytkowników - jest to autoryzacja niezależna do ustawianej na kontrolerze.</p>
+</section>
+<section id="restauthenticationentrypoint">
+<h5>RestAuthenticationEntryPoint</h5>
+<p>Ta klasa jest wywoływana, gdy użytkownik próbuje uzyskać dostęp do chronionego zasobu bez uwierzytelniania. W takim przypadku po prostu zwracamy odpowiedź 401 Unauthorized.</p>
+</section>
+<section id="oauth-communication-flow">
+<h5>OAuth communication flow</h5>
+<pre class="code java literal-block"><code><span class="whitespace">                </span><span class="punctuation">.</span><span class="name attribute">oauth2Login</span><span class="punctuation">()</span><span class="whitespace">
+    </span><span class="comment single">// set up in Google console as URI</span><span class="whitespace">
+    </span><span class="punctuation">.</span><span class="name attribute">redirectionEndpoint</span><span class="punctuation">()</span><span class="whitespace">
+    </span><span class="punctuation">.</span><span class="name attribute">baseUri</span><span class="punctuation">(</span><span class="literal string">&quot;/oauth2/callback/google&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="punctuation">.</span><span class="name attribute">and</span><span class="punctuation">()</span><span class="whitespace">
+    </span><span class="punctuation">.</span><span class="name attribute">successHandler</span><span class="punctuation">(</span><span class="name">oAuth2AuthenticationSuccessHandler</span><span class="punctuation">);</span><span class="whitespace">
+
+    </span><span class="comment single">// Add our custom Token based authentication filter</span><span class="whitespace">
+    </span><span class="name">http</span><span class="punctuation">.</span><span class="name attribute">addFilterBefore</span><span class="punctuation">(</span><span class="name">tokenAuthenticationFilter</span><span class="punctuation">(),</span><span class="whitespace"> </span><span class="name">UsernamePasswordAuthenticationFilter</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">);</span></code></pre>
+<p>Wszystkie aplikacje korzystające z podstawowego wzorca podczas uzyskiwania dostępu do interfejsu API Google przy użyciu protokołu OAuth 2.0 muszą wykonać pięć kroków:</p>
+<p>Pierwszym krokiem jest wywołanie przez fronend</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="http://localhost:8080/oauth2/authorization/google">http://localhost:8080/oauth2/authorization/google</a></div>
+</div>
+</blockquote>
+<p>Po otrzymaniu żądania autoryzacji klient Spring Security OAuth2 przekieruje użytkownika do <strong>AuthorizationUrl</strong> podanego dostawcy (providera) autoryzacji. Cały stan związany z żądaniem autoryzacji jest zapisywany za pomocą <strong>authorizationRequestRepository</strong> w sesji HTTP (ważne jeżeli chcemy wykonywać więcej zapytać do serwera Google, ale w naszym wypadku robimy to tylko raz).</p>
+<p>Jeśli użytkownik zezwoli na dostęp do aplikacji, dostawca przekieruje użytkownika do adresu URL wywołania zwrotnego <a class="reference external" href="http://localhost:8080/oauth2/callback/google">http://localhost:8080/oauth2/callback/google</a> z kodem autoryzacyjnym. Adres ten jest ustawiany w GUI consoli googla i musi być uzgodniony między providerem API i naszym serwerem.</p>
+<p>Jeśli wywołanie zwrotne <strong>OAuth2</strong> powiedzie się i zawiera kod autoryzacji, Spring Security wymieni <strong>authorization_code</strong> na <strong>access_token</strong> i prześle nam dane o które prosiliśmy.</p>
+<p>Na koniec wywoływany jest <strong>oAuth2AuthenticationSuccessHandler</strong>. Tworzy on token uwierzytelniania JWT dla użytkownika i wysyła go użytkownikowi przez redirect_uri wraz z tokenem JWT w zapytaniu. W tym miejscu też tworzymy token oraz użytkowników na podstawie danych otrzymanych od providera - zobacz metodę <strong>tokenProvider.createToken()</strong>.</p>
+<p>Tworzenie użytkowników :</p>
+<pre class="code java literal-block"><code><span class="name">User</span><span class="whitespace"> </span><span class="name">user</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">User</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="name">user</span><span class="punctuation">.</span><span class="name attribute">setEmail</span><span class="punctuation">((</span><span class="name">String</span><span class="punctuation">)</span><span class="name">userAuth</span><span class="punctuation">.</span><span class="name attribute">getAttributes</span><span class="punctuation">().</span><span class="name attribute">get</span><span class="punctuation">(</span><span class="literal string">&quot;email&quot;</span><span class="punctuation">));</span><span class="whitespace">
+</span><span class="name">user</span><span class="punctuation">.</span><span class="name attribute">setImageUrl</span><span class="punctuation">((</span><span class="name">String</span><span class="punctuation">)</span><span class="name">userAuth</span><span class="punctuation">.</span><span class="name attribute">getAttributes</span><span class="punctuation">().</span><span class="name attribute">get</span><span class="punctuation">(</span><span class="literal string">&quot;picture&quot;</span><span class="punctuation">));</span><span class="whitespace">
+</span><span class="name">user</span><span class="punctuation">.</span><span class="name attribute">setName</span><span class="punctuation">((</span><span class="name">String</span><span class="punctuation">)</span><span class="name">userAuth</span><span class="punctuation">.</span><span class="name attribute">getAttributes</span><span class="punctuation">().</span><span class="name attribute">get</span><span class="punctuation">(</span><span class="literal string">&quot;name&quot;</span><span class="punctuation">));</span><span class="whitespace">
+</span><span class="name">User</span><span class="whitespace"> </span><span class="name">userSaved</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">userRepository</span><span class="punctuation">.</span><span class="name attribute">save</span><span class="punctuation">(</span><span class="name">user</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="name">userPrincipal</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">UserPrincipal</span><span class="punctuation">.</span><span class="name attribute">create</span><span class="punctuation">(</span><span class="name">userSaved</span><span class="punctuation">);</span></code></pre>
+<p>Tworzenie tokenu, jak widać w tokenie zapiszemy jedynie id użytkownika.</p>
+<pre class="code java literal-block"><code><span class="name">Jwts</span><span class="punctuation">.</span><span class="name attribute">builder</span><span class="punctuation">()</span><span class="whitespace">
+        </span><span class="punctuation">.</span><span class="name attribute">setSubject</span><span class="punctuation">(</span><span class="name">Long</span><span class="punctuation">.</span><span class="name attribute">toString</span><span class="punctuation">(</span><span class="name">userPrincipal</span><span class="punctuation">.</span><span class="name attribute">getId</span><span class="punctuation">()))</span><span class="whitespace">
+        </span><span class="punctuation">.</span><span class="name attribute">setIssuedAt</span><span class="punctuation">(</span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">Date</span><span class="punctuation">())</span><span class="whitespace">
+        </span><span class="punctuation">.</span><span class="name attribute">setExpiration</span><span class="punctuation">(</span><span class="name">expiryDate</span><span class="punctuation">)</span><span class="whitespace">
+        </span><span class="punctuation">.</span><span class="name attribute">signWith</span><span class="punctuation">(</span><span class="name">SignatureAlgorithm</span><span class="punctuation">.</span><span class="name attribute">HS512</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">appProperties</span><span class="punctuation">.</span><span class="name attribute">getAuth</span><span class="punctuation">().</span><span class="name attribute">getTokenSecret</span><span class="punctuation">())</span><span class="whitespace">
+        </span><span class="punctuation">.</span><span class="name attribute">compact</span><span class="punctuation">();</span></code></pre>
+</section>
+<section id="customuserdetailservice">
+<h5>CustomUserDetailService</h5>
+<p>Klasa ta służy nam do tego by zamieniać nasze obiekty typu User na obiekty UserPrincipal implementujące interfers UserDetails i mogące być tym samym elementem Authentication.</p>
+</section>
+<section id="tokenauthenticationfilter">
+<h5>TokenAuthenticationFilter</h5>
+<p>Autoryzacja zapytań naszej aplikacji frontendowej odbywa się poprzez filtr TokenAuthenticationFilter.</p>
+<p>Kiedy klient uzyskał prawidłowy token i chce wywołać REST-owy endpoint na naszy serwerze inny niż /authenticate? musi dostarczyć nagłówek X-Auth-Token. Jeśli ten token jest obecny, AuthenticationFilter tworzy właściwy obiekt uwierzytelniania danych wejściowych, a AuthenticationManager wywołuje TokenAuthenticationProvider w celu uwierzytelnienia. Implementacja tego providera jest bardzo prosta. W rzeczywistości chcemy sprawdzić podpis Tokeny względem ustawionego przez nas sekretu. W przypadku sukcesu korzystamy z przesłanego ID do zapisania odpowiedniego użytkownika jako element klasy Authentication.</p>
+<pre class="code java literal-block"><code><span class="keyword namespace">package</span><span class="whitespace"> </span><span class="name namespace">com.example.springsocial.security</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">TokenAuthenticationFilter</span><span class="whitespace"> </span><span class="keyword declaration">extends</span><span class="whitespace"> </span><span class="name">OncePerRequestFilter</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Autowired</span><span class="whitespace">
+</span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">TokenProvider</span><span class="whitespace"> </span><span class="name">tokenProvider</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Autowired</span><span class="whitespace">
+</span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">CustomUserDetailsService</span><span class="whitespace"> </span><span class="name">customUserDetailsService</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="keyword declaration">static</span><span class="whitespace"> </span><span class="keyword declaration">final</span><span class="whitespace"> </span><span class="name">Logger</span><span class="whitespace"> </span><span class="name">logger</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">LoggerFactory</span><span class="punctuation">.</span><span class="name attribute">getLogger</span><span class="punctuation">(</span><span class="name">TokenAuthenticationFilter</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Override</span><span class="whitespace">
+</span><span class="keyword declaration">protected</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">doFilterInternal</span><span class="punctuation">(</span><span class="name">HttpServletRequest</span><span class="whitespace"> </span><span class="name">request</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">HttpServletResponse</span><span class="whitespace"> </span><span class="name">response</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">FilterChain</span><span class="whitespace"> </span><span class="name">filterChain</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="keyword declaration">throws</span><span class="whitespace"> </span><span class="name">ServletException</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">IOException</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">try</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">String</span><span class="whitespace"> </span><span class="name">jwt</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">getJwtFromRequest</span><span class="punctuation">(</span><span class="name">request</span><span class="punctuation">);</span><span class="whitespace">
+
+        </span><span class="keyword">if</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">StringUtils</span><span class="punctuation">.</span><span class="name attribute">hasText</span><span class="punctuation">(</span><span class="name">jwt</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="operator">&amp;&amp;</span><span class="whitespace"> </span><span class="name">tokenProvider</span><span class="punctuation">.</span><span class="name attribute">validateToken</span><span class="punctuation">(</span><span class="name">jwt</span><span class="punctuation">))</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+            </span><span class="name">Long</span><span class="whitespace"> </span><span class="name">userId</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">tokenProvider</span><span class="punctuation">.</span><span class="name attribute">getUserIdFromToken</span><span class="punctuation">(</span><span class="name">jwt</span><span class="punctuation">);</span><span class="whitespace">
+
+            </span><span class="name">UserDetails</span><span class="whitespace"> </span><span class="name">userDetails</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">customUserDetailsService</span><span class="punctuation">.</span><span class="name attribute">loadUserById</span><span class="punctuation">(</span><span class="name">userId</span><span class="punctuation">);</span><span class="whitespace">
+            </span><span class="name">UsernamePasswordAuthenticationToken</span><span class="whitespace"> </span><span class="name">authentication</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">UsernamePasswordAuthenticationToken</span><span class="punctuation">(</span><span class="name">userDetails</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="keyword constant">null</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">userDetails</span><span class="punctuation">.</span><span class="name attribute">getAuthorities</span><span class="punctuation">());</span><span class="whitespace">
+            </span><span class="name">authentication</span><span class="punctuation">.</span><span class="name attribute">setDetails</span><span class="punctuation">(</span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">WebAuthenticationDetailsSource</span><span class="punctuation">().</span><span class="name attribute">buildDetails</span><span class="punctuation">(</span><span class="name">request</span><span class="punctuation">));</span><span class="whitespace">
+
+            </span><span class="name">SecurityContextHolder</span><span class="punctuation">.</span><span class="name attribute">getContext</span><span class="punctuation">().</span><span class="name attribute">setAuthentication</span><span class="punctuation">(</span><span class="name">authentication</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="punctuation">}</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace"> </span><span class="keyword">catch</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">Exception</span><span class="whitespace"> </span><span class="name">ex</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">logger</span><span class="punctuation">.</span><span class="name attribute">error</span><span class="punctuation">(</span><span class="literal string">&quot;Could not set user authentication in security context&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">ex</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="name">filterChain</span><span class="punctuation">.</span><span class="name attribute">doFilter</span><span class="punctuation">(</span><span class="name">request</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">response</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name function">getJwtFromRequest</span><span class="punctuation">(</span><span class="name">HttpServletRequest</span><span class="whitespace"> </span><span class="name">request</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">String</span><span class="whitespace"> </span><span class="name">bearerToken</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">request</span><span class="punctuation">.</span><span class="name attribute">getHeader</span><span class="punctuation">(</span><span class="literal string">&quot;Authorization&quot;</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="keyword">if</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">StringUtils</span><span class="punctuation">.</span><span class="name attribute">hasText</span><span class="punctuation">(</span><span class="name">bearerToken</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="operator">&amp;&amp;</span><span class="whitespace"> </span><span class="name">bearerToken</span><span class="punctuation">.</span><span class="name attribute">startsWith</span><span class="punctuation">(</span><span class="literal string">&quot;Bearer &quot;</span><span class="punctuation">))</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">bearerToken</span><span class="punctuation">.</span><span class="name attribute">substring</span><span class="punctuation">(</span><span class="literal number integer">7</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">bearerToken</span><span class="punctuation">.</span><span class="name attribute">length</span><span class="punctuation">());</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="keyword constant">null</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+</section>
+<section id="userprincipal">
+<h5>UserPrincipal</h5>
+<p>Klasa UserPrincipal implementuje interfejs UserDetails i reprezentuje uwierzytelniony podmiot Spring Security. Zawiera dane uwierzytelnionego użytkownika. Możemy dostać się do niej poprzez obiekt klasy Authentication. W ogólności nie musimy definiować własnego modelu użytkownika w aplikacji, ale jest to dla nas pomocne, gdyż możemy dodać do interfejsu dodatkowe pola z danymi o użytkowniku.</p>
+</section>
+<section id="cors">
+<h5>CORS</h5>
+<p>Ze względów bezpieczeństwa przeglądarki zabraniają wywołań AJAX do zasobów znajdujących się poza bieżącym źródłem (serwerem, domeną). Na przykład, gdy sprawdzasz swoje konto bankowe w jednej zakładce, możesz mieć otwartą witrynę evil.com w innej. Skrypty z evil.com nie powinny być w stanie wysyłać żądań AJAX do Twojego bankowego API (wypłacania pieniędzy z Twojego konta!) przy użyciu Twoich danych uwierzytelniających.</p>
+<p>Udostępnianie zasobów między źródłami (CORS) to specyfikacja W3C zaimplementowana przez większość przeglądarek, która pozwala w elastyczny sposób określić, jakiego rodzaju żądania między domenami są autoryzowane, zamiast używać mniej bezpiecznych i mniej wydajnych hacków, takich jak IFrame lub JSONP.</p>
+<p>Możesz dodać do swojej metody obsługi z adnotacjami &#64;RequestMapping adnotację <strong>&#64;CrossOrigin</strong>, aby włączyć w niej mechanizm CORS (domyślnie &#64;CrossOrigin zezwala na wszystkie źródła i metody HTTP określone w adnotacji &#64;RequestMapping):</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;CrossOrigin</span><span class="whitespace">
+</span><span class="name decorator">&#64;GetMapping</span><span class="punctuation">(</span><span class="literal string">&quot;/{id}&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">Account</span><span class="whitespace"> </span><span class="name function">retrieve</span><span class="punctuation">(</span><span class="name decorator">&#64;PathVariable</span><span class="whitespace"> </span><span class="name">Long</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="comment single">// ...</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Jeśli używasz Spring Boot to włączenie mechanizmu CORS dla całej aplikacji zaleca się wykonać po prostu przez deklarację komponentu bean WebMvcConfigurer w następujący sposób:</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;Configuration</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">MyConfiguration</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Bean</span><span class="whitespace">
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">WebMvcConfigurer</span><span class="whitespace"> </span><span class="name function">corsConfigurer</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">WebMvcConfigurerAdapter</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+            </span><span class="name decorator">&#64;Override</span><span class="whitespace">
+            </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">addCorsMappings</span><span class="punctuation">(</span><span class="name">CorsRegistry</span><span class="whitespace"> </span><span class="name">registry</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+                </span><span class="name">registry</span><span class="punctuation">.</span><span class="name attribute">addMapping</span><span class="punctuation">(</span><span class="literal string">&quot;/**&quot;</span><span class="punctuation">);</span><span class="whitespace">
+            </span><span class="punctuation">}</span><span class="whitespace">
+        </span><span class="punctuation">};</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>W naszych przypadkach potrzebujemy cors, aby umożliwić komunikację z serwerem auth. Możesz go również wykorzystać w swoim projekcie jeżeli miałbyś problem z CORS.</p>
+</section>
+</section>
+<section id="react">
+<h4>React</h4>
+<section id="local-storage">
+<h5>Local storage</h5>
+<p>LocalStorage jest elementem przeglądarki. Umożliwia dostęp do lokalnego obiektu Storage. LocalStorage jest podobny w koncepcji do sessionStorage. Różnica między nimi polega na tym, że dane przechowywane w localStorage nie mają daty ważności, a dane przechowywane w sessionStorage są usuwane po zakończeniu sesji – czyli po zamknięciu przeglądarki.</p>
+<p>Użycie pamięci lokalnej jest dość proste. W swoim kodzie JavaScript, uruchomionym w przeglądarce, powinieneś mieć dostęp do instancji localStorage, która ma setter i getter do przechowywania i pobierania danych z lokalnego magazynu. Istnieją również metody w magazynie lokalnym, aby usunąć elementy i wyczyścić wszystkie elementy:</p>
+<pre class="code javascript literal-block"><code><span class="comment single">// setter</span><span class="whitespace">
+</span><span class="name other">localStorage</span><span class="punctuation">.</span><span class="name other">setItem</span><span class="punctuation">(</span><span class="literal string single">'myData'</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">data</span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="comment single">// getter</span><span class="whitespace">
+</span><span class="name other">localStorage</span><span class="punctuation">.</span><span class="name other">getItem</span><span class="punctuation">(</span><span class="literal string single">'myData'</span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="comment single">// remove</span><span class="whitespace">
+</span><span class="name other">localStorage</span><span class="punctuation">.</span><span class="name other">removeItem</span><span class="punctuation">(</span><span class="literal string single">'myData'</span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="comment single">// remove all</span><span class="whitespace">
+</span><span class="name other">localStorage</span><span class="punctuation">.</span><span class="name other">clear</span><span class="punctuation">();</span></code></pre>
+</section>
+<section id="oauth">
+<h5>OAuth</h5>
+<p><strong>OAuth2RedirectHandler</strong> to ścieżka wykonywana po pomyślnym uwierzytelnieniu użytkownika. Używamy lokalnej pamięci, aby zabezpieczyć ACCESS_TOKEN. Następnie musi być używany za każdym razem, gdy nawiązujemy połączenie z backendem.</p>
+<pre class="code javascript literal-block"><code><span class="name other">request</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name other">options</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="name other">headers</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="operator word">new</span><span class="whitespace"> </span><span class="name other">Headers</span><span class="punctuation">({});</span><span class="whitespace">
+
+
+    </span><span class="name other">axios</span><span class="punctuation">.</span><span class="name other">get</span><span class="punctuation">(</span><span class="name other">options</span><span class="punctuation">.</span><span class="name other">url</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name other">headers</span><span class="operator">:</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+            </span><span class="literal string single">'Content-Type'</span><span class="operator">:</span><span class="whitespace"> </span><span class="literal string single">'application/json'</span><span class="punctuation">,</span><span class="whitespace">
+            </span><span class="literal string single">'Authorization'</span><span class="operator">:</span><span class="whitespace"> </span><span class="literal string single">'Bearer '</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="name other">localStorage</span><span class="punctuation">.</span><span class="name other">getItem</span><span class="punctuation">(</span><span class="name other">ACCESS_TOKEN</span><span class="punctuation">)</span><span class="whitespace">
+        </span><span class="punctuation">}</span><span class="whitespace">
+    </span><span class="punctuation">}).</span><span class="name other">then</span><span class="punctuation">(</span><span class="name other">response</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace">
+            </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name other">setState</span><span class="punctuation">({</span><span class="name other">data</span><span class="operator">:</span><span class="whitespace"> </span><span class="name other">response</span><span class="punctuation">.</span><span class="name other">data</span><span class="punctuation">})</span><span class="whitespace">
+        </span><span class="punctuation">).</span><span class="keyword">catch</span><span class="punctuation">((</span><span class="name other">error</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name other">setState</span><span class="punctuation">({</span><span class="name other">data</span><span class="operator">:</span><span class="whitespace"> </span><span class="name builtin">JSON</span><span class="punctuation">.</span><span class="name other">stringify</span><span class="punctuation">(</span><span class="name other">error</span><span class="punctuation">.</span><span class="name other">response</span><span class="punctuation">)});</span><span class="whitespace">
+    </span><span class="punctuation">});</span><span class="whitespace">
+</span><span class="punctuation">};</span></code></pre>
+</section>
+<section id="react-router-domain">
+<h5>React-router-domain</h5>
+<p>Komponent &lt;Route&gt; jest najważniejszym komponentem w React Router. Renderuje zadany komponent, jeśli bieżąca lokalizacja URL pasuje do podanej ścieżki. W idealnym przypadku składnik &lt;Route&gt; powinien mieć właściwość o nazwie path, a jeśli nazwa ścieżki pasuje do wpisanej w URL to zostanie zrenderowana.</p>
+<p>W przypadku niezalogowanego użytkownika w PrivateRoute przekierowujemy użytkownika na stronę logowania.</p>
+<p>Z drugiej strony komponent &lt;Link&gt; służy do poruszania się między stronami. Możemy użyć &lt;Link&gt;, aby przejść do konkretnego adresu URL i ponownie renderować widok bez odświeżania.</p>
+<p>&lt;NavLink&gt; to specjalna wersja &lt;Link&gt;, która dodaje atrybuty stylizacji do renderowanego elementu, gdy pasuje on do bieżącego adresu URL.</p>
+</section>
+<section id="appheader">
+<h5>AppHeader</h5>
+<p>Zawiera nagłówek / menu, które w zależności od tego czy jesteśmy zalogowani czy też nie pojawia się użytkownikowi w różnej formie.</p>
+</section>
+<section id="app">
+<h5>App</h5>
+<p>Główna klasa zwiera menu aplikacji, oraz metody zapytań, które wykonują komponenty (przesyłamy je wstrzykując do komponentów). Dba o zarządzanie stanem zalogowania, lub nie i propaguje ten stan do wszystkich komponentów poniżej.</p>
+</section>
+<section id="constants">
+<h5>Constants</h5>
+<p>Zawierają stałe potrzebne w aplikacji, adres serwera, adres serwera autoryzacji oraz adres na który serwer przesyła nam token.</p>
+</section>
+<section id="backendrequest">
+<h5>BackendRequest</h5>
+<p>Ustawiamy token z local storage i robimy zapytanie na endpoint serwera.</p>
+</section>
+<section id="profile">
+<h5>Profile</h5>
+<p>Strona z profile (styl i postać strony ściągnięta z internetu). Tu także występuje zabezpieczenie (redirect) w przypadku, gdy niezalogowany użytkownik chce wejść na stronę profilu.</p>
+</section>
+<section id="login">
+<h5>Login</h5>
+<p>Przekierowanie na link do autoryzacji przez API google.</p>
+</section>
+<section id="oauth2redirecthandler">
+<h5>OAuth2RedirectHandler</h5>
+<p>Pobiera token z linka przesyłanego przez nasz serwer i zapisuje w local storage.</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="footnote-1" role="note">
+<span class="label"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></span>
+<p>Wykorzystano materiały z:</p>
+</aside>
+</aside>
+<p><a class="reference external" href="https://github.com/callicoder/spring-boot-react-oauth2-social-login-demo">https://github.com/callicoder/spring-boot-react-oauth2-social-login-demo</a></p>
+<p><a class="reference external" href="https://auth0.com/docs/protocols/protocol-oauth2">https://auth0.com/docs/protocols/protocol-oauth2</a></p>
+<p><a class="reference external" href="https://dassum.medium.com/securing-spring-boot-rest-api-with-json-web-token-and-jdbc-token-store-67558a7d6c29">https://dassum.medium.com/securing-spring-boot-rest-api-with-json-web-token-and-jdbc-token-store-67558a7d6c29</a></p>
+<p><a class="reference external" href="https://stormpath.com/blog/token-authentication-scalable-user-mgmt">https://stormpath.com/blog/token-authentication-scalable-user-mgmt</a></p>
+<p><a class="reference external" href="https://auth0.com/learn/token-based-authentication-made-easy/">https://auth0.com/learn/token-based-authentication-made-easy/</a></p>
+<p><a class="reference external" href="https://spring.io/projects/spring-security">https://spring.io/projects/spring-security</a></p>
+<p><a class="reference external" href="https://www.callicoder.com/spring-boot-spring-security-jwt-mysql-react-app-part-2/">https://www.callicoder.com/spring-boot-spring-security-jwt-mysql-react-app-part-2/</a></p>
+<p><a class="reference external" href="https://www.callicoder.com/spring-boot-security-oauth2-social-login-part-2/">https://www.callicoder.com/spring-boot-security-oauth2-social-login-part-2/</a></p>
+<p><a class="reference external" href="https://spring.io/blog/2015/06/08/cors-support-in-spring-framework">https://spring.io/blog/2015/06/08/cors-support-in-spring-framework</a></p>
+</section>
+</section>
+</section>
+</section></body>
+</html>
+

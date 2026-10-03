@@ -1,0 +1,746 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>PRA09.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="programming-laboratory">
+<h2>Programming Laboratory</h2>
+<section id="react">
+<h3>React</h3>
+<p class="important">Uwaga! cały kod znajduje się na gałęzi <strong>ReactStart</strong> w repozytorium <a class="reference external" href="https://github.com/WitMar/PRA2025">https://github.com/WitMar/PRA2025</a> . Kod końcowy w gałęzi <strong>ReactEnd</strong>.</p>
+<p>Jeżeli nie widzisz odpowiednich gałęzi na GitHubie wykonaj <strong>Ctr+T</strong>, a jak to nie pomoże to wybierz z menu <strong>VCS-&gt;Git-&gt;Fetch</strong>.</p>
+<section id="node">
+<h4>Node</h4>
+<p>W celu uruchomienia React na swoim komputerze potrzebujesz dwóch elementów Node i npm. Zalecane wersje to <strong>Node v18.19.1</strong> i <strong>npm v10.2.4</strong> (npm instalowane jest z wersją Node).</p>
+<p>Node.js to środowisko programistyczne przeznaczone do tworzenia wysoce skalowalnych aplikacji internetowych, w szczególności serwerów WWW napisanych w JavaScript. Node.js umożliwia tworzenie aplikacji sterowanych zdarzeniami, które korzystają z asynchronicznego systemu we/wy.</p>
+<p>W systemach Linux wyszukaj czy masz już zainstalowane pakiety nodejs i npm, np. instalacja dla Ubuntu wygląda tak:</p>
+<pre class="code bash literal-block"><code>sudo<span class="whitespace"> </span>apt-get<span class="whitespace"> </span>install<span class="whitespace"> </span>nodejs<span class="whitespace"> </span>npm</code></pre>
+<p>Instalacja na windows:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://phoenixnap.com/kb/install-node-js-npm-on-windows">https://phoenixnap.com/kb/install-node-js-npm-on-windows</a></div>
+</div>
+</blockquote>
+<p>Środowisko pracy z javascriptem może być dowolnym edytorem tekstu lub bardziej zaawansowanym środowiskiem np. bardzo podobnym do IntelliJ (jest to bardzo pomocne w wyszukiwaniu błędów składniowych i składniowych w kodzie).</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://www.jetbrains.com/webstorm/">https://www.jetbrains.com/webstorm/</a></div>
+</div>
+</blockquote>
+</section>
+<section id="instalacja-zaleznosci-w-domu">
+<h4>Instalacja zależności w domu</h4>
+<p>Aplikacja wymaga posiadania na komputerze instalacji node: <a class="reference external" href="https://nodejs.org/en/">https://nodejs.org/en/</a></p>
+<p>Aby utworzyć nową aplikację, najprosćiej jest wykorzystać następującą metodę:</p>
+<pre class="code bash literal-block"><code>npx<span class="whitespace"> </span>create-react-app<span class="whitespace"> </span>todoapp</code></pre>
+<p>Uwaga! Aby uruchomić polecenie, musisz mieć wersję <strong>Node &gt;= 10</strong> na swoim lokalnym komputerze programistycznym. Możesz użyć <strong>nvm</strong> (macOS/Linux) lub <strong>nvm-windows</strong>, aby zainstalować i przełączać się między wersjami Node na swoim komputerze.</p>
+<pre class="code bash literal-block"><code>bash$<span class="whitespace"> </span>nvm<span class="whitespace">
+
+</span>Node<span class="whitespace"> </span>Version<span class="whitespace"> </span>Manager<span class="whitespace"> </span><span class="operator">(</span>v0.39.0<span class="operator">)</span></code></pre>
+<pre class="code bash literal-block"><code>bash$<span class="whitespace"> </span>nvm<span class="whitespace"> </span>list<span class="whitespace">
+</span>-&gt;<span class="whitespace">       </span>v8.0.0<span class="whitespace">
+     </span>v10.0.0<span class="whitespace">
+     </span>v10.6.0<span class="whitespace">
+     </span>v10.18.1<span class="whitespace">
+                 </span>v12.0.0<span class="whitespace">
+                 </span>v12.18.2<span class="whitespace">
+                 </span>v13.6.0<span class="whitespace">
+                 </span>v14.0.0<span class="whitespace">
+                 </span>v18.0.0</code></pre>
+<p>Zmiana wersji:</p>
+<pre class="code bash literal-block"><code>bash$<span class="whitespace"> </span>nvm<span class="whitespace"> </span>install<span class="whitespace"> </span><span class="literal number">18</span>.19.1</code></pre>
+<pre class="code bash literal-block"><code>bash$<span class="whitespace"> </span>nvm<span class="whitespace"> </span>use<span class="whitespace"> </span><span class="literal number">18</span>.19.1</code></pre>
+<p>Jeżeli otwierasz już pobraną aplikację, to z poziomu terminala w katalogu projektu należy wywołać następujące polecenia:</p>
+<pre class="code bash literal-block"><code>npm<span class="whitespace"> </span>start</code></pre>
+</section>
+<section id="errors">
+<h4>Errors</h4>
+<p>Jeżeli zobaczysz błąd:</p>
+<pre class="code bash literal-block"><code>npm<span class="whitespace"> </span>ERR!<span class="whitespace"> </span>ENOTFOUND<span class="whitespace"> </span>code<span class="whitespace">
+</span>npm<span class="whitespace"> </span>ERR!<span class="whitespace"> </span>errno<span class="whitespace"> </span>ENOTFOUND<span class="whitespace">
+</span>npm<span class="whitespace"> </span>ERR!<span class="whitespace"> </span>network<span class="whitespace"> </span>request<span class="whitespace"> </span>to<span class="whitespace"> </span>https://registry.npmjs.org/inline-process-browser/-/inline-process-browser-1.0.0.tgz<span class="whitespace"> </span>failed,<span class="whitespace"> </span>reason:<span class="whitespace"> </span>getaddrinfo<span class="whitespace"> </span>ENOTFOUND<span class="whitespace"> </span>registry.npmjs.org<span class="whitespace"> </span>registry.npmjs.org:443<span class="whitespace">
+</span>npm<span class="whitespace"> </span>ERR!<span class="whitespace"> </span>network<span class="whitespace"> </span>This<span class="whitespace"> </span>is<span class="whitespace"> </span>a<span class="whitespace"> </span>problem<span class="whitespace"> </span>related<span class="whitespace"> </span>to<span class="whitespace"> </span>network<span class="whitespace"> </span>connectivity.<span class="whitespace">
+</span>npm<span class="whitespace"> </span>ERR!<span class="whitespace"> </span>network<span class="whitespace"> </span>In<span class="whitespace"> </span>most<span class="whitespace"> </span>cases<span class="whitespace"> </span>you<span class="whitespace"> </span>are<span class="whitespace"> </span>behind<span class="whitespace"> </span>or<span class="whitespace"> </span>have<span class="whitespace"> </span>bad<span class="whitespace"> </span>network<span class="whitespace"> </span>settings.<span class="whitespace">
+</span>npm<span class="whitespace"> </span>ERR!<span class="whitespace"> </span>network<span class="whitespace">
+</span>npm<span class="whitespace"> </span>ERR!<span class="whitespace"> </span>network<span class="whitespace"> </span>If<span class="whitespace"> </span>you<span class="whitespace"> </span>are<span class="whitespace"> </span>behind<span class="whitespace"> </span>a<span class="whitespace"> </span>proxy,<span class="whitespace"> </span>please<span class="whitespace"> </span>make<span class="whitespace"> </span>sure<span class="whitespace"> </span>that<span class="whitespace"> </span>the<span class="whitespace">
+</span>npm<span class="whitespace"> </span>ERR!<span class="whitespace"> </span>network<span class="whitespace"> </span><span class="literal string single">'proxy'</span><span class="whitespace"> </span>config<span class="whitespace"> </span>is<span class="whitespace"> </span><span class="name builtin">set</span><span class="whitespace"> </span>properly.<span class="whitespace"> </span>See:<span class="whitespace"> </span><span class="literal string single">'npm help config'</span></code></pre>
+<p>Spróbuj jedno z następujących:</p>
+<p>Tymczasowe rozwiązanie na linux: <strong>add 104.16.20.35 registry.npmjs.org to /etc/hosts file</strong></p>
+<p>lub</p>
+<pre class="code bash literal-block"><code>npm<span class="whitespace"> </span>config<span class="whitespace"> </span><span class="name builtin">set</span><span class="whitespace"> </span>registry<span class="whitespace"> </span>http://registry.npmjs.org</code></pre>
+</section>
+<section id="instalacja-windows-komputery-na-uam">
+<h4>Instalacja - windows komputery na UAM</h4>
+<p>Musisz zainstalować pakiety (najlepiej na dysku poligon).</p>
+<pre class="code bash literal-block"><code>P:<span class="whitespace">
+
+</span>mkdir<span class="whitespace"> </span>s<span class="operator">[</span>numer_indeksu<span class="operator">]</span><span class="whitespace">
+
+</span><span class="name builtin">cd</span><span class="whitespace"> </span>s<span class="operator">[</span>numer_indeksu<span class="operator">]</span></code></pre>
+<p>Pobierz kod z repozytorium Git do utworzonego katalogu i uruchom</p>
+<pre class="code bash literal-block"><code>npm<span class="whitespace"> </span>install<span class="whitespace">
+
+</span>npm<span class="whitespace"> </span>start</code></pre>
+<p>Musisz mieć <strong>Node v8.0.0</strong> na lokalnym komputerze programistycznym, aby uruchomić json-server, uruchom server imitujący backend w osobnym terminalu</p>
+<pre class="code bash literal-block"><code>json-server<span class="whitespace"> </span>--watch<span class="whitespace"> </span>db.json<span class="whitespace"> </span>--port<span class="whitespace"> </span><span class="literal number">8080</span></code></pre>
+<p>Aplikacja będzie dostępna pod adresem <strong>localhost: 3000</strong>, serwer będzie działał pod adresem <strong>localhost: 8080</strong>.</p>
+<p>Aplikacja jest przebudowywana na żywo, podczas każdej zmiany w plikach źródłowych. Wszystko, co musisz zrobić, to zapisać plik, a zmiany zostaną natychmiast zastosowane.</p>
+</section>
+<section id="react-1">
+<h4>React</h4>
+<p>React to deklaratywna biblioteka JavaScript do budowania interfejsów użytkownika. Pozwala budować złożone interfejsy użytkownika z małych i odizolowanych fragmentów kodu zwanych „komponentami”. React może służyć jako baza przy tworzeniu aplikacji single page lub mobilnych. React jako framework zajmuje się tylko zarządzaniem stanem i renderowaniem stanu do DOM. Document Object Model (DOM) to programistyczny interfejs API dla dokumentów HTML i XML. Definiuje logiczną strukturę dokumentów oraz sposób uzyskiwania dostępu do dokumentu i manipulowania nimi.
+Z racji tego, że React odpowiada tylko za zmiany w modelu DOM, tworzenie aplikacji React zwykle wymaga użycia dodatkowych bibliotek do routingu i zarządzania stanem aplikacji.</p>
+<p>React używa wirtualnego Document Object Model lub wirtualnego DOM, tworząc pamięć podręczną struktury danych w pamięci, obliczając powstałe różnice, a następnie wydajnie aktualizując wyświetlany DOM przeglądarki. Pozwala to programiście na pisanie kodu tak, jakby cała strona była renderowana przy każdej zmianie, podczas gdy biblioteki React renderują tylko te podkomponenty, które faktycznie się zmieniają.</p>
+</section>
+<section id="project-structure">
+<h4>Project structure</h4>
+<p>Zależności naszego projektu są przechowywane w pliku <strong>package.json</strong>.</p>
+<p>Plik <strong>package.json</strong> pełni tę samą rolę, co pom.xml w projektach Maven. Sekcja Skripts definiuje zestaw skryptów node, które możesz uruchomić. Te skrypty są aplikacjami wiersza poleceń. Możesz je uruchomić, wywołując npm run XXXX lub yarn XXXX, gdzie XXXX to nazwa polecenia. Przykład: <em>npm run build</em>. <strong>Package.json</strong> zachowuje składnie json. Najważniejsze dla nas elementy znajdują się pod tagiem <strong>dependencies</strong>.</p>
+<p>Instalacja pakietu przy użyciu npm lub yarn:</p>
+<pre class="code bash literal-block"><code>npm<span class="whitespace"> </span>install<span class="whitespace"> </span>&lt;PACKAGENAME&gt;<span class="whitespace">
+</span>yarn<span class="whitespace"> </span>add<span class="whitespace"> </span>&lt;PACKAGENAME&gt;</code></pre>
+<p>taki pakiet jest automatycznie wstawiany do listy zależności.</p>
+<p>Wersje pakietu:</p>
+<p>W powyższym opisie widziałeś numery wersji takie jak: <strong>~3.0.0</strong> lub <strong>^0.13.0</strong>. Co one oznaczają i jakich innych specyfikatorów wersji możesz użyć?</p>
+<p>Te symbole określają, które aktualizacje twój pakiet akceptuje. Biorąc pod uwagę, że przy użyciu semver (wersjonowania semantycznego) wszystkie wersje mają 3 cyfry, pierwsza to wydanie główne, druga wydanie podrzędne, a trzecia to wydanie poprawki, obowiązują następujące zasady:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">~: jeśli piszesz ~0.13.0, chcesz aktualizować tylko wydania poprawek: 0.13.1 jest w porządku, ale 0.14.0 nie.</div>
+<div class="line">^: jeśli piszesz ^0.13.0, chcesz zaktualizować łatkę i mniejsze wydania: 0.13.1, 0.14.0 i tak dalej.</div>
+<div class="line">*: jeśli napiszesz *, oznacza to, że akceptujesz wszystkie aktualizacje, w tym aktualizacje głównych wersji.</div>
+<div class="line">&gt;: akceptujesz każdą wersję wyższą niż ta, którą określiłeś</div>
+<div class="line">&gt;=: akceptujesz dowolną wersję równą lub wyższą niż ta, którą określiłeś</div>
+<div class="line">&lt;=: akceptujesz dowolną wersję równą lub niższą od podanej</div>
+<div class="line">&lt;: akceptujesz dowolną wersję niższą od określonej</div>
+</div>
+</blockquote>
+<p>są też inne zasady:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">brak symbolu: akceptujesz tylko tę konkretną wersję, którą określisz</div>
+<div class="line">latest: chcesz użyć najnowszej dostępnej wersji</div>
+</div>
+</blockquote>
+<p>Pobrane zależności są przechowywane w folderze <strong>node_modules</strong> i nie powinny być elementem repozytorium kodu.</p>
+<p>Kod jest przechowywany w folderze <strong>src</strong>.</p>
+<p>Aby dodać nową zależność uruchom <strong>npm install NAZWA_BIBLIOTEKI</strong> w forlderze projektu. Zależność zostanie automatycznie dodana do pliku package.json.</p>
+</section>
+<section id="javascript-i-immutability">
+<h4>Javascript i Immutability</h4>
+<p>Generalnie istnieją dwa podejścia do zarządzania danymi. Pierwsze podejście polega na &quot;mutowaniu&quot; danych poprzez bezpośrednią zmianę wartości danych. Drugie podejście polega na zastąpieniu danych nową kopią, która zawiera pożądane zmiany. Elementy React są immutable. Po utworzeniu elementu nie możesz zmienić jego dzieci ani atrybutów a jedynie podmienić cały obiekt na nowy.</p>
+<p>Immutable dane pozwalają łatwo określić, czy dokonano zmian, co pomaga określić, kiedy komponent wymaga ponownego renderowania.</p>
+</section>
+<section id="jsx">
+<h4>JSX</h4>
+<p>JSX lub JavaScript XML to rozszerzenie składni języka JavaScript. Podobny z wyglądu do HTML, JSX zapewnia możliwość renderowania komponentów przy użyciu znanej składni HTML.</p>
+<p>Wyrażenia JavaScript (ale nie instrukcje) mogą być używane wewnątrz JSX z nawiasami klamrowymi <strong>{}</strong>:</p>
+<pre class="code java literal-block"><code><span class="operator">&lt;</span><span class="name">h1</span><span class="operator">&gt;</span><span class="punctuation">{</span><span class="literal number integer">10</span><span class="operator">+</span><span class="literal number integer">1</span><span class="punctuation">}</span><span class="operator">&lt;/</span><span class="name">h1</span><span class="operator">&gt;</span></code></pre>
+<p>Wyeneruje dla nas następujący HTML</p>
+<pre class="code java literal-block"><code><span class="operator">&lt;</span><span class="name">h1</span><span class="operator">&gt;</span><span class="literal number integer">11</span><span class="operator">&lt;/</span><span class="name">h1</span><span class="operator">&gt;</span></code></pre>
+<p>Nie możemy korzystać z polecenia if then, ale możemy korzystać z operatorów logicznych (jeżeli pierwsza część jest prawdziwa wykonaj kolejną) i operatora ternarnego &quot;?&quot;.</p>
+<pre class="code java literal-block"><code><span class="operator">&lt;</span><span class="name">div</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="operator">&lt;</span><span class="name">h1</span><span class="operator">&gt;</span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name">i</span><span class="whitespace"> </span><span class="operator">===</span><span class="whitespace"> </span><span class="literal number integer">1</span><span class="whitespace"> </span><span class="operator">?</span><span class="whitespace"> </span><span class="error">'</span><span class="keyword constant">true</span><span class="error">'</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="error">'</span><span class="keyword constant">false</span><span class="error">'</span><span class="whitespace"> </span><span class="punctuation">}</span><span class="operator">&lt;/</span><span class="name">h1</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="operator">&lt;</span><span class="name">h1</span><span class="operator">&gt;</span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name">i</span><span class="whitespace"> </span><span class="operator">===</span><span class="whitespace"> </span><span class="literal number integer">1</span><span class="whitespace"> </span><span class="operator">&amp;&amp;</span><span class="whitespace"> </span><span class="literal string">&quot;I equals one&quot;</span><span class="whitespace"> </span><span class="punctuation">}</span><span class="operator">&lt;/</span><span class="name">h1</span><span class="operator">&gt;</span><span class="whitespace">
+</span><span class="operator">&lt;/</span><span class="name">div</span><span class="operator">&gt;</span></code></pre>
+</section>
+<section id="index">
+<h4>Index</h4>
+<p>Aplikacje zbudowane za pomocą Reacta zwykle mają jeden <strong>główny węzeł DOM</strong>. Aby wyrenderować element React od głównego węzła DOM, przekaż komponent i element główny do ReactDOM.render():</p>
+<pre class="code java literal-block"><code><span class="name">ReactDOM</span><span class="punctuation">.</span><span class="name attribute">render</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="operator">&lt;</span><span class="name">TodoList</span><span class="whitespace"> </span><span class="operator">/&gt;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">document</span><span class="punctuation">.</span><span class="name attribute">getElementById</span><span class="punctuation">(</span><span class="error">'</span><span class="name">root</span><span class="error">'</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">);</span></code></pre>
+</section>
+<section id="komponenty-react">
+<h4>Komponenty react</h4>
+<p>Komponenty to niezależne fragmenty kodu, które mogą być wielokrotnie użyte w aplikacji.</p>
+<p><strong>Komponenty klasowe</strong></p>
+<p>Podczas tworzenia komponentu React nazwa komponentu musi zaczynać się od wielkiej litery.</p>
+<p>Komponent musi zawierać instrukcję extends React.Component, która tworzy dziedziczenie po React.Component i daje Twojemu komponentowi dostęp do funkcji React.Component.
+Komponent wymaga posiadania metody render, która zwraca hierarchię widoków do wyświetlenia.</p>
+<pre class="code java literal-block"><code><span class="keyword declaration">class</span> <span class="name class">TodoList</span><span class="whitespace"> </span><span class="keyword declaration">extends</span><span class="whitespace"> </span><span class="name">React</span><span class="punctuation">.</span><span class="name attribute">Component</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">render</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="whitespace">
+            </span><span class="operator">&lt;</span><span class="name">div</span><span class="whitespace"> </span><span class="name">className</span><span class="operator">=</span><span class="literal string">&quot;TodoList&quot;</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name">h1</span><span class="operator">&gt;</span><span class="name">Todo</span><span class="whitespace"> </span><span class="name">List</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">props</span><span class="punctuation">.</span><span class="name attribute">name</span><span class="punctuation">}</span><span class="operator">&lt;/</span><span class="name">h1</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name">ul</span><span class="operator">&gt;</span><span class="whitespace">
+                    </span><span class="operator">&lt;</span><span class="name">li</span><span class="operator">&gt;</span><span class="name">Learn</span><span class="whitespace"> </span><span class="name">React</span><span class="operator">&lt;/</span><span class="name">li</span><span class="operator">&gt;</span><span class="whitespace">
+                    </span><span class="operator">&lt;</span><span class="name">li</span><span class="operator">&gt;</span><span class="name">Pass</span><span class="whitespace"> </span><span class="name">programming</span><span class="whitespace"> </span><span class="name">laboratory</span><span class="operator">&lt;/</span><span class="name">li</span><span class="operator">&gt;</span><span class="whitespace">
+                    </span><span class="operator">&lt;</span><span class="name">li</span><span class="operator">&gt;</span><span class="name">Have</span><span class="whitespace"> </span><span class="name">a</span><span class="whitespace"> </span><span class="name">nice</span><span class="whitespace"> </span><span class="name">holiday</span><span class="operator">&lt;/</span><span class="name">li</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;/</span><span class="name">ul</span><span class="operator">&gt;</span><span class="whitespace">
+            </span><span class="operator">&lt;/</span><span class="name">div</span><span class="operator">&gt;</span><span class="whitespace">
+        </span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="name">export</span><span class="whitespace"> </span><span class="keyword">default</span><span class="whitespace"> </span><span class="name">TodoList</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="punctuation">}</span></code></pre>
+<p>React czerpie swoją siłę w ponownym wykorzystaniu kodu, sensowne jest więc umieszczanie komponentów w osobnych plikach. Zauważ, że plik musi zaczynać się od zaimportowania Reacta i kończyć się instrukcją <em>export default TodoList;</em>. Czyli udostępnienia go dla innych komponentów do użytku.</p>
+<p>Kiedy już zdefiniujemy komponent, możemy teraz wyrenderować go w innym komponencie, pisząc <em>&lt;TodoList /&gt;</em>. Każdy komponent tworzy zamkniętą całość i może działać niezależnie; pozwala to na budowanie złożonych interfejsów użytkownika z prostych komponentów.</p>
+<p><strong>Komponenty funkcyjne</strong></p>
+<p>W React komponenty funkcyjne są bardziej zwinnym sposobem na pisanie komponentów, zawierają one tylko metodę render i nie mają własnego stanu. Możemy napisać funkcję, która pobiera props jako dane wejściowe i zwraca to, co powinno zostać wyrenderowane. Będziemy o nich mówić na kolejnych zajęciach.</p>
+<pre class="code java literal-block"><code><span class="name">function</span><span class="whitespace"> </span><span class="name function">Todo</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="whitespace">
+        </span><span class="operator">&lt;</span><span class="name">li</span><span class="whitespace"> </span><span class="name">className</span><span class="operator">=</span><span class="literal string">&quot;todo&quot;</span><span class="whitespace"> </span><span class="operator">&gt;</span><span class="whitespace">
+            </span><span class="name">Have</span><span class="whitespace"> </span><span class="name">a</span><span class="whitespace"> </span><span class="name">nice</span><span class="whitespace"> </span><span class="name">holidays</span><span class="whitespace">
+        </span><span class="operator">&lt;/</span><span class="name">li</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name">export</span><span class="whitespace"> </span><span class="keyword">default</span><span class="whitespace"> </span><span class="name">Todo</span><span class="punctuation">;</span></code></pre>
+<p class="tag">Exercise</p>
+<p>Dodaj Todo component do TodoList</p>
+</section>
+<section id="style-css">
+<h4>Style css</h4>
+<p>Style css możemy dodawać na pare sposobów:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">jako osobne pliki</div>
+<div class="line">inline w kodzie komponentu</div>
+</div>
+</blockquote>
+<pre class="code java literal-block"><code><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="name">greenStyle</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">color</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="error">'</span><span class="name">green</span><span class="error">'</span><span class="punctuation">,</span><span class="whitespace">
+</span><span class="punctuation">};</span><span class="whitespace">
+
+ </span><span class="operator">&lt;</span><span class="name">li</span><span class="whitespace"> </span><span class="name">style</span><span class="operator">=</span><span class="punctuation">{</span><span class="name">greenStyle</span><span class="punctuation">}</span><span class="operator">&gt;</span><span class="name">Learn</span><span class="whitespace"> </span><span class="name">React</span><span class="operator">&lt;/</span><span class="name">li</span><span class="operator">&gt;</span></code></pre>
+<p>or</p>
+<blockquote>
+<div class="line-block">
+<div class="line">jako stylowane komponenty</div>
+</div>
+</blockquote>
+<p>Utwórz zmienną, wybierając konkretny element html, w którym przechowujemy nasze klucze stylów</p>
+<pre class="code java literal-block"><code><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="name">Div</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">styled</span><span class="punctuation">.</span><span class="name attribute">htmlElement</span><span class="error">`</span><span class="name">color</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="name">pink</span><span class="error">`</span></code></pre>
+<p>Następnie używamy nazwy naszej zmiennej jako opakowania <em>&lt;Div&gt;&lt;/Div&gt;</em>, tak jakbyśmy używali komponentu reakcji.</p>
+<pre class="code java literal-block"><code><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="name">Undone</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">styled</span><span class="punctuation">.</span><span class="name attribute">p</span><span class="error">`</span><span class="whitespace">
+    </span><span class="name">color</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="name">red</span><span class="punctuation">,</span><span class="whitespace">
+</span><span class="error">`</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="operator">&lt;</span><span class="name">Undone</span><span class="operator">&gt;</span><span class="name">Pass</span><span class="whitespace"> </span><span class="name">programming</span><span class="whitespace"> </span><span class="name">laboratory</span><span class="operator">&lt;/</span><span class="name">Undone</span><span class="operator">&gt;</span></code></pre>
+<p>Pamiętaj, że nazwy komponentów stylizowanych muszą zaczynać się <strong>wielką literą</strong>.</p>
+</section>
+<section id="cykl-zycia-komponentu">
+<h4>Cykl życia komponentu</h4>
+<p>Cykl życia komponentu można podzielić na 4 części:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">Mounting —  instancja komponentu jest tworzona i wstawiana do DOM.</div>
+<div class="line">Updating — gdy komponent React narodzi się w przeglądarce i będzie się rozwijał, otrzymując nowe aktualizacje.</div>
+<div class="line">Unmounting — składnik nie jest potrzebny i zostaje odmontowany.</div>
+<div class="line">Obsługa błędów  — wywoływana, gdy wystąpi błąd podczas renderowania, w metodzie cyklu życia lub w konstruktorze dowolnego komponentu podrzędnego.</div>
+</div>
+</blockquote>
+<p class="center"><img alt="col" src="reactLifecycle.png" /></p>
+<p>Metody cyklu życia używają wyzwalaczy, które umożliwiają wykonanie kodu w ustalonych punktach podczas życia komponentu:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><strong>shouldComponentUpdate</strong> pozwala programiście zapobiec niepotrzebnemu ponownemu renderowaniu komponentu przez zwrócenie wartości false, jeśli renderowanie nie jest wymagane.</div>
+<div class="line"><strong>componentDidMount</strong> jest wywoływana po „zamontowaniu” komponentu (komponent został utworzony w interfejsie użytkownika, często przez powiązanie go z węzłem DOM). Jest to powszechnie używane do wyzwalania ładowania danych ze zdalnego źródła za pośrednictwem interfejsu API.</div>
+<div class="line"><strong>componentWillUnmount</strong> jest wywoływany bezpośrednio przed usunięciem lub „odmontowaniem” komponentu. Jest to powszechnie używane do czyszczenia wymagających zasobów zależności od komponentu, które nie zostaną po prostu usunięte wraz z odmontowaniem komponentu (np. usunięcie wszelkich instancji setInterval(), które są powiązane z komponentem lub &quot;eventListener&quot; ustawionego na komponencie)</div>
+<div class="line"><strong>renderowanie</strong> to najważniejsza metoda cyklu życia i jedyna wymagana w każdym komponencie. Zwykle jest wywoływana za każdym razem, gdy stan komponentu jest aktualizowany, co powinno znaleźć odzwierciedlenie w interfejsie użytkownika.</div>
+</div>
+</blockquote>
+</section>
+<section id="lifecycle-methods">
+<h4>Lifecycle methods</h4>
+<p>React ma cztery wbudowane metody, które są wywoływane w tej kolejności podczas montowania komponentu:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">constructor()</div>
+<div class="line">getDerivedStateFromProps()</div>
+<div class="line">render()</div>
+<div class="line">componentDidMount()</div>
+</div>
+</blockquote>
+<p>Metoda getDerivedStateFromProps() jest wywoływana tuż przed wyrenderowaniem elementów w DOM. Jest to naturalne miejsce do ustawienia obiektu stanu na podstawie początkowych właściwości. Również przy aktualizacjach wywoływana jest metoda getDerivedStateFromProps. Jest to pierwsza metoda wywoływana po zaktualizowaniu składnika.</p>
+</section>
+<section id="przekazywanie-danych-przez-props">
+<h4>Przekazywanie danych przez Props</h4>
+<p>Komponent przyjmuje parametry zwane <strong>props</strong> (skrót od „properties”). Dostęp do props można uzyskać za pomocą zmiennej <strong>this.props</strong>.</p>
+<p>Definiując komponent do renderowania możemy przekazać wartość w definicji komponentu. Nazwa parametrów powinna być w tym wypadku zgodna z nazwą właściwości, którą zdefiniowaliśmy w komponencie <em>TodoList</em>.</p>
+<pre class="code java literal-block"><code><span class="keyword declaration">class</span> <span class="name class">Lists</span><span class="whitespace"> </span><span class="keyword declaration">extends</span><span class="whitespace"> </span><span class="name">React</span><span class="punctuation">.</span><span class="name attribute">Component</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">render</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="operator">&lt;</span><span class="name">TodoList</span><span class="whitespace"> </span><span class="name">name</span><span class="operator">=</span><span class="literal string">&quot;My List&quot;</span><span class="whitespace"> </span><span class="operator">/&gt;</span><span class="punctuation">;</span><span class="whitespace">
+        </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="keyword declaration">class</span> <span class="name class">TodoList</span><span class="whitespace"> </span><span class="keyword declaration">extends</span><span class="whitespace"> </span><span class="name">React</span><span class="punctuation">.</span><span class="name attribute">Component</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">render</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="whitespace">
+        </span><span class="operator">&lt;</span><span class="name">div</span><span class="whitespace"> </span><span class="name">className</span><span class="operator">=</span><span class="literal string">&quot;todoList&quot;</span><span class="operator">&gt;</span><span class="whitespace">
+            </span><span class="operator">&lt;</span><span class="name">h1</span><span class="operator">&gt;</span><span class="name">Todo</span><span class="whitespace"> </span><span class="name">List</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">props</span><span class="punctuation">.</span><span class="name attribute">name</span><span class="punctuation">}</span><span class="operator">&lt;/</span><span class="name">h1</span><span class="operator">&gt;</span><span class="whitespace">
+            </span><span class="operator">&lt;</span><span class="name">ul</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name">Todo</span><span class="operator">/&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name">Todo</span><span class="operator">/&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name">Todo</span><span class="operator">/&gt;</span><span class="whitespace">
+            </span><span class="operator">&lt;/</span><span class="name">ul</span><span class="operator">&gt;</span><span class="whitespace">
+        </span><span class="operator">&lt;/</span><span class="name">div</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Props są własnościami <strong>read-only</strong> i nie mogą być modyfikowane.</p>
+</section>
+<section id="state-stan">
+<h4>State (stan)</h4>
+<p>Chcemy mieć możliwość dodawania i zapamiętywania zadań todo do wykonania. Aby „zapamiętać” rzeczy, komponenty używają tzw. stanu. Komponenty Reacta mogą mieć stan, ustawiając this.state w swoich konstruktorach. Stan powinien być uważany za prywatny dla komponentu React, w którym jest zdefiniowany.</p>
+<p>Dostęp do stanu konstruktora można uzyskać za pomocą zmiennej <strong>this.state</strong>.</p>
+<p><strong>Nie modyfikuj stanu bezpośrednio</strong> bezpośrednia zmiana stanu nie spowoduje ponownego renderowania komponentu:</p>
+<pre class="code java literal-block"><code><span class="comment single">// Wrong</span><span class="whitespace">
+</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">.</span><span class="name attribute">nr</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal number integer">0</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">.</span><span class="name attribute">todosList</span><span class="punctuation">.</span><span class="name attribute">push</span><span class="punctuation">({</span><span class="whitespace"> </span><span class="name">name</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string">&quot;List&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">elements</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="operator">[</span><span class="whitespace"> </span><span class="literal string">&quot;learnReact&quot;</span><span class="operator">]</span><span class="whitespace"> </span><span class="punctuation">});</span></code></pre>
+<p>Zamiast tego korzystaj z metody setState():</p>
+<pre class="code java literal-block"><code><span class="comment single">// Correct</span><span class="whitespace">
+</span><span class="name">newelement</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name">name</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string">&quot;List&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">elements</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="operator">[</span><span class="whitespace"> </span><span class="literal string">&quot;learnReact&quot;</span><span class="operator">]</span><span class="whitespace"> </span><span class="punctuation">};</span><span class="whitespace">
+</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setState</span><span class="punctuation">(</span><span class="name">prevState</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">({</span><span class="whitespace">
+    </span><span class="name">number</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal number integer">0</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="name">todosList</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="operator">[</span><span class="punctuation">...</span><span class="name attribute">prevState</span><span class="punctuation">.</span><span class="name attribute">todosList</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">newelement</span><span class="operator">]</span><span class="whitespace">
+</span><span class="punctuation">}))</span></code></pre>
+<p>Zmiany stanu są wykonywane asynchronicznie, więc musisz być świadomy możliwych implikacji tego zachowania i nie zakładaj, że jeden setState zostanie wykonany przed innym (i przed następną linią w kodzie!!).</p>
+<p>setState zmienia tylko wartość podanej zmiennej, pozostawiając inne zmienne stanu nienaruszone, więc nie trzeba ustawiać całego stanu w każdej komendzie setState.</p>
+<p>Jedynym miejscem, w którym możesz bezpośrednio przypisać <strong>this.state</strong> jest <strong>konstruktor</strong>.</p>
+<p>Stan nie jest dostępny dla żadnego komponentu innego niż ten, który go posiada i ustawia. Aby zebrać dane od wielu elementów podrzędnych lub aby dwa komponenty podrzędne komunikowały się ze sobą, musisz zamiast tego zadeklarować stan współdzielony w ich komponencie nadrzędnym. Komponent rodzica może przekazać stan z powrotem do dzieci za pomocą props; dzięki temu komponenty podrzędne są zsynchronizowane ze sobą oraz z komponentem nadrzędnym. W celu przekazania wartości od dziecka do rodzica używamy funkcji - wtedy rodzic przekazuje funkcję jako props do dziecka, gdy dziecko wykonuje funkcję, jest ona wykonywana na rodzicu z  dostępu do stanu rodzica.</p>
+</section>
+<section id="konstruktor">
+<h4>Konstruktor</h4>
+<p class="important">W klasach JavaScript musisz zawsze wywoływać super podczas definiowania konstruktora podklasy. Wszystkie klasy komponentów React, które mają konstruktor, powinny zaczynać się od wywołania super(props).</p>
+<pre class="code java literal-block"><code><span class="name">constructor</span><span class="punctuation">(</span><span class="name">props</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword declaration">super</span><span class="punctuation">(</span><span class="name">props</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name">todosList</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="operator">[]</span><span class="whitespace"> </span><span class="punctuation">};</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p class="tag">Exercise</p>
+<p>Dodaj konstruktor i stan do TodoList</p>
+<pre class="code java literal-block"><code><span class="keyword declaration">class</span> <span class="name class">TodoList</span><span class="whitespace"> </span><span class="keyword declaration">extends</span><span class="whitespace"> </span><span class="name">React</span><span class="punctuation">.</span><span class="name attribute">Component</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">constructor</span><span class="punctuation">(</span><span class="name">props</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword declaration">super</span><span class="punctuation">(</span><span class="name">props</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="name">let</span><span class="whitespace"> </span><span class="name">t1</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name">value</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string">&quot;Learn React&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">done</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="keyword constant">true</span><span class="whitespace"> </span><span class="punctuation">};</span><span class="whitespace">
+        </span><span class="name">let</span><span class="whitespace"> </span><span class="name">t2</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name">value</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string">&quot;Pass Programming Laboratory&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">done</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="keyword constant">false</span><span class="whitespace"> </span><span class="punctuation">};</span><span class="whitespace">
+        </span><span class="name">let</span><span class="whitespace"> </span><span class="name">t3</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name">value</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string">&quot;Have a nice holiday&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">done</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="keyword constant">false</span><span class="whitespace"> </span><span class="punctuation">};</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name">todosList</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="operator">[</span><span class="name">t1</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">t2</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">t3</span><span class="operator">]</span><span class="whitespace"> </span><span class="punctuation">};</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+
+    </span><span class="name">render</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+        </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name">todosList</span><span class="punctuation">}</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">;</span><span class="whitespace">
+
+        </span><span class="name">let</span><span class="whitespace"> </span><span class="name">todos</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">todosList</span><span class="punctuation">.</span><span class="name attribute">map</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="name">todo</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+            </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="operator">&lt;</span><span class="name">ul</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name">Todo</span><span class="whitespace"> </span><span class="name">value</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name">todo</span><span class="punctuation">.</span><span class="name attribute">value</span><span class="punctuation">}</span><span class="whitespace">
+                        </span><span class="name">done</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name">todo</span><span class="punctuation">.</span><span class="name attribute">done</span><span class="punctuation">}</span><span class="whitespace">   </span><span class="operator">/&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;/</span><span class="name">ul</span><span class="operator">&gt;</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="punctuation">})</span><span class="whitespace">
+
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="whitespace">
+            </span><span class="operator">&lt;</span><span class="name">div</span><span class="whitespace"> </span><span class="name">className</span><span class="operator">=</span><span class="literal string">&quot;TodoList&quot;</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name">h1</span><span class="operator">&gt;</span><span class="name">Todo</span><span class="whitespace"> </span><span class="name">List</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">props</span><span class="punctuation">.</span><span class="name attribute">name</span><span class="punctuation">}</span><span class="operator">&lt;/</span><span class="name">h1</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="punctuation">{</span><span class="name">todos</span><span class="punctuation">}</span><span class="whitespace">
+        </span><span class="operator">&lt;/</span><span class="name">div</span><span class="operator">&gt;</span><span class="whitespace">
+        </span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name">export</span><span class="whitespace"> </span><span class="keyword">default</span><span class="whitespace"> </span><span class="name">TodoList</span><span class="punctuation">;</span></code></pre>
+</section>
+<section id="zdarzenia">
+<h4>Zdarzenia</h4>
+<p>W React możemy wykonywać zdarzenia HTML.</p>
+<pre class="code java literal-block"><code><span class="name">constructor</span><span class="punctuation">(</span><span class="name">props</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+</span><span class="comment single">// This binding is necessary to make `this` work in the callback</span><span class="whitespace">
+</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">addTodo</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">addTodo</span><span class="punctuation">.</span><span class="name attribute">bind</span><span class="punctuation">(</span><span class="keyword">this</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name">addTodo</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">let</span><span class="whitespace"> </span><span class="name">newelement</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name">value</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string">&quot;new&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">done</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="keyword constant">false</span><span class="whitespace"> </span><span class="punctuation">};</span><span class="whitespace">
+    </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setState</span><span class="punctuation">(</span><span class="name">prevState</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">({</span><span class="whitespace">
+        </span><span class="name">todosList</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="operator">[</span><span class="punctuation">...</span><span class="name attribute">prevState</span><span class="punctuation">.</span><span class="name attribute">todosList</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">newelement</span><span class="operator">]</span><span class="whitespace">
+    </span><span class="punctuation">}));</span><span class="whitespace">
+</span><span class="punctuation">};</span><span class="whitespace">
+
+</span><span class="operator">&lt;</span><span class="name">button</span><span class="whitespace"> </span><span class="name">onClick</span><span class="operator">=</span><span class="punctuation">{</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">addTodo</span><span class="punctuation">}</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="name">AddTodo</span><span class="whitespace">
+</span><span class="operator">&lt;/</span><span class="name">button</span><span class="operator">&gt;</span></code></pre>
+<p>Gdzie addTodo to funkcja reakcji. Pamiętaj, aby powiązać funkcję, gdy jest zdefiniowana, jeśli zapomnisz powiązać (bind) this.addTodo i przekazać ją do onClick, będzie to niezdefiniowane, gdy funkcja zostanie faktycznie wywołana. Alternatywnie możesz użyć <strong>arrow function</strong> w wywołaniu zwrotnym:</p>
+<pre class="code java literal-block"><code><span class="name">constructor</span><span class="punctuation">(</span><span class="name">props</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name">addTodo</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">let</span><span class="whitespace"> </span><span class="name">newelement</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name">value</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string">&quot;new&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">done</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="keyword constant">false</span><span class="whitespace"> </span><span class="punctuation">};</span><span class="whitespace">
+    </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setState</span><span class="punctuation">(</span><span class="name">prevState</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">({</span><span class="whitespace">
+        </span><span class="name">todosList</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="operator">[</span><span class="punctuation">...</span><span class="name attribute">prevState</span><span class="punctuation">.</span><span class="name attribute">todosList</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">newelement</span><span class="operator">]</span><span class="whitespace">
+    </span><span class="punctuation">}));</span><span class="whitespace">
+</span><span class="punctuation">};</span><span class="whitespace">
+
+</span><span class="operator">&lt;</span><span class="name">button</span><span class="whitespace"> </span><span class="name">onClick</span><span class="operator">=</span><span class="punctuation">{()</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">addTodo</span><span class="punctuation">()}</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="name">AddTodo</span><span class="whitespace">
+</span><span class="operator">&lt;/</span><span class="name">button</span><span class="operator">&gt;</span></code></pre>
+<p>Problem z tą składnią polega na tym, że za każdym razem, gdy komponent jest renderowany, tworzone jest inne wywołanie zwrotne, co może wymusić dodatkowe ponowne renderowanie.</p>
+<p>Jeśli chcesz zapobiec domyślnemu zachowaniu zdarzenia HTML, musisz wykonać metodę PreventDefault().</p>
+<pre class="code java literal-block"><code><span class="name">function</span><span class="whitespace"> </span><span class="name function">ActionLink</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">function</span><span class="whitespace"> </span><span class="name function">handleClick</span><span class="punctuation">(</span><span class="name">e</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">e</span><span class="punctuation">.</span><span class="name attribute">preventDefault</span><span class="punctuation">();</span><span class="whitespace">
+        </span><span class="name">console</span><span class="punctuation">.</span><span class="name attribute">log</span><span class="punctuation">(</span><span class="error">'</span><span class="name">The</span><span class="whitespace"> </span><span class="name">link</span><span class="whitespace"> </span><span class="name">was</span><span class="whitespace"> </span><span class="name">clicked</span><span class="punctuation">.</span><span class="error">'</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="whitespace">
+        </span><span class="operator">&lt;</span><span class="name">a</span><span class="whitespace"> </span><span class="name">href</span><span class="operator">=</span><span class="literal string">&quot;#&quot;</span><span class="whitespace"> </span><span class="name">onClick</span><span class="operator">=</span><span class="punctuation">{</span><span class="name">handleClick</span><span class="punctuation">}</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">Click</span><span class="whitespace"> </span><span class="name">me</span><span class="whitespace"> </span><span class="operator">&lt;/</span><span class="name">a</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p class="tag">Exercise</p>
+<p>Dodaj nowy element Todo po kliknięciu przez użytkownika.</p>
+</section>
+<section id="react-listy-i-klucze">
+<h4>React Listy i klucze</h4>
+<p>Listy są ważnym aspektem Twojej aplikacji. Każda aplikacja musi korzystać z list w takiej czy innej formie. W React, gdy używasz list, każdy element listy wymaga unikalnego klucza.
+Klucze są niezbędne do poprawy wydajności aplikacji React. Klucze pomagają React określić, które elementy zostały zmienione (dodane/usunięte/zmienione). Aby nadać unikatową tożsamość każdemu elementowi w tablicy, wymagany jest klucz.</p>
+<pre class="code java literal-block"><code><span class="operator">&lt;</span><span class="name">ul</span><span class="whitespace"> </span><span class="name">key</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name">todo</span><span class="punctuation">.</span><span class="name attribute">id</span><span class="punctuation">}</span><span class="operator">&gt;</span></code></pre>
+<p class="tag">Exercise</p>
+<p>Skopiuj i przeanalizuj następujący kod:</p>
+<pre class="code java literal-block"><code><span class="keyword declaration">class</span> <span class="name class">TodoList</span><span class="whitespace"> </span><span class="keyword declaration">extends</span><span class="whitespace"> </span><span class="name">React</span><span class="punctuation">.</span><span class="name attribute">Component</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">constructor</span><span class="punctuation">(</span><span class="name">props</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword declaration">super</span><span class="punctuation">(</span><span class="name">props</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="name">let</span><span class="whitespace"> </span><span class="name">t1</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name">id</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal number integer">0</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">value</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string">&quot;Learn React&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">done</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="keyword constant">true</span><span class="whitespace"> </span><span class="punctuation">};</span><span class="whitespace">
+        </span><span class="name">let</span><span class="whitespace"> </span><span class="name">t2</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name">id</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">value</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string">&quot;Pass Programming Laboratory&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">done</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="keyword constant">false</span><span class="whitespace"> </span><span class="punctuation">};</span><span class="whitespace">
+        </span><span class="name">let</span><span class="whitespace"> </span><span class="name">t3</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name">id</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal number integer">2</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">value</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string">&quot;Have a nice holiday&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">done</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="keyword constant">false</span><span class="whitespace"> </span><span class="punctuation">};</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name">todosList</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="operator">[</span><span class="name">t1</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">t2</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">t3</span><span class="operator">]</span><span class="whitespace"> </span><span class="punctuation">};</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">addTodo</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">addTodo</span><span class="punctuation">.</span><span class="name attribute">bind</span><span class="punctuation">(</span><span class="keyword">this</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">counter</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal number integer">2</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">};</span><span class="whitespace">
+
+
+    </span><span class="name">addTodo</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">counter</span><span class="operator">++</span><span class="punctuation">;</span><span class="whitespace">
+        </span><span class="name">let</span><span class="whitespace"> </span><span class="name">newelement</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">counter</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">value</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string">&quot;new&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">done</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="keyword constant">false</span><span class="whitespace"> </span><span class="punctuation">};</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setState</span><span class="punctuation">(</span><span class="name">prevState</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">({</span><span class="whitespace">
+            </span><span class="name">todosList</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="operator">[</span><span class="punctuation">...</span><span class="name attribute">prevState</span><span class="punctuation">.</span><span class="name attribute">todosList</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">newelement</span><span class="operator">]</span><span class="whitespace">
+        </span><span class="punctuation">}));</span><span class="whitespace">
+    </span><span class="punctuation">};</span><span class="whitespace">
+
+    </span><span class="name">handleRemove</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">id</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">let</span><span class="whitespace"> </span><span class="name">arrAfterDel</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">.</span><span class="name attribute">todosList</span><span class="punctuation">.</span><span class="name attribute">filter</span><span class="punctuation">(</span><span class="name">function</span><span class="punctuation">(</span><span class="name">item</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+            </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">item</span><span class="punctuation">.</span><span class="name attribute">id</span><span class="whitespace"> </span><span class="operator">!==</span><span class="whitespace"> </span><span class="name">id</span><span class="whitespace">
+        </span><span class="punctuation">});</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setState</span><span class="punctuation">({</span><span class="name">todosList</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="name">arrAfterDel</span><span class="punctuation">});</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="name">render</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+        </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name">todosList</span><span class="punctuation">}</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">;</span><span class="whitespace">
+
+        </span><span class="name">let</span><span class="whitespace"> </span><span class="name">todos</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">todosList</span><span class="punctuation">.</span><span class="name attribute">map</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="name">todo</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+            </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="operator">&lt;</span><span class="name">ul</span><span class="whitespace"> </span><span class="name">key</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name">todo</span><span class="punctuation">.</span><span class="name attribute">id</span><span class="punctuation">}</span><span class="operator">&gt;</span><span class="whitespace">
+                        </span><span class="operator">&lt;</span><span class="name">Todo</span><span class="whitespace"> </span><span class="name">value</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name">todo</span><span class="punctuation">.</span><span class="name attribute">value</span><span class="punctuation">}</span><span class="whitespace">
+                            </span><span class="name">done</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name">todo</span><span class="punctuation">.</span><span class="name attribute">done</span><span class="punctuation">}</span><span class="whitespace">   </span><span class="operator">/&gt;</span><span class="whitespace">
+                        </span><span class="operator">&lt;</span><span class="name">button</span><span class="whitespace"> </span><span class="name">type</span><span class="operator">=</span><span class="literal string">&quot;button&quot;</span><span class="whitespace"> </span><span class="name">onClick</span><span class="operator">=</span><span class="punctuation">{()</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">handleRemove</span><span class="punctuation">(</span><span class="name">todo</span><span class="punctuation">.</span><span class="name attribute">id</span><span class="punctuation">)}</span><span class="operator">&gt;</span><span class="whitespace">
+                            </span><span class="name">Remove</span><span class="whitespace">
+                        </span><span class="operator">&lt;/</span><span class="name">button</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;/</span><span class="name">ul</span><span class="operator">&gt;</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="punctuation">})</span><span class="whitespace">
+
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="whitespace">
+            </span><span class="operator">&lt;</span><span class="name">div</span><span class="whitespace"> </span><span class="name">className</span><span class="operator">=</span><span class="literal string">&quot;TodoList&quot;</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name">h1</span><span class="operator">&gt;</span><span class="name">Todo</span><span class="whitespace"> </span><span class="name">List</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">props</span><span class="punctuation">.</span><span class="name attribute">name</span><span class="punctuation">}</span><span class="operator">&lt;/</span><span class="name">h1</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="punctuation">{</span><span class="name">todos</span><span class="punctuation">}</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name">button</span><span class="whitespace"> </span><span class="name">onClick</span><span class="operator">=</span><span class="punctuation">{</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">addTodo</span><span class="punctuation">}</span><span class="operator">&gt;</span><span class="whitespace">
+                    </span><span class="name">AddTodo</span><span class="whitespace">
+                </span><span class="operator">&lt;/</span><span class="name">button</span><span class="operator">&gt;</span><span class="whitespace">
+            </span><span class="operator">&lt;/</span><span class="name">div</span><span class="operator">&gt;</span><span class="whitespace">
+        </span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name">export</span><span class="whitespace"> </span><span class="keyword">default</span><span class="whitespace"> </span><span class="name">TodoList</span><span class="punctuation">;</span></code></pre>
+<p>Zauważ, że musimy użyć globalnego licznika zmiennych w celu dodania unikalnych identyfikatorów do obiektu. Ta wartość będzie żyć z komponentem. Moglibyśmy użyć stanu do zapisania licznika, ale pamiętaj, że zmiany stanu powodują ponowne renderowanie i nie jest to w tym przypadku potrzebne.</p>
+</section>
+<section id="zastosowanie-cyklu-zycie-komponentu">
+<h4>Zastosowanie cyklu życie komponentu</h4>
+<p class="tag">Exercise</p>
+<p>Ustaw done jako element stanu klasy Todo i dodaj przycisk, który ustawia Todo na gotowe</p>
+<pre class="code java literal-block"><code><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">React</span><span class="whitespace"> </span><span class="name">from</span><span class="whitespace"> </span><span class="error">'</span><span class="name">react</span><span class="error">'</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="name">greenStyle</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">color</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="error">'</span><span class="name">green</span><span class="error">'</span><span class="punctuation">,</span><span class="whitespace">
+</span><span class="punctuation">};</span><span class="whitespace">
+
+</span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="name">redStyle</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">color</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="error">'</span><span class="name">red</span><span class="error">'</span><span class="punctuation">,</span><span class="whitespace">
+</span><span class="punctuation">};</span><span class="whitespace">
+
+
+</span><span class="keyword declaration">class</span> <span class="name class">Todo</span><span class="whitespace"> </span><span class="keyword declaration">extends</span><span class="whitespace"> </span><span class="name">React</span><span class="punctuation">.</span><span class="name attribute">Component</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">constructor</span><span class="punctuation">(</span><span class="name">props</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword declaration">super</span><span class="punctuation">(</span><span class="name">props</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setDone</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setDone</span><span class="punctuation">.</span><span class="name attribute">bind</span><span class="punctuation">(</span><span class="keyword">this</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name">done</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="keyword constant">null</span><span class="punctuation">};</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">static</span><span class="whitespace"> </span><span class="name function">getDerivedStateFromProps</span><span class="punctuation">(</span><span class="name">props</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">state</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">if</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">state</span><span class="punctuation">.</span><span class="name attribute">done</span><span class="whitespace"> </span><span class="operator">===</span><span class="whitespace"> </span><span class="keyword constant">null</span><span class="punctuation">)</span><span class="whitespace">
+            </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name">done</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="name">props</span><span class="punctuation">.</span><span class="name attribute">done</span><span class="punctuation">};</span><span class="whitespace"> </span><span class="keyword">else</span><span class="whitespace"> </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">{};</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="name">setDone</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">if</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">.</span><span class="name attribute">done</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+            </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setState</span><span class="punctuation">({</span><span class="name">done</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="keyword constant">false</span><span class="punctuation">});</span><span class="whitespace">
+        </span><span class="punctuation">}</span><span class="whitespace"> </span><span class="keyword">else</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+            </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setState</span><span class="punctuation">({</span><span class="name">done</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="keyword constant">true</span><span class="punctuation">});</span><span class="whitespace">
+        </span><span class="punctuation">}</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="name">render</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+        </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name">value</span><span class="punctuation">}</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">props</span><span class="punctuation">;</span><span class="whitespace">
+        </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name">done</span><span class="punctuation">}</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">;</span><span class="whitespace">
+
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="whitespace">
+            </span><span class="operator">&lt;</span><span class="name">div</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="punctuation">{</span><span class="name">done</span><span class="whitespace"> </span><span class="operator">===</span><span class="whitespace"> </span><span class="keyword constant">true</span><span class="whitespace"> </span><span class="operator">?</span><span class="whitespace">
+                    </span><span class="operator">&lt;</span><span class="name">li</span><span class="whitespace"> </span><span class="name">style</span><span class="operator">=</span><span class="punctuation">{</span><span class="name">greenStyle</span><span class="punctuation">}</span><span class="operator">&gt;</span><span class="whitespace">
+                        </span><span class="punctuation">{</span><span class="name">value</span><span class="punctuation">}</span><span class="whitespace">
+                    </span><span class="operator">&lt;/</span><span class="name">li</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace">
+                    </span><span class="operator">&lt;</span><span class="name">li</span><span class="whitespace"> </span><span class="name">style</span><span class="operator">=</span><span class="punctuation">{</span><span class="name">redStyle</span><span class="punctuation">}</span><span class="operator">&gt;</span><span class="whitespace">
+                        </span><span class="punctuation">{</span><span class="name">value</span><span class="punctuation">}</span><span class="whitespace">
+                    </span><span class="operator">&lt;/</span><span class="name">li</span><span class="operator">&gt;</span><span class="punctuation">}</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name">button</span><span class="whitespace"> </span><span class="name">onClick</span><span class="operator">=</span><span class="punctuation">{</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setDone</span><span class="punctuation">}</span><span class="operator">&gt;</span><span class="whitespace">
+                    </span><span class="name">Change</span><span class="whitespace"> </span><span class="name">status</span><span class="whitespace">
+                </span><span class="operator">&lt;/</span><span class="name">button</span><span class="operator">&gt;</span><span class="whitespace">
+            </span><span class="operator">&lt;/</span><span class="name">div</span><span class="operator">&gt;</span><span class="whitespace">
+        </span><span class="punctuation">)</span><span class="whitespace">
+
+    </span><span class="punctuation">};</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name">export</span><span class="whitespace"> </span><span class="keyword">default</span><span class="whitespace"> </span><span class="name">Todo</span><span class="punctuation">;</span></code></pre>
+<p>Oczywiście wadą tego rozwiązania jest to, że komponent nadrzędny nie wie o zmianie stanu komponentu potomnego.</p>
+<p>Dodaj funkcję do właściwości komponentu potomnego, która zaktualizuje dane. W TodoList zdefiniuj:</p>
+<pre class="code java literal-block"><code><span class="name">updateChild</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">id</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">done</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">let</span><span class="whitespace"> </span><span class="name">arrAfterUpdate</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">.</span><span class="name attribute">todosList</span><span class="punctuation">.</span><span class="name attribute">map</span><span class="punctuation">(</span><span class="name">function</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">item</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">if</span><span class="punctuation">(</span><span class="name">item</span><span class="punctuation">.</span><span class="name attribute">id</span><span class="whitespace"> </span><span class="operator">===</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="name">item</span><span class="punctuation">.</span><span class="name attribute">done</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">done</span><span class="punctuation">;</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">item</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">});</span><span class="whitespace">
+    </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setState</span><span class="punctuation">({</span><span class="name">todosList</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="name">arrAfterUpdate</span><span class="punctuation">});</span><span class="whitespace">
+    </span><span class="name">console</span><span class="punctuation">.</span><span class="name attribute">log</span><span class="punctuation">(</span><span class="name">arrAfterUpdate</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">};</span></code></pre>
+<p>w render dodaj :</p>
+<pre class="code java literal-block"><code><span class="operator">&lt;</span><span class="name">Todo</span><span class="whitespace"> </span><span class="name">value</span><span class="operator">=</span><span class="punctuation">{</span><span class="name">todo</span><span class="punctuation">.</span><span class="name attribute">value</span><span class="punctuation">}</span><span class="whitespace">
+                </span><span class="name">done</span><span class="operator">=</span><span class="punctuation">{</span><span class="name">todo</span><span class="punctuation">.</span><span class="name attribute">done</span><span class="punctuation">}</span><span class="whitespace">
+                </span><span class="name">id</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name">todo</span><span class="punctuation">.</span><span class="name attribute">id</span><span class="punctuation">}</span><span class="whitespace">
+                </span><span class="name">update</span><span class="operator">=</span><span class="punctuation">{(</span><span class="name">id</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">done</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">updateChild</span><span class="punctuation">(</span><span class="name">id</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">done</span><span class="punctuation">)}</span><span class="whitespace">  </span><span class="operator">/&gt;</span></code></pre>
+<p>Wywołaj it in the Todo.js</p>
+<pre class="code java literal-block"><code><span class="name">setDone</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">if</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">.</span><span class="name attribute">done</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setState</span><span class="punctuation">({</span><span class="name">done</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="keyword constant">false</span><span class="punctuation">},</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">props</span><span class="punctuation">.</span><span class="name attribute">update</span><span class="punctuation">(</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">props</span><span class="punctuation">.</span><span class="name attribute">id</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="operator">!</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">.</span><span class="name attribute">done</span><span class="punctuation">));</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace"> </span><span class="keyword">else</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setState</span><span class="punctuation">({</span><span class="name">done</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="keyword constant">true</span><span class="punctuation">},</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">props</span><span class="punctuation">.</span><span class="name attribute">update</span><span class="punctuation">(</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">props</span><span class="punctuation">.</span><span class="name attribute">id</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="operator">!</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">.</span><span class="name attribute">done</span><span class="punctuation">));</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="punctuation">}</span></code></pre>
+<p>Pamiętaj, że setState jest asynchroniczny, więc nie możemy tego zrobić w taki sposób</p>
+<pre class="code java literal-block"><code><span class="keyword">if</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">.</span><span class="name attribute">done</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setState</span><span class="punctuation">({</span><span class="name">done</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="keyword constant">false</span><span class="punctuation">});</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace"> </span><span class="keyword">else</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setState</span><span class="punctuation">({</span><span class="name">done</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="keyword constant">true</span><span class="punctuation">});</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">props</span><span class="punctuation">.</span><span class="name attribute">update</span><span class="punctuation">(</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">props</span><span class="punctuation">.</span><span class="name attribute">id</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">.</span><span class="name attribute">done</span><span class="punctuation">)</span></code></pre>
+<p>jako że prawdopodobnie stan zostanie zaktualizowany <strong>po</strong>, wykonaniu funkcji aktualizacji. Dlatego używamy funkcji zwrotnej (callback), która jest drugim argumentem funkcji setState i jest wykonywana po zakończeniu setState.</p>
+</section>
+<section id="debugging">
+<h4>Debugging</h4>
+<p>Możesz debugować i sprawdzać błędy w aplikacji React za pomocą przeglądarki. W programie firefox kliknij prawym przyciskiem myszy i wybierz opcję inspekcji elementu.</p>
+<p>W zakładce konsoli można znaleźć błędy zwracane przez kod javascript.</p>
+<p>W zakładce debugger możesz debugować aplikację. Kliknij kartę Debuger, kliknij <strong>ctrl + p</strong>, aby wybrać plik Todo.js. Ustaw punkt przerwania i kliknij na stronie. Sprawdź wartość zmiennych i sposób debugowania.</p>
+<p class="center"><img alt="col1" src="reactDebug.png" /></p>
+</section>
+<section id="input-fields">
+<h4>Input fields</h4>
+<p>Formularz w React dodajesz jak każdy inny element. Dane są obsługiwane przez komponenty, wszystkie dane są przechowywane w stanie komponentów. Możesz kontrolować zmiany, dodając obsługę zdarzeń w atrybucie onChange.</p>
+<p class="tag">Exercise</p>
+<p>Zezwalaj użytkownikowi na dodawanie todo za pomocą pola input field</p>
+<p>Add to TodoList:</p>
+<pre class="code java literal-block"><code><span class="name">myChangeHandler</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">event</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setState</span><span class="punctuation">({</span><span class="name">newTodo</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="name">event</span><span class="punctuation">.</span><span class="name attribute">target</span><span class="punctuation">.</span><span class="name attribute">value</span><span class="punctuation">});</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="punctuation">...</span><span class="whitespace">
+</span><span class="name">render</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+</span><span class="punctuation">...</span><span class="whitespace">
+</span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="whitespace">
+        </span><span class="operator">&lt;</span><span class="name">div</span><span class="whitespace"> </span><span class="name">className</span><span class="operator">=</span><span class="literal string">&quot;TodoList&quot;</span><span class="operator">&gt;</span><span class="whitespace">
+            </span><span class="operator">&lt;</span><span class="name">h1</span><span class="operator">&gt;</span><span class="name">Todo</span><span class="whitespace"> </span><span class="name">List</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">props</span><span class="punctuation">.</span><span class="name attribute">name</span><span class="punctuation">}</span><span class="operator">&lt;/</span><span class="name">h1</span><span class="operator">&gt;</span><span class="whitespace">
+            </span><span class="punctuation">{</span><span class="name">todos</span><span class="punctuation">}</span><span class="whitespace">
+            </span><span class="operator">&lt;</span><span class="name">p</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">My</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">todo</span><span class="whitespace"> </span><span class="operator">&lt;/</span><span class="name">p</span><span class="operator">&gt;</span><span class="whitespace">
+            </span><span class="operator">&lt;</span><span class="name">input</span><span class="whitespace">
+                </span><span class="name">type</span><span class="operator">=</span><span class="error">'</span><span class="name">text</span><span class="error">'</span><span class="whitespace">
+                </span><span class="name">onChange</span><span class="operator">=</span><span class="punctuation">{</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">myChangeHandler</span><span class="punctuation">}</span><span class="whitespace">
+            </span><span class="operator">/&gt;</span><span class="whitespace">
+            </span><span class="operator">&lt;</span><span class="name">button</span><span class="whitespace"> </span><span class="name">onClick</span><span class="operator">=</span><span class="punctuation">{</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">addTodo</span><span class="punctuation">}</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="name">AddTodo</span><span class="whitespace">
+            </span><span class="operator">&lt;/</span><span class="name">button</span><span class="operator">&gt;</span><span class="whitespace">
+        </span><span class="operator">&lt;/</span><span class="name">div</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="punctuation">);</span></code></pre>
+<p class="tag">Exercise</p>
+<p>Przepisz wartość ze stanu do nowo tworzonego wpisu Todo (jako jego value).</p>
+<p>Czyść w stanie pole tekstowe po dodaniu elementu.</p>
+<p>oraz dodaj w input</p>
+<pre class="code java literal-block"><code><span class="name">value</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">.</span><span class="name attribute">newTodo</span><span class="punctuation">}</span></code></pre>
+</section>
+<section id="zapytania-http">
+<h4>Zapytania http</h4>
+<p>Naszym nadrzędnym celem jest, aby nasza aplikacja działała razem z serwerem json działającym na porcie 8080.</p>
+<p>W tym celu użyjemy biblioteki, która nazywa się axios. Axios to lekki klient HTTP.</p>
+<p>Dodaj do &quot;package.json&quot;</p>
+<pre class="code java literal-block"><code><span class="literal string">&quot;devDependencies&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+  </span><span class="literal string">&quot;axios&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string">&quot;^0.24.0&quot;</span><span class="whitespace">
+</span><span class="punctuation">},</span></code></pre>
+<p><span class="badimportant">Uwaga! najnowsza werjsa Axiosa nie działa z kodem z repozytorium więc ustawianie takiej wersji biblioteki jest konieczne!!</span></p>
+<p>Dodaj import do komponentu TodoList:</p>
+<pre class="code java literal-block"><code><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">axios</span><span class="whitespace"> </span><span class="name">from</span><span class="whitespace"> </span><span class="error">'</span><span class="name">axios</span><span class="error">'</span><span class="punctuation">;</span></code></pre>
+<p>Pobierz wszystkie elementy z serwera i zapisz je jako todos na componentMount:</p>
+<pre class="code java literal-block"><code><span class="name">componentDidMount</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">axios</span><span class="punctuation">.</span><span class="name attribute">get</span><span class="punctuation">(</span><span class="error">`</span><span class="name">http</span><span class="punctuation">:</span><span class="comment single">//localhost:8080/todos`)</span><span class="whitespace">
+        </span><span class="punctuation">.</span><span class="name attribute">then</span><span class="punctuation">(</span><span class="name">res</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+            </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="name">todosList</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">res</span><span class="punctuation">.</span><span class="name attribute">data</span><span class="punctuation">;</span><span class="whitespace">
+            </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setState</span><span class="punctuation">({</span><span class="whitespace"> </span><span class="name">todosList</span><span class="whitespace"> </span><span class="punctuation">});</span><span class="whitespace">
+        </span><span class="punctuation">})</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>W celu aktualizacji elementu na serwerze wykorzystujemy metodę PUT:</p>
+<pre class="code java literal-block"><code><span class="name">updateChild</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">id</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">done</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">let</span><span class="whitespace"> </span><span class="name">arrAfterUpdate</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">.</span><span class="name attribute">todosList</span><span class="punctuation">.</span><span class="name attribute">map</span><span class="punctuation">(</span><span class="name">function</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">item</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">if</span><span class="punctuation">(</span><span class="name">item</span><span class="punctuation">.</span><span class="name attribute">id</span><span class="whitespace"> </span><span class="operator">===</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="name">item</span><span class="punctuation">.</span><span class="name attribute">done</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">done</span><span class="punctuation">;</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">item</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">});</span><span class="whitespace">
+
+    </span><span class="name">let</span><span class="whitespace"> </span><span class="name">object</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">arrAfterUpdate</span><span class="punctuation">.</span><span class="name attribute">find</span><span class="punctuation">(</span><span class="name">function</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">item</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">if</span><span class="punctuation">(</span><span class="name">item</span><span class="punctuation">.</span><span class="name attribute">id</span><span class="whitespace"> </span><span class="operator">===</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">item</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">});</span><span class="whitespace">
+
+    </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setState</span><span class="punctuation">({</span><span class="name">todosList</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="name">arrAfterUpdate</span><span class="punctuation">},</span><span class="whitespace"> </span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="name">axios</span><span class="punctuation">.</span><span class="name attribute">put</span><span class="punctuation">(</span><span class="error">`</span><span class="name">http</span><span class="punctuation">:</span><span class="comment single">//localhost:8080/todos/${object.id}`, object));</span><span class="whitespace">
+
+    </span><span class="name">console</span><span class="punctuation">.</span><span class="name attribute">log</span><span class="punctuation">(</span><span class="name">arrAfterUpdate</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">};</span></code></pre>
+<p>POST by przesłać obiekt do serwera:</p>
+<pre class="code java literal-block"><code><span class="name">addTodo</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+     </span><span class="name">let</span><span class="whitespace"> </span><span class="name">nextId</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">.</span><span class="name attribute">todosList</span><span class="punctuation">.</span><span class="name attribute">map</span><span class="punctuation">(</span><span class="name">a</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">a</span><span class="punctuation">.</span><span class="name attribute">id</span><span class="whitespace"> </span><span class="punctuation">}).</span><span class="name attribute">reduce</span><span class="punctuation">((</span><span class="name">acc</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">val</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+         </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">acc</span><span class="whitespace"> </span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">val</span><span class="whitespace"> </span><span class="operator">?</span><span class="whitespace"> </span><span class="name">acc</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace"> </span><span class="name">val</span><span class="punctuation">;</span><span class="whitespace">
+     </span><span class="punctuation">});</span><span class="whitespace">
+     </span><span class="name">nextId</span><span class="operator">++</span><span class="punctuation">;</span><span class="whitespace">
+     </span><span class="name">let</span><span class="whitespace"> </span><span class="name">newelement</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name">id</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="name">nextId</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">value</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">.</span><span class="name attribute">newTodo</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">done</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="keyword constant">false</span><span class="punctuation">};</span><span class="whitespace">
+     </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setState</span><span class="punctuation">(</span><span class="name">prevState</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">({</span><span class="whitespace">
+         </span><span class="name">todosList</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="operator">[</span><span class="punctuation">...</span><span class="name attribute">prevState</span><span class="punctuation">.</span><span class="name attribute">todosList</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">newelement</span><span class="operator">]</span><span class="punctuation">,</span><span class="whitespace">
+         </span><span class="name">newTodo</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string">&quot;&quot;</span><span class="whitespace">
+     </span><span class="punctuation">}),</span><span class="whitespace"> </span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="name">axios</span><span class="punctuation">.</span><span class="name attribute">post</span><span class="punctuation">(</span><span class="error">`</span><span class="name">http</span><span class="punctuation">:</span><span class="comment single">//localhost:8080/todos/`, newelement));</span><span class="whitespace">
+ </span><span class="punctuation">};</span></code></pre>
+<p>DELETE by usunąć obiekt:</p>
+<pre class="code java literal-block"><code><span class="name">handleRemove</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">id</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">let</span><span class="whitespace"> </span><span class="name">object</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">.</span><span class="name attribute">todosList</span><span class="punctuation">.</span><span class="name attribute">find</span><span class="punctuation">(</span><span class="name">function</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">item</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">if</span><span class="punctuation">(</span><span class="name">item</span><span class="punctuation">.</span><span class="name attribute">id</span><span class="whitespace"> </span><span class="operator">===</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">item</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">});</span><span class="whitespace">
+    </span><span class="name">let</span><span class="whitespace"> </span><span class="name">arrAfterDel</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">.</span><span class="name attribute">todosList</span><span class="punctuation">.</span><span class="name attribute">filter</span><span class="punctuation">(</span><span class="name">function</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">item</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">item</span><span class="punctuation">.</span><span class="name attribute">id</span><span class="whitespace"> </span><span class="operator">!==</span><span class="whitespace"> </span><span class="name">id</span><span class="whitespace">
+    </span><span class="punctuation">});</span><span class="whitespace">
+    </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setState</span><span class="punctuation">({</span><span class="name">todosList</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="name">arrAfterDel</span><span class="punctuation">},</span><span class="whitespace"> </span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="name">axios</span><span class="punctuation">.</span><span class="name attribute">delete</span><span class="punctuation">(</span><span class="error">`</span><span class="name">http</span><span class="punctuation">:</span><span class="comment single">//localhost:8080/todos/${object.id}`, object));</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+</section>
+<section id="styling">
+<h4>Styling</h4>
+<p>Chcielibyśmy dodać do naszego projektu tabelę Bootstrap.</p>
+<p>Render oczekuje, że zwracany obiekt będzie opakowany w pojedynczy tag główny. Ale czasami nie chcesz mieć tego w swoim kodzie. W takim przypadku możesz użyć elementu React.Frament symulujący takie zachowanie.</p>
+<pre class="code bash literal-block"><code>npm<span class="whitespace"> </span>install<span class="whitespace"> </span>bootstrap</code></pre>
+<p>Dodaj do Todo.js class:</p>
+<pre class="code bash literal-block"><code>import<span class="whitespace"> </span><span class="literal string single">'bootstrap/dist/css/bootstrap.min.css'</span><span class="punctuation">;</span></code></pre>
+<pre class="code java literal-block"><code><span class="operator">&lt;</span><span class="name">React</span><span class="punctuation">.</span><span class="name attribute">Fragment</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="punctuation">{</span><span class="name">done</span><span class="whitespace"> </span><span class="operator">===</span><span class="whitespace"> </span><span class="keyword constant">true</span><span class="whitespace"> </span><span class="operator">?</span><span class="whitespace">
+        </span><span class="operator">&lt;</span><span class="name">th</span><span class="whitespace"> </span><span class="name">style</span><span class="operator">=</span><span class="punctuation">{</span><span class="name">greenStyle</span><span class="punctuation">}</span><span class="operator">&gt;</span><span class="whitespace">
+            </span><span class="punctuation">{</span><span class="name">value</span><span class="punctuation">}</span><span class="whitespace">
+        </span><span class="operator">&lt;/</span><span class="name">th</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="punctuation">:</span><span class="whitespace">
+        </span><span class="operator">&lt;</span><span class="name">th</span><span class="whitespace"> </span><span class="name">style</span><span class="operator">=</span><span class="punctuation">{</span><span class="name">redStyle</span><span class="punctuation">}</span><span class="operator">&gt;</span><span class="whitespace">
+            </span><span class="punctuation">{</span><span class="name">value</span><span class="punctuation">}</span><span class="whitespace">
+        </span><span class="operator">&lt;/</span><span class="name">th</span><span class="operator">&gt;</span><span class="punctuation">}</span><span class="whitespace">
+    </span><span class="operator">&lt;</span><span class="name">th</span><span class="operator">&gt;</span><span class="whitespace">
+        </span><span class="operator">&lt;</span><span class="name">button</span><span class="whitespace"> </span><span class="name">onClick</span><span class="operator">=</span><span class="punctuation">{</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">setDone</span><span class="punctuation">}</span><span class="operator">&gt;</span><span class="whitespace">
+            </span><span class="name">Change</span><span class="whitespace"> </span><span class="name">status</span><span class="whitespace">
+        </span><span class="operator">&lt;/</span><span class="name">button</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="operator">&lt;/</span><span class="name">th</span><span class="operator">&gt;</span><span class="whitespace">
+</span><span class="operator">&lt;/</span><span class="name">React</span><span class="punctuation">.</span><span class="name attribute">Fragment</span><span class="operator">&gt;</span></code></pre>
+<p>Dodaj elementy tabeli bootstrap do głównej klasy:</p>
+<pre class="code java literal-block"><code><span class="name">render</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+    </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name">todosList</span><span class="punctuation">}</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="name">let</span><span class="whitespace"> </span><span class="name">todos</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">todosList</span><span class="punctuation">.</span><span class="name attribute">map</span><span class="punctuation">(</span><span class="name">todo</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="operator">&lt;</span><span class="name">tr</span><span class="whitespace"> </span><span class="name">key</span><span class="operator">=</span><span class="punctuation">{</span><span class="name">todo</span><span class="punctuation">.</span><span class="name attribute">id</span><span class="punctuation">}</span><span class="operator">&gt;</span><span class="whitespace">
+            </span><span class="operator">&lt;</span><span class="name">Todo</span><span class="whitespace"> </span><span class="name">value</span><span class="operator">=</span><span class="punctuation">{</span><span class="name">todo</span><span class="punctuation">.</span><span class="name attribute">value</span><span class="punctuation">}</span><span class="whitespace">
+                  </span><span class="name">done</span><span class="operator">=</span><span class="punctuation">{</span><span class="name">todo</span><span class="punctuation">.</span><span class="name attribute">done</span><span class="punctuation">}</span><span class="whitespace">
+                  </span><span class="name">id</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name">todo</span><span class="punctuation">.</span><span class="name attribute">id</span><span class="punctuation">}</span><span class="whitespace">
+                  </span><span class="name">update</span><span class="operator">=</span><span class="punctuation">{(</span><span class="name">id</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">done</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">updateChild</span><span class="punctuation">(</span><span class="name">id</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">done</span><span class="punctuation">)}</span><span class="whitespace">  </span><span class="operator">/&gt;</span><span class="whitespace">
+            </span><span class="operator">&lt;</span><span class="name">th</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name">button</span><span class="whitespace"> </span><span class="name">type</span><span class="operator">=</span><span class="literal string">&quot;button&quot;</span><span class="whitespace"> </span><span class="name">onClick</span><span class="operator">=</span><span class="punctuation">{()</span><span class="whitespace"> </span><span class="operator">=&gt;</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">handleRemove</span><span class="punctuation">(</span><span class="name">todo</span><span class="punctuation">.</span><span class="name attribute">id</span><span class="punctuation">)}</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="name">Remove</span><span class="whitespace">
+                </span><span class="operator">&lt;/</span><span class="name">button</span><span class="operator">&gt;</span><span class="whitespace">
+            </span><span class="operator">&lt;/</span><span class="name">th</span><span class="operator">&gt;</span><span class="whitespace">
+        </span><span class="operator">&lt;/</span><span class="name">tr</span><span class="operator">&gt;</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="punctuation">})</span><span class="whitespace">
+
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="whitespace">
+        </span><span class="operator">&lt;</span><span class="name">div</span><span class="whitespace"> </span><span class="name">className</span><span class="operator">=</span><span class="literal string">&quot;TodoList&quot;</span><span class="operator">&gt;</span><span class="whitespace">
+            </span><span class="operator">&lt;</span><span class="name">h1</span><span class="operator">&gt;</span><span class="name">Todo</span><span class="whitespace"> </span><span class="name">List</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">props</span><span class="punctuation">.</span><span class="name attribute">name</span><span class="punctuation">}</span><span class="operator">&lt;/</span><span class="name">h1</span><span class="operator">&gt;</span><span class="whitespace">
+            </span><span class="operator">&lt;</span><span class="name">table</span><span class="whitespace"> </span><span class="name">className</span><span class="operator">=</span><span class="literal string">&quot;table table-striped&quot;</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name">thead</span><span class="whitespace"> </span><span class="name">className</span><span class="operator">=</span><span class="literal string">&quot;thead-dark&quot;</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name">th</span><span class="whitespace"> </span><span class="name">scope</span><span class="operator">=</span><span class="literal string">&quot;col&quot;</span><span class="operator">&gt;</span><span class="name">Todo</span><span class="operator">&lt;/</span><span class="name">th</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name">th</span><span class="whitespace"> </span><span class="name">scope</span><span class="operator">=</span><span class="literal string">&quot;col&quot;</span><span class="operator">&gt;</span><span class="name">Status</span><span class="operator">&lt;/</span><span class="name">th</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name">th</span><span class="whitespace"> </span><span class="name">scope</span><span class="operator">=</span><span class="literal string">&quot;col&quot;</span><span class="operator">&gt;&lt;/</span><span class="name">th</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;/</span><span class="name">thead</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name">tbody</span><span class="operator">&gt;</span><span class="whitespace">
+                    </span><span class="punctuation">{</span><span class="name">todos</span><span class="punctuation">}</span><span class="whitespace">
+                </span><span class="operator">&lt;/</span><span class="name">tbody</span><span class="operator">&gt;</span><span class="whitespace">
+            </span><span class="operator">&lt;/</span><span class="name">table</span><span class="operator">&gt;</span><span class="whitespace">
+            </span><span class="operator">&lt;</span><span class="name">p</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">My</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">todo</span><span class="whitespace"> </span><span class="operator">&lt;/</span><span class="name">p</span><span class="operator">&gt;</span><span class="whitespace">
+            </span><span class="operator">&lt;</span><span class="name">input</span><span class="whitespace">
+                </span><span class="name">type</span><span class="operator">=</span><span class="error">'</span><span class="name">text</span><span class="error">'</span><span class="whitespace">
+                </span><span class="name">onChange</span><span class="operator">=</span><span class="punctuation">{</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">myChangeHandler</span><span class="punctuation">}</span><span class="whitespace">
+                </span><span class="name">value</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">state</span><span class="punctuation">.</span><span class="name attribute">newTodo</span><span class="punctuation">}</span><span class="whitespace">
+            </span><span class="operator">/&gt;</span><span class="whitespace">
+            </span><span class="operator">&lt;</span><span class="name">button</span><span class="whitespace"> </span><span class="name">onClick</span><span class="operator">=</span><span class="punctuation">{</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">addTodo</span><span class="punctuation">}</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="name">AddTodo</span><span class="whitespace">
+            </span><span class="operator">&lt;/</span><span class="name">button</span><span class="operator">&gt;</span><span class="whitespace">
+        </span><span class="operator">&lt;/</span><span class="name">div</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Zobacz na wynik.</p>
+</section>
+<section id="tests">
+<h4>Tests</h4>
+<p>Aby uruchomić test w TodoList.test.js musimy stworzyć nową konfigurację uruchomienia w WebStorm.</p>
+<p>Wybierz plus i wybierz <strong>Jest</strong>, w oknie otwartym w opcjach <em>Jest options</em> wpisz <strong>--env=jsdom</strong>.</p>
+<p>Więcej o testach można przeczytać na</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://jestjs.io/docs/en/tutorial-react">https://jestjs.io/docs/en/tutorial-react</a></div>
+</div>
+</blockquote>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="footnote-1" role="note">
+<span class="label"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></span>
+<p>Used materials from :</p>
+</aside>
+</aside>
+<p><a class="reference external" href="https://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/">https://projects.wojtekmaj.pl/react-lifecycle-methods-diagram/</a></p>
+<p><a class="reference external" href="https://reactjs.org/tutorial/tutorial.html">https://reactjs.org/tutorial/tutorial.html</a></p>
+<p><a class="reference external" href="https://codeburst.io/4-four-ways-to-style-react-components-ac6f323da822">https://codeburst.io/4-four-ways-to-style-react-components-ac6f323da822</a></p>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/React_(web_framework">https://en.wikipedia.org/wiki/React_(web_framework</a>)</p>
+<p><a class="reference external" href="https://reactjs.org/docs/getting-started.html">https://reactjs.org/docs/getting-started.html</a></p>
+<p><a class="reference external" href="https://medium.com/&#64;krishankantsinghal/package-json-understanding-it-for-your-nodejs-reactjs-angularjs-or-any-javascript-app-which-use-5a18de90d33">https://medium.com/&#64;krishankantsinghal/package-json-understanding-it-for-your-nodejs-reactjs-angularjs-or-any-javascript-app-which-use-5a18de90d33</a></p>
+<p><a class="reference external" href="https://adhithiravi.medium.com/why-do-i-need-keys-in-react-lists-dbb522188bbb">https://adhithiravi.medium.com/why-do-i-need-keys-in-react-lists-dbb522188bbb</a></p>
+<p><a class="reference external" href="https://www.w3schools.com/react/react_lifecycle.asp">https://www.w3schools.com/react/react_lifecycle.asp</a></p>
+<p><a class="reference external" href="https://www.netguru.com/codestories/react-native-lifecycle">https://www.netguru.com/codestories/react-native-lifecycle</a></p>
+</section>
+</section>
+</section></body>
+</html>
+

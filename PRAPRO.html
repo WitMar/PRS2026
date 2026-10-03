@@ -1,0 +1,88 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>PRAPRO.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="pracownia-programowania">
+<h2>Pracownia Programowania</h2>
+<section id="projekt">
+<h3>Projekt</h3>
+<p class="tag">Projekt z tematów 1-4</p>
+<p>Zadanie:</p>
+<p>Napisz program działający w terminalu (konsoli, inaczej proram tesktowy), który będzie analizował dane meteorologiczne z linka (odczyty sensorów z sensor community z rejonu Warszawy)</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://data.sensor.community/airrohr/v1/filter/box=52.36734243199027,20.819494415027485,52.09692843752652,21.319390572461643">https://data.sensor.community/airrohr/v1/filter/box=52.36734243199027,20.819494415027485,52.09692843752652,21.319390572461643</a></div>
+</div>
+</blockquote>
+<p>Model danych (wygenerowane online klasy z formatu json) można znaleźć tutaj:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://mw.home.amu.edu.pl/zajecia/PRA2025/model.zip">https://mw.home.amu.edu.pl/zajecia/PRA2025/model.zip</a></div>
+</div>
+</blockquote>
+<p>Program powinien wypisywać dowolne statystyki z odczytanych danych wymyślone przez użytkownika (np średnie temp, wilgotność, liczbę miejsc o dużej temp, dużym zanieczyszczeniu powietrza itp)
+i mieć możliwość zapisania tych statystyl w trzech formatach do wyboru: pliku PDF, json lub xml. Wykorzystaj dowolną bibliotekę Javy do tworzenia plików PDF. Postać pliku jest dowolna.</p>
+<p>Napisz testy do wyrzystywanych metod, skorzystaj obowiązkowo z zamockowania danych dla danych pobieranych z data.sensor.</p>
+<p>W programie wykorzystaj strumienie oraz co najmniej jedną strukturę danych (set, map, list, stack, etc.).</p>
+<p>Przykłąd wywołania:</p>
+<pre class="code xml literal-block"><code>Statystyki:<span class="whitespace">
+</span>.........<span class="whitespace">
+</span>.........<span class="whitespace">
+</span>.........<span class="whitespace">
+</span>Zapisz<span class="whitespace"> </span>jako:<span class="whitespace">
+</span>P-Pdf<span class="whitespace"> </span>J-Json<span class="whitespace"> </span>X-xml<span class="whitespace">
+</span>&gt;&gt;P<span class="whitespace">
+</span>Zapisanow<span class="whitespace"> </span>wynik<span class="whitespace"> </span>do<span class="whitespace"> </span>pliku<span class="whitespace"> </span>pdf</code></pre>
+</section>
+<section id="zapytania-http-in-java">
+<h3>Zapytania HTTP in Java</h3>
+<p>Możemy wykonywać żądania HTTP z kodu, najprościej użyć biblioteki Apache.httpclient.</p>
+<pre class="code xml literal-block"><code><span class="name tag">&lt;dependency&gt;</span><span class="whitespace">
+      </span><span class="name tag">&lt;groupId&gt;</span>org.apache.httpcomponents<span class="name tag">&lt;/groupId&gt;</span><span class="whitespace">
+      </span><span class="name tag">&lt;artifactId&gt;</span>httpclient<span class="name tag">&lt;/artifactId&gt;</span><span class="whitespace">
+      </span><span class="name tag">&lt;version&gt;</span>4.5.10<span class="name tag">&lt;/version&gt;</span><span class="whitespace">
+</span><span class="name tag">&lt;/dependency&gt;</span></code></pre>
+<p>Wykonanie zapytania GET:</p>
+<pre class="code java literal-block"><code><span class="whitespace">                    </span><span class="name">DefaultHttpClient</span><span class="whitespace"> </span><span class="name">httpClient</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">DefaultHttpClient</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="name">HttpGet</span><span class="whitespace"> </span><span class="name">getRequest</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">HttpGet</span><span class="punctuation">(</span><span class="whitespace">
+        </span><span class="literal string">&quot;https://data.sensor.community/airrohr/v1/filter/box=52.36734243199027,20.819494415027485,52.09692843752652,21.319390572461643&quot;</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="name">getRequest</span><span class="punctuation">.</span><span class="name attribute">addHeader</span><span class="punctuation">(</span><span class="literal string">&quot;accept&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;application/json&quot;</span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="name">HttpResponse</span><span class="whitespace"> </span><span class="name">response</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">httpClient</span><span class="punctuation">.</span><span class="name attribute">execute</span><span class="punctuation">(</span><span class="name">getRequest</span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="keyword">if</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">response</span><span class="punctuation">.</span><span class="name attribute">getStatusLine</span><span class="punctuation">().</span><span class="name attribute">getStatusCode</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">!=</span><span class="whitespace"> </span><span class="literal number integer">200</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">throw</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">RuntimeException</span><span class="punctuation">(</span><span class="literal string">&quot;Failed : HTTP error code : &quot;</span><span class="whitespace">
+            </span><span class="operator">+</span><span class="whitespace"> </span><span class="name">response</span><span class="punctuation">.</span><span class="name attribute">getStatusLine</span><span class="punctuation">().</span><span class="name attribute">getStatusCode</span><span class="punctuation">());</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name">BufferedReader</span><span class="whitespace"> </span><span class="name">br</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">BufferedReader</span><span class="punctuation">(</span><span class="whitespace">
+        </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">InputStreamReader</span><span class="punctuation">((</span><span class="name">response</span><span class="punctuation">.</span><span class="name attribute">getEntity</span><span class="punctuation">().</span><span class="name attribute">getContent</span><span class="punctuation">())));</span><span class="whitespace">
+</span><span class="name">StringBuilder</span><span class="whitespace"> </span><span class="name">sb</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">StringBuilder</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="name">String</span><span class="whitespace"> </span><span class="name">line</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="keyword">while</span><span class="whitespace"> </span><span class="punctuation">((</span><span class="name">line</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">br</span><span class="punctuation">.</span><span class="name attribute">readLine</span><span class="punctuation">())</span><span class="whitespace"> </span><span class="operator">!=</span><span class="whitespace"> </span><span class="keyword constant">null</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">sb</span><span class="punctuation">.</span><span class="name attribute">append</span><span class="punctuation">(</span><span class="name">line</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="name">String</span><span class="whitespace"> </span><span class="name">json</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">sb</span><span class="punctuation">.</span><span class="name attribute">toString</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="name">ObjectMapper</span><span class="whitespace"> </span><span class="name">mapper</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">ObjectMapper</span><span class="punctuation">();</span></code></pre>
+<p>Wykorzystanie modelu</p>
+<pre class="code java literal-block"><code><span class="name">ArrayList</span><span class="operator">&lt;</span><span class="name">Root</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">obj</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">mapper</span><span class="punctuation">.</span><span class="name attribute">readValue</span><span class="punctuation">(...........</span></code></pre>
+</section>
+<section id="ocena">
+<h3>Ocena</h3>
+<p>Testy - test zmockowanego zapytania, co najmiej 3 scenariusze testów, 2xPozytywny, Negatywny - np złe dane wejściowe : 30%</p>
+<p>Strumienie - wykorzystanie strumienia do przetwarzania informacji: 10%</p>
+<p>Serializacja i Deserializacja JSON + XML: 20%</p>
+<p>Biblioteka PDF: 20%</p>
+<p>Działanie zgodne ze specyfikacją i pobieranie prawidłowych danych 20%</p>
+</section>
+</section></body>
+</html>
+

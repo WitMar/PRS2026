@@ -1,0 +1,7 @@
+rst2html5.py --link-stylesheet --template=template.html --stylesheet=style.css --cloak-email-addresses --no-doc-title --math-output=mathjax  DNIF.rs DNIF.html
+
+rst2html5.py --link-stylesheet --template=template.html --stylesheet=style.css --cloak-email-addresses --no-doc-title --math-output=mathjax  DNIF.rs DNIF.html
+
+.. math::
+
+   \frac{1}{2}

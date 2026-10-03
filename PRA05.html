@@ -1,0 +1,515 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>PRA05.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="pracownia-programowania">
+<h2>Pracownia Programowania</h2>
+<section id="rest-api-spring-framework">
+<h3>REST API + SPRING FRAMEWORK</h3>
+<p class="important">Uwaga! cały kod znajduje się na gałęzi <strong>SpringStart</strong> w repozytorium <a class="reference external" href="https://github.com/WitMar/PRA2025">https://github.com/WitMar/PRA2025</a> . Kod końcowy w gałęzi <strong>SpringEnd</strong>.</p>
+<p>Jeżeli nie widzisz odpowiednich gałęzi na GitHubie wykonaj <strong>Ctr+T</strong>, a jak to nie pomoże to wybierz z menu <strong>VCS-&gt;Git-&gt;Fetch</strong>.</p>
+<p><strong>API</strong> to skrót od Application Programming Interface; opisuje jak poszczególne elementy lub warstwy oprogramowania powinny się komunikować. W praktyce to najczęściej spis metod, które umożliwiają realizację określonych operacji na maszynie końcowej.</p>
+<p><strong>REST</strong> jest zbiorem reguł specyficznego sposobu wymiany komunikatów między serwerem a klientem. REST zaprojektowano tak, by był możliwie najprostszy. Restowe API jest blisko związany z protokołem sieciowym HTTP i wykorzystuje jego metody takie jak <strong>POST, GET,  PUT,  DELETE</strong>.</p>
+<p>Kiedy  tworzysz  aplikację  sieciową  i  chcesz  udostępnić innym  programistom  możliwość  integracji  z  nią, najlepiej udostępnić dobre API restowe wraz z dokumentacją.</p>
+<section id="http">
+<h4>HTTP</h4>
+<p>HTTP (Hyper Transfer Protocol) jest protokołem odpowiedzialnym za przesyłanie w Internecie stron WWW.</p>
+<p>W zapytaniach HTTP możemy wyróżnić dwa elementy: <strong>nagłówek</strong> i <strong>ciało</strong>.</p>
+</section>
+<section id="naglowek">
+<h4>Nagłówek</h4>
+<p>Nagłówki HTTP spotkamy zarówno w zapytaniach, jak i w odpowiedziach. Są one pierwszymy liniami, oddzielone od ciała jedną pustą linią. Nagłówki są opcjonalne – protokół nie wymaga ich obecności. Nagłówki to pewnego rodzaju metadane i polecenia wymieniane przez przeglądarkę i serwer – mogą się w nich znaleźć informacje takie jak rodzaj przesyłanych treści (np. czy jest to obrazek czy plik JSON), sugestia dotycząca traktowania zawartości (czy przeglądarka ma wyświetlić daną treść, czy np. potraktować to jako pobieranie), jaki jest rozmiar przesyłanych danych, kiedy były modyfikowane, jakiego rodzaju odpowiedzi druga strona się spodziewa itp.</p>
+<p>Nagłówki przyjmują postać klucz-wartość, zapisywane w postaci:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><strong>Klucz: wartość</strong></div>
+</div>
+</blockquote>
+<p>Przykłady:</p>
+<table>
+<tbody>
+<tr><td><p><strong>Nagłówek</strong></p></td>
+<td><p><strong>Opis</strong></p></td>
+<td><p><strong>Przykład</strong></p></td>
+</tr>
+<tr><td><p>Content-Type</p></td>
+<td><p>W zapytaniu oraz odpowiedzi określa, jakiego typu dane są przesyłane</p></td>
+<td><p>Content-Type: application/json</p></td>
+</tr>
+<tr><td><p>Content-Length</p></td>
+<td><p>W zapytaniu oraz odpowiedzi zawiera informacje ile danych jest przesyłanych</p></td>
+<td><p>Content-Length: 20</p></td>
+</tr>
+<tr><td><p>Cookie</p></td>
+<td><p>W zapytaniu przesyła zawartość Cookies przechowywanych dla danej witryny. Może przechowywać wiele wartości w postaci klucz=wartość, pary,oddzielane są od siebie średnikami.</p></td>
+<td><p>Cookie: AcceptedCookiePolicy=1; Country=Poland;</p></td>
+</tr>
+<tr><td><p>Set-Cookie</p></td>
+<td><p>W odpowiedzi jest to polecenie serwera, aby przeglądarka ustawiła wartości Cookie. Podobnie jak nagłówek Cookie może zawierać wiele par postaci klucz=wartość oddzielonych średnikami</p></td>
+<td><p>Set-Cookie: UserID=JanNowak; SeenTutorial=1</p></td>
+</tr>
+<tr><td><p>Last-Modified</p></td>
+<td><p>W odpowiedzi serwer może poinformować kiedy nastąpiła ostatnia zmiana zawartości. Format daty jest specyficzny dla protokołu HTTP i określony w dokumencie RCF 7231</p></td>
+<td><p>Last-Modified: Tue, 15 May 2015 12:45:26 GMT</p></td>
+</tr>
+<tr><td><p>Accept</p></td>
+<td><p>W zapytaniu klient może poinformować serwer, jakiego typu odpowiedzi akceptuje. Dzięki temu serwer może zadecydować o wysłaniu odpowiedzi np. w XML a nie JSON, co ma zastosowanie w wielu API</p></td>
+<td><p>Accept: application/xml</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="cialo">
+<h4>Ciało</h4>
+<p>Ciało wiadomości przechowuje rzeczywiste dane żądania HTTP (takie jak dane formularza, etc.) i dane odpowiedzi HTTP z serwera ( pliki, obrazki, JSON, etc.).</p>
+<p>Jeśli komunikat HTTP zawiera treść, to w wiadomości znajdują się zazwyczaj dane opisane w nagłówku. W szczególności</p>
+<blockquote>
+<div class="line-block">
+<div class="line">Content-Type: nagłówek dostarcza typ danych MIME w wiadomości takich jak text/html lub image/gif.</div>
+</div>
+<div class="line-block">
+<div class="line">Content-Length: nagłówek podaje liczbę bajtów w treści.</div>
+</div>
+</blockquote>
+</section>
+<section id="parametry">
+<h4>Parametry</h4>
+<p>Istnieją dwie podstawowe metody przekazania parametrów:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">jako element URL podczas użycia metody <strong>GET</strong></div>
+</div>
+<div class="line-block">
+<div class="line">jako para klucz:wartość nagłówka podczas użycia metody <strong>POST/PUT/DELETE</strong></div>
+</div>
+</blockquote>
+<p>Parametry przekazywane metodą GET umieszczane są w adresie strony po znaku ? i rozdzielone znakiem &amp;. Parametry są zwykle przekazywane w postaci par nazwa=wartość.</p>
+<p>Przykład:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://www.google.pl/search?q=get+method+example&amp;lr=lang_pl">https://www.google.pl/search?q=get+method+example&amp;lr=lang_pl</a></div>
+</div>
+</blockquote>
+</section>
+<section id="status-odpowiedzi">
+<h4>Status odpowiedzi</h4>
+<p>Jednym z elementów protokołu HTTP są kody odpowiedzi, zwanymi też statusami. To numeryczne, trzycyfrowe kody, które są dołączane do odpowiedzi i sygnalizują status odpowiedzi.</p>
+<p>Nagłówki grupują się względem pierwszej cyfry w sekcje:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><strong>1xx</strong> – informacyjne, nieczęsto można spotkać, dotyczą bardziej środowiska niż samej aplikacji (np. 111 – serwer odrzucił połaczenie)</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>2xx</strong> – zapytanie się powiodło</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>3xx</strong> – przekierowanie, zapytanie należy kierować pod inny adres / serwer</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>4xx</strong> – błąd aplikacji spowodowany działaniem użytkownika (np. wspomniany 404 – nie znaleziono – czy 403 – brak dostępu lub 400 – niepoprawnie zapytanie)</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>5xx</strong> – błąd serwera (np. nieobsłużony wyjątek w Javie)</div>
+</div>
+</blockquote>
+<p>Najczęstszymi statusami HTTP, z którymi możemy się spotkać są:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">200 - OK, 201 - Created, 202 - Accepted</div>
+</div>
+<div class="line-block">
+<div class="line">400 – Złe zapytanie (Brakuje w zapytaniu wymaganych parametrów lub nie może być poprawnie odczytane)</div>
+</div>
+<div class="line-block">
+<div class="line">401 – Nie powiodła się autentykacja, brak pozwolenia</div>
+</div>
+<div class="line-block">
+<div class="line">403 – Dostęp zabroniony</div>
+</div>
+<div class="line-block">
+<div class="line">404 – Nie znaleziono</div>
+</div>
+<div class="line-block">
+<div class="line">405 – Niedozwolona metoda (Np. wysłanie pod dany adres metody POST, a nie GET)</div>
+</div>
+<div class="line-block">
+<div class="line">500 – Błąd serwera</div>
+</div>
+<div class="line-block">
+<div class="line">503 – Serwis niedostępny</div>
+</div>
+</blockquote>
+<p>Lista wszystkich nagłówków HTTP dostępna jest tutaj:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://pl.wikipedia.org/wiki/Kod_odpowiedzi_HTTP">https://pl.wikipedia.org/wiki/Kod_odpowiedzi_HTTP</a></div>
+</div>
+</blockquote>
+</section>
+<section id="metody">
+<h4>Metody</h4>
+<p>Porównamy metody <strong>HTTP</strong> z typowymi operacjami <strong>CRUD</strong> (create, read, update, delete):</p>
+<blockquote>
+<div class="line-block">
+<div class="line">* metoda <strong>POST</strong> jest używana do tworzenia nowych rzeczy, to praktycznie odpowiednik Create z terminologii CRUD;</div>
+</div>
+<div class="line-block">
+<div class="line">* <strong>GET</strong>  stanowi  proste  zapytanie  z  parametrami (odpowiednik Read);</div>
+</div>
+<div class="line-block">
+<div class="line">* metoda <strong>PUT</strong> aktualizuje lub zamienia dane, można ją traktować jako update/replace  into z SQL lub Update z CRUD;</div>
+</div>
+<div class="line-block">
+<div class="line">* nazwa  metody <strong>DELETE</strong>  mówi  sama  za  siebie i jest oczywiście odpowiednikiem Delete z CRUD.</div>
+</div>
+</blockquote>
+<table>
+<tbody>
+<tr><td><p><strong>Metoda</strong></p></td>
+<td><p><strong>Request body</strong></p></td>
+<td><p><strong>Response body</strong></p></td>
+<td><p><strong>Zastosowanie / opis</strong></p></td>
+</tr>
+<tr><td><p>GET</p></td>
+<td><p>niedozwolone</p></td>
+<td><p>opcjonalnie</p></td>
+<td><p>Pobieranie zasobu lub jego wyświetlenie, np. wyświetlenie formularza lub strony. Parametry można przekazywac jedynie poprzez adres (np. ?nazwa=wartosc&amp;nazwa2=wartosc2)</p></td>
+</tr>
+<tr><td><p>POST</p></td>
+<td><p>opcjonalnie</p></td>
+<td><p>opcjonalnie</p></td>
+<td><p>Przesłanie danych zapisanych jako pary klucz-wartość do serwera (np. wysłanie formularza, gdzie kluczem jest nazwa danego pola a wartością wpisana przez nas wartość). Metoda ta pozwala przesyłać także pliki (a także wiele pliki oraz pary klucz-wartość jednocześnie).</p></td>
+</tr>
+<tr><td><p>PUT</p></td>
+<td><p>opcjonalnie</p></td>
+<td><p>opcjonalnie</p></td>
+<td><p>Przesyłanie ‚paczki’ danych np. jednego pliku. Metoda ta ma pewne ograniczenia np. nie ma możliwości łaczenia par klucz-wartość z inną, przesyłaną treścią (np. plikiem). Obecnie używana głównie w przypadku RESTowych serwisów, gdzie ciałem jest np. formularz zapisany w postaci,JSONa.</p></td>
+</tr>
+<tr><td><p>DELETE</p></td>
+<td><p>opcjonalnie</p></td>
+<td><p>opcjonalnie</p></td>
+<td><p>Usuwanie zasobu na serwerze, z racji bezpieczeństwa praktycznie zawsze jest wyłaczona domyślnie. Obecnie używana głównie w przypadku RESTowych serwisów wskazując, że dany zasób ma być usunięty.</p></td>
+</tr>
+</tbody>
+</table>
+<p>Protokół HTTP jest <span class="todo">bezstanowy</span>, tzn nie przechowuje informacji o tym, co działo się wcześniej (jak np protokół TCP). Jest to oczywisty problem w większości przypadków, kiedy korzystamy z narzędzi wymagających zalogowania się – informacja o tym, jaki użytkownik jest zalogowany musi być przechowywana w jakiś sposób.</p>
+<p>Rozwiązaniem stosowanym obecnie na szeroka skalę są tzw. ciasteczka – pierwotnie mające postać plików tekstowych w formacie klucz=wartość, obecnie przechowywane w wewnętrznej bazie danych przeglądarki.</p>
+</section>
+<section id="rest">
+<h4>REST</h4>
+<p>REST oznacza głównie komunikację przez HTTP z użyciem kilku metod tegoż HTTP i wymianę danych w formacie JSON lub XML.</p>
+<p>Najważniejszą własnością RESTa są zasoby. Każdy zasób ma swój adres. Adres jest unikalny i zawsze ten sam. Nie może być dwóch zasobów pod tym samym adresem. Jeden zasób nie powinien też pojawiać się pod kilkoma adresami. Przykład <em>/samochod</em>.</p>
+<p>Przykład:</p>
+<table>
+<tbody>
+<tr><td><p>URL</p></td>
+<td><p>POST</p></td>
+<td><p>PUT</p></td>
+<td><p>GET</p></td>
+<td><p>DELETE</p></td>
+</tr>
+<tr><td><p>/samochod</p></td>
+<td><p>Stwórz nowy samochód</p></td>
+<td><p>Zamień/aktualizuj wszystkie samochody</p></td>
+<td><p>Pobierz wszystkie samochody</p></td>
+<td><p>Usuń wszystkie samochody</p></td>
+</tr>
+<tr><td><p>/samochod/{id}</p></td>
+<td><p>Stwórz samochód o danym id</p></td>
+<td><p>Aktualizuj samochód o danym id</p></td>
+<td><p>Pobierz samochód o danym id</p></td>
+<td><p>Usuń samochód o danym id</p></td>
+</tr>
+</tbody>
+</table>
+<p>Wprawdzie REST nie wymusza użycia HTTP, ale prawie zawsze idzie z nim w parze. HTTP to coś więcej niż znane wszystkim GET i POST. Mamy nagłówki żądania i odpowiedzi, mamy kody odpowiedzi, mamy też kilka różnych metod wywołania. REST stara się wykorzystać wszystkie te możliwości do maksimum.</p>
+<p>Uwagi:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">* <strong>POST</strong> jest z kilku względów wyjątkową metodą HTTP z punktu widzenia REST. Najpopularniejsze jej zastosowanie to dodanie zasobu do kolekcji. Co ważne, identyfikator takim zasobom nadaje serwer, a co za tym idzie, klient musi mieć możliwość przenawigowania do dodanego przez siebie zasobu. Dlatego jeśli żądanie przejdzie poprawnie walidację i zasób zostaje utworzony, to serwer musi zwrócić kod 201 / Created wraz z adresem URI nowo utworzonego zasobu zamieszczonym w nagłówku Location.</div>
+</div>
+<div class="line-block">
+<div class="line">* <strong>PUT</strong> służy także do dodawania zasobów. Różnica polega na tym, że żądanie PUT musi być idempotentne. Operacje idempotentne (w algebrze) to takie, które wielokrotnie stosowane nie zmienią wyniku. Zatem jedyną możliwość idempotentnego dodania zasobu jest wstawienie go pod Id nadany przez klienta. Każdy kolejny, taki sam request będzie traktowany jako aktualizacja zasobu znajdującego się pod wskazanym Id.</div>
+</div>
+<div class="line-block">
+<div class="line">Konsekwencja jest taka, że jeżeli metodę PUT wywołamy 100 razy z takimi samymi nagłówkami i body, to w bazie danych będzie cały czas jeden zasób, natomiast w przypadku dodawania przez POST utworzyć się powinno 100 zasobów z różnymi Id.</div>
+</div>
+<div class="line-block">
+<div class="line">* W przypadku chęci wywołania metody GET z parametrem złożonym, który nie może być zapisany w URL, stosujemy metodę POST jako jej zamiennik.</div>
+</div>
+</blockquote>
+</section>
+<section id="postman">
+<h4>Postman</h4>
+<p>Postman został stworzony do wsparcia wszystkich aspektów rozwoju API. Postman jest aplikacją, która pozwala na przesyłanie requestów i odbieranie odpowiedzi od serwisów internetowych.</p>
+<p>Jak zainstalować Postmana?</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://www.postman.com/downloads/">https://www.postman.com/downloads/</a></div>
+</div>
+</blockquote>
+<p>Wybierz opcję &quot;Try the web version&quot;. Następnie &quot;Workspaces&quot; -&gt; New -&gt; API.</p>
+<p>Możesz też włączyć wersje online do testów.</p>
+<p>Po lewej stronie mamy historię wykorzystywanych zapytań, po prawej wprowadzamy szczegóły zapytania. W dolnej części pokazywana jest odpowiedź od serwera.</p>
+<p>Metoda <strong>GET</strong> służy do pobierania danych. W polu obok (URL) wpisujemy adres metody, do której się odwołujemy.</p>
+<p class="tag">Zadanie</p>
+<p>Otwórz Postmana. Wywołaj GET na stronie</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://postman-echo.com/get?foo1=bar1&amp;foo2=bar2">https://postman-echo.com/get?foo1=bar1&amp;foo2=bar2</a></div>
+</div>
+</blockquote>
+<p>Wywołaj POST na tym samym adresie, zobacz jaki będzie wynik.</p>
+<p>Wywołaj POST na adresie :</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://postman-echo.com/post">https://postman-echo.com/post</a></div>
+</div>
+</blockquote>
+<p>Prześlij dane w postaci danych &quot;raw&quot; typu JSON w ciele zapytania. Porównaj wynik w przypadku gdy zmienisz typ na form-data.</p>
+<p>Wywołaj PUT na adresie :</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://postman-echo.com/put">https://postman-echo.com/put</a></div>
+</div>
+</blockquote>
+<p>Wywołaj GET na adresie :</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://postman-echo.com/response-headers?foo1=bar1&amp;foo2=bar2">https://postman-echo.com/response-headers?foo1=bar1&amp;foo2=bar2</a></div>
+</div>
+</blockquote>
+<p>Zobacz jak parametry są przekazywane w nagłówku odpowiedzi i gdzie je znaleźć.</p>
+<p>Wywołaj różne statusy odpowiedzi przez zapytanie GET na adresie :</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://postman-echo.com/status/500">https://postman-echo.com/status/500</a></div>
+</div>
+</blockquote>
+<section id="autoryzacja">
+<h5>Autoryzacja</h5>
+<p>Wielokrotnie zdarza się, że wywołania zapytań API wymagają autoryzacji użytkownika. Może to być tzw. basic authorization za pomocą użytkownika i hasła lub też autoryzacja za pomocą tokena dostępu.</p>
+<p>Zobacz jak zachowuje się zablokowany endpoint</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://postman-echo.com/basic-auth">https://postman-echo.com/basic-auth</a></div>
+</div>
+</blockquote>
+<p>Wpisz w polu Autorization dane dostępowe</p>
+<blockquote>
+<div class="line-block">
+<div class="line">Username: postman</div>
+</div>
+<div class="line-block">
+<div class="line">Password: password</div>
+</div>
+</blockquote>
+<p>Zobacz jakie pole zostało dodane do nagłówków. Czy same pole autorization z zaszyfrowanym użytkownikiem i hasłem wystarczy do autoryzacji ?</p>
+</section>
+<section id="swagger">
+<h5>Swagger</h5>
+<p><em>Swagger 2 is an open-source project used to describe and document RESTful APIs.</em></p>
+<p>Swagger jest biblioteką służącą do automatycznego generowania dokumentacji. Udostępnia bardzo proste i klarowny opis naszego API dla innych developerów, generuje się automatycznie z naszego kodu (oczywiście po dodaniu biblioteki do naszej aplikacji) oraz umożliwia testowanie naszych endpointów.</p>
+<p>Wejdź na:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://catfact.ninja/">https://catfact.ninja/</a></div>
+</div>
+</blockquote>
+<p>I zobacz jak wygląda automatycznie wygenerowana dokumentacja API.</p>
+</section>
+</section>
+</section>
+<section id="spring">
+<h3>Spring</h3>
+<p>Spring jest Frameworkiem aplikacji pozwalającym na tworzenie aplikacji w języku Java w oparciu o paradygmat odwrócenia sterowania (ang. Inversion of Control, IoC).</p>
+<p>Odwrócenie sterowania pozwala na modyfikację zachowania (ustawień) programu w czasie uruchomienia, na co nie pozwala tradycyjne podejście. Kontener aplikacji (framework) jest odpowiedzialny za zarządzanie cyklem życia obiektów: tworzenie, inicjalizację, konfigurację i zarządzanie zależnościami między obiektami.</p>
+<p>Obiekty stworzone przez kontener nazywane są obiektami zarządzanymi lub <strong>beanami</strong>. Ustawienia frameworka Spring mogą być zdefiniowane w pliku properties,XML (Extensible Markup Language), YAML lub za pomocą adnotacji w kodzie. W naszym przypadku skupimy się na mechanizmie adnotacji i pliku YAML.</p>
+<p>Obiekty są przekazywane do klas poprzez mechanizm <em>dependency lookup</em> lub <em>dependency injection</em>. Dependency lookup polega na tym, że program zgłasza się do kontenera z prośbą o udostępnienie zadanego zasobu (na podstawie nazwy lub typu). Dependency injection polega na tym, że kontener automatycznie wstrzykuje implementację obiektu do innego obiektu poprzez konstruktor, pole lub metodę.</p>
+<section id="konfiguracja-plik-properties">
+<h4>Konfiguracja plik properties</h4>
+<p>Domyślnie Spring Boot ma dostęp do konfiguracji ustawionych w pliku application.properties, który używa formatu klucz-wartość:</p>
+<pre class="code xml literal-block"><code>#---<span class="whitespace">
+</span>spring.datasource.url=jdbc:h2:dev<span class="whitespace">
+</span>spring.datasource.username=SA<span class="whitespace">
+</span>spring.datasource.password=password</code></pre>
+<p>W plikach tego typu każda linia jest pojedynczą konfiguracją, więc w przypadku danych hierarchicznych, zmuszeni jesteśmy do korzystania z tych samych przedrostków w każdej linii. W tym powyższym przykładzie każdy klucz należy do sekcji <em>spring.datasource</em>.</p>
+<p>W ramach naszych wartości możemy używać symboli ze składnią ${}, aby odnosić się do zawartości innych kluczy, właściwości systemu lub zmiennych środowiskowych:</p>
+<pre class="code xml literal-block"><code>app.name=MyApp<span class="whitespace">
+</span>app.description=${app.name}<span class="whitespace"> </span>is<span class="whitespace"> </span>a<span class="whitespace"> </span>Spring<span class="whitespace"> </span>Boot<span class="whitespace"> </span>application</code></pre>
+</section>
+<section id="konfiuracja-plik-yaml">
+<h4>Konfiuracja plik Yaml</h4>
+<p>Yaml to specjalny format zapisu danych strukturalnych, podobny w logice do formatu json. Poszczególne elementy struktury danych są oddzielane znakami nowej linii, a ich hierarchia ustalana jest na podstawie wcięcia linii. Język wprowadza trzy podstawowe struktury danych, które mogą być wkomponowane w dokument: listy, słowniki i typy proste. Obsługuje również referencje, które eliminują konieczność redundancji danych.</p>
+<p>Przykład:</p>
+<pre class="code yaml literal-block"><code><span class="name namespace">---</span><span class="whitespace">
+</span><span class="name tag">tekst</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string">&quot;pierwsze</span><span class="name variable"> </span><span class="literal string">zdanie&quot;</span><span class="whitespace">
+</span><span class="name tag">drugi</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string">&quot;drugie</span><span class="name variable"> </span><span class="literal string">zdanie&quot;</span><span class="whitespace">
+</span><span class="name tag">pi</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal scalar plain">3.14159</span><span class="whitespace">
+</span><span class="name tag">boże-narodzenie</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal scalar plain">true</span><span class="whitespace">
+</span><span class="name tag">jajka</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal scalar plain">3</span><span class="whitespace">
+</span><span class="name tag">ptaki</span><span class="punctuation">:</span><span class="whitespace">
+        </span><span class="punctuation indicator">-</span><span class="whitespace"> </span><span class="literal scalar plain">czyżyk</span><span class="whitespace">
+        </span><span class="punctuation indicator">-</span><span class="whitespace"> </span><span class="literal scalar plain">kos</span><span class="whitespace">
+        </span><span class="punctuation indicator">-</span><span class="whitespace"> </span><span class="literal scalar plain">gołąb</span><span class="whitespace">
+        </span><span class="punctuation indicator">-</span><span class="whitespace"> </span><span class="literal scalar plain">wróbel</span><span class="whitespace">
+</span><span class="name tag">swieta</span><span class="punctuation">:</span><span class="whitespace">
+        </span><span class="name tag">barszcz</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal scalar plain">litr</span><span class="whitespace">
+        </span><span class="name tag">pierniczki</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal scalar plain">3</span><span class="whitespace">
+        </span><span class="name tag">czekoladki</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal scalar plain">null</span><span class="whitespace">
+        </span><span class="name tag">prezenty</span><span class="punctuation">:</span><span class="whitespace">
+                </span><span class="name tag">zabawki</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal scalar plain">1</span><span class="whitespace">
+                </span><span class="name tag">schowek</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string">&quot;pod</span><span class="name variable"> </span><span class="literal string">choinką&quot;</span><span class="whitespace">
+        </span><span class="name tag">światełka</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal scalar plain">dwa</span></code></pre>
+<p>Plik zaczyna się od trzech myślników. Te myślniki wskazują początek nowego dokumentu YAML. YAML pozwala, podobnie jak properties na definiowanie wielu konfiuracji w obrębie jednego pliku (elementy po trzech myślinikach są traktowane tak jakby były zapisane w osobnym pliku). Następnie widzimy konstrukcję, która tworzy większość typowego dokumentu YAML: parę klucz-wartość. Tekst to klucz, który wskazuje na wartość typu string: &quot;pierwsze zdanie&quot;. YAML obsługuje więcej niż tylko Stringi. Plik zaczyna się od sześciu par klucz-wartość. Mają cztery różne typy danych. Tekst i drugi to Stringi. Pi to liczba zmiennoprzecinkowa. boże-narodzenie to wartość logiczna. Jajka to liczba całkowita. Siódmy element to tablica. Lista ptaki ma cztery elementy, każdy oznaczony kreską otwierającą. Elementy w liście poprzedzone są wcięciem. Wcięcie to sposób, w jaki YAML oznacza zagnieżdżanie. Liczba spacji może się różnić w zależności od pliku, ale tabulatory nie są dozwolone. Obiekt swieta, zawiera pięć elementów, z których każdy ma wcięcie. Możemy traktować swieta jako słownik, który zawiera dwa ciągi znaków, dwie liczby całkowite i inny słownik. YAML obsługuje zagnieżdżanie par klucz-wartość i mieszanie typów. Ciągi znaków nie otoczone cudzysłowem są rozpoznawane jako stringi lub liczby w zależności od ich postaci.</p>
+<p>Przykład spring:</p>
+<pre class="code yaml literal-block"><code><span class="name tag">spring</span><span class="punctuation">:</span><span class="whitespace">
+        </span><span class="name tag">datasource</span><span class="punctuation">:</span><span class="whitespace">
+                </span><span class="name tag">password</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal scalar plain">password</span><span class="whitespace">
+                </span><span class="name tag">url</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal scalar plain">jdbc:h2:dev</span><span class="whitespace">
+                </span><span class="name tag">username</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal scalar plain">SA</span></code></pre>
+<p>W ramach naszych wartości możemy używać symboli ze składnią ${}, aby odnosić się do zawartości innych kluczy, właściwości systemu lub zmiennych środowiskowych:</p>
+<p>Przykład spring:</p>
+<pre class="code yaml literal-block"><code><span class="name tag">variable</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal scalar plain">${PATH}</span><span class="whitespace">
+</span><span class="name tag">name</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal scalar plain">test-YAML</span><span class="whitespace">
+</span><span class="name tag">environment</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal scalar plain">testing</span><span class="whitespace">
+</span><span class="name tag">enabled</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal scalar plain">false</span><span class="whitespace">
+</span><span class="name tag">servers</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal scalar plain">www.abc.test.com, www.xyz.test.com</span></code></pre>
+<p>Uwaga! Spring nie radzi sobie dobrze z listami obiektów w Yaml oznaczanych myślnikami, dlatego stosujemy notacje z przecinkami.</p>
+<p>Import wartości zmiennej w kodzie programu dla zmiennych zdefiniowanych w pliku Yaml:</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;Value</span><span class="punctuation">(</span><span class="literal string">&quot;${variable}&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name">variable</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="name decorator">&#64;Value</span><span class="punctuation">(</span><span class="literal string">&quot;${name}&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name">name</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="name decorator">&#64;Value</span><span class="punctuation">(</span><span class="literal string">&quot;${environment}&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name">environment</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="name decorator">&#64;Value</span><span class="punctuation">(</span><span class="literal string">&quot;${enabled}&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="keyword type">boolean</span><span class="whitespace"> </span><span class="name">enabled</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="name decorator">&#64;Value</span><span class="punctuation">(</span><span class="literal string">&quot;${servers}&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">String</span><span class="operator">[]</span><span class="whitespace"> </span><span class="name">servers</span><span class="punctuation">;</span></code></pre>
+</section>
+<section id="inversion-of-control">
+<h4>Inversion of Control</h4>
+<p>Paradygmat (czasami rozważany też jako wzorzec projektowy lub wzorzec architektury) polegający na przeniesieniu funkcji sterowania wykonywaniem programu do używanego frameworku. Framework w odpowiednich momentach wywołuje kod programu stworzony przez programistę w ramach implementacji danej aplikacji. Odbiega to od popularnej metody programowania, gdzie programista tworzy kod aplikacji, który steruje jej zachowaniem. Następnie używa we własnym modelu sterowania bibliotek dostarczonych przez framework.</p>
+<p>Zaletami tego podejścia są:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">rozdział implementacji metod od implementacji konkretnych interfejsów</div>
+<div class="line">łatwość w podmianie implementacji danych klas</div>
+<div class="line">większa modułowość programu</div>
+<div class="line">większa łatwość w testowaniu programu poprzez rozdzielenie komponentów i możliwość mockowania zależności</div>
+</div>
+</blockquote>
+</section>
+<section id="dependency-injection">
+<h4>Dependency injection</h4>
+<p>Wstrzykiwanie zależności (ang. Dependency Injection, DI) – wzorzec projektowy i wzorzec architektury oprogramowania polegający na usuwaniu bezpośrednich zależności pomiędzy komponentami na rzecz architektury typu plug-in. Polega na przekazywaniu gotowych, utworzonych instancji obiektów udostępniających swoje metody i właściwości obiektom, które z nich korzystają (np. jako parametry konstruktora). Stanowi alternatywę do podejścia, gdzie obiekty tworzą instancję obiektów, z których korzystają np. we własnym konstruktorze</p>
+<p>Oto jak tworzyliśmy obiekty w tradycyjnym podejściu:</p>
+<pre class="code java literal-block"><code><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">Store</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">Item</span><span class="whitespace"> </span><span class="name">item</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name function">Store</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">item</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">ItemImplementation</span><span class="punctuation">();</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>W podanym wyżej przykładzie związujemy z obiektem Store szczególną implementację interfejsu Item.</p>
+<p>W przypadku DI, możemy przekazać do obiektu Store dowolną implementację Item, poprzez sparametryzowanie tworzenie obiektu:</p>
+<pre class="code java literal-block"><code><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">Store</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">Item</span><span class="whitespace"> </span><span class="name">item</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="comment single">// Someone will do this part for us</span><span class="whitespace">
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name function">Store</span><span class="punctuation">(</span><span class="name">Item</span><span class="whitespace"> </span><span class="name">item</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">item</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">item</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+</section>
+<section id="bean">
+<h4>Bean</h4>
+<p>Adnotacja na klasie: <strong>&#64;Configuration</strong> wskazuje, że dana klasa służy Springowi jako klasa definiująca Beany w projekcie. Adnotacja &#64;Bean nad metodą mówi że dana metoda zwraca obiekt, który ma być traktowany (zarejestrowany) jako Bean przez framework w kontekście Springa. Najprostszy przykład klasy z adnotacją <strong>&#64;Configuration</strong> znajdziemy poniżej:</p>
+<pre class="code java literal-block"><code><span class="whitespace">    </span><span class="name decorator">&#64;SpringBootConfiguration</span><span class="whitespace">
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">HelloWorldConfig</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+            </span><span class="name decorator">&#64;Bean</span><span class="whitespace">
+            </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">HelloWorld</span><span class="whitespace"> </span><span class="name function">helloWorld</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+                    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">HelloWorld</span><span class="punctuation">();</span><span class="whitespace">
+            </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Domyślnie Beany są singletonami, jeżeli chciałbyś to zmienić i wymusić inny typ zachowania, spójrz na dokumentację</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://docs.spring.io/spring/docs/2.5.x/reference/beans.html#beans-factory-scopes">https://docs.spring.io/spring/docs/2.5.x/reference/beans.html#beans-factory-scopes</a></div>
+</div>
+</blockquote>
+</section>
+<section id="autowired">
+<h4>Autowired</h4>
+<p>W środowisku Spring kontener IoC jest reprezentowany przez interfejs <strong>ConfigurableApplicationContext</strong>. Kontener Spring jest odpowiedzialny za tworzenie instancji, konfigurowanie i składanie obiektów znanych jako <strong>beans</strong>, a także zarządzanie ich cyklem życia.</p>
+<p>Aby zmontować komponenty bean, kontener używa metadanych konfiguracyjnych, które mogą mieć postać <strong>konfiguracji XML</strong> lub <strong>adnotacji</strong>. My będziemy używać adnotacji.</p>
+<p>W przypadku DI dla pól klasy możemy wstrzyknąć zależności zaznaczając je adnotacją <strong>&#64;Autowired</strong>:</p>
+<p class="badimportant">&#64;Autowired will tell Spring to search for a Spring bean which implements the required interface and place it automatically into the variable.</p>
+<pre class="code java literal-block"><code><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">Store</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Autowired</span><span class="whitespace">
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">Item</span><span class="whitespace"> </span><span class="name">item</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="punctuation">}</span></code></pre>
+<p>Przy tworzeniu obiektu typu Store, nie wywołujemy konstruktora ani żadnych metod ustawiających wartość pola Item, kontener sam, korzystając z mechanizmu refleksji, wstrzyknie nam implementację beana Item do klasy Store.</p>
+<p class="tag">Zadanie</p>
+<p>Otwórz kod znajdujący się na branchu <strong>SpringStart</strong>. Zobacz jakie elementy można znaleźć w kodzie aplikacji.</p>
+<p>Dodaj do projektu nową klasę Printer</p>
+<pre class="code java literal-block"><code><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">org.springframework.beans.factory.annotation.Autowired</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">Printer</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Autowired</span><span class="whitespace">
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">HelloWorld</span><span class="whitespace"> </span><span class="name">helloWorld</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name function">Printer</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">sendMessage</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">helloWorld</span><span class="punctuation">.</span><span class="name attribute">getMessage</span><span class="punctuation">();</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p class="tag">Zadanie</p>
+<p>Dodaj do konfiguracji wpis o Printer jako bean, oraz pobierz w głównej klasie jego implementację z kontekstu. Sprawdź, czy zmiany w ustawieniu helloWorld.setMessage() wpłyną na wynik wywołania metory print() obiektu typu Printer.</p>
+</section>
+<section id="component-service">
+<h4>Component / Service</h4>
+<p>Dzięki adnotacjom <strong>&#64;Component</strong> (i <strong>&#64;Service</strong>) możemy oznaczać klasę Javovą jako <strong>bean</strong>, tak by mechanizm skanujący komponenty mógł ją pobrać i przenieść do kontekstu aplikacji.</p>
+<p>Kontekst Springa musi wiedzieć, gdzie szukać Beanów, w przeciwnym razie ich nie znajdzie, dodaj pobranie beana serwis do głównej klasy:</p>
+<pre class="code java literal-block"><code><span class="name">Service</span><span class="whitespace"> </span><span class="name">service</span><span class="whitespace">  </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">Service</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="name">context</span><span class="punctuation">.</span><span class="name attribute">getBean</span><span class="punctuation">(</span><span class="name">ServiceImpl</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="name">service</span><span class="punctuation">.</span><span class="name attribute">print</span><span class="punctuation">();</span></code></pre>
+<p>Spróbuj uruchomić kod i zobacz co się stało.</p>
+<p>Podczas tworzenia aplikacji Spring Boot, musisz powiedzieć Spring Framework, gdzie szukać komponentów Spring. Używanie funkcji &#64;ComponentScan jest jednym z ustawień konfiguracji Springa. Domyślnie skanowanie komponentów mówi Springowi, aby przyjrzał się danemu pakietowi i jego wszystkim podpakietom (jeśli chcesz określić inny pakiet, musisz ustawić dodatkowo parametr w adnotacji).</p>
+<p class="tag">Zadanie</p>
+<p>Dodaj <strong>&#64;ComponentScan</strong> do pliku konfiguracyjnego. Uruchom program ponownie.</p>
+<p>Uwaga! Autowire działa tylko dla klas tworzonych przez Spring, jeżeli w kodzie zdecydujemy się utworzyć dany obiekt przez new(), to w odpowiednie pola nie zostaną wstrzyknięte implementacje beanów.</p>
+<p><strong>Wykorzystano materiały z:</strong></p>
+<p><a class="reference external" href="https://www.itmagination.com/pl/booster/basic-testing-of-rest-api-using-postman">https://www.itmagination.com/pl/booster/basic-testing-of-rest-api-using-postman</a></p>
+<p><a class="reference external" href="https://mickl.net/2016/10/10/8-rzeczy-ktore-warto-wiedziec-projektujac-rest-owe-api/">https://mickl.net/2016/10/10/8-rzeczy-ktore-warto-wiedziec-projektujac-rest-owe-api/</a></p>
+<p><a class="reference external" href="http://www.moseleians.co.uk/wp-content/uploads/cmdm/9632/1422444257_api-restowe-whitepaper.pdf">http://www.moseleians.co.uk/wp-content/uploads/cmdm/9632/1422444257_api-restowe-whitepaper.pdf</a></p>
+<p><a class="reference external" href="https://kobietydokodu.pl/niezbednik-juniora-protokol-http/">https://kobietydokodu.pl/niezbednik-juniora-protokol-http/</a></p>
+<p><a class="reference external" href="http://threats.pl/bezpieczenstwo-aplikacji-internetowych/absolutne-podstawy">http://threats.pl/bezpieczenstwo-aplikacji-internetowych/absolutne-podstawy</a></p>
+<p><a class="reference external" href="http://adam.wroclaw.pl/2014/07/restful-api-jak-zrobic-je-dobrze/">http://adam.wroclaw.pl/2014/07/restful-api-jak-zrobic-je-dobrze/</a></p>
+<p><a class="reference external" href="https://github.com/callicoder/spring-boot-mysql-rest-api-tutorial">https://github.com/callicoder/spring-boot-mysql-rest-api-tutorial</a></p>
+<p><a class="reference external" href="https://www.journaldev.com/2461/spring-ioc-bean-example-tutorial">https://www.journaldev.com/2461/spring-ioc-bean-example-tutorial</a></p>
+<p><a class="reference external" href="https://www.baeldung.com/inversion-control-and-dependency-injection-in-spring">https://www.baeldung.com/inversion-control-and-dependency-injection-in-spring</a></p>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Spring_Framework">https://en.wikipedia.org/wiki/Spring_Framework</a></p>
+<p><a class="reference external" href="https://www.tutorialspoint.com/spring/spring_java_based_configuration.htm">https://www.tutorialspoint.com/spring/spring_java_based_configuration.htm</a></p>
+<p><a class="reference external" href="https://www.cloudbees.com/blog/yaml-tutorial-everything-you-need-get-started">https://www.cloudbees.com/blog/yaml-tutorial-everything-you-need-get-started</a></p>
+<p><a class="reference external" href="https://www.baeldung.com/spring-boot-yaml-vs-properties">https://www.baeldung.com/spring-boot-yaml-vs-properties</a></p>
+</section>
+</section>
+</section></body>
+</html>
+

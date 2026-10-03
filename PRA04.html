@@ -1,0 +1,270 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>PRA04.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="pracowania-programowania">
+<h2>Pracowania Programowania</h2>
+<section id="json-xml">
+<h3>JSON &amp; XML</h3>
+<p><em>Współautor części materiału : Tomasz Ziętkiewicz</em></p>
+<p class="important">Uwaga! Kod do tych zajęć znajduje się na gałęzi <strong>JsonAndXmlStart</strong> w repozytorium <a class="reference external" href="https://github.com/WitMar/PRA2025">https://github.com/WitMar/PRA2025</a> . Kod końcowy w gałęzi <strong>JsonAndXmlEnd</strong>.</p>
+<p>Jeżeli nie widzisz odpowiednich gałęzi na GitHubie wykonaj <strong>Ctr+T</strong>, a jak to nie pomoże to wybierz z menu <strong>Git-&gt;Fetch</strong>.</p>
+<section id="json">
+<h4>JSON</h4>
+<p>JSON (JavaScript Object Notation) <a class="reference external" href="http://www.json.org/">http://www.json.org/</a> to lekki, tekstowy format wymiany danych.</p>
+<p>Jest oparty na podzbiorze języka JavaScript.</p>
+<p>Powszechnie wykorzystywany do przechowywania i przekazywania ustrukturyzowanych danych w postaci tekstowej.</p>
+<p>Właściwości JSON-a:</p>
+<ul class="simple">
+<li><p>czytelny dla człowieka</p></li>
+<li><p>szeroko rozpowszechniony - biblioteki dla każdego języka (lista na <a class="reference external" href="http://www.json.org">http://www.json.org</a>)</p></li>
+</ul>
+<section id="przyklad-json">
+<h5>Przykład JSON</h5>
+<pre class="code json literal-block"><code><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name tag">&quot;artist&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string double">&quot;Pink Floyd&quot;</span><span class="punctuation">,</span><span class="whitespace">
+    </span><span class="name tag">&quot;title&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string double">&quot;Dark Side of the moon&quot;</span><span class="punctuation">,</span><span class="whitespace">
+    </span><span class="name tag">&quot;year&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal number integer">1973</span><span class="punctuation">,</span><span class="whitespace">
+    </span><span class="name tag">&quot;tracks&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="punctuation">[</span><span class="whitespace">
+        </span><span class="punctuation">{</span><span class="whitespace">
+            </span><span class="name tag">&quot;track#&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="whitespace">
+            </span><span class="name tag">&quot;title&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string double">&quot;Speak to Me/Breathe&quot;</span><span class="punctuation">,</span><span class="whitespace">
+            </span><span class="name tag">&quot;length&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string double">&quot;3:57&quot;</span><span class="punctuation">,</span><span class="whitespace">
+            </span><span class="name tag">&quot;music&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="punctuation">[</span><span class="literal string double">&quot;Mason&quot;</span><span class="punctuation">]</span><span class="whitespace">
+        </span><span class="punctuation">},</span><span class="whitespace">
+        </span><span class="punctuation">{</span><span class="whitespace">
+            </span><span class="name tag">&quot;track#&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal number integer">2</span><span class="punctuation">,</span><span class="whitespace">
+            </span><span class="name tag">&quot;title&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string double">&quot;On the run&quot;</span><span class="punctuation">,</span><span class="whitespace">
+            </span><span class="name tag">&quot;length&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string double">&quot;3:50&quot;</span><span class="punctuation">,</span><span class="whitespace">
+            </span><span class="name tag">&quot;music&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="punctuation">[</span><span class="literal string double">&quot;Waters&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string double">&quot;Gilmour&quot;</span><span class="punctuation">]</span><span class="whitespace">
+        </span><span class="punctuation">}</span><span class="whitespace">
+    </span><span class="punctuation">]</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Przykład z życia: <a class="reference external" href="http://www.poznan.pl/mim/plan/map_service.html?mtype=pub_transport&amp;co=stacje_rowerowe">API rowerów miejskich</a></p>
+</section>
+<section id="skladnia-json">
+<h5>Składnia JSON</h5>
+<p>Dwie struktury danych:</p>
+<ul class="simple">
+<li><p><strong>object</strong> (obiekt, słownik, mapa)
+zbiór par klucz-wartość</p></li>
+</ul>
+<pre class="code json literal-block"><code><span class="punctuation">{</span><span class="whitespace">
+</span><span class="name tag">&quot;title&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string double">&quot;Dark Side of the Moon&quot;</span><span class="punctuation">,</span><span class="whitespace">
+</span><span class="name tag">&quot;year&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal number integer">1973</span><span class="punctuation">,</span><span class="whitespace">
+</span><span class="name tag">&quot;tracks#&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal number integer">9</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<div style="text-align: center;">
+    <img src="object.gif" alt="My Image">
+</div><ul class="simple">
+<li><dl class="simple">
+<dt><strong>array</strong> (tablica, lista)</dt>
+<dd><p>uporządkowany zbiór wartości</p>
+</dd>
+</dl>
+</li>
+</ul>
+<pre class="code json literal-block"><code><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name tag">&quot;name&quot;</span><span class="punctuation">:</span><span class="literal string double">&quot;John&quot;</span><span class="punctuation">,</span><span class="whitespace">
+    </span><span class="name tag">&quot;age&quot;</span><span class="punctuation">:</span><span class="literal number integer">30</span><span class="punctuation">,</span><span class="whitespace">
+    </span><span class="name tag">&quot;cars&quot;</span><span class="punctuation">:[</span><span class="whitespace"> </span><span class="literal string double">&quot;Ford&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string double">&quot;BMW&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string double">&quot;Fiat&quot;</span><span class="whitespace"> </span><span class="punctuation">]</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<div style="text-align: center;">
+    <img src="array.gif" alt="My Image">
+</div><p>Siedem typów wartości:</p>
+<div style="text-align: center;">
+    <img src="value.gif" alt="My Image">
+</div><section id="komentarze">
+<h6>Komentarze</h6>
+<p>Do pliku JSON nie możemy dodawać komentarzy</p>
+</section>
+</section>
+</section>
+<section id="xml">
+<h4>XML</h4>
+<p>XML (Extensible Markup Language) - język znaczników (markup language),
+który podobnie jak JSON umożliwia serializację i wymianę strukturalnych danych
+w postaci tekstowej.</p>
+<section id="skladnia-xml">
+<h5>Składnia XML</h5>
+<p>W dokumencie XML możemy wydzielić <em>zawartość</em> (<em>content</em>) i <em>znaczniki</em> (<em>markup</em>).</p>
+<p>Znaczniki znajdują się między parami znaków &quot;&lt;&quot; i &quot;&gt;&quot; lub &quot;&amp;&quot; i &quot;;&quot;.</p>
+<p>Treść dokumentu to wszystkie znaki, które nie są znacznikami.</p>
+<section id="tagi">
+<h6>Tagi</h6>
+<ul class="simple">
+<li><p>tagi początku elementu:</p></li>
+</ul>
+<pre class="code xml literal-block"><code><span class="name tag">&lt;album&gt;</span></code></pre>
+<ul class="simple">
+<li><p>tagi końca elementu:</p></li>
+</ul>
+<pre class="code xml literal-block"><code><span class="name tag">&lt;/album&gt;</span></code></pre>
+<ul class="simple">
+<li><p>tagi puste (bez zawartości):</p></li>
+</ul>
+<pre class="code xml literal-block"><code><span class="name tag">&lt;album</span><span class="whitespace"> </span><span class="name tag">/&gt;</span></code></pre>
+</section>
+<section id="element">
+<h6>Element</h6>
+<p>Element rozpoczna się tagiem początku, kończy tagiem końca elementu, albo jest pustym tagiem.</p>
+<p>Pomiędzy tagami znajduje się zawartość elementu, którym może być albo zwykły tekst, albo zagnieżdżone elementy.</p>
+<p>Tagi początkowy i pusty mogą zawierać atrybuty, czyli pary klucz-wartość.</p>
+<p>Klucz podajemy jako text bez cudzysłowów, wartości zawsze w cudzysłowie.</p>
+<pre class="code xml literal-block"><code><span class="name tag">&lt;track</span><span class="whitespace"> </span><span class="name attribute">number=</span><span class="literal string">&quot;3&quot;</span><span class="whitespace"> </span><span class="name attribute">title=</span><span class="literal string">&quot;Time&quot;</span><span class="whitespace"> </span><span class="name attribute">length=</span><span class="literal string">&quot;3:57&quot;</span><span class="name tag">&gt;</span><span class="whitespace">
+    </span>Ticking<span class="whitespace"> </span>away<span class="whitespace"> </span>the<span class="whitespace"> </span>moments<span class="whitespace"> </span>that<span class="whitespace"> </span>make<span class="whitespace"> </span>up<span class="whitespace"> </span>a<span class="whitespace"> </span>dull<span class="whitespace"> </span>day<span class="whitespace">
+    </span>You<span class="whitespace"> </span>fritter<span class="whitespace"> </span>and<span class="whitespace"> </span>waste<span class="whitespace"> </span>the<span class="whitespace"> </span>hours<span class="whitespace"> </span>in<span class="whitespace"> </span>an<span class="whitespace"> </span>offhand<span class="whitespace"> </span>way<span class="whitespace">
+    </span>Kicking<span class="whitespace"> </span>around<span class="whitespace"> </span>on<span class="whitespace"> </span>a<span class="whitespace"> </span>piece<span class="whitespace"> </span>of<span class="whitespace"> </span>ground<span class="whitespace"> </span>in<span class="whitespace"> </span>your<span class="whitespace"> </span>home<span class="whitespace"> </span>town<span class="whitespace">
+    </span>Waiting<span class="whitespace"> </span>for<span class="whitespace"> </span>someone<span class="whitespace"> </span>or<span class="whitespace"> </span>something<span class="whitespace"> </span>to<span class="whitespace"> </span>show<span class="whitespace"> </span>you<span class="whitespace"> </span>the<span class="whitespace"> </span>way<span class="whitespace">
+</span><span class="name tag">&lt;/track&gt;</span></code></pre>
+</section>
+<section id="komentarze-1">
+<h6>Komentarze</h6>
+<p>Komentarze znajdują się między znacznikami &quot;&lt;!--&quot; i &quot;--&gt;&quot;.</p>
+</section>
+</section>
+<section id="przyklad-xml">
+<h5>Przykład XML</h5>
+<pre class="code xml literal-block"><code><span class="comment preproc">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><span class="whitespace">
+</span><span class="name tag">&lt;album</span><span class="whitespace"> </span><span class="name attribute">title=</span><span class="literal string">&quot;Dark Side of the Moon&quot;</span><span class="whitespace"> </span><span class="name attribute">year=</span><span class="literal string">&quot;1973&quot;</span><span class="name tag">&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;track</span><span class="whitespace"> </span><span class="name attribute">number=</span><span class="literal string">&quot;1&quot;</span><span class="whitespace"> </span><span class="name attribute">title=</span><span class="literal string">&quot;Speak to Me/Breathe&quot;</span><span class="name tag">&gt;</span><span class="whitespace">
+        </span>Breathe,<span class="whitespace"> </span>breathe<span class="whitespace"> </span>in<span class="whitespace"> </span>the<span class="whitespace"> </span>air<span class="whitespace">
+        </span>Don't<span class="whitespace"> </span>be<span class="whitespace"> </span>afraid<span class="whitespace"> </span>to<span class="whitespace"> </span>care<span class="whitespace">
+        </span>Leave<span class="whitespace"> </span>but<span class="whitespace"> </span>don't<span class="whitespace"> </span>leave<span class="whitespace"> </span>me<span class="whitespace">
+        </span>Look<span class="whitespace"> </span>around<span class="whitespace"> </span>and<span class="whitespace"> </span>choose<span class="whitespace"> </span>your<span class="whitespace"> </span>own<span class="whitespace"> </span>ground<span class="whitespace">
+        </span>For<span class="whitespace"> </span>long<span class="whitespace"> </span>you<span class="whitespace"> </span>live<span class="whitespace"> </span>and<span class="whitespace"> </span>high<span class="whitespace"> </span>you<span class="whitespace"> </span>fly<span class="whitespace">
+        </span>Smiles<span class="whitespace"> </span>you'll<span class="whitespace"> </span>give<span class="whitespace"> </span>and<span class="whitespace"> </span>tears<span class="whitespace"> </span>you'll<span class="whitespace"> </span>cry<span class="whitespace">
+        </span>And<span class="whitespace"> </span>all<span class="whitespace"> </span>you<span class="whitespace"> </span>touch<span class="whitespace"> </span>and<span class="whitespace"> </span>all<span class="whitespace"> </span>you<span class="whitespace"> </span>see<span class="whitespace">
+        </span>Is<span class="whitespace"> </span>all<span class="whitespace"> </span>your<span class="whitespace"> </span>life<span class="whitespace"> </span>will<span class="whitespace"> </span>ever<span class="whitespace"> </span>be<span class="whitespace">
+    </span><span class="name tag">&lt;/track&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;track</span><span class="whitespace"> </span><span class="name attribute">number=</span><span class="literal string">&quot;2&quot;</span><span class="whitespace"> </span><span class="name attribute">title=</span><span class="literal string">&quot;On the run&quot;</span><span class="whitespace"> </span><span class="name tag">/&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;track</span><span class="whitespace"> </span><span class="name attribute">number=</span><span class="literal string">&quot;3&quot;</span><span class="whitespace"> </span><span class="name attribute">title=</span><span class="literal string">&quot;Time&quot;</span><span class="whitespace"> </span><span class="name attribute">length=</span><span class="literal string">&quot;3:57&quot;</span><span class="name tag">&gt;</span><span class="whitespace">
+        </span>Ticking<span class="whitespace"> </span>away<span class="whitespace"> </span>the<span class="whitespace"> </span>moments<span class="whitespace"> </span>that<span class="whitespace"> </span>make<span class="whitespace"> </span>up<span class="whitespace"> </span>a<span class="whitespace"> </span>dull<span class="whitespace"> </span>day<span class="whitespace">
+        </span>You<span class="whitespace"> </span>fritter<span class="whitespace"> </span>and<span class="whitespace"> </span>waste<span class="whitespace"> </span>the<span class="whitespace"> </span>hours<span class="whitespace"> </span>in<span class="whitespace"> </span>an<span class="whitespace"> </span>offhand<span class="whitespace"> </span>way<span class="whitespace">
+        </span>Kicking<span class="whitespace"> </span>around<span class="whitespace"> </span>on<span class="whitespace"> </span>a<span class="whitespace"> </span>piece<span class="whitespace"> </span>of<span class="whitespace"> </span>ground<span class="whitespace"> </span>in<span class="whitespace"> </span>your<span class="whitespace"> </span>home<span class="whitespace"> </span>town<span class="whitespace">
+        </span>Waiting<span class="whitespace"> </span>for<span class="whitespace"> </span>someone<span class="whitespace"> </span>or<span class="whitespace"> </span>something<span class="whitespace"> </span>to<span class="whitespace"> </span>show<span class="whitespace"> </span>you<span class="whitespace"> </span>the<span class="whitespace"> </span>way<span class="whitespace">
+    </span><span class="name tag">&lt;/track&gt;</span><span class="whitespace">
+</span><span class="name tag">&lt;/album&gt;</span></code></pre>
+<p>Życiowy przykład: <a class="reference external" href="https://nextbike.net/maps/nextbike-official.xml?city=192">API rowerów miejskich, XML</a></p>
+</section>
+</section>
+<section id="serializacja-deserializacja">
+<h4>Serializacja / Deserializacja</h4>
+<p>Serializacja - proces polegający na przekształceniu struktur danych albo stanu obiektu do sekwencyjnej formy, która umożliwa zapisanie lub przesłanie tych danych i potencjalnie odtworzenie struktur danych lub obiektów w późniejszym czasie/przez inny proces/komputer (deserializację).</p>
+<p>Na przykład, serializacja może polegać na zapisie do pliku w formacie JSON obiektów wygenerowanych przez nasz program, w celu późniejszego wczytania tych obiektów z powrotem do programu w celu kontynuowania obliczeń.</p>
+<p>JSON i XML są przykładami formatów dobrze nadających się do serializacji danych w sposób czytelny dla człowieka.</p>
+<p>Dane można również serializować dane w postaci binarnej, niezrozumiałej dla człowieka.</p>
+<section id="jackson">
+<h5>Jackson</h5>
+<p><a class="reference external" href="https://github.com/FasterXML/jackson">Jackson</a> - zestaw narzędzi do przetwarzania danych dla Javy (&quot;suite of data-processing tools for Java&quot;).</p>
+<p>Głównym komponentem jest generator/parser JSON, pozwalający m.in. na deserializację/serializację do/z JSON z/do Javy.</p>
+<p>Posiada liczne moduły dodające obsługę innych formatów danych, m.in. XML, YAML czy CSV.</p>
+<p>Strona domowa projektu nie działa, ale projekt jest aktywnie rozwijany na <a class="reference external" href="https://github.com/FasterXML/jackson">GitHub</a>.</p>
+<p><a class="reference external" href="https://web.archive.org/web/20170801130759/http://wiki.fasterxml.com/JacksonHome">Zarchiwizowana wersja strony domowej</a>.</p>
+<p class="tag">Przygotowanie</p>
+<p>Zobacz jak tworzeni są pracownicy w kodzie oraz jak są serializowani oraz co jest wynikiem programu.
+Każdy z pracowników ma przypisany adres.</p>
+<p>Zobacz jak za pomocą om.fasterxml.jackson.databind.ObjectMapper zapisywany (serializowany) jest obiekt.</p>
+<p>Przykłady:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://www.mkyong.com/java/how-to-convert-java-object-to-from-json-jackson/">https://www.mkyong.com/java/how-to-convert-java-object-to-from-json-jackson/</a></div>
+</div>
+<div class="line-block">
+<div class="line"><a class="reference external" href="http://www.baeldung.com/jackson-object-mapper-tutorial">http://www.baeldung.com/jackson-object-mapper-tutorial</a></div>
+</div>
+</blockquote>
+<p class="tag">Zadanie 0: Uruchom serializację</p>
+<p>Uruchom kod, sprawdź jaka wersja biblioteki Jackson jest zainmportowana do pom.xml.</p>
+<p class="important">Wskazówka: Odpowiedni wpis znajdzie w dokumentacji w <a class="reference external" href="https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind">repozytorium maven</a>.</p>
+<p class="tag">Zadanie 1: Uruchom deserializację</p>
+<p>Odkomentuj linijkę</p>
+<pre class="code Java literal-block"><code><span class="comment single">//deserializeDemo(jsonMapper, &quot;json&quot;);</span></code></pre>
+<p>Uruchom kod, zobacz jaki błąd widzisz. Dodaj do katalou resources plik employee.json i wklej do niego zawartość pliku result.json, czy błąd zniknął? Co zobaczysz jeżeli plik będzie zapisany w niepoprawnym miejscu?</p>
+<p class="tag">Zadanie 2: Deserializacja z JSON</p>
+<p>Uruchom kod korzystając z debugera żeby sprawdzić jak zachowują się obiekty i jak zmienia się wynagrodzenie.</p>
+<p class="tag">Zadanie 3: Annotacje</p>
+<p>W języku Java dla zapisu nazwy pól klasy przyjmuje się konwencję notacji <a class="reference external" href="https://pl.wikipedia.org/wiki/CamelCase">lowerCamelCase</a>.</p>
+<p>W JSON nie ma przyjętego standardu notacji (<a class="reference external" href="https://stackoverflow.com/questions/5543490/json-naming-convention">dyskusja na StackOverflow</a>).</p>
+<p>Domyślnie pola w JSONie wygenerowanym przez Jackson/Gson mają <strong>takie same nazwy jak pola w klasie</strong>, którą serializujemy.</p>
+<p>Dodaj do modelowanych klas annotacje zmieniającą nazwę pola w JSON z salary na &quot;wynagrodzenie&quot; oraz adnotacje do ignorowania pola &quot;pesel&quot; przy serializacji.</p>
+<p class="important">Wskazówka: Skorzystaj z <a class="reference external" href="https://github.com/FasterXML/jackson-databind/#annotations-changing-property-names">dokumentacji</a>.</p>
+<p>Zobacz w jakiej kolejności serializowane są pola oraz odpowiedz na pytanie dlaczego wystąpił błąd deserializacji? Napraw błąd. Czy Pesel wczytuje się przy deserializacji?</p>
+<p class="tag">Zadanie 4: Deserializacja typów generycznych</p>
+<p>Spróbuj serializować listę pracowników (w postaci ArrayList) zobacz jak wygląda plik json zawierający listę kilku pracowników.
+Wczytaj tę listę do kolekcji ArrayList&lt;Employee&gt;.</p>
+<p>Następnie spróbuj zdeserializować otrzymany plik wynikowy.</p>
+<p class="important">Wskazówka: Skorzystaj z <a class="reference external" href="https://github.com/FasterXML/jackson-databind/#3-minute-tutorial-generic-collections-tree-model">3 minute tutorial</a>.</p>
+<section id="jackson-xml">
+<h6>Jackson XML</h6>
+<p>Jackson posiada <a class="reference external" href="https://github.com/FasterXML/jackson-dataformat-xml">moduł</a>
+rozszerzający go o obsługę formatu XML.
+Aby użyć XML zamiast JSON wystarczy zmienić &quot;ObjectMapper&quot; na XmlMapper&quot;:</p>
+<pre class="code Java literal-block"><code><span class="name">ObjectMapper</span><span class="whitespace"> </span><span class="name">xmlMapper</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">XmlMapper</span><span class="punctuation">();</span></code></pre>
+<p>Więcej szczegółów:</p>
+<blockquote>
+<p><a class="reference external" href="http://www.baeldung.com/jackson-xml-serialization-and-deserialization">http://www.baeldung.com/jackson-xml-serialization-and-deserialization</a></p>
+</blockquote>
+<p class="tag">Zadanie 5: XML</p>
+<p>Korzystając z istniejącej klasy JacksonSerialization zmodyfikuj ją, albo stwórz nową klasę tak, żeby umożliwić serializację / deserializację do/z formatu XML.
+Dodaj do katalogu main/resources pliki xml odpowiadające istniejącym już plikom json.</p>
+<p class="important">Wskazówka: Nie musisz tworzyć zawartości plików xml samodzielnie, możesz wygenerować je za pomocą odpowiednich metod.</p>
+<p class="important">Wskazówka: Pamiętaj żeby dodać bibliotekę do pom.xml. Odpowiedni wpis znajdziesz w <a class="reference external" href="https://github.com/FasterXML/jackson-dataformat-xml#maven-dependency">repozytorium GitHub modułu XML</a>. Skorzystaj z wersji <strong>2.17.1</strong>.</p>
+<p class="tag">Zadanie 6: Joda Time</p>
+<p>Dodaj do klasy Employee pole</p>
+<pre class="code java literal-block"><code><span class="name">DateTime</span><span class="whitespace"> </span><span class="name">birthDate</span></code></pre>
+<p>zawierające datę urodzenia pracownika.</p>
+<p class="important">Wskazówka: Możesz potrzebować modułu <a class="reference external" href="https://github.com/FasterXML/jackson-datatype-joda">jackson-datatype-joda</a>.</p>
+<p>Spróbuj dokonać serializacji a następnie deserializacji obiektu tak zmodyfikowanej klasy.</p>
+<p>Żeby wszystko zadziałało potrzebujesz zarejestrować w mapperze moduł Joda.</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://stackoverflow.com/questions/29523169/register-jodamodule-in-jax-rs-application">https://stackoverflow.com/questions/29523169/register-jodamodule-in-jax-rs-application</a></div>
+</div>
+</blockquote>
+<p>Zobacz jak teraz serializuje się plik.</p>
+<p>StackOverflow powie Ci, że brakuje Ci adnotacji względem tego jak formatowana powinna być data.
+Dodaj nad polem daty adnotacje</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;JsonFormat</span><span class="punctuation">(</span><span class="name">shape</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">JsonFormat</span><span class="punctuation">.</span><span class="name attribute">Shape</span><span class="punctuation">.</span><span class="name attribute">STRING</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">pattern</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;yyyy-MM-dd HH:mm:ss.SSSZ&quot;</span><span class="punctuation">)</span></code></pre>
+<p class="tag">Zadanie 7: rekurencyjne odwołania</p>
+<p>Zauważ, że w JSONie wypisywane są całe obiekty wraz z zależnościami. Co stałoby się gdyby pracownik X miał podwładnego Y którego podwładnym byłby znów X? Otrzymalibyśmy nieskończoną rekurencję i błąd serializacji. Żeby tego uniknąć możemy zastosować adnotację:</p>
+<p>Odkomentuj linie w ModeObjectCreator.java</p>
+<blockquote>
+<pre class="code java literal-block"><code><span class="name">emp2</span><span class="punctuation">.</span><span class="name attribute">getManagers</span><span class="punctuation">().</span><span class="name attribute">add</span><span class="punctuation">(</span><span class="name">emp</span><span class="punctuation">);</span></code></pre>
+</blockquote>
+<p>i dodaj:</p>
+<blockquote>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;JsonIdentityInfo</span><span class="punctuation">(</span><span class="name">generator</span><span class="operator">=</span><span class="name">ObjectIdGenerators</span><span class="punctuation">.</span><span class="name attribute">IntSequenceGenerator</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">,</span><span class="whitespace">
+        </span><span class="name">property</span><span class="operator">=</span><span class="literal string">&quot;refId&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">scope</span><span class="operator">=</span><span class="name">Employee</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">Employee</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="punctuation">...</span><span class="whitespace"> </span><span class="punctuation">}</span></code></pre>
+</blockquote>
+<p>Która spowoduje, że obiekty wypisywane będą tylko raz, a przy wielokrotnych odwołaniach zostanie zastosowane Id jako referencja.</p>
+<p>Więcej na ten temat:</p>
+<p><a class="reference external" href="http://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion">http://www.baeldung.com/jackson-bidirectional-relationships-and-infinite-recursion</a></p>
+</section>
+</section>
+</section>
+<section id="generowanie-klas-z-json">
+<h4>Generowanie klas z JSON</h4>
+<p>Istnieje wiele generatorów online zamieniających JSON na klasy modelu w Java.</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://json2csharp.com/code-converters/json-to-pojo">https://json2csharp.com/code-converters/json-to-pojo</a></div>
+</div>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://www.site24x7.com/tools/json-to-java.html">https://www.site24x7.com/tools/json-to-java.html</a></div>
+</div>
+</blockquote>
+</section>
+</section>
+</section></body>
+</html>
+

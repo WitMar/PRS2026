@@ -1,0 +1,585 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>PRA03.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="pracownia-programowania">
+<h2>Pracownia Programowania</h2>
+<p class="important">Uwaga! Kod do zajęć znajduje się na gałęzi <strong>StreamsClassesStart</strong> w repozytorium <a class="reference external" href="https://github.com/WitMar/PRA2025">https://github.com/WitMar/PRA2025</a> . Kod końcowy w gałęzi <strong>StreamsClassesEnd</strong>.</p>
+<p>Jeżeli nie widzisz odpowiednich gałęzi na GitHubie wykonaj <strong>Ctr+T</strong>, a jak to nie pomoże to wybierz z menu <strong>Git-&gt;Fetch</strong>.</p>
+<section id="interfejsy-w-javie">
+<h3>Interfejsy w Javie</h3>
+<p>Interfejs w Javie to zbiór abstrakcyjnych metod, które określają, jakie operacje musi implementować klasa, ale nie zawierają ich implementacji (do Javy 8). Interfejsy pozwalają na definiowanie kontraktów, które klasy muszą spełniać, co ułatwia programowanie obiektowe oraz zapewnia elastyczność i wielokrotne dziedziczenie (ponieważ klasa może implementować wiele interfejsów).</p>
+<p>Od Javy 8 interfejsy mogą zawierać również metody domyślne (<em>default methods</em>) i statyczne (<em>static methods</em>), które mają implementację.</p>
+<section id="przyklad-interfejsu-w-javie">
+<h4>Przykład interfejsu w Javie</h4>
+<ol class="arabic simple">
+<li><p>Definiowanie interfejsu:</p></li>
+</ol>
+<pre class="code java highlight literal-block"><code><span class="keyword declaration">interface</span> <span class="name class">Zwierze</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">dajGlos</span><span class="punctuation">();</span><span class="whitespace"> </span><span class="comment single">// Metoda abstrakcyjna (brak implementacji)</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<ol class="arabic simple" start="2">
+<li><p>Implementacja interfejsu w klasie:</p></li>
+</ol>
+<pre class="code java highlight literal-block"><code><span class="keyword declaration">class</span> <span class="name class">Pies</span><span class="whitespace"> </span><span class="keyword declaration">implements</span><span class="whitespace"> </span><span class="name">Zwierze</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name decorator">&#64;Override</span><span class="whitespace">
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">dajGlos</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="literal string">&quot;Hau Hau!&quot;</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<ol class="arabic simple" start="3">
+<li><p>Implementacja interfejsu w innej klasie:</p></li>
+</ol>
+<pre class="code java highlight literal-block"><code><span class="keyword declaration">class</span> <span class="name class">Kot</span><span class="whitespace"> </span><span class="keyword declaration">implements</span><span class="whitespace"> </span><span class="name">Zwierze</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name decorator">&#64;Override</span><span class="whitespace">
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">dajGlos</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="literal string">&quot;Miau Miau!&quot;</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<ol class="arabic simple" start="4">
+<li><p>Użycie interfejsu:</p></li>
+</ol>
+<pre class="code java highlight literal-block"><code><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">Main</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">static</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">main</span><span class="punctuation">(</span><span class="name">String</span><span class="operator">[]</span><span class="whitespace"> </span><span class="name">args</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">Zwierze</span><span class="whitespace"> </span><span class="name">pies</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">Pies</span><span class="punctuation">();</span><span class="whitespace">
+        </span><span class="name">Zwierze</span><span class="whitespace"> </span><span class="name">kot</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">Kot</span><span class="punctuation">();</span><span class="whitespace">
+
+        </span><span class="name">pies</span><span class="punctuation">.</span><span class="name attribute">dajGlos</span><span class="punctuation">();</span><span class="whitespace"> </span><span class="comment single">// Wywoła &quot;Hau Hau!&quot;</span><span class="whitespace">
+        </span><span class="name">kot</span><span class="punctuation">.</span><span class="name attribute">dajGlos</span><span class="punctuation">();</span><span class="whitespace">  </span><span class="comment single">// Wywoła &quot;Miau Miau!&quot;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+</section>
+<section id="podsumowanie">
+<h4>Podsumowanie</h4>
+<ul class="simple">
+<li><p>Interfejsy definiują kontrakt dla klas.</p></li>
+<li><p>Klasa może implementować wiele interfejsów (co nie jest możliwe w przypadku dziedziczenia klas).</p></li>
+<li><p>Od Javy 8 interfejsy mogą zawierać metody domyślne i statyczne z implementacją.</p></li>
+<li><p>Pozwalają na luźniejsze powiązania między komponentami w programowaniu obiektowym.</p></li>
+</ul>
+</section>
+</section>
+<section id="kolekcje">
+<h3>Kolekcje</h3>
+<p>Kolekcje w Java:</p>
+<p class="center"><img alt="col" src="coll.png" /></p>
+<p class="center"><img alt="map" src="map.png" /></p>
+<p>Przykłady:</p>
+<pre class="code java highlight literal-block"><code><span class="name">List</span><span class="operator">&lt;</span><span class="name">Integer</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">list</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">ArrayList</span><span class="operator">&lt;&gt;</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="name">Set</span><span class="operator">&lt;</span><span class="name">Integer</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">list</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">HashSet</span><span class="operator">&lt;&gt;</span><span class="punctuation">();</span></code></pre>
+<p>Interfejs mówi nam, że operujemy na obiekcie Listy ze wszystkimi jej możliwościami natomiast prawa strona mówi nam z jakiej implementacji będziemy korzystać (np. dla ArrayList wstawianie elementu na środku listy będzie szybkie, natomiast dla LinkedList wydajniejsza będzie operacja usuwania elementu z listy).</p>
+<section id="mapy">
+<h4>Mapy</h4>
+<p>Mapy to struktury danych opartych na relacji klucz-wartość, w niektórych językach struktura ta jest nazywana słownikiem. Najpopularniejszą implementacją Mapy jak HashMapa oparta na funkcji skrótu mapującej klucz na miejsce w pamięci.</p>
+<p>HashMap nie daje żadnej gwarancji wzlędem kolejności elementów na mapie. Oznacza to, że nie możemy przyjąć żadnej kolejności podczas iteracji po kluczach czy wartościach hash mapy:</p>
+<pre class="code java highlight literal-block"><code><span class="name decorator">&#64;Test</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">whenInsertObjectsHashMap_thenRandomOrder</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">Map</span><span class="operator">&lt;</span><span class="name">Integer</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">String</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">hashmap</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">HashMap</span><span class="operator">&lt;&gt;</span><span class="punctuation">();</span><span class="whitespace">
+        </span><span class="name">hashmap</span><span class="punctuation">.</span><span class="name attribute">put</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;TreeMap&quot;</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="name">hashmap</span><span class="punctuation">.</span><span class="name attribute">put</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;vs&quot;</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="name">hashmap</span><span class="punctuation">.</span><span class="name attribute">put</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;HashMap&quot;</span><span class="punctuation">);</span><span class="whitespace">
+
+        </span><span class="name">assertThat</span><span class="punctuation">(</span><span class="name">hashmap</span><span class="punctuation">.</span><span class="name attribute">keySet</span><span class="punctuation">(),</span><span class="whitespace"> </span><span class="name">containsInAnyOrder</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number integer">2</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number integer">3</span><span class="punctuation">));</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Elementy w TreeMap są sortowane zgodnie z ich naturalną kolejnością.</p>
+</section>
+</section>
+<section id="fluent-api">
+<h3>Fluent API</h3>
+<p>Termin &quot;Fluent Interface&quot; został wymyślony przez Martina Fowlera i Erica Evansa. Fluent API oznacza zbudowanie API w taki sposób, aby spełniało następujące kryteria:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">* Programista może bardzo łatwo zrozumieć interfejs API.</div>
+<div class="line">* Interfejs API może wykonać szereg działań na raz (w Javie możemy to zrobić za pomocą szeregu wywołań metod (łańcuchy metod)).</div>
+<div class="line">* Nazwa każdej metody powinna być związana z domeną, w której operuje.</div>
+<div class="line">* Interfejs API powinien być wystarczająco sugestywny, tak by wskazać użytkownikom interfejsu API, co robić dalej i jakie możliwe operacje mogą podjąć użytkownicy w danym momencie.</div>
+</div>
+</blockquote>
+<p>Najczęstsze zastosowanie to tworzenie tzw. <strong>The Fluent Interface builder</strong> dobra praktyka mówi, żeby używać go, gdy konstruktor ma więcej niż cztery lub pięć parametrów, tworzymy wtedy specjalną klasę konstruktora, która pomaga w tworzeniu obiektów.</p>
+<p>Główną ideą jest by zamiast:</p>
+<pre class="code java highlight literal-block"><code><span class="name">Person</span><span class="punctuation">(</span><span class="name">String</span><span class="whitespace"> </span><span class="name">name</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">Title</span><span class="whitespace"> </span><span class="name">title</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">name</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">name</span><span class="punctuation">;</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">title</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">title</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name">Person</span><span class="whitespace"> </span><span class="name">adam</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">Person</span><span class="punctuation">(</span><span class="literal string">&quot;Adam Z.&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">Title</span><span class="punctuation">.</span><span class="name attribute">PROF</span><span class="punctuation">);</span></code></pre>
+<p>użyć łatwiejszej w analizie fasady otaczającej konstruktor w formie tzw. <strong>buildera</strong>:</p>
+<pre class="code java highlight literal-block"><code><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">PersonBuilderBuilder</span><span class="whitespace"> </span><span class="keyword declaration">implements</span><span class="whitespace"> </span><span class="name">IPersonBuilder</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+  </span><span class="name">Title</span><span class="whitespace"> </span><span class="name">title</span><span class="punctuation">;</span><span class="whitespace">
+  </span><span class="name">String</span><span class="whitespace"> </span><span class="name">name</span><span class="punctuation">;</span><span class="whitespace">
+
+  </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">Person</span><span class="whitespace"> </span><span class="name function">build</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+      </span><span class="name">Person</span><span class="whitespace"> </span><span class="name">person</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">Person</span><span class="punctuation">(</span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">name</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">title</span><span class="punctuation">);</span><span class="whitespace">
+      </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">person</span><span class="punctuation">;</span><span class="whitespace">
+  </span><span class="punctuation">}</span><span class="whitespace">
+
+  </span><span class="name decorator">&#64;Override</span><span class="whitespace">
+  </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">IPersonBuilder</span><span class="whitespace"> </span><span class="name function">withName</span><span class="punctuation">(</span><span class="name">String</span><span class="whitespace"> </span><span class="name">name</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+      </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">name</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">name</span><span class="punctuation">;</span><span class="whitespace">
+      </span><span class="keyword">return</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">;</span><span class="whitespace">
+  </span><span class="punctuation">}</span><span class="whitespace">
+
+  </span><span class="name decorator">&#64;Override</span><span class="whitespace">
+  </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">IPersonBuilder</span><span class="whitespace"> </span><span class="name function">withTitle</span><span class="punctuation">(</span><span class="name">Title</span><span class="whitespace"> </span><span class="name">title</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+      </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">title</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">title</span><span class="punctuation">;</span><span class="whitespace">
+      </span><span class="keyword">return</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">;</span><span class="whitespace">
+  </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+  </span><span class="name">PersonBuilderBuilder</span><span class="whitespace"> </span><span class="name">personBuilder</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">PersonBuilderBuilder</span><span class="punctuation">();</span><span class="whitespace">
+  </span><span class="name">Person</span><span class="whitespace"> </span><span class="name">person</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">personBuilder</span><span class="punctuation">.</span><span class="name attribute">withName</span><span class="punctuation">(</span><span class="literal string">&quot;Marcin Witkowski&quot;</span><span class="punctuation">)</span><span class="whitespace">
+          </span><span class="punctuation">.</span><span class="name attribute">withTitle</span><span class="punctuation">(</span><span class="name">Title</span><span class="punctuation">.</span><span class="name attribute">DR</span><span class="punctuation">)</span><span class="whitespace">
+          </span><span class="punctuation">.</span><span class="name attribute">build</span><span class="punctuation">();</span></code></pre>
+<p>Co znacznie ułatwia odczytanie i zrozumienie kodu.</p>
+<p>W powyższym przykładzie używamy również interfejsów, które w ogólności nie są konieczne do stosowania (zadane metody możemy zaimplementować także bez występowania interfejsu), popatrz także na przykład:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="http://www.javabyexamples.com/builder-vs-fluent-interface/">http://www.javabyexamples.com/builder-vs-fluent-interface/</a></div>
+</div>
+</blockquote>
+<p>Ten sam pomysł można zastosować nie tylko w przypadku budowy nowego obiektu, ale także do zarządzania obiektami i ich metodami.</p>
+<p>Kluczowym elementem tej techniki jest to, że implementacja <strong>fluent API</strong> wymaga przekazania tego samego obiektu jako wyniku funkcji (<strong>return this</strong>).</p>
+<p>Ponownie w przykładzie używamy interfejsu, który w ogólności nie jest konieczny:</p>
+<pre class="code java highlight literal-block"><code><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">Person</span><span class="whitespace"> </span><span class="keyword declaration">implements</span><span class="whitespace"> </span><span class="name">IPerson</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+  </span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Person</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">friends</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">ArrayList</span><span class="operator">&lt;&gt;</span><span class="punctuation">();</span><span class="whitespace">
+  </span><span class="name">String</span><span class="whitespace"> </span><span class="name">name</span><span class="punctuation">;</span><span class="whitespace">
+  </span><span class="name">Enum</span><span class="whitespace"> </span><span class="name">title</span><span class="punctuation">;</span><span class="whitespace">
+
+  </span><span class="name decorator">&#64;Override</span><span class="whitespace">
+  </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">IPerson</span><span class="whitespace"> </span><span class="name function">addFriend</span><span class="punctuation">(</span><span class="name">Person</span><span class="whitespace"> </span><span class="name">friend</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+      </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">friends</span><span class="punctuation">.</span><span class="name attribute">add</span><span class="punctuation">(</span><span class="name">friend</span><span class="punctuation">);</span><span class="whitespace">
+      </span><span class="keyword">return</span><span class="whitespace"> </span><span class="keyword">this</span><span class="punctuation">;</span><span class="whitespace">
+  </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Aby dodać znajomego dla osoby, wykonujemy metodę addFriend(), która zwraca obiekt <strong>IPerson</strong>, który pozwala nam korzystać łańcuchowo z innych metod (podobnie działają potoki w systemach operacyjnych).</p>
+<pre class="code java highlight literal-block"><code><span class="name">adam</span><span class="punctuation">.</span><span class="name attribute">addFriend</span><span class="punctuation">(</span><span class="name">Ben</span><span class="punctuation">).</span><span class="name attribute">addFriend</span><span class="punctuation">(</span><span class="name">Barrack</span><span class="punctuation">).</span><span class="name attribute">addFriend</span><span class="punctuation">(</span><span class="name">John</span><span class="punctuation">);</span></code></pre>
+<p class="tag">Task 1: Builder</p>
+<p>Przejdź do klasy MainFluentApi i stwórz obiekt klasy Person korzystając z Buildera. Sprawdź czy możesz stworzyć obiekt korzystając z konstruktora klasy poprzez operator <strong>new Person()</strong>.</p>
+<p class="tag">Task 2: Friends</p>
+<p>Stwórz dwie inne osoby i dodaj je jako przyjaciół pierwszej z osób.</p>
+<p class="tag">Task 3: Hello</p>
+<p>Zaimplementuj metodę sayHelloToFriends w klasie  Person tak by wypisywała ona na ekran &quot;Hello &lt;person name&gt;&quot;. Sprawdź czy implementacja działa.</p>
+</section>
+<section id="wyrazenia-lambda-w-javie">
+<h3>Wyrażenia Lambda w Javie</h3>
+<p>Wyrażenia lambda (<em>lambda expressions</em>) zostały wprowadzone w Javie 8 i umożliwiają bardziej zwięzły zapis funkcji anonimowych. Ułatwiają pracę z interfejsami funkcyjnymi, co prowadzi do bardziej czytelnego i zwięzłego kodu.</p>
+<section id="skladnia">
+<h4>Składnia</h4>
+<p>Wyrażenie lambda składa się z:</p>
+<ul class="simple">
+<li><p>Listy parametrów w nawiasach <span class="todo">(param1, param2, ...)</span></p></li>
+<li><p>Strzałki <span class="todo">-&gt;</span>, oddzielającej parametry od ciała wyrażenia</p></li>
+<li><p>Ciała wyrażenia, które może być pojedynczą instrukcją lub blokiem kodu</p></li>
+</ul>
+</section>
+<section id="przyklad">
+<h4>Przykład</h4>
+<pre class="code java highlight literal-block"><code><span class="name decorator">&#64;FunctionalInterface</span><span class="whitespace">
+</span><span class="keyword declaration">interface</span> <span class="name class">Kalkulator</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name function">operacja</span><span class="punctuation">(</span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name">a</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name">b</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">Main</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">static</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">main</span><span class="punctuation">(</span><span class="name">String</span><span class="operator">[]</span><span class="whitespace"> </span><span class="name">args</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">Kalkulator</span><span class="whitespace"> </span><span class="name">dodawanie</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">a</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">b</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">a</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="name">b</span><span class="punctuation">;</span><span class="whitespace">
+        </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="literal string">&quot;Wynik: &quot;</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="name">dodawanie</span><span class="punctuation">.</span><span class="name attribute">operacja</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number integer">3</span><span class="punctuation">));</span><span class="whitespace"> </span><span class="comment single">// Wynik: 8</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+</section>
+<section id="zastosowanie">
+<h4>Zastosowanie</h4>
+<ul class="simple">
+<li><p>Programowanie funkcyjne</p></li>
+<li><p>Przetwarzanie kolekcji z <em>Stream API</em></p></li>
+<li><p>Obsługa zdarzeń w GUI</p></li>
+<li><p>Współpraca z interfejsami funkcyjnymi w Javie (np. <cite>Runnable</cite>, <cite>Comparator</cite>)</p></li>
+</ul>
+</section>
+<section id="podsumowanie-1">
+<h4>Podsumowanie</h4>
+<ul class="simple">
+<li><p>Lambda expressions upraszczają kod i eliminują potrzebę stosowania klas anonimowych.</p></li>
+<li><p>Można je stosować tylko w interfejsach funkcyjnych (z jedną metodą abstrakcyjną).</p></li>
+<li><p>Znacząco poprawiają czytelność i zwięzłość kodu.</p></li>
+</ul>
+</section>
+<section id="function">
+<h4>Function</h4>
+<p>Function to specjalny interfejs w javie do definiowania funkcji. Posiada on trzy główne metody.</p>
+<p>Wyróżniamy trzy rodzaje funkcji : <strong>Function</strong> (która przyjmuje i zwraca argumenty), <strong>Consumer</strong> (która przyjmuje arumenty, ale nic nie zwraca) oraz <strong>Producer</strong> (który produkuje dane, ale nie pobiera argumentów).</p>
+<section id="apply">
+<h5>apply()</h5>
+<p>apply uruchamia wykonanie funkcji dla zadanych parametrów</p>
+<pre class="code java highlight literal-block"><code><span class="name">Function</span><span class="operator">&lt;</span><span class="name">Integer</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">Double</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">half</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">a</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">a</span><span class="whitespace"> </span><span class="operator">/</span><span class="whitespace"> </span><span class="literal number float">2.0</span><span class="punctuation">;</span><span class="whitespace">
+  </span><span class="comment single">// apply the function to get the result</span><span class="whitespace">
+</span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="name">half</span><span class="punctuation">.</span><span class="name attribute">apply</span><span class="punctuation">(</span><span class="literal number integer">10</span><span class="punctuation">));</span></code></pre>
+</section>
+<section id="addthen">
+<h5>addThen()</h5>
+<p>zwraca funkcje złożoną, gdzie funkcja będąca argumentem zostanie wykonana po oryginalnej funkcji</p>
+<pre class="code java highlight literal-block"><code><span class="name">Function</span><span class="operator">&lt;</span><span class="name">Integer</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">Double</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">half</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">a</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">a</span><span class="whitespace"> </span><span class="operator">/</span><span class="whitespace"> </span><span class="literal number float">2.0</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="comment single">// Now treble the output of half function</span><span class="whitespace">
+</span><span class="name">half</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">half</span><span class="punctuation">.</span><span class="name attribute">andThen</span><span class="punctuation">(</span><span class="name">a</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="literal number integer">3</span><span class="whitespace"> </span><span class="operator">*</span><span class="whitespace"> </span><span class="name">a</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="comment single">// apply the function to get the result</span><span class="whitespace">
+</span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="name">half</span><span class="punctuation">.</span><span class="name attribute">apply</span><span class="punctuation">(</span><span class="literal number integer">10</span><span class="punctuation">));</span></code></pre>
+</section>
+<section id="identity">
+<h5>identity()</h5>
+<p>zwraca funkcję identycznościową (zwracającą na wyjście to co podamy na wejściu).</p>
+<pre class="code java highlight literal-block"><code><span class="name">Function</span><span class="operator">&lt;</span><span class="name">Integer</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">Double</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">half</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">a</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">a</span><span class="whitespace"> </span><span class="operator">/</span><span class="whitespace"> </span><span class="literal number float">2.0</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="comment single">// Now treble the output of halffunction</span><span class="whitespace">
+</span><span class="name">half</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">half</span><span class="punctuation">.</span><span class="name attribute">andThen</span><span class="punctuation">(</span><span class="name">Function</span><span class="punctuation">.</span><span class="name attribute">identity</span><span class="punctuation">());</span><span class="whitespace">
+</span><span class="comment single">// apply the function to get the result</span><span class="whitespace">
+</span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="name">half</span><span class="punctuation">.</span><span class="name attribute">apply</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">));</span></code></pre>
+<p>Do definiowania funkcji możemy użyć <strong>wyrażeń Lambda</strong>.</p>
+<p>Przykłady funkcji i ich wywołań znajdziesz w klasie <strong>Functions.java</strong>.</p>
+<p class="tag">Task 4: Process</p>
+<p>Wykorzystaj lambda expression w klasie MainFluentAPI tak by metoda processFriends() czyściła listę przyjaciół. Uwaga w wyrażeniu lambda możemy też zapisać funkcję jako <span class="todo">params -&gt; {many operations + return}</span>.</p>
+<p>Zrób to samo z funkcją processFriendsInPlace() ta funkjca jest Consumentem więc nie musisz zwracać argumentu!.</p>
+<p class="tag">Task 5: Best friend</p>
+<p>Zaimplementuj funkcję wyboru <strong>best friend</strong> tak by wybierała jako najlepszego przyjaciela pierwszy element listy przyjaciół. Sprawdź co stanie się gdy lista będzie pusta.</p>
+</section>
+</section>
+</section>
+<section id="operator-w-javie">
+<h3>Operator <span class="todo">::</span> w Javie</h3>
+<p>Operator <span class="todo">::</span> w Javie, zwany <strong>referencją do metody</strong> (<em>method reference</em>), jest skróconą formą wyrażeń lambda. Pozwala na przekazywanie metod jako argumentów do innych metod.</p>
+<section id="rodzaje-referencji-do-metod">
+<h4>Rodzaje referencji do metod</h4>
+<ol class="arabic simple">
+<li><p><strong>Referencja do metody statycznej</strong></p></li>
+</ol>
+<pre class="code java highlight literal-block"><code><span class="keyword declaration">class</span> <span class="name class">Utils</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword declaration">static</span><span class="whitespace"> </span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name function">kwadrat</span><span class="punctuation">(</span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name">x</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">x</span><span class="whitespace"> </span><span class="operator">*</span><span class="whitespace"> </span><span class="name">x</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">Main</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">static</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">main</span><span class="punctuation">(</span><span class="name">String</span><span class="operator">[]</span><span class="whitespace"> </span><span class="name">args</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">Function</span><span class="operator">&lt;</span><span class="name">Integer</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">Integer</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">funkcja</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">Utils</span><span class="punctuation">::</span><span class="name">kwadrat</span><span class="punctuation">;</span><span class="whitespace">
+        </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="name">funkcja</span><span class="punctuation">.</span><span class="name attribute">apply</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">));</span><span class="whitespace"> </span><span class="comment single">// Wynik: 25</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<ol class="arabic simple" start="2">
+<li><p><strong>Referencja do metody instancyjnej</strong></p></li>
+</ol>
+<pre class="code java highlight literal-block"><code><span class="keyword declaration">class</span> <span class="name class">Printer</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">drukuj</span><span class="punctuation">(</span><span class="name">String</span><span class="whitespace"> </span><span class="name">tekst</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="name">tekst</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">Main</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">static</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">main</span><span class="punctuation">(</span><span class="name">String</span><span class="operator">[]</span><span class="whitespace"> </span><span class="name">args</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">Printer</span><span class="whitespace"> </span><span class="name">printer</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">Printer</span><span class="punctuation">();</span><span class="whitespace">
+        </span><span class="name">Consumer</span><span class="operator">&lt;</span><span class="name">String</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">funkcja</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">printer</span><span class="punctuation">::</span><span class="name">drukuj</span><span class="punctuation">;</span><span class="whitespace">
+        </span><span class="name">funkcja</span><span class="punctuation">.</span><span class="name attribute">accept</span><span class="punctuation">(</span><span class="literal string">&quot;Witaj, świecie!&quot;</span><span class="punctuation">);</span><span class="whitespace"> </span><span class="comment single">// Witaj, świecie!</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<ol class="arabic simple" start="3">
+<li><p><strong>Referencja do konstruktora</strong></p></li>
+</ol>
+<pre class="code java highlight literal-block"><code><span class="keyword declaration">class</span> <span class="name class">Osoba</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">String</span><span class="whitespace"> </span><span class="name">imie</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="name">Osoba</span><span class="punctuation">(</span><span class="name">String</span><span class="whitespace"> </span><span class="name">imie</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">imie</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">imie</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">Main</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">static</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">main</span><span class="punctuation">(</span><span class="name">String</span><span class="operator">[]</span><span class="whitespace"> </span><span class="name">args</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">Function</span><span class="operator">&lt;</span><span class="name">String</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">Osoba</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">konstruktor</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">Osoba</span><span class="punctuation">::</span><span class="keyword">new</span><span class="punctuation">;</span><span class="whitespace">
+        </span><span class="name">Osoba</span><span class="whitespace"> </span><span class="name">osoba</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">konstruktor</span><span class="punctuation">.</span><span class="name attribute">apply</span><span class="punctuation">(</span><span class="literal string">&quot;Jan&quot;</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="name">osoba</span><span class="punctuation">.</span><span class="name attribute">imie</span><span class="punctuation">);</span><span class="whitespace"> </span><span class="comment single">// Jan</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+</section>
+<section id="podsumowanie-2">
+<h4>Podsumowanie</h4>
+<ul class="simple">
+<li><p>Operator <span class="todo">::</span> jest skrótem dla wyrażeń lambda, gdy wywołujemy istniejące metody.</p></li>
+<li><p>Może być używany do odwoływania się do metod statycznych, metod instancyjnych i konstruktorów.</p></li>
+<li><p>Ułatwia kodowanie, sprawiając, że wyrażenia są bardziej czytelne i zwięzłe.</p></li>
+</ul>
+</section>
+</section>
+<section id="strumienie">
+<h3>Strumienie</h3>
+<p>Tradycyjnie w Javie do przechodzenia po kolekcjach korzystaliśmy z jawnych iteratorów</p>
+<pre class="code java highlight literal-block"><code><span class="name">List</span><span class="whitespace"> </span><span class="operator">&lt;</span><span class="name">String</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">names</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">ArrayList</span><span class="whitespace"> </span><span class="operator">&lt;&gt;</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="keyword">for</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">Student</span><span class="whitespace"> </span><span class="name">student</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="name">students</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">if</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">student</span><span class="punctuation">.</span><span class="name attribute">getName</span><span class="whitespace"> </span><span class="punctuation">().</span><span class="name attribute">startsWith</span><span class="punctuation">(</span><span class="literal string">&quot;A&quot;</span><span class="punctuation">))</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">names</span><span class="punctuation">.</span><span class="name attribute">add</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">student</span><span class="punctuation">.</span><span class="name attribute">getName</span><span class="whitespace"> </span><span class="punctuation">());</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Wykorzystując strumienie korzystamy z tzw. <em>wewnętrznych iteracji</em> zapisanych za pomocą Fluent API, to znaczy logika iteracji po elementach jest dla nas ukryta a skupiamy się na ich przetwarzaniu.</p>
+<pre class="code java highlight literal-block"><code><span class="name">List</span><span class="whitespace"> </span><span class="operator">&lt;</span><span class="name">String</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">namesNewJava</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">()</span><span class="whitespace">
+              </span><span class="punctuation">.</span><span class="name attribute">map</span><span class="punctuation">(</span><span class="name">student</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">student</span><span class="punctuation">.</span><span class="name attribute">getName</span><span class="punctuation">())</span><span class="whitespace">
+              </span><span class="punctuation">.</span><span class="name attribute">filter</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">name</span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">name</span><span class="punctuation">.</span><span class="name attribute">startsWith</span><span class="punctuation">(</span><span class="literal string">&quot;A&quot;</span><span class="punctuation">))</span><span class="whitespace">
+              </span><span class="punctuation">.</span><span class="name attribute">collect</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">Collectors</span><span class="punctuation">.</span><span class="name attribute">toList</span><span class="punctuation">());</span></code></pre>
+<section id="operacje-na-strumieniach">
+<h4>Operacje na strumieniach</h4>
+<p>Operacja na strumieniach dzielimy na <strong>pośrednie</strong> i <strong>końcowe</strong> (terminalne). Operacje pośrednie zwracają jako wynik działania strumień (czyli są elementem wywołań łańcuchowych). W powyższym przykładzie takimi
+operacjami są <em>map i filter</em>. Operacje terminalne kończą przetwarzanie, zwykle agregują one wyniki, zliczają wartości, albo też nic nie wykonują (np. operacja foreach może
+być terminalna). Powyżej przykładem takiej operacji jest <em>collect</em>.</p>
+<p>Dla operacji numerycznych stworzono specjalne strumienie <strong>IntStream, DoubleStream, and LongStream.</strong></p>
+<pre class="code java highlight literal-block"><code><span class="name">IntStream</span><span class="punctuation">.</span><span class="name attribute">rangeClosed</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number integer">10</span><span class="punctuation">).</span><span class="name attribute">forEach</span><span class="punctuation">(</span><span class="name">num</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">print</span><span class="punctuation">(</span><span class="name">num</span><span class="punctuation">));</span><span class="whitespace">
+</span><span class="comment single">// -&gt;12345678910</span><span class="whitespace">
+</span><span class="name">IntStream</span><span class="punctuation">.</span><span class="name attribute">range</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number integer">10</span><span class="punctuation">).</span><span class="name attribute">forEach</span><span class="punctuation">(</span><span class="name">num</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">print</span><span class="punctuation">(</span><span class="name">num</span><span class="punctuation">));</span><span class="whitespace">
+</span><span class="comment single">// -&gt;123456789</span></code></pre>
+</section>
+<section id="budowa-strumieni">
+<h4>Budowa strumieni</h4>
+<p>Stream stałych i elementów tablicy i wykorzystanie funkcji forEach do przejścia przez strumień.</p>
+<pre class="code java highlight literal-block"><code><span class="name">Stream</span><span class="punctuation">.</span><span class="name attribute">of</span><span class="punctuation">(</span><span class="literal string">&quot;This&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;is&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;Java8&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;Stream&quot;</span><span class="punctuation">).</span><span class="name attribute">forEach</span><span class="punctuation">(</span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">::</span><span class="name">println</span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="name">String</span><span class="operator">[]</span><span class="whitespace"> </span><span class="name">stringArray</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">String</span><span class="operator">[]</span><span class="punctuation">{</span><span class="literal string">&quot;Streams&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;can&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;be&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;created&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;from&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;arrays&quot;</span><span class="punctuation">};</span><span class="whitespace">
+</span><span class="name">Arrays</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">(</span><span class="name">stringArray</span><span class="punctuation">).</span><span class="name attribute">forEach</span><span class="punctuation">(</span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">::</span><span class="name">println</span><span class="punctuation">);</span></code></pre>
+</section>
+</section>
+<section id="elementy-strumieni">
+<h3>Elementy strumieni</h3>
+<p>Aby przetworzyć obiekt na strumień wykorzystujemy metodę <strong>stream()</strong>. Następnie korzystamy z operacji by przetwarzać dane strumieniowe.</p>
+<p class="tag">Task 7: Strumienie</p>
+<p>Zobacz w klasie <strong>MainStreams</strong> jakiego typu jest poniższy obiekt:</p>
+<pre class="code java highlight literal-block"><code><span class="name">whatIsIt</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">().</span><span class="name attribute">filter</span><span class="punctuation">(</span><span class="name">s</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">s</span><span class="punctuation">.</span><span class="name attribute">getName</span><span class="punctuation">().</span><span class="name attribute">length</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="literal number integer">2</span><span class="punctuation">);</span></code></pre>
+<section id="filter">
+<h4><strong>Filter</strong></h4>
+<p>Wybiera elementy ze strumienia względem danego warunku</p>
+<pre class="code java highlight literal-block"><code><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">()</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">filter</span><span class="punctuation">(</span><span class="name">student</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">student</span><span class="punctuation">.</span><span class="name attribute">getScore</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">&gt;=</span><span class="whitespace"> </span><span class="literal number integer">60</span><span class="punctuation">)</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">collect</span><span class="punctuation">(</span><span class="name">Collectors</span><span class="punctuation">.</span><span class="name attribute">toList</span><span class="punctuation">());</span></code></pre>
+</section>
+<section id="map">
+<h4><strong>Map</strong></h4>
+<p>Zmienia przetwarzany element na coś innego, czyli pobiera element jednego typu i zwraca element innego typu. W praktyce najczęściej służy do wyciągnięcia jakiś atrybutów z obiektów.</p>
+<pre class="code java highlight literal-block"><code><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">()</span><span class="whitespace">
+        </span><span class="punctuation">.</span><span class="name attribute">map</span><span class="punctuation">(</span><span class="name">Student</span><span class="punctuation">::</span><span class="name">getName</span><span class="punctuation">)</span><span class="whitespace">
+        </span><span class="punctuation">.</span><span class="name attribute">collect</span><span class="punctuation">(</span><span class="name">Collectors</span><span class="punctuation">.</span><span class="name attribute">toList</span><span class="punctuation">());</span></code></pre>
+<p>The <em>Student::getName</em> jest tzw. <strong>method reference</strong>, skrótowym odwołaniem się do metody z klasy. Czyli na obiekcie typu Student, który przyjdzie ze streama wywołujemy metodę <em>getName()</em>, zadziała tylko z obiektem odpowiedniego typu.</p>
+<p>Równoważnie możemy zapisać taki strumień jako:</p>
+<pre class="code java highlight literal-block"><code><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">()</span><span class="whitespace">
+        </span><span class="punctuation">.</span><span class="name attribute">map</span><span class="punctuation">(</span><span class="name">student</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">student</span><span class="punctuation">.</span><span class="name attribute">getName</span><span class="punctuation">())</span><span class="whitespace">
+        </span><span class="punctuation">.</span><span class="name attribute">collect</span><span class="punctuation">(</span><span class="name">Collectors</span><span class="punctuation">.</span><span class="name attribute">toList</span><span class="punctuation">());</span></code></pre>
+</section>
+<section id="distinct">
+<h4><strong>Distinct</strong></h4>
+<p>Usuwa powtórzenia</p>
+<pre class="code java highlight literal-block"><code><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">()</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">map</span><span class="punctuation">(</span><span class="name">Student</span><span class="punctuation">::</span><span class="name">getName</span><span class="punctuation">)</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">distinct</span><span class="punctuation">()</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">collect</span><span class="punctuation">(</span><span class="name">Collectors</span><span class="punctuation">.</span><span class="name attribute">toList</span><span class="punctuation">());</span></code></pre>
+</section>
+<section id="limit">
+<h4><strong>Limit</strong></h4>
+<p>Ogranicza liczbę elementów w strumieniu do podanej liczby.</p>
+</section>
+<section id="sorted">
+<h4><strong>Sorted</strong></h4>
+<p>Sortuje elementy w naturalnym dla nich porządku.</p>
+<pre class="code java highlight literal-block"><code><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">()</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">map</span><span class="punctuation">(</span><span class="name">Student</span><span class="punctuation">::</span><span class="name">getName</span><span class="punctuation">)</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">sorted</span><span class="punctuation">()</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">collect</span><span class="punctuation">(</span><span class="name">Collectors</span><span class="punctuation">.</span><span class="name attribute">toList</span><span class="punctuation">());</span></code></pre>
+<p>Z pomocą klasy Comparator możemy definiować sortowania różnego typu</p>
+<pre class="code java highlight literal-block"><code><span class="comment single">//Sorting names if the Students in descending order</span><span class="whitespace">
+</span><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">()</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">map</span><span class="punctuation">(</span><span class="name">Student</span><span class="punctuation">::</span><span class="name">getName</span><span class="punctuation">)</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">sorted</span><span class="punctuation">(</span><span class="name">Comparator</span><span class="punctuation">.</span><span class="name attribute">reverseOrder</span><span class="punctuation">())</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">collect</span><span class="punctuation">(</span><span class="name">Collectors</span><span class="punctuation">.</span><span class="name attribute">toList</span><span class="punctuation">());</span><span class="whitespace">
+</span><span class="comment single">//Sorting students by First Name and Last Name both</span><span class="whitespace">
+</span><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">()</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">sorted</span><span class="punctuation">(</span><span class="name">Comparator</span><span class="punctuation">.</span><span class="name attribute">comparing</span><span class="punctuation">(</span><span class="name">Student</span><span class="punctuation">::</span><span class="name">getFirstName</span><span class="punctuation">).</span><span class="whitespace">
+                                </span><span class="name">thenComparing</span><span class="punctuation">(</span><span class="name">Student</span><span class="punctuation">::</span><span class="name">getLastName</span><span class="punctuation">))</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">map</span><span class="punctuation">(</span><span class="name">Student</span><span class="punctuation">::</span><span class="name">getName</span><span class="punctuation">)</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">collect</span><span class="punctuation">(</span><span class="name">Collectors</span><span class="punctuation">.</span><span class="name attribute">toList</span><span class="punctuation">());</span><span class="whitespace">
+</span><span class="comment single">//Sorting students by First Name Descending and Last Name Ascending</span><span class="whitespace">
+</span><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">()</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">sorted</span><span class="punctuation">(</span><span class="name">Comparator</span><span class="punctuation">.</span><span class="name attribute">comparing</span><span class="punctuation">(</span><span class="name">Student</span><span class="punctuation">::</span><span class="name">getFirstName</span><span class="punctuation">)</span><span class="whitespace">
+                                </span><span class="punctuation">.</span><span class="name attribute">reversed</span><span class="punctuation">()</span><span class="whitespace">
+                                </span><span class="punctuation">.</span><span class="name attribute">thenComparing</span><span class="punctuation">(</span><span class="name">Student</span><span class="punctuation">::</span><span class="name">getLastName</span><span class="punctuation">))</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">map</span><span class="punctuation">(</span><span class="name">Student</span><span class="punctuation">::</span><span class="name">getName</span><span class="punctuation">)</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">collect</span><span class="punctuation">(</span><span class="name">Collectors</span><span class="punctuation">.</span><span class="name attribute">toList</span><span class="punctuation">());</span></code></pre>
+</section>
+<section id="flatmap">
+<h4><strong>FlatMap</strong></h4>
+<p>Działa podobnie jak mapa, tylko jako wynik zwraca strumień przetworzonych elementów.</p>
+<pre class="code java highlight literal-block"><code><span class="name">List</span><span class="operator">&lt;</span><span class="name">Integer</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">numbers</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">Arrays</span><span class="punctuation">.</span><span class="name attribute">asList</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number integer">2</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number integer">3</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number integer">4</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="name">List</span><span class="operator">&lt;</span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Integer</span><span class="operator">&gt;&gt;</span><span class="whitespace"> </span><span class="name">mapped</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace">
+                                </span><span class="name">numbers</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">()</span><span class="whitespace">
+                                </span><span class="punctuation">.</span><span class="name attribute">map</span><span class="punctuation">(</span><span class="name">number</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">Arrays</span><span class="punctuation">.</span><span class="name attribute">asList</span><span class="punctuation">(</span><span class="name">number</span><span class="whitespace"> </span><span class="operator">-</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">number</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">number</span><span class="whitespace"> </span><span class="operator">+</span><span class="literal number integer">1</span><span class="punctuation">))</span><span class="whitespace">
+                                </span><span class="punctuation">.</span><span class="name attribute">collect</span><span class="punctuation">(</span><span class="name">Collectors</span><span class="punctuation">.</span><span class="name attribute">toList</span><span class="punctuation">());</span><span class="whitespace">
+
+</span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="name">mapped</span><span class="punctuation">);</span><span class="whitespace"> </span><span class="comment single">//:&gt; [[0, 1, 2], [1, 2, 3], [2, 3, 4], [3, 4, 5]]</span><span class="whitespace">
+
+</span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Integer</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">flattened</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace">
+                                </span><span class="name">numbers</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">()</span><span class="whitespace">
+                                </span><span class="punctuation">.</span><span class="name attribute">flatMap</span><span class="punctuation">(</span><span class="name">number</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">Arrays</span><span class="punctuation">.</span><span class="name attribute">asList</span><span class="punctuation">(</span><span class="name">number</span><span class="whitespace"> </span><span class="operator">-</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">number</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">number</span><span class="whitespace"> </span><span class="operator">+</span><span class="literal number integer">1</span><span class="punctuation">).</span><span class="name attribute">stream</span><span class="punctuation">())</span><span class="whitespace">
+                                </span><span class="punctuation">.</span><span class="name attribute">collect</span><span class="punctuation">(</span><span class="name">Collectors</span><span class="punctuation">.</span><span class="name attribute">toList</span><span class="punctuation">());</span><span class="whitespace">
+
+</span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="name">flattened</span><span class="punctuation">);</span><span class="whitespace">  </span><span class="comment single">//:&gt; [0, 1, 2, 1, 2, 3, 2, 3, 4, 3, 4, 5]</span></code></pre>
+</section>
+</section>
+<section id="elementy-terminalne">
+<h3>Elementy Terminalne</h3>
+<section id="collect">
+<h4><strong>Collect</strong></h4>
+<p>Zbiera elementy strumienia w listę.</p>
+<pre class="code java highlight literal-block"><code><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">()</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">filter</span><span class="punctuation">(</span><span class="name">student</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">student</span><span class="punctuation">.</span><span class="name attribute">getScore</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">&gt;=</span><span class="whitespace"> </span><span class="literal number integer">60</span><span class="punctuation">)</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">collect</span><span class="punctuation">(</span><span class="name">Collectors</span><span class="punctuation">.</span><span class="name attribute">toList</span><span class="punctuation">());</span></code></pre>
+<p class="important">Ważne: Collect zwraca nowy obiekt! Nową listę, mapę, zbiór etc. ale wartości są te same co w przetwarzanej kolekcji.</p>
+<p>grupowanie i partycjonowanie</p>
+<pre class="code java highlight literal-block"><code><span class="name">Map</span><span class="operator">&lt;</span><span class="name">Long</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Student</span><span class="operator">&gt;&gt;</span><span class="whitespace"> </span><span class="name">studentsByYear</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">()</span><span class="whitespace">
+                        </span><span class="punctuation">.</span><span class="name attribute">collect</span><span class="punctuation">(</span><span class="name">groupingBy</span><span class="punctuation">(</span><span class="name">Student</span><span class="punctuation">::</span><span class="name">getYear</span><span class="punctuation">));</span><span class="whitespace">
+
+</span><span class="name">Map</span><span class="operator">&lt;</span><span class="name">Boolean</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Student</span><span class="operator">&gt;&gt;</span><span class="whitespace"> </span><span class="name">groups</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace">
+        </span><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">().</span><span class="name attribute">collect</span><span class="punctuation">(</span><span class="name">Collectors</span><span class="punctuation">.</span><span class="name attribute">partitioningBy</span><span class="punctuation">(</span><span class="name">s</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">s</span><span class="punctuation">.</span><span class="name attribute">getName</span><span class="punctuation">().</span><span class="name attribute">startsWith</span><span class="punctuation">(</span><span class="literal string">&quot;A&quot;</span><span class="punctuation">)));</span></code></pre>
+</section>
+<section id="match">
+<h4><strong>Match</strong></h4>
+<p>Match stosujemy gdy interesuje nas występowanie w strumieniu elementu o danych własnościach.</p>
+<pre class="code java highlight literal-block"><code><span class="comment single">//Check if at least one student has got distinction</span><span class="whitespace">
+</span><span class="name">Boolean</span><span class="whitespace"> </span><span class="name">hasStudentWithDistinction</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">()</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">anyMatch</span><span class="punctuation">(</span><span class="name">student</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">student</span><span class="punctuation">.</span><span class="name attribute">getScore</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="literal number integer">80</span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="comment single">//Check if All of the students have distinction</span><span class="whitespace">
+</span><span class="name">Boolean</span><span class="whitespace"> </span><span class="name">hasAllStudentsWithDistinction</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">()</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">allMatch</span><span class="punctuation">(</span><span class="name">student</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">student</span><span class="punctuation">.</span><span class="name attribute">getScore</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="literal number integer">80</span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="comment single">//Return true if None of the students are over distinction</span><span class="whitespace">
+</span><span class="name">Boolean</span><span class="whitespace"> </span><span class="name">hasAllStudentsBelowDistinction</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">()</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">noneMatch</span><span class="punctuation">(</span><span class="name">student</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">student</span><span class="punctuation">.</span><span class="name attribute">getScore</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="literal number integer">80</span><span class="punctuation">);</span></code></pre>
+</section>
+<section id="find">
+<h4><strong>Find</strong></h4>
+<p>Pozwala znajdować obiekt w strumieniu o danych włanościach, możemy wybrać dowolny dopasowany obiekt lub pierwszy dopasowany.</p>
+<pre class="code java highlight literal-block"><code><span class="comment single">//Returns any student that matches to the given condition</span><span class="whitespace">
+</span><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">().</span><span class="name attribute">filter</span><span class="punctuation">(</span><span class="name">student</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">student</span><span class="punctuation">.</span><span class="name attribute">getAge</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="literal number integer">20</span><span class="punctuation">)</span><span class="whitespace">
+                        </span><span class="punctuation">.</span><span class="name attribute">findAny</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="comment single">//Returns first student that matches to the given condition</span><span class="whitespace">
+</span><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">().</span><span class="name attribute">filter</span><span class="punctuation">(</span><span class="name">student</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">student</span><span class="punctuation">.</span><span class="name attribute">getAge</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="literal number integer">20</span><span class="punctuation">)</span><span class="whitespace">
+                        </span><span class="punctuation">.</span><span class="name attribute">findFirst</span><span class="punctuation">();</span></code></pre>
+</section>
+<section id="reduce">
+<h4><strong>Reduce</strong></h4>
+<p>Pozwala zredukować strumień danych do pojedynczej wartości.</p>
+<pre class="code java highlight literal-block"><code><span class="comment single">//Summing without passing an identity</span><span class="whitespace">
+</span><span class="name">Optional</span><span class="operator">&lt;</span><span class="name">integer</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">sum</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">numbers</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">()</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">reduce</span><span class="punctuation">((</span><span class="name">x</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">y</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">x</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="name">y</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="comment single">//Product without passing an identity</span><span class="whitespace">
+</span><span class="name">Optional</span><span class="operator">&lt;</span><span class="name">integer</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">product</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">numbers</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">()</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">reduce</span><span class="punctuation">((</span><span class="name">x</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">y</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">x</span><span class="whitespace"> </span><span class="operator">*</span><span class="whitespace"> </span><span class="name">y</span><span class="punctuation">);</span></code></pre>
+</section>
+<section id="foreach">
+<h4><strong>ForEach</strong></h4>
+<p>Wykonanie operacji dla każdego elementu z listy.</p>
+<pre class="code java highlight literal-block"><code><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">stream</span><span class="punctuation">()</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">filter</span><span class="punctuation">(</span><span class="name">student</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">student</span><span class="punctuation">.</span><span class="name attribute">getScore</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">&gt;=</span><span class="whitespace"> </span><span class="literal number integer">60</span><span class="punctuation">)</span><span class="whitespace">
+                </span><span class="punctuation">.</span><span class="name attribute">foreach</span><span class="punctuation">(</span><span class="name">student</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+                        </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="literal string">&quot;Brawo&quot;</span><span class="punctuation">);</span><span class="whitespace">
+                        </span><span class="name">student</span><span class="punctuation">.</span><span class="name attribute">assignGradeInUsos</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">);</span><span class="whitespace">
+                </span><span class="punctuation">});</span></code></pre>
+</section>
+<section id="removeif">
+<h4><strong>RemoveIf</strong></h4>
+<p>Usuwanie (w miejscu!) elementów z kolekcji spełniających zadany warunek.</p>
+<pre class="code java highlight literal-block"><code><span class="name">students</span><span class="punctuation">.</span><span class="name attribute">removeIf</span><span class="punctuation">(</span><span class="name">student</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">student</span><span class="punctuation">.</span><span class="name attribute">getScore</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">&gt;=</span><span class="whitespace"> </span><span class="literal number integer">60</span><span class="punctuation">)</span></code></pre>
+<p class="tag">Task 8: Streams przykłady</p>
+<p>Przejrzyj przykłady wykorzystania strumieni z klasy <strong>StreamExamples</strong>.</p>
+<p>Zaimplementuj korzystając ze strumieni brakujące metody w klasie <strong>Tasks</strong>.
+Sprawdź uruchamiając <strong>TasksTest</strong> czy dobrze wykonałeś zadanie.</p>
+</section>
+</section>
+<section id="zmienne-lokalne-w-strumieniach">
+<h3>Zmienne lokalne w strumieniach</h3>
+<p>Poniższy kod się nie skompiluje:</p>
+<pre class="code java highlight literal-block"><code><span class="keyword type">int</span><span class="whitespace"> </span><span class="name">i</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal number integer">0</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="name">IntStream</span><span class="punctuation">.</span><span class="name attribute">range</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number integer">10</span><span class="punctuation">).</span><span class="name attribute">forEach</span><span class="punctuation">(</span><span class="name">number</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">if</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">number</span><span class="whitespace"> </span><span class="operator">&lt;</span><span class="whitespace"> </span><span class="name">i</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="literal string">&quot;Smaller&quot;</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="name">i</span><span class="operator">++</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">});</span></code></pre>
+<p>Podstawowym powodem, dla którego kompilacja się nie powiedzie, jest przechwycenie przez lambda wyrażenie wartości <strong>i</strong>, co oznacza wykonanie jej kopii w momencie inicjalizacji. Wymuszenie, by zmienna była ostateczna, pozwala uniknąć wrażenia, że ​​zwiększenie <strong>i</strong> wewnątrz lambda mogłoby faktycznie zmodyfikować parametr metody <strong>i</strong>.</p>
+<p>Podczas gdy to się skompiluje:</p>
+<pre class="code java highlight literal-block"><code><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name">i</span><span class="whitespace"> </span><span class="operator">=</span><span class="literal number integer">0</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">method</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+   </span><span class="name">IntStream</span><span class="punctuation">.</span><span class="name attribute">range</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number integer">10</span><span class="punctuation">).</span><span class="name attribute">forEach</span><span class="punctuation">(</span><span class="name">number</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">if</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">number</span><span class="whitespace"> </span><span class="operator">&lt;</span><span class="whitespace"> </span><span class="name">i</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+            </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="literal string">&quot;Smaller&quot;</span><span class="punctuation">);</span><span class="whitespace">
+            </span><span class="name">i</span><span class="operator">++</span><span class="punctuation">;</span><span class="whitespace">
+        </span><span class="punctuation">}</span><span class="whitespace">
+    </span><span class="punctuation">});</span><span class="whitespace">
+ </span><span class="punctuation">}</span></code></pre>
+<p>Mówiąc najprościej, chodzi o to, gdzie przechowywane są zmienne składowe. Zmienne lokalne znajdują się na stosie, ale zmienne globalne składowe są na stercie. Ponieważ mamy do czynienia z pamięcią sterty, kompilator może zagwarantować, że lambda będzie miała dostęp do najnowszej wartości zmiennej.</p>
+<p>Z drugiej strony zmiana wartości zmiennych w strumieniu może powodować problemy podczas ich równoległego wykonywania, dlatego jest uznawana za złą praktykę. Strumienie powinny być bezstanowe i jako takie nie wymieniać między sobą informacji (zmiennych, parametrów itp).</p>
+<pre class="code java highlight literal-block"><code><span class="name">IntStream</span><span class="whitespace"> </span><span class="name">stream</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">IntStream</span><span class="punctuation">.</span><span class="name attribute">range</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number integer">100</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="name">stream</span><span class="punctuation">.</span><span class="name attribute">parallel</span><span class="punctuation">().</span><span class="name attribute">forEach</span><span class="punctuation">(</span><span class="name">number</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+   </span><span class="keyword">if</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">number</span><span class="whitespace"> </span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">i</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+       </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="name">i</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="literal string">&quot; smaller than + number);
+       i+=2;
+   }
+ });</span></code></pre>
+<p class="tag">Task 9: Local variables</p>
+<p>Odkomentuj kod w klasie <strong>MainStreams.java</strong> by zobaczyć dlaczego należy unikać takiego podejścia.</p>
+<pre class="code java highlight literal-block"><code><span class="comment single">//LocalVariables example = new LocalVariables();</span><span class="whitespace">
+</span><span class="comment single">//example.method();</span></code></pre>
+</section>
+<section id="laziness">
+<h3>Laziness</h3>
+<p>W teorii języka programowania leniwa ewaluacja (lazy evaluation) lub call-by-need jest strategią ewaluacji, która opóźnia ocenę wyrażenia, dopóki nie będzie potrzebna jego wartość. W Java 8 Streams API potoki są konstruowany leniwie i przechowywane jako zestaw instrukcji. Dopiero gdy wywołamy operację terminalną, potok zostaje uruchomiony.</p>
+<p>Innymi słowy, strumienie są <strong>leniwe</strong>, ponieważ operacje pośrednie nie są oceniane, dopóki nie zostanie wywołana operacja terminala (może nawet nigdy, jeśli strumienie nie zawierają terminala!). Dzięki temu strumienie mogą przetwarzać duże zbiory danych z wysoką wydajnością.</p>
+<p>Gdy operacja terminala kończy się w czasie końcowym, nawet jeśli dane wejściowe ze strumienia są nieskończone, nazywa się to short-circuiting. Java 8 Streams API optymalizuje przetwarzanie strumienia za pomocą operacji short-circuiting. Metody Short Circuit kończą przetwarzanie strumienia, gdy tylko zostaną spełnione ich warunki.</p>
+<pre class="code java highlight literal-block"><code><span class="comment single">// lazy evaluation - it does not matter where you put the limit</span><span class="whitespace">
+</span><span class="name">IntStream</span><span class="punctuation">.</span><span class="name attribute">range</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number integer">100</span><span class="punctuation">)</span><span class="whitespace">
+        </span><span class="punctuation">.</span><span class="name attribute">map</span><span class="punctuation">(</span><span class="name">a</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+            </span><span class="keyword">if</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">a</span><span class="whitespace"> </span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="literal number integer">10</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+                </span><span class="keyword">try</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+                    </span><span class="name">Thread</span><span class="punctuation">.</span><span class="name attribute">sleep</span><span class="punctuation">(</span><span class="literal number integer">5000</span><span class="punctuation">);</span><span class="whitespace">
+                </span><span class="punctuation">}</span><span class="whitespace"> </span><span class="keyword">catch</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">InterruptedException</span><span class="whitespace"> </span><span class="name">e</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+                    </span><span class="name">e</span><span class="punctuation">.</span><span class="name attribute">printStackTrace</span><span class="punctuation">();</span><span class="whitespace">
+                </span><span class="punctuation">}</span><span class="whitespace">
+            </span><span class="punctuation">}</span><span class="whitespace">
+            </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">a</span><span class="punctuation">;</span><span class="whitespace">
+        </span><span class="punctuation">}).</span><span class="name attribute">limit</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">)</span><span class="whitespace">
+        </span><span class="punctuation">.</span><span class="name attribute">forEach</span><span class="punctuation">(</span><span class="name">a</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="name">a</span><span class="punctuation">));</span></code></pre>
+<p>Operacje pośrednie są podzielone na operacje bezstanowe i stanowe. Operacje bezstanowe, takie jak filtr i mapowanie, nie zachowują stanu z poprzednio widzianego elementu podczas przetwarzania nowego elementu — każdy element może być przetwarzany niezależnie od operacji na innych elementach. Operacje stanowe, takie jak distinct i sorting, mogą uwzględniać stan z poprzednio widzianych elementów podczas przetwarzania nowych elementów.</p>
+<p>Operacje stanowe mogą wymagać przetworzenia wszystkich danych wejściowych przed wygenerowaniem wyniku.</p>
+<p>Spójrz na przykład w klasie <strong>MainLazy</strong>.</p>
+<p class="tag">Task 10: Sorting</p>
+<p>Sprawdź efekt wywołania jeżeli posortujemy stream przed limit.</p>
+<pre class="code java highlight literal-block"><code><span class="name">Stream</span><span class="punctuation">.</span><span class="name attribute">of</span><span class="punctuation">(</span><span class="literal string">&quot;Sun&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;Set&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;Run&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;Stream&quot;</span><span class="punctuation">).</span><span class="name attribute">filter</span><span class="punctuation">(</span><span class="name">word</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="name">word</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">word</span><span class="punctuation">.</span><span class="name attribute">startsWith</span><span class="punctuation">(</span><span class="literal string">&quot;S&quot;</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="punctuation">}).</span><span class="name attribute">limit</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">).</span><span class="name attribute">forEach</span><span class="punctuation">(</span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">::</span><span class="name">println</span><span class="punctuation">);</span></code></pre>
+<p>Czy wynik zmienia się wraz ze zmianą miejsca sorted() - przed i za limit?
+Teraz miejsce limit jest istotne! Czy kolejność operacji jest taka sama przy sortowaniu lub bez niego.</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="footnote-1" role="note">
+<span class="label"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></span>
+<p>Used materials from:</p>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://www.eclipse.org/collections/">https://www.eclipse.org/collections/</a></div>
+<div class="line"><a class="reference external" href="https://dzone.com/articles/java-fluent-api-design">https://dzone.com/articles/java-fluent-api-design</a></div>
+<div class="line"><a class="reference external" href="https://kamiljozwiak.net/fluent-api/">https://kamiljozwiak.net/fluent-api/</a></div>
+<div class="line"><a class="reference external" href="https://www.baeldung.com/java-lambda-effectively-final-local-variables">https://www.baeldung.com/java-lambda-effectively-final-local-variables</a></div>
+<div class="line"><a class="reference external" href="https://github.com/vfarcic/java-8-exercises">https://github.com/vfarcic/java-8-exercises</a></div>
+<div class="line"><a class="reference external" href="https://www.javatpoint.com/collections-in-java">https://www.javatpoint.com/collections-in-java</a></div>
+</div>
+</aside>
+</aside>
+</section>
+</section></body>
+</html>
+

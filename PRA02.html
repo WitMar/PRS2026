@@ -1,0 +1,348 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>PRA02.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="pracownia-programowania">
+<h2>Pracownia Programowania</h2>
+<section id="debugowanie-i-testowanie">
+<h3>Debugowanie i Testowanie</h3>
+<p class="important">Uwaga! Kod z którego będziemy korzystać na zajęciach jest dostępny na branchu <strong>TestAndDebugStart</strong> w repozytorium <a class="reference external" href="https://github.com/WitMar/PRA2025">https://github.com/WitMar/PRA2025</a>  . Kod końcowy można znaleźć na branchu <strong>TestAndDebugEnd</strong>.</p>
+<p>Jeżeli nie widzisz odpowiednich gałęzi na GitHubie wykonaj <strong>Ctr+T</strong>, a jak to nie pomoże to wybierz z menu <strong>Git-&gt;Fetch</strong>.</p>
+<section id="podsumowanie-zajec-i">
+<h4>Podsumowanie zajęć I</h4>
+<p>Co wiemy po pierwszych zajęciach:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">* Projekt podzielony jest na katalogi: źródłowy - <span class="todo">src</span>, testowy - <span class="todo">test</span>, zasobów - <span class="todo">resources</span>.</div>
+</div>
+<div class="line-block">
+<div class="line">* W katalogu projektu umieszczony jest plik <strong>pom.xml</strong> odpowiadający za ustawienia Mavena, w pliku tym dodajemy odnośniki do zewnętrznych bibliotek i ustawienia budowania aplikacji.</div>
+</div>
+<div class="line-block">
+<div class="line">* Ustawienia dodatkowych bibliotek znajdziemy w plikach w katalogu resources.</div>
+</div>
+<div class="line-block">
+<div class="line">* Pracujemy na GIT - nowa funkcjonalność (nowy temat zajęć) zakładana jest na nowej gałęzi (ang. <em>branch</em>).</div>
+</div>
+</blockquote>
+</section>
+<section id="synchronizacja-kodu-git-z-oryginalnym-repo">
+<h4>Synchronizacja kodu Git z oryginalnym repo</h4>
+<p>Stwórz swoje własne repozytorium na GitHub.</p>
+<p>Przejdź do <strong>Git -&gt; Manage Remotes</strong></p>
+<p>Dodaj wpis kierujący na Twoje repozytorium</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://github.com/LINK_CO_MOJEGO_REPO">https://github.com/LINK_CO_MOJEGO_REPO</a></div>
+</div>
+</blockquote>
+<p>nazwij je najlepiej jako <strong>MojeRepozytorium</strong></p>
+<p>Wybierz <span class="hold">Ctrl + T</span>, aby odświeżyć zależności.</p>
+<p>Jeżeli Ctrl+T z jakiegoś powodu nie ściągnie oczekiwanych zmian, to żeby wymusić ściągnięcie zmian wybierz <strong>Git -&gt; fetch</strong>.</p>
+<p>Wtedy na liście branchy w prawym dolnym rogu ekranu powinieneś widzieć gałęzie z repo przedmiotowego i ze swojego.</p>
+<p>Przejdź na gałąź <strong>TestAndDebugStart</strong>.</p>
+<p>Jako że dodaliśmy nowe repozytorium, możliwe, że musisz ponownie skonfigurować mavena. Przejdź do zakładki Maven i sprawdź, czy widzisz goale (Lifecycle, Plugin, Dependencies), jeżeli nie, spróbuj odświeżyć Mavena (dwie strzałki w kółko). Jeśli to nie pomoże wybierz lupkę wpisz add maven project i wskaż plik <strong>pom.xml</strong> z dysku twardego. Następnie odśwież ponownie Mavena. To powinno pomóc - sprawdź, czy twoje pliki .java mają niebieskie kółko obok nich w zakładce <strong>Project</strong>.</p>
+<img alt="mavenTryAgain.png" class="center" src="mavenTryAgain.png" />
+</section>
+<section id="przydatne-skroty-ideaj">
+<h4>Przydatne skróty IdeaJ</h4>
+<p>Lista skrótów IdeaJ</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://resources.jetbrains.com/storage/products/intellij-idea/docs/IntelliJIDEA_ReferenceCard.pdf">https://resources.jetbrains.com/storage/products/intellij-idea/docs/IntelliJIDEA_ReferenceCard.pdf</a></div>
+</div>
+</blockquote>
+<p><span class="hold">Alt + Enter</span> pokaż podpowiedź rozwiązania błędu</p>
+<p><span class="hold">Ctrl + W</span>, <span class="hold">Ctrl + Shift + W</span> zaznaczenie całej sekcji, rozszerzenie zaznaczenia, zawężenie zaznaczenia.</p>
+<p><span class="hold">Ctrl + Shift + N</span> wyszukanie pliku po nazwie</p>
+<p><span class="hold">Shift + Shift</span> wyszukiwanie wszędzie</p>
+<p><span class="hold">Alt + Insert</span> generuj kod</p>
+<p><span class="hold">Ctrl + /</span> zakomentuj line</p>
+<p><span class="hold">Ctrl + Shift + /</span> odkomentuj linie</p>
+<p><span class="hold">Ctrl + E</span> ostatnio otwierane pliki</p>
+<p><span class="hold">Ctrl + Alt + L</span> formatuj kod</p>
+<p><span class="hold">Tab</span>, <span class="hold">Shift+Tab</span> wcięcie, cofnij wcięcie</p>
+<p><span class="hold">Shift + F6</span> zmiana nazwy</p>
+<p><span class="hold">Ctrl + Shift + Alt + T</span> refaktoruj</p>
+<p><span class="hold">Ctrl + Alt + M</span> wyekstraktuj metodę</p>
+<p><span class="hold">Alt + Right/Left</span> przełączaj zakładki</p>
+<p><span class="hold">Ctrl + Alt + Right / Left</span> nawiguj wstecz / do przodu (uwaga pod Linux system już używa tego skrótu więc trzeba zmenić ustawienia systemu)</p>
+<p><span class="hold">Ctrl + (klik na nazwie metody)</span> pokaż użycie</p>
+<p><span class="hold">Ctrl + Alt + (klik na nazwie metody)</span> pokaż implementację</p>
+<p><span class="hold">Ctrl + K</span> służy do commitowania kodu lokalnie do repozytorium</p>
+<p><span class="hold">Ctrl + Shift + K</span> służy do commitowania kodu do zewnętrznego repozytorium</p>
+<p><span class="hold">Ctrl + T</span> służy do odświeżania projektu - ściągania zmian z serwera</p>
+<p><span class="badimportant">Uwaga!!</span> Jeśli używasz Linuksa lub innego systemu operacyjnego innego niż Windows (lub zdalnego pulpitu), niektóre z tych skrótów mogą być już zarezerwowane w systemie, wtedy musisz zmienić ustawienia systemowe lub zmienić je w <strong>Settins-&gt;Keymap</strong> w Intellij</p>
+<p class="tag">Wykonaj</p>
+<p>Przedź na branch <strong>TestAndDebugStart</strong></p>
+<p>Wyszukaj klasę o nazwie <strong>ClassThatHaveItAll</strong> (Ctrl + Shift + N).</p>
+<p>Zformatuj kod (Ctrl + Alt + L) - na wydziałowym linuxie ten skrót oznacza wyloguj, musisz zmienić skrót w ustawieniach systemu żeby móc go używać lub zmienić skrót w środowsiku (Settings-&gt;Keymap).</p>
+<p>Dodaj do klasy w nagłówku linijkę</p>
+<pre class="code java highlight literal-block"><code><span class="name">List</span><span class="whitespace"> </span><span class="operator">&lt;</span><span class="name">Long</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">list</span><span class="punctuation">;</span></code></pre>
+<p>Wybierz automatyczną poprawę błędu (Alt + Enter).</p>
+<p>Następnie wybierz (Alt + Insert) wygeneruj konstruktor, oraz settery i gettery dla klasy.</p>
+<p>Znajdź interfejs <strong>InterfaceOne</strong> (Ctr + Shift + f). Wyszukaj użycie (Ctrl + click na nazwie metody) i implementacje metody (Ctrl + Alt + click na nazwie metody) <strong>printMe()</strong> klikając na definicje metody w interfejsie.</p>
+<p>Sprawdź, jak poruszać się między zakładkami (Alt + prawo / lewo) i przejść do poprzednich zmian (Ctrl + Alt + prawo / lewo).</p>
+</section>
+<section id="debug">
+<h4>Debug</h4>
+<p>Przejdź do klasy <strong>Breakpoints</strong> pakietu <strong>debug</strong>.</p>
+<p>Poprzez wybór <strong>Run -&gt; Debug</strong>  lub wybierając na klasie prawym przyciskiem myszy <strong>Debug</strong> możemy debugować nasz kod czyli uruchamiać w kontrolowany sposób, tak by móc zatrzymywać w dowolnym momencie wywołanie kodu.</p>
+<p>Czym jest debugowanie?</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://www.codeproject.com/Articles/991643/What-is-Debugging-How-to-Debug-A-Beginners-Guide">https://www.codeproject.com/Articles/991643/What-is-Debugging-How-to-Debug-A-Beginners-Guide</a></div>
+</div>
+</blockquote>
+<p>Aby uruchomić kod lub uruchomić debuggowanie możesz też kliknąć prawym przyciskiem na zielony trójkąt obok nazwy klasy i wybrać opcję DEBUG.</p>
+<img alt="hereForDebug.png" class="center" src="hereForDebug.png" />
+<p>Pomocne w debugowaniu są tzw. <strong>breakpointy</strong>, czyli miejsce w kodzie, w którym chcemy zatrzymać wywołanie kodu by móc podejrzeć wartości zmiennych i stan programu. Żeby dodać breakpoint klikamy obok numeru linii tak, by pojawiła się czerwona kropka.</p>
+<img alt="breapoint.png" class="center" src="breapoint.png" />
+<p>Po kliknięciu prawym przyciskiem myszy możemy określić także specjalny warunek przy breakpoincie.</p>
+<img alt="warunek.png" class="center" src="warunek.png" />
+<p>Po uruchomieniu trybu debug na dole pojawia się nam okno debugowania na którym wyświetlone są aktualne wartości zmiennych. Dodatkowo możemy wybrać przez <span class="hold">Alt+F8</span> lub klikając na ikonę kalkulatora okno ewaluacji wyrażeń i wykonać ewaluację jakiegoś wyrażenia na obecnych wartościach zmiennych. Ewaluacja wyrażeń jest przydatna przy debugowaniu np. wartości list, których wartości nie jesteśmy w stanie przejrzeć pojedynczo.</p>
+<img alt="debug.png" class="center" src="debug.png" />
+<p>Przy odpowiednich ustawieniach możliwe jest także debugowanie aplikacji działających na serwerze w czasie uruchomienia (więcej na ten temat na przyszłych zajęciach).</p>
+<p class="tag">Wykonaj</p>
+<p>Uruchom klasę <strong>Breakpoints</strong>. Jaki błąd wystąpił?</p>
+<p>Uruchom debug klasy <strong>Breakpoints</strong>.</p>
+<p>Żeby zatrzymać wywołanie dodaj breakpoint w klasie.</p>
+<p>Użyj F8 (lub strzałka w dół na panelu debugingu) aby przejść w wywołaniu kodu linijka po linijce.</p>
+<p>Użyj StepInto F7 (strzała w prawo-dół na panelu debugingu) aby wejść w wywołanie metody.</p>
+<p>Znajdź i popraw błąd.</p>
+<p class="tag">Wykonaj</p>
+<p>Uruchom klasę <strong>EvaluateExpressions</strong>. Jaki błąd wystąpił?</p>
+<p>Ustaw breakpointa w metodzie <strong>ProcessElementAtIndex</strong>.</p>
+<p>Otwórz okno ewaluacji wyrażeń i wpisz w niej <strong>list.get(index)</strong> .</p>
+<p>Przechodź F9 (zielony trójkąt na panelu debug) do kolejnych wystąpień breakpointa i podglądaj wartości zmiennych.</p>
+<p>By sprawdzić jak naprawdę wyglądają ostatnie elementy listy wpisz w oknie evaluacji następujący kod:</p>
+<pre class="code java highlight literal-block"><code><span class="name">Collections</span><span class="punctuation">.</span><span class="name attribute">reverse</span><span class="punctuation">(</span><span class="name">myList</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="name">myList</span></code></pre>
+<p>Znajdź i popraw błąd.</p>
+<p class="tag">Wykonaj</p>
+<p>Uruchom klasę <strong>ConditionalBreak</strong>. Jaki błąd wystąpił?</p>
+<p>W linii 18, ustaw zwykły breakpoint, czy łatwo jest znaleźć błąd?</p>
+<p>Ustaw w linii 18 warunkowy breakpoint tak, by zatrzymywał się przy spełnieniu warunku <strong>!everythingIsOk</strong>.</p>
+<p>Jak widzisz breakpoint nie działa, przenieś go do linii 19.</p>
+<p>Uruchom kod, co wywołało błąd?</p>
+</section>
+<section id="shelve-ans-stash">
+<h4>Shelve ans Stash</h4>
+<p>Czasami w czasie pracy jesteś zmuszony przełączyć się między różnymi zadaniami z niedokończonym kodem, a następnie wrócić do niego. IntelliJ IDEA zapewnia kilka sposobów wygodnej pracy nad kilkoma różnymi funkcjami bez utraty jej wyników:</p>
+<blockquote>
+<ul class="simple">
+<li><p>utwórz nowy branch dla osobnego kodu</p></li>
+<li><p>odłóż zmiany na półkę (ang. stash)</p></li>
+</ul>
+</blockquote>
+<p><span class="badimportant">Nie można odkładać na półkę niewersjonowanych plików, które nie zostały dodane do kontroli wersji.</span></p>
+<p>W widoku <strong>Local Changes</strong> na karcie <strong>Git</strong> pod kodem kliknij prawym przyciskiem myszy pliki lub listę zmian, które chcesz umieścić na półce, i wybierz <strong>Shelve</strong> z menu kontekstowego.</p>
+<img alt="shelf.png" class="center" src="shelf.png" />
+<p>Czasami może być konieczne przywrócenie oryginalnej postaci gałęzi - HEAD, co zrobić by nie utracić w tym momencie wykonanych już zmian.</p>
+<p>Stash działa podobnie jak shelve tylko zamiast obsługi poprzez GIT wykorzystuje IDE do przechowywania zmian.</p>
+<p>Aby schować, zamiany lokalnie w IDE a nie w GIT wybierz <strong>Git | Uncommited Changes | Stash Changes</strong>, aby usunąć schowek, wybierz <strong>Git | Uncommited Changes | Unstash Changes</strong>.</p>
+<p>Jeśli chcesz utworzyć nową gałąź na podstawie wybranego schowka zamiast stosować go do aktualnej gałęzi, wpisz nową nazwę w polu &quot;As new branch&quot;.</p>
+</section>
+<section id="junit">
+<h4>JUnit</h4>
+<p>JUnit to biblioteka służąca do pisania testów kodu. Testy mają na celu kontrolę jakości kodu, różnych ścieżek wywołań a także tego czy nowe zmiany nie wprowadzają błędów i zachowują starą funkcjonalność.</p>
+<p>Proces budowania wersji przez Maven domyślnie uruchamia wszystkie testy znajdujące się w katalogu TEST podczas budowania pliku wykonywalnego.</p>
+<p>Najpierw musimy dodać w pliku <strong>pom.xml</strong> zależność dla modułu testowego.</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://mvnrepository.com/artifact/junit/junit/4.12">https://mvnrepository.com/artifact/junit/junit/4.12</a></div>
+</div>
+</blockquote>
+<p>W naszym branchu jest już stworzona klasa testowa jednak by dodać nową należałoby wykonać poniższe operacje: wejść do klasy <strong>AdvanceMath</strong> i wybrać <span class="hold">Ctrl + Shift + T</span> , kliknąć create new Test. Aby osiągnąć to samo inaczej można wybrać nazwę klasy i kliknąć <span class="hold">Alt + Enter</span> i wybrać create test.</p>
+<p>Biblioteka JUnit korzysta z tzw. adnotacji. Przed każdą metodą która ma być uruchamiana jako test umieszczamy <strong>&#64;Test</strong>.</p>
+<p>Inną istotną adnotacją jest <strong>&#64;Before</strong> która pozwala nam zdefiniować operacje które będą wykonywane przed uruchomieniem każdego testu.</p>
+<p>Przykładowa klasa testująca:</p>
+<pre class="code java highlight literal-block"><code><span class="keyword namespace">package</span><span class="whitespace"> </span><span class="name namespace">second.junit</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">com.sun.xml.internal.ws.policy.AssertionSet</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">example.HelloWorld</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">org.apache.log4j.Logger</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">org.junit.Assert</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">org.junit.Before</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">org.junit.Test</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="keyword namespace">import static</span><span class="whitespace"> </span><span class="name namespace">org.junit.Assert.*</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">AdvanceMathTest</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+    </span><span class="name">AdvanceMath</span><span class="whitespace"> </span><span class="name">math</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword declaration">final</span><span class="whitespace"> </span><span class="keyword declaration">static</span><span class="whitespace"> </span><span class="name">Logger</span><span class="whitespace"> </span><span class="name">logger</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">Logger</span><span class="punctuation">.</span><span class="name attribute">getLogger</span><span class="punctuation">(</span><span class="name">AdvanceMath</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">);</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Before</span><span class="whitespace">
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">setUp</span><span class="punctuation">(){</span><span class="whitespace">
+        </span><span class="name">logger</span><span class="punctuation">.</span><span class="name attribute">info</span><span class="punctuation">(</span><span class="literal string">&quot;Odpalam setUpa&quot;</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="name">math</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">AdvanceMath</span><span class="punctuation">();</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Test</span><span class="whitespace">
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">additionTest</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">a</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">math</span><span class="punctuation">.</span><span class="name attribute">addition</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="literal number integer">4</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="name">assertTrue</span><span class="punctuation">(</span><span class="name">a</span><span class="operator">==</span><span class="literal number integer">5</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Test</span><span class="whitespace">
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">additionTestString</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword type">long</span><span class="whitespace"> </span><span class="name">a</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">math</span><span class="punctuation">.</span><span class="name attribute">addition</span><span class="punctuation">(</span><span class="literal string">&quot;1&quot;</span><span class="punctuation">,</span><span class="literal number integer">4</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="name">Assert</span><span class="punctuation">.</span><span class="name attribute">assertEquals</span><span class="punctuation">(</span><span class="literal number integer">5L</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">a</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+
+    </span><span class="name decorator">&#64;Test</span><span class="punctuation">(</span><span class="name">expected</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">Exception</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">additionTestString2</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name">a</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">math</span><span class="punctuation">.</span><span class="name attribute">addition</span><span class="punctuation">(</span><span class="literal string">&quot;a1&quot;</span><span class="punctuation">,</span><span class="literal number integer">4</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="punctuation">}</span></code></pre>
+<p>Test możemy uruchomić klikając na klasę i wybierając <strong>run</strong> lub przez zakładkę Maven -&gt; Test. Testy są też dodawane automatycznie przy wykonaniu <strong>Install</strong> w zakładce Mavena.</p>
+<p>Przykłady wykorzystania biblioteki JUnit :</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="http://www.mkyong.com/tutorials/junit-tutorials/">http://www.mkyong.com/tutorials/junit-tutorials/</a></div>
+</div>
+</blockquote>
+<p>Polecam spojrzeć na przykłady na temat testowania list i map.</p>
+<section id="assertj">
+<h5>AssertJ</h5>
+<p>Lepszą biblioteką do pisania bardziej złożonych testów jest biblioteka AssertJ.</p>
+<p>W pliku <strong>pom.xml</strong> dodano zależność do biblioteki assertj.</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://mvnrepository.com/artifact/org.assertj/assertj-core/3.17.2">https://mvnrepository.com/artifact/org.assertj/assertj-core/3.17.2</a></div>
+</div>
+</blockquote>
+<p>Zobacz klasę <strong>Frodo.java</strong> w katalogu test. Testy w niej są o wiele łatwiejsze do zrozumienia i definiowania w przypadku złożonych warunków.</p>
+<p>Dokumentacja:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://assertj.github.io/doc/">https://assertj.github.io/doc/</a></div>
+</div>
+</blockquote>
+</section>
+<section id="mock">
+<h5>Mock</h5>
+<p>W przypadku gdy testujemy złożone systemy nasz kod może zależeć od zewnętrznych bibliotek, serwisów, albo danych. W przypadku testów jednostkowych oczekiwanie jest, że będziemy je wykonywać wielokrotnie a czas ich wykonywania będzie ograniczony.
+W związku z tym nie chcemy testując naszego kodu czekać na połączenie, podbierać dużych plików danych, czy zależeć od dostępności zewnętrznych elementów.</p>
+<p>Jak więc testować kod, który takie zależności posiada? Z pomocą przychodzą nam tzw. Mocki, czyli klasy udające inne klasy, dla których możemy sami definiować odpowiedź klasy dla wywołania jej metod (sami tym samym dostarczając danych testowych dla naszych przypadków testowych).</p>
+<p>Do tworzenia Mock-ów będziemy stosować bibliotekę <strong>Mockito</strong>.</p>
+<p class="tag">Zadanie</p>
+<p>Znajdź odpowiedni wpis w Maven repository i dodaj Mockito do projektu.</p>
+<p>Tworzenie mock’ów sprowadza się do wywołania metody metodę Mockito.mock().</p>
+<pre class="code java highlight literal-block"><code><span class="name">Class1</span><span class="whitespace"> </span><span class="name">mock1</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">Mockito</span><span class="punctuation">.</span><span class="name attribute">mock</span><span class="punctuation">(</span><span class="name">Class1</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="name">Class2</span><span class="whitespace"> </span><span class="name">mock2</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">Mockito</span><span class="punctuation">.</span><span class="name attribute">mock</span><span class="punctuation">(</span><span class="name">Class2</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="name">TestedClass</span><span class="whitespace"> </span><span class="name">testedClass</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">TestedClass</span><span class="punctuation">(</span><span class="name">mock1</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">mock2</span><span class="punctuation">);</span></code></pre>
+<p>Wykorzystanie mock'ów. Dla zadanych parametrów funkcji z mockowanej klasy zwróc dany wynik jako odpowiedź. To w jaki sposób mock ma zareagować na wywołanie metody definiujemy używając <strong>Mockito.when</strong>.</p>
+<pre class="code java highlight literal-block"><code><span class="name">Mockito</span><span class="punctuation">.</span><span class="name attribute">when</span><span class="punctuation">(</span><span class="name">Class1</span><span class="punctuation">.</span><span class="name attribute">method1</span><span class="punctuation">(</span><span class="name">any</span><span class="punctuation">(),</span><span class="whitespace"> </span><span class="name">any</span><span class="punctuation">()).</span><span class="name attribute">thenReturn</span><span class="punctuation">(</span><span class="literal string">&quot;mockedOutput&quot;</span><span class="punctuation">);</span></code></pre>
+<p>Do określenia zachowania mock’a możesz także użyć metod:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">Mockito.doReturn - zwróć wartość</div>
+<div class="line">Mockito.doThrow - zwróć wyjątek</div>
+<div class="line">Mockito.doNothing - nic nie zwracaj</div>
+<div class="line">Mockito.doAnswer - gdy chcesz zwrócić wartość w oparciu np. o wejściowe parametry</div>
+</div>
+</blockquote>
+<p>Zobacz jak działa klasa <strong>ProcessQuery</strong>.</p>
+<p>W naszym przypadku chcemy przetestować metodę <strong>process</strong> klasy <strong>ProcessQuery</strong>, metoda ta korzysta z klasy <strong>HttpQueryClass</strong>, która oryginalnie w kodzie wywołuje zapytanie HTTP o dane z zewnętrznego serwera HTTP.
+To jest klasa, którą chcielibyśmy zamockować, a dokładniej wywołanie metody <strong>query</strong> z niej.</p>
+<pre class="code java highlight literal-block"><code><span class="name decorator">&#64;Test</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">mockTestExample</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">when</span><span class="punctuation">(</span><span class="name">httpQueryClass</span><span class="punctuation">.</span><span class="name attribute">query</span><span class="punctuation">()).</span><span class="name attribute">thenReturn</span><span class="punctuation">(</span><span class="literal string">&quot;test&quot;</span><span class="punctuation">);</span><span class="whitespace">
+
+    </span><span class="name">ProcessQuery</span><span class="whitespace"> </span><span class="name">processQuery</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">ProcessQuery</span><span class="punctuation">(</span><span class="name">httpQueryClass</span><span class="punctuation">);</span><span class="whitespace">
+
+    </span><span class="name">String</span><span class="whitespace"> </span><span class="name">result</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">processQuery</span><span class="punctuation">.</span><span class="name attribute">process</span><span class="punctuation">();</span><span class="whitespace">
+    </span><span class="name">assertThat</span><span class="punctuation">(</span><span class="name">result</span><span class="punctuation">).</span><span class="name attribute">isEqualTo</span><span class="punctuation">(</span><span class="literal string">&quot;TEST&quot;</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p class="tag">Zadanie</p>
+<p>Dodaj do metody query parametr i zmień definicję mock tak by działała z wywołaniem metody z parametrem, dla konkretnej wartości jak i dla dowolnej wartości.</p>
+</section>
+</section>
+<section id="extra">
+<h4>Extra</h4>
+<section id="good-practices-of-code-development">
+<h5>Good practices of code development</h5>
+<ul class="simple">
+<li><p>Make indents inside loops and if-statements</p></li>
+</ul>
+<pre class="code java highlight literal-block"><code><span class="name">function</span><span class="whitespace"> </span><span class="name function">foo</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">if</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">$maybe</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">do_it_now</span><span class="punctuation">();</span><span class="whitespace">
+        </span><span class="name">again</span><span class="punctuation">();</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace"> </span><span class="keyword">else</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">abort_mission</span><span class="punctuation">();</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+    </span><span class="name">finalize</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<ul class="simple">
+<li><p>You can deal with curly brackets also like this:</p></li>
+</ul>
+<pre class="code java highlight literal-block"><code><span class="name">function</span><span class="whitespace"> </span><span class="name function">foo</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">if</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">$maybe</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">do_it_now</span><span class="punctuation">();</span><span class="whitespace">
+        </span><span class="name">again</span><span class="punctuation">();</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+    </span><span class="keyword">else</span><span class="whitespace">
+    </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">abort_mission</span><span class="punctuation">();</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+    </span><span class="name">finalize</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<ul class="simple">
+<li><p>Use blank lines consistently and as required. Blank lines may be used for separating  code lines or line groups semantically for readability.</p></li>
+<li><p>Character count of a line should be limited for readability.</p></li>
+<li><p>Name variables, procedures, functions in sensible way, start with small letter and introduce new word with capital letter</p></li>
+</ul>
+<pre class="code java highlight literal-block"><code><span class="name">studentsCounter</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="name">listIterator</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="name">averageOverLastWeek</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="name">findBestInClass</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="name">computeAverage</span><span class="punctuation">();</span></code></pre>
+<ul class="simple">
+<li><p>Name classes in sensible way, start with capital letter and introduce new word with capital letter</p></li>
+</ul>
+<pre class="code java highlight literal-block"><code><span class="name">NightShift</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="name">FastCar</span><span class="punctuation">;</span></code></pre>
+<ul class="simple">
+<li><p>Name constant values with all capital letters, separate words with <strong>_</strong></p></li>
+</ul>
+<pre class="code python highlight literal-block"><code><span class="name">DAYS_IN_THE_WEEK</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="name">NUMBER_OF_SHIFTS</span><span class="punctuation">();</span></code></pre>
+<ul class="simple">
+<li><p>Using space chars in code should also be consistent in whole application. Generally, situations below are suitable for using spaces:</p></li>
+<li><p>Between operators and operands:</p></li>
+</ul>
+<pre class="code java highlight literal-block"><code><span class="name">a</span><span class="whitespace"> </span><span class="operator">+=</span><span class="whitespace"> </span><span class="name">b</span><span class="whitespace"> </span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">c</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal number integer">0</span><span class="punctuation">;</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">a</span><span class="whitespace"> </span><span class="operator">==</span><span class="whitespace"> </span><span class="name">b</span><span class="punctuation">)</span></code></pre>
+<ul class="simple">
+<li><p>Between statement keywords and brackets:</p></li>
+</ul>
+<pre class="code java highlight literal-block"><code><span class="keyword">if</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">value</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{,</span><span class="whitespace"> </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">A</span><span class="whitespace"> </span><span class="punctuation">{</span></code></pre>
+<ul class="simple">
+<li><p>After ';' char in loops:</p></li>
+</ul>
+<pre class="code java highlight literal-block"><code><span class="keyword">for</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name">i</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal number integer">0</span><span class="punctuation">;</span><span class="whitespace"> </span><span class="name">i</span><span class="whitespace"> </span><span class="operator">&lt;</span><span class="whitespace"> </span><span class="name">length</span><span class="punctuation">;</span><span class="whitespace"> </span><span class="name">i</span><span class="operator">++</span><span class="punctuation">)</span></code></pre>
+<ul class="simple">
+<li><p>Between type casters and operands:</p></li>
+</ul>
+<pre class="code java highlight literal-block"><code><span class="punctuation">(</span><span class="keyword type">int</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="name">value</span><span class="whitespace"> </span><span class="punctuation">,</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">String</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="name">value</span></code></pre>
+</section>
+</section>
+</section>
+</section></body>
+</html>
+

@@ -1,0 +1,3 @@
+1 zajęcia trochę zostaje czasu na zajęciach dodaj konflikt w GIT (lub merge into current) plus reset head example na Git
+
+Dodaj na streamach Optional!!! i prace z nim

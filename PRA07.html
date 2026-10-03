@@ -1,0 +1,905 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>PRA07.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="pracownia-programowania">
+<h2>Pracownia Programowania</h2>
+<section id="orm">
+<h3>ORM</h3>
+<p class="important">Uwaga! cały kod znajduje się na gałęzi <strong>HibernateStart</strong> w repozytorium <a class="reference external" href="https://github.com/WitMar/PRA2025">https://github.com/WitMar/PRA2025</a> . Kod końcowy w gałęzi <strong>HibernateEnd</strong>.</p>
+<p>Jeżeli nie widzisz odpowiednich gałęzi na GitHubie wykonaj <strong>Ctr+T</strong>, a jak to nie pomoże to wybierz z menu <strong>VCS-&gt;Git-&gt;Fetch</strong>.</p>
+<section id="orm-1">
+<h4>ORM</h4>
+<p>ORM to skrótowe oznaczenie pojęcia &quot;mapowanie obiektowo-relacyjne&quot; (od angielskiego <em>Object-Relational Mapping</em>). Chodzi więc o zamianę (mapowanie) danych w postaci tabelarycznej (relacji w bazie danych) na obiekty, albo w drugą stronę. Pomaga ono przyspieszyć proces rozwoju aplikacji, dbając o takie aspekty, jak zarządzanie transakcjami, automatyczne generowanie klucza głównego, zarządzanie połączeniami z bazą danych i tłumaczeniem zapytań na język SQL. Jest nowoczesnym podejściem do zagadnienia współpracy z bazą danych, wykorzystującym filozofię programowania obiektowego.</p>
+<section id="elementy-orm">
+<h5>Elementy ORM</h5>
+<blockquote>
+<div class="line-block">
+<div class="line">1. Mechanizm specyfikowania metadanych opisujących odwzorowanie klas na relacje w bazach danych</div>
+</div>
+<div class="line-block">
+<div class="line">2. API do zarządzania cyklem życia obiektów</div>
+</div>
+<div class="line-block">
+<div class="line">3. Język lub API do wykonywania zapytań. Najpopularniejsza implementacja technologii odwzorowania obiektowo-relacyjnego dla aplikacji Java to Hibernate (dla C# to LinQ)</div>
+</div>
+</blockquote>
+</section>
+</section>
+<section id="architektura">
+<h4>Architektura</h4>
+<p class="center"><img alt="arch" src="archHib.png" /></p>
+<p>Elementy:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">* <strong>Konfiguracja</strong> : zwykle zapisywany w plikach hibernate.properties lub hibernate.cfg.xml. Jest używany przez Session Factory do ustawień połączenia z bazą i czasem mapowania obiektów (plik xml).</div>
+</div>
+<div class="line-block">
+<div class="line">* <strong>Session factory</strong> : Hibernate wykorzystuje session factory do tworzenia sesji. Session Factory używa informacji konfiguracyjnych z wyżej wymienionych plików, aby odpowiednio utworzyć instancję obiektu sesji. Możemy tworzyć wiele sesji w ramach jednego połączenia.</div>
+</div>
+<div class="line-block">
+<div class="line">* <strong>Sesja</strong> : reprezentuje interakcję między aplikacją a bazą danych w dowolnym momencie. Jest ona reprezentowana przez klasę org.hibernate.Session.</div>
+</div>
+<div class="line-block">
+<div class="line">* <strong>Zapytanie (query)</strong> : Umożliwia aplikacjom wysyłanie zapytań do bazy danych o jeden lub więcej przechowywanych w niej obiektów. Hibernate udostępnia różne techniki zapytań do bazy danych, w tym NamedQuery i Criteria API.</div>
+</div>
+<div class="line-block">
+<div class="line">* <strong>Pamięć podręczna pierwszego poziomu</strong> : reprezentuje domyślną pamięć podręczną używaną przez obiekt sesji Hibernate podczas interakcji z bazą danych. Jest również nazywany pamięcią podręczną sesji i buforuje obiekty w ramach bieżącej sesji. Wszystkie żądania z obiektu Session do bazy danych muszą przechodzić przez pamięć podręczną pierwszego poziomu lub pamięć podręczną sesji. Należy zauważyć, że pamięć podręczna pierwszego poziomu jest dostępna dopóki obiekt sesji aktywny.</div>
+</div>
+<div class="line-block">
+<div class="line">* <strong>Transakcja</strong> : umożliwia osiągnięcie spójności danych i wycofanie w przypadku, gdy coś pójdzie nie tak.</div>
+</div>
+<div class="line-block">
+<div class="line">* <strong>Persistent object</strong> : są to zwykłe obiekty Java (POJO), które zostają utrwalone jako jeden z wierszy w powiązanej tabeli w bazie danych przez hibernate. Można je skonfigurować w plikach konfiguracyjnych (hibernate.cfg.xml lub hibernate.properties) lub z adnotacją &#64;Entity.</div>
+</div>
+<div class="line-block">
+<div class="line">* <strong>Pamięć podręczna</strong> drugiego poziomu: służy do przechowywania obiektów w sesjach. Musi to być jawnie włączona i konieczne jest zapewnienie dostawcy (implementacji) pamięci podręcznej. Jedną z popularnych implementacji pamięci podręcznej drugiego poziomu jest EhCache.</div>
+</div>
+</blockquote>
+</section>
+<section id="zaleznosci">
+<h4>Zależności</h4>
+<p>Żeby korzystać z Hibernate potrzebne nam będzie na pewno pakiet hibernate-core oraz sterownik bazy danych.</p>
+<pre class="code xml highlight literal-block"><code><span class="name tag">&lt;dependencies&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;dependency&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;groupId&gt;</span>junit<span class="name tag">&lt;/groupId&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;artifactId&gt;</span>junit<span class="name tag">&lt;/artifactId&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;version&gt;</span>4.13.1<span class="name tag">&lt;/version&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;scope&gt;</span>test<span class="name tag">&lt;/scope&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;/dependency&gt;</span><span class="whitespace">
+    </span><span class="comment multiline">&lt;!-- Hibernate resources --&gt;</span><span class="whitespace">
+    </span><span class="comment multiline">&lt;!-- https://mvnrepository.com/artifact/org.hibernate/hibernate-entitymanager --&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;dependency&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;groupId&gt;</span>org.hibernate<span class="name tag">&lt;/groupId&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;artifactId&gt;</span>hibernate-entitymanager<span class="name tag">&lt;/artifactId&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;version&gt;</span>5.6.15.Final<span class="name tag">&lt;/version&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;/dependency&gt;</span><span class="whitespace">
+    </span><span class="comment multiline">&lt;!-- Jakarta Persistence API --&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;dependency&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;groupId&gt;</span>jakarta.persistence<span class="name tag">&lt;/groupId&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;artifactId&gt;</span>jakarta.persistence-api<span class="name tag">&lt;/artifactId&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;version&gt;</span>3.1.0<span class="name tag">&lt;/version&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;/dependency&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;dependency&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;groupId&gt;</span>org.hibernate.orm<span class="name tag">&lt;/groupId&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;artifactId&gt;</span>hibernate-core<span class="name tag">&lt;/artifactId&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;version&gt;</span>6.5.3.Final<span class="name tag">&lt;/version&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;/dependency&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;dependency&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;groupId&gt;</span>org.hibernate.validator<span class="name tag">&lt;/groupId&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;artifactId&gt;</span>hibernate-validator<span class="name tag">&lt;/artifactId&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;version&gt;</span>7.0.0.Alpha2<span class="name tag">&lt;/version&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;/dependency&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;dependency&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;groupId&gt;</span>org.hibernate.common<span class="name tag">&lt;/groupId&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;artifactId&gt;</span>hibernate-commons-annotations<span class="name tag">&lt;/artifactId&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;version&gt;</span>4.0.2.Final<span class="name tag">&lt;/version&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;classifier&gt;</span>tests<span class="name tag">&lt;/classifier&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;/dependency&gt;</span><span class="whitespace">
+
+
+    </span><span class="comment multiline">&lt;!-- Database --&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;dependency&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;groupId&gt;</span>org.hsqldb<span class="name tag">&lt;/groupId&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;artifactId&gt;</span>hsqldb<span class="name tag">&lt;/artifactId&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;version&gt;</span>2.7.1<span class="name tag">&lt;/version&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;/dependency&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;dependency&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;groupId&gt;</span>org.postgresql<span class="name tag">&lt;/groupId&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;artifactId&gt;</span>postgresql<span class="name tag">&lt;/artifactId&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;version&gt;</span>42.7.2<span class="name tag">&lt;/version&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;/dependency&gt;</span><span class="whitespace">
+
+</span><span class="name tag">&lt;/dependencies&gt;</span></code></pre>
+<p>W naszym projekcie będziemy korzystać z bazy <strong>HSQL (bazy zapisywanej w pamięci)</strong> ale w domu proszę uruchomić przykład z PostgreSQL lub jakąś bazą dostępną online np:</p>
+<blockquote>
+<p><a class="reference external" href="https://remotemysql.com/">https://remotemysql.com/</a></p>
+</blockquote>
+</section>
+<section id="konfiguracja-hibernate">
+<h4>Konfiguracja Hibernate</h4>
+<p>Konfiguracje Hibernate zapisujemy w pliku  <strong>hibernate.cfg.xml</strong>, <strong>hibernate.properties</strong> lub <strong>persistence.xml</strong> .</p>
+<p>Uwaga! W zależności od tego z jakich elementów korzystamy biblioteka przy wywołaniu szuka automatycznie określonych plików w ścieżce projektu w celu odnalezienia konfiguracji.</p>
+<p>W pliku musimy wyspecyfikować:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">szczegóły dostępu do bazy danych, adres, hasło, user, lokalizacja,</div>
+</div>
+<div class="line-block">
+<div class="line">język stosowanych zapytań sql,</div>
+</div>
+<div class="line-block">
+<div class="line">ew. listę klas mapowanych na tabele baz danych</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>dialect</strong> określa jak hibernate ma komunikować się z bazą danych</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>show_sql</strong> - true pokaże nam zapytania SQL tworzone przez hibernate (głównie do debugowania).</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>hbm2dll</strong> określa sposób zachowania względem schematu bazy danych. <strong>create</strong> oznacza że tworzymy za każdym razem schemat od nowa. Dostępne wartości to create, <strong>validate</strong> (tylko walidacja schematu nie zmienianie go) oraz <strong>uptade</strong> (automatyczne dostosowywanie zmian w schemacie ale nie usuwanie wcześniejszych elementów). Gdy już raz go stworzymy polecam zmienić wartość na <em>validate</em> lub <em>update</em>. Uwaga! Czasem update może powodować dziwne błędy jak &quot;table not found&quot;.</div>
+</div>
+</blockquote>
+<p>Przykładowe ustawienia dostępu do bazy danych dla bazy PostgreSQL:</p>
+<pre class="code xml highlight literal-block"><code><span class="comment preproc">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><span class="whitespace">
+</span><span class="name tag">&lt;persistence</span><span class="whitespace"> </span><span class="name attribute">version=</span><span class="literal string">&quot;3.1&quot;</span><span class="whitespace">
+                        </span><span class="name attribute">xmlns=</span><span class="literal string">&quot;https://jakarta.ee/xml/ns/persistence&quot;</span><span class="whitespace">
+                        </span><span class="name attribute">xmlns:xsi=</span><span class="literal string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span><span class="whitespace">
+                        </span><span class="name attribute">xsi:schemaLocation=</span><span class="literal string">&quot;https://jakarta.ee/xml/ns/persistence
+                                                                https://jakarta.ee/xml/ns/persistence/persistence_3_1.xsd&quot;</span><span class="name tag">&gt;</span><span class="whitespace">
+
+        </span><span class="name tag">&lt;persistence-unit</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;hibernate-dynamic&quot;</span><span class="whitespace"> </span><span class="name attribute">transaction-type=</span><span class="literal string">&quot;RESOURCE_LOCAL&quot;</span><span class="name tag">&gt;</span><span class="whitespace">
+                </span><span class="name tag">&lt;provider&gt;</span>org.hibernate.jpa.HibernatePersistenceProvider<span class="name tag">&lt;/provider&gt;</span><span class="whitespace">
+
+                </span><span class="name tag">&lt;properties&gt;</span><span class="whitespace">
+                        </span><span class="comment multiline">&lt;!-- JDBC settings --&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;jakarta.persistence.jdbc.url&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;jdbc:postgresql://localhost:5432/postgres&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;jakarta.persistence.jdbc.user&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;postgres&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;jakarta.persistence.jdbc.password&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;postgres&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;jakarta.persistence.jdbc.driver&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;org.postgresql.Driver&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+
+                        </span><span class="comment multiline">&lt;!-- Hibernate settings --&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;hibernate.dialect&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;org.hibernate.dialect.PostgreSQLDialect&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;hibernate.hbm2ddl.auto&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;create&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;hibernate.format_sql&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;false&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;hibernate.show_sql&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;true&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                </span><span class="name tag">&lt;/properties&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;/persistence-unit&gt;</span><span class="whitespace">
+</span><span class="name tag">&lt;/persistence&gt;</span></code></pre>
+<p><strong>Uwaga!</strong> żeby uruchomić program z powyższymi ustawieniami w domu powinieneś mieć zainstalowany serwer PostgreSQL lub zmienić adres serwera w ustawieniach. Informacje o instalacji PostgreSQL powinieneś łatwo znaleźć w internecie.Do podejrzenia danych w bazie postgresql polecam wykorzystać program <strong>pgAdmin</strong>.</p>
+<p>Konfiguracja wykorzystująca uczelnianą bazę PostgreSQL (change username and password to your own):</p>
+<pre class="code xml highlight literal-block"><code><span class="comment preproc">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><span class="whitespace">
+</span><span class="name tag">&lt;persistence</span><span class="whitespace"> </span><span class="name attribute">version=</span><span class="literal string">&quot;3.1&quot;</span><span class="whitespace">
+                        </span><span class="name attribute">xmlns=</span><span class="literal string">&quot;https://jakarta.ee/xml/ns/persistence&quot;</span><span class="whitespace">
+                        </span><span class="name attribute">xmlns:xsi=</span><span class="literal string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span><span class="whitespace">
+                        </span><span class="name attribute">xsi:schemaLocation=</span><span class="literal string">&quot;https://jakarta.ee/xml/ns/persistence
+                                                                https://jakarta.ee/xml/ns/persistence/persistence_3_1.xsd&quot;</span><span class="name tag">&gt;</span><span class="whitespace">
+
+        </span><span class="name tag">&lt;persistence-unit</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;hibernate-dynamic&quot;</span><span class="whitespace"> </span><span class="name attribute">transaction-type=</span><span class="literal string">&quot;RESOURCE_LOCAL&quot;</span><span class="name tag">&gt;</span><span class="whitespace">
+                </span><span class="name tag">&lt;provider&gt;</span>org.hibernate.jpa.HibernatePersistenceProvider<span class="name tag">&lt;/provider&gt;</span><span class="whitespace">
+
+                </span><span class="name tag">&lt;properties&gt;</span><span class="whitespace">
+                        </span><span class="comment multiline">&lt;!-- JDBC settings --&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;jakarta.persistence.jdbc.url&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;jdbc:postgresql://psql.wmi.amu.edu.pl:5432/mw?ssl=true&amp;amp;sslfactory=org.postgresql.ssl.NonValidatingFactory&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;jakarta.persistence.jdbc.user&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;postgres&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;jakarta.persistence.jdbc.password&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;postgres&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;jakarta.persistence.jdbc.driver&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;org.postgresql.Driver&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+
+                        </span><span class="comment multiline">&lt;!-- Hibernate settings --&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;hibernate.dialect&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;org.hibernate.dialect.PostgreSQLDialect&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;hibernate.hbm2ddl.auto&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;create&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;hibernate.format_sql&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;false&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;hibernate.show_sql&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;true&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                </span><span class="name tag">&lt;/properties&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;/persistence-unit&gt;</span><span class="whitespace">
+</span><span class="name tag">&lt;/persistence&gt;</span></code></pre>
+<p>Na zajęciach wykorzystywać będziemy bazę HSQL uruchamianą w pamięci komputera:</p>
+<pre class="code xml highlight literal-block"><code><span class="comment preproc">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span><span class="whitespace">
+</span><span class="name tag">&lt;persistence</span><span class="whitespace"> </span><span class="name attribute">version=</span><span class="literal string">&quot;3.1&quot;</span><span class="whitespace">
+                        </span><span class="name attribute">xmlns=</span><span class="literal string">&quot;https://jakarta.ee/xml/ns/persistence&quot;</span><span class="whitespace">
+                        </span><span class="name attribute">xmlns:xsi=</span><span class="literal string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span><span class="whitespace">
+                        </span><span class="name attribute">xsi:schemaLocation=</span><span class="literal string">&quot;https://jakarta.ee/xml/ns/persistence
+                                                                https://jakarta.ee/xml/ns/persistence/persistence_3_1.xsd&quot;</span><span class="name tag">&gt;</span><span class="whitespace">
+
+        </span><span class="name tag">&lt;persistence-unit</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;hibernate-dynamic&quot;</span><span class="whitespace"> </span><span class="name attribute">transaction-type=</span><span class="literal string">&quot;RESOURCE_LOCAL&quot;</span><span class="name tag">&gt;</span><span class="whitespace">
+                </span><span class="name tag">&lt;provider&gt;</span>org.hibernate.jpa.HibernatePersistenceProvider<span class="name tag">&lt;/provider&gt;</span><span class="whitespace">
+
+                </span><span class="name tag">&lt;properties&gt;</span><span class="whitespace">
+                        </span><span class="comment multiline">&lt;!-- JDBC settings --&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;jakarta.persistence.jdbc.url&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;jdbc:hsqldb:mem:PRA&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;jakarta.persistence.jdbc.user&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;sa&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;jakarta.persistence.jdbc.password&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;jakarta.persistence.jdbc.driver&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;org.hsqldb.jdbc.JDBCDriver&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+
+                        </span><span class="comment multiline">&lt;!-- Hibernate settings --&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;hibernate.dialect&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;org.hibernate.dialect.HSQLDialect&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;hibernate.hbm2ddl.auto&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;create&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;hibernate.format_sql&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;false&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;property</span><span class="whitespace"> </span><span class="name attribute">name=</span><span class="literal string">&quot;hibernate.show_sql&quot;</span><span class="whitespace"> </span><span class="name attribute">value=</span><span class="literal string">&quot;true&quot;</span><span class="name tag">/&gt;</span><span class="whitespace">
+                        </span><span class="name tag">&lt;/properties&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;/persistence-unit&gt;</span><span class="whitespace">
+</span><span class="name tag">&lt;/persistence&gt;</span></code></pre>
+<p class="tag">Zadanie 1</p>
+<p>Dodaj do katalogu <strong>resources</strong> podkatalog <strong>META-INF</strong> a w nim plik <strong>persistence.xml</strong> wklej do niego powyższą zawartość.</p>
+<p><strong>WAŻNE</strong>, jeśli zobaczysz błąd:</p>
+<pre class="code xml highlight literal-block"><code><span class="whitespace">    </span>Initial<span class="whitespace"> </span>SessionFactory<span class="whitespace"> </span>creation<span class="whitespace"> </span>failed.javax.persistence.PersistenceException:<span class="whitespace"> </span>No<span class="whitespace"> </span>Persistence<span class="whitespace"> </span>provider<span class="whitespace"> </span>for<span class="whitespace"> </span>EntityManager<span class="whitespace"> </span>named<span class="whitespace"> </span>hibernate-dynamic<span class="whitespace">
+</span>Exception<span class="whitespace"> </span>in<span class="whitespace"> </span>thread<span class="whitespace"> </span>&quot;main&quot;<span class="whitespace"> </span>java.lang.NullPointerException</code></pre>
+<p>Oznacza to najprawdopodobniej, że Hibernate nie może znaleźć ustawień (lub całego pliku), sprawdź ustawienia resource, ścieżki katalogów, nazwe entity managera itp. Sprawdź czy katalog Resource oznaczony jest jako ResourceRoot.</p>
+</section>
+<section id="mapowanie-adnotacje">
+<h4>Mapowanie - adnotacje</h4>
+<p>Oznaczenie odwzorowania między tabelami bazy danych a klasą realizowane jest za pomocą mechanizmu adnotacji.</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><strong>&#64;Entity</strong> adnotacja służąca do określenia, że dana klasa ma być odwzorowana na encję bazy danych.</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>&#64;Table</strong> określa właściwości tabeli (np. nazwę, definicja ograniczeń itp.), jeżeli nie będzie tej adnotacji nazwą tabeli będzie nazwa klasy</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>&#64;Id</strong> oznaczamy klucz główny tabeli</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>&#64;Column</strong> określa właściwości kolumny tabeli (np. nazwę, czy musi być unikalne, czy może być puste), gdy nie jest zdefiniowana kolumna będzie miała taką nazwę jak pole klasy.</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>&#64;GeneratedValue</strong> oznacza że wartość tego pola będzie automatycznie generowana</div>
+</div>
+</blockquote>
+<pre class="code java highlight literal-block"><code><span class="keyword namespace">package</span><span class="whitespace"> </span><span class="name namespace">hibernate.model</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">javax.persistence.*</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Entity</span><span class="whitespace">
+</span><span class="name decorator">&#64;Table</span><span class="punctuation">(</span><span class="name">name</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;EMPLOYEE&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">uniqueConstraints</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name decorator">&#64;UniqueConstraint</span><span class="punctuation">(</span><span class="name">columnNames</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="literal string">&quot;first_name&quot;</span><span class="punctuation">,</span><span class="literal string">&quot;last_name&quot;</span><span class="punctuation">})})</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">Employee</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Id</span><span class="whitespace"> </span><span class="name decorator">&#64;GeneratedValue</span><span class="whitespace">
+    </span><span class="name decorator">&#64;Column</span><span class="punctuation">(</span><span class="name">name</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;id&quot;</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Column</span><span class="punctuation">(</span><span class="name">name</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;first_name&quot;</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name">firstName</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Column</span><span class="punctuation">(</span><span class="name">name</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;last_name&quot;</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name">lastName</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Column</span><span class="punctuation">(</span><span class="name">name</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;salary&quot;</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name">salary</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Column</span><span class="punctuation">(</span><span class="name">name</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;PESEL&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">nullable</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword constant">false</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">unique</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword constant">true</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name">pesel</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name function">Employee</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name function">getId</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">setId</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name">id</span><span class="whitespace"> </span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+            </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">id</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name function">getFirstName</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+         </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">firstName</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">setFirstName</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name">first_name</span><span class="whitespace"> </span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">firstName</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">first_name</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name function">getLastName</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">lastName</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">setLastName</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name">last_name</span><span class="whitespace"> </span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">lastName</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">last_name</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name function">getSalary</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">salary</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+        </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">setSalary</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name">salary</span><span class="whitespace"> </span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">salary</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">salary</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name function">getPesel</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">pesel</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">setPesel</span><span class="punctuation">(</span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name">pesel</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">pesel</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">pesel</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p class="tag">Zadanie 2</p>
+<p>Uruchom klasę <strong>CreateModel</strong> zobacz jakie tabele i zależności tworzy Hibernate.</p>
+</section>
+<section id="collections-mapping">
+<h4>Collections mapping</h4>
+<p>Proste kolekcje typów prostych możemy definiować za pomocą adnotacji &#64;ElementCollection</p>
+<pre class="code java highlight literal-block"><code><span class="name decorator">&#64;Entity</span><span class="punctuation">(</span><span class="name">name</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;Employee&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">static</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">Employee</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Id</span><span class="whitespace">
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">Long</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;ElementCollection</span><span class="whitespace">
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">List</span><span class="operator">&lt;</span><span class="name">String</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">phones</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">ArrayList</span><span class="operator">&lt;&gt;</span><span class="punctuation">();</span><span class="whitespace">
+
+    </span><span class="punctuation">...</span><span class="whitespace">
+
+</span><span class="punctuation">}</span></code></pre>
+<p class="tag">Zadanie 3</p>
+<p>Dodaj kolekcję <strong>numerów telefonów</strong> do Pracownika, zobacz jak są mapowane w bazie danych przez Hibernate.</p>
+</section>
+<section id="stany-encji">
+<h4>Stany encji</h4>
+<p>Oprócz samego mapowania obiektowo-relacyjnego, jednym z problemów, które Hibernate miał rozwiązać, jest problem zarządzania obiektami podczas wykonywania programu. Pojęcie &quot;persisted context&quot; jest rozwiązaniem Hibernata dla tego problemu. Persisted contex może być traktowany jako kontener lub pamięć podręczna pierwszego poziomu dla wszystkich obiektów, które zostały załadowane lub zapisane w bazie danych podczas sesji.</p>
+<p>Każda instancja obiektu w aplikacji pojawia się w jednym z trzech głównych stanów w odniesieniu do kontekstu trwałości sesji:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">* <strong>przejściowy (transient)</strong> - ta instancja nie jest i nigdy nie była związana z sesją; ta instancja nie ma odpowiednich wierszy w bazie danych; zwykle jest to tylko nowy obiekt, który stworzyłeś, aby zapisać do bazy danych (nie posiada własnego id);</div>
+</div>
+<div class="line-block">
+<div class="line">* <strong>persistent (managed)</strong> - ta instancja jest powiązana z unikalnym identyfikatorem w obiekcie Session. Może istnieć fizycznie w bazie danych lub nie. Każda dokonana na obiekcie zmiana będzie automatycznie śledzona i propagowana do bazy danych.</div>
+</div>
+<div class="line-block">
+<div class="line">* <strong>odłączone (detached)</strong> - ta instancja była kiedyś podłączona do sesji (w stanie trwałym), ale teraz nie jest; instancja wchodzi w ten stan, jeśli usuniesz ją z kontekstu, wyczyścisz lub zamkniesz sesję.</div>
+</div>
+</blockquote>
+<p>Ważne jest, aby od samego początku zrozumieć, że wszystkie metody (persist, save, update, merge) nie powodują od razu odpowiednich instrukcji SQL UPDATE lub INSERT. Rzeczywiste zapisanie danych w bazie danych następuje po dokonaniu transakcji lub opróżnieniu sesji (flush()).</p>
+<p class="center"><img alt="ass10" src="hib.png" /></p>
+</section>
+<section id="entitymanager-vs-sessionmanager">
+<h4>EntityManager vs SessionManager</h4>
+<p>Są dwa standardy obsługi sesji w hibernate, oparty na sesji i oparty na starszym standardzie JPA z wykorzystaniem EntityManagera.</p>
+<p>W naszych przykładach będziemy używać obiektu <strong>Session</strong>.</p>
+<p>Jeśli podczas pracy z Entity Managerem potrzebujesz obiektów Session możesz je również uzyskać za pomocą:</p>
+<pre class="code java highlight literal-block"><code><span class="name">Session</span><span class="whitespace"> </span><span class="name">session</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">entityManager</span><span class="punctuation">.</span><span class="name attribute">unwrap</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="name">Session</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="whitespace"> </span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="name">SessionImplementor</span><span class="whitespace"> </span><span class="name">sessionImplementor</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">entityManager</span><span class="punctuation">.</span><span class="name attribute">unwrap</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="name">SessionImplementor</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="whitespace"> </span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="name">SessionFactory</span><span class="whitespace"> </span><span class="name">sessionFactory</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">entityManager</span><span class="punctuation">.</span><span class="name attribute">getEntityManagerFactory</span><span class="punctuation">().</span><span class="name attribute">unwrap</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="name">SessionFactory</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="whitespace"> </span><span class="punctuation">);</span></code></pre>
+</section>
+<section id="metody-session">
+<h4>Metody Session</h4>
+<section id="get-method">
+<h5>Get method</h5>
+<p>Metoda get służy do pobierania jednego obiektu na podstawie jego klucza. Kluczem do wyszukania obiektu jest pole, które ma adnotację <strong>&#64;Id</strong>. Przykładowe użycie:</p>
+<pre class="code java highlight literal-block"><code><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">get</span><span class="punctuation">(</span><span class="name">Employee</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number integer">1L</span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">byId</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="name">Employee</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="whitespace"> </span><span class="punctuation">).</span><span class="name attribute">load</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="literal number integer">1L</span><span class="whitespace"> </span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="comment single">// get only reference not the whole object</span><span class="whitespace">
+</span><span class="name">book</span><span class="punctuation">.</span><span class="name attribute">setWorker</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">load</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="name">Employee</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number integer">1L</span><span class="whitespace"> </span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">);</span></code></pre>
+<p>pobierze nam obiekt typu Employee o identyfikatorze równym 1.</p>
+<p>Jeśli ta metoda nie znajdzie obiektu w bazie danych, zwraca wartość null.</p>
+<p>Możliwe jest również zwrócenie obiektu typu Optional z Java 8:</p>
+<pre class="code java highlight literal-block"><code><span class="name">Optional</span><span class="operator">&lt;</span><span class="name">Employee</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">optionalPerson</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">byId</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="name">Employee</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="whitespace"> </span><span class="punctuation">).</span><span class="name attribute">loadOptional</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="literal number integer">1L</span><span class="whitespace"> </span><span class="punctuation">);</span></code></pre>
+<p>Pobieranie listy obiektów z listy id'ków</p>
+<pre class="code java highlight literal-block"><code><span class="name">List</span><span class="operator">&lt;</span><span class="name">Employee</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">employees</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">session</span><span class="whitespace">
+            </span><span class="punctuation">.</span><span class="name attribute">byMultipleIds</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="name">Employee</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="whitespace"> </span><span class="punctuation">)</span><span class="whitespace">
+            </span><span class="punctuation">.</span><span class="name attribute">multiLoad</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="literal number integer">1L</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number integer">2L</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number integer">3L</span><span class="whitespace"> </span><span class="punctuation">);</span></code></pre>
+</section>
+<section id="persist-method">
+<h5>Persist method</h5>
+<p>Możesz użyć tej metody, aby wstawić nowy obiekt do stanu zarządzanego.</p>
+<pre class="code java highlight literal-block"><code><span class="name">Employee</span><span class="whitespace"> </span><span class="name">emp</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">Employee</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">persist</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="name">person</span><span class="whitespace"> </span><span class="punctuation">);</span></code></pre>
+<p>Przenosi nowy obiekt do stanu <em>zarządzanego</em>. Metoda save sprawia, że ​​obiekt jest zarządzalny, tj. wszelkie zmiany w nim wprowadzone (w ramach jednej metody z adnotacją &#64;Transactional lub metod, które ta metoda wywołuje) zostaną utrwalone w bazie danych.</p>
+</section>
+<section id="merge-method">
+<h5>Merge method</h5>
+<p>Za pomocą tej metody można przenieść istniejący obiekt ze stanu <em>detached</em> do stanu <em>zarządzanego</em>. Przykład:</p>
+<pre class="code java highlight literal-block"><code><span class="name">Employee</span><span class="whitespace"> </span><span class="name">person</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">byId</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="name">Employee</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="whitespace"> </span><span class="punctuation">).</span><span class="name attribute">load</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="literal number integer">1L</span><span class="whitespace"> </span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="comment single">//Clear the Session so the person entity becomes detached</span><span class="whitespace">
+</span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">clear</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="name">person</span><span class="punctuation">.</span><span class="name attribute">setName</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="literal string">&quot;Mr. John Doe&quot;</span><span class="whitespace"> </span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="name">person</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">Employee</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">merge</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="name">person</span><span class="whitespace"> </span><span class="punctuation">);</span></code></pre>
+<p>Weryfikacja stanu obiektu za pomocą Hibernate API</p>
+<pre class="code java highlight literal-block"><code><span class="keyword type">boolean</span><span class="whitespace"> </span><span class="name">contained</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">contains</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="name">person</span><span class="whitespace"> </span><span class="punctuation">);</span></code></pre>
+</section>
+<section id="delete-method">
+<h5>Delete method</h5>
+<p>Metoda delete służy do usuwania obiektów.</p>
+<pre class="code java highlight literal-block"><code><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">delete</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="name">person</span><span class="whitespace"> </span><span class="punctuation">);</span></code></pre>
+<p>More information:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://docs.jboss.org/hibernate/orm/5.4/javadocs/org/hibernate/Session.html">https://docs.jboss.org/hibernate/orm/5.4/javadocs/org/hibernate/Session.html</a></div>
+</div>
+</blockquote>
+</section>
+</section>
+<section id="przyklad">
+<h4>Przykład</h4>
+<p>Klasa zapisująca i czytająca element z bazy danych:</p>
+<pre class="code java highlight literal-block"><code><span class="keyword declaration">class</span> <span class="name class">Manager</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+   </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">static</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">main</span><span class="punctuation">(</span><span class="name">String</span><span class="operator">[]</span><span class="whitespace"> </span><span class="name">args</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+    </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="literal string">&quot;Start&quot;</span><span class="punctuation">);</span><span class="whitespace">
+
+    </span><span class="name">EntityManager</span><span class="whitespace"> </span><span class="name">entityManager</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword constant">null</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="name">EntityManagerFactory</span><span class="whitespace"> </span><span class="name">entityManagerFactory</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword constant">null</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="keyword">try</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+        </span><span class="comment single">// FACTORY NAME HAS TO MATCHED THE ONE FROM PERSISTED.XML !!!</span><span class="whitespace">
+        </span><span class="name">entityManagerFactory</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">Persistence</span><span class="punctuation">.</span><span class="name attribute">createEntityManagerFactory</span><span class="punctuation">(</span><span class="literal string">&quot;hibernate-dynamic&quot;</span><span class="punctuation">);</span><span class="whitespace">
+
+        </span><span class="name">entityManager</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">entityManagerFactory</span><span class="punctuation">.</span><span class="name attribute">createEntityManager</span><span class="punctuation">();</span><span class="whitespace">
+        </span><span class="name">Session</span><span class="whitespace"> </span><span class="name">session</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">entityManager</span><span class="punctuation">.</span><span class="name attribute">unwrap</span><span class="punctuation">(</span><span class="name">Session</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">);</span><span class="whitespace">
+
+        </span><span class="comment single">//New transaction</span><span class="whitespace">
+        </span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">beginTransaction</span><span class="punctuation">();</span><span class="whitespace">
+
+        </span><span class="comment single">// Create Employee</span><span class="whitespace">
+        </span><span class="name">Employee</span><span class="whitespace"> </span><span class="name">emp</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">createEmployee</span><span class="punctuation">();</span><span class="whitespace">
+
+        </span><span class="comment single">// Save in First order Cache (not database yet)</span><span class="whitespace">
+        </span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">save</span><span class="punctuation">(</span><span class="name">emp</span><span class="punctuation">);</span><span class="whitespace">
+
+        </span><span class="name">Employee</span><span class="whitespace"> </span><span class="name">employee</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">get</span><span class="punctuation">(</span><span class="name">Employee</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">emp</span><span class="punctuation">.</span><span class="name attribute">getId</span><span class="punctuation">());</span><span class="whitespace">
+        </span><span class="keyword">if</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">employee</span><span class="whitespace"> </span><span class="operator">==</span><span class="whitespace"> </span><span class="keyword constant">null</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+            </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="name">emp</span><span class="punctuation">.</span><span class="name attribute">getId</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="literal string">&quot; not found! &quot;</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="punctuation">}</span><span class="whitespace"> </span><span class="keyword">else</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+            </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="literal string">&quot;Found &quot;</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="name">employee</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="punctuation">}</span><span class="whitespace">
+
+        </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="literal string">&quot;Employee &quot;</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="name">employee</span><span class="punctuation">.</span><span class="name attribute">getId</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="literal string">&quot; &quot;</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="name">employee</span><span class="punctuation">.</span><span class="name attribute">getFirstName</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="name">employee</span><span class="punctuation">.</span><span class="name attribute">getLastName</span><span class="punctuation">());</span><span class="whitespace">
+
+        </span><span class="name">employee</span><span class="punctuation">.</span><span class="name attribute">setLastName</span><span class="punctuation">(</span><span class="literal string">&quot;NowakPRE&quot;</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">Random</span><span class="punctuation">().</span><span class="name attribute">nextInt</span><span class="punctuation">());</span><span class="whitespace"> </span><span class="comment single">// No SQL needed</span><span class="whitespace">
+        </span><span class="comment single">//changeFirstGuyToNowak(session);</span><span class="whitespace">
+
+        </span><span class="comment single">//Commit transaction to database</span><span class="whitespace">
+        </span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">getTransaction</span><span class="punctuation">().</span><span class="name attribute">commit</span><span class="punctuation">();</span><span class="whitespace">
+
+        </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="literal string">&quot;Done&quot;</span><span class="punctuation">);</span><span class="whitespace">
+
+        </span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">close</span><span class="punctuation">();</span><span class="whitespace">
+
+    </span><span class="punctuation">}</span><span class="whitespace"> </span><span class="keyword">catch</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name">Throwable</span><span class="whitespace"> </span><span class="name">ex</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="comment single">// Make sure you log the exception, as it might be swallowed</span><span class="whitespace">
+        </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">err</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="literal string">&quot;Initial SessionFactory creation failed.&quot;</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="name">ex</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace"> </span><span class="keyword">finally</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">entityManagerFactory</span><span class="punctuation">.</span><span class="name attribute">close</span><span class="punctuation">();</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="punctuation">}</span></code></pre>
+<section id="flush">
+<h5>Flush</h5>
+<p>Aby wymuśić synchronizacje persistence context, czyli przesłanie stanu obiektów do bazy danych można wykonać metodę <strong>flush()</strong>. Stan kontekstu jest też czasem synchronizowany automatycznie za nas:</p>
+<pre class="code xml highlight literal-block"><code><span class="whitespace">   </span>From<span class="whitespace"> </span>time<span class="whitespace"> </span>to<span class="whitespace"> </span>time<span class="whitespace"> </span>the<span class="whitespace"> </span>Session<span class="whitespace"> </span>will<span class="whitespace"> </span>execute<span class="whitespace"> </span>the<span class="whitespace"> </span>SQL<span class="whitespace"> </span>statements<span class="whitespace"> </span>needed<span class="whitespace"> </span>to<span class="whitespace"> </span>synchronize<span class="whitespace"> </span>the<span class="whitespace"> </span>JDBC<span class="whitespace"> </span>connection's<span class="whitespace"> </span>state<span class="whitespace"> </span>with<span class="whitespace"> </span>the<span class="whitespace"> </span>state<span class="whitespace"> </span>of<span class="whitespace"> </span>objects<span class="whitespace"> </span>held<span class="whitespace"> </span>in<span class="whitespace"> </span>memory.<span class="whitespace"> </span>This<span class="whitespace"> </span>process,<span class="whitespace"> </span>flush,<span class="whitespace"> </span>occurs<span class="whitespace"> </span>by<span class="whitespace"> </span>default<span class="whitespace"> </span>at<span class="whitespace"> </span>the<span class="whitespace"> </span>following<span class="whitespace"> </span>points<span class="whitespace">
+
+</span>-<span class="whitespace"> </span>before<span class="whitespace"> </span>some<span class="whitespace"> </span>query<span class="whitespace"> </span>executions<span class="whitespace">
+
+</span>-<span class="whitespace"> </span>from<span class="whitespace"> </span>org.hibernate.Transaction.commit()<span class="whitespace">
+
+</span>-<span class="whitespace"> </span>from<span class="whitespace"> </span>Session.flush()</code></pre>
+<p class="tag">Zadanie 4</p>
+<p>Przejdź debuggiem powyższy kod linijka po linijce by zobaczyć jak się zachowuje.
+Dodaj flush() między zmianą nazwiska i zobacz co się stanie.</p>
+<pre class="code java highlight literal-block"><code><span class="name">employee</span><span class="punctuation">.</span><span class="name attribute">setLastName</span><span class="punctuation">(</span><span class="literal string">&quot;NowakPRE&quot;</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">Random</span><span class="punctuation">().</span><span class="name attribute">nextInt</span><span class="punctuation">());</span><span class="whitespace"> </span><span class="comment single">// No SQL needed</span><span class="whitespace">
+</span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">flush</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="name">employee</span><span class="punctuation">.</span><span class="name attribute">setLastName</span><span class="punctuation">(</span><span class="literal string">&quot;NowakPRE&quot;</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">Random</span><span class="punctuation">().</span><span class="name attribute">nextInt</span><span class="punctuation">());</span><span class="whitespace"> </span><span class="comment single">// No SQL needed</span></code></pre>
+</section>
+<section id="refresh">
+<h5>Refresh</h5>
+<p>Możesz także odświeżyć obiekt, aby zsynchronizować stan obiektu ze stanem z bazy danych</p>
+<pre class="code java highlight literal-block"><code><span class="punctuation">((</span><span class="name">SessionImpl</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="name">session</span><span class="punctuation">).</span><span class="name attribute">refresh</span><span class="punctuation">(</span><span class="name">emp</span><span class="punctuation">.</span><span class="name attribute">getAddress</span><span class="punctuation">());</span><span class="whitespace">
+</span><span class="name">emp</span><span class="punctuation">.</span><span class="name attribute">getAddress</span><span class="punctuation">()</span></code></pre>
+<p class="tag">Zadanie 5</p>
+<p>Odśwież obiekt przed updatem oraz po zakonczeniu transakcji zobacz w consoli jakie operacje zostaną wykonane.</p>
+<pre class="code java highlight literal-block"><code><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">refresh</span><span class="punctuation">(</span><span class="name">employee</span><span class="punctuation">);</span></code></pre>
+<p>Dodaj flush przed refreshem.</p>
+<p class="tag">Zadanie 6</p>
+<p>Zobacz czy zmiana imienia pracownika wykona zapytania na bazie danych.  Co stanie się jeżeli uruchomimy metodę <em>changeFirstGuyToNowak</em>?</p>
+</section>
+</section>
+<section id="zapytania">
+<h4>Zapytania</h4>
+</section>
+<section id="queries">
+<h4>Queries</h4>
+<section id="native-query">
+<h5>Native Query</h5>
+<p>Możesz wyrażać zapytania w natywnym dialekcie SQL swojej bazy danych.</p>
+<pre class="code java highlight literal-block"><code><span class="name">List</span><span class="operator">&lt;</span><span class="name">Object</span><span class="operator">[]&gt;</span><span class="whitespace"> </span><span class="name">persons</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">createNativeQuery</span><span class="punctuation">(</span><span class="whitespace">
+    </span><span class="literal string">&quot;SELECT * FROM Employee&quot;</span><span class="whitespace"> </span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="punctuation">.</span><span class="name attribute">getResultList</span><span class="punctuation">();</span></code></pre>
+</section>
+<section id="hql">
+<h5>HQL</h5>
+<p>Hibernate Query Language (HQL) i Java Persistence Query Language (JPQL) to języki podobne do SQL do tworzenia zapytań w Hibernate. Aby wykonać zapytanie, musimy je najpierw utworzyć za pomocą metody <strong>session.createQuery</strong>, a następnie pobrać wynik. Aby pobrać listę pracowników musimy wykonać następujący kod:</p>
+<pre class="code java highlight literal-block"><code><span class="name">List</span><span class="operator">&lt;</span><span class="name">Employee</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">persons</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">createQuery</span><span class="punctuation">(</span><span class="whitespace">
+    </span><span class="literal string">&quot;from Employee&quot;</span><span class="whitespace"> </span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="punctuation">.</span><span class="name attribute">list</span><span class="punctuation">();</span></code></pre>
+<p>by utworzyć zapytanie z parametrem stosujemy zapis:</p>
+<pre class="code java highlight literal-block"><code><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">createQuery</span><span class="punctuation">(</span><span class="whitespace">
+             </span><span class="literal string">&quot;SELECT c FROM Employee c WHERE c.lastName LIKE :firstName&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">Employee</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">)</span><span class="whitespace">
+             </span><span class="punctuation">.</span><span class="name attribute">setParameter</span><span class="punctuation">(</span><span class="literal string">&quot;firstName&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;%&quot;</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="name">firstName</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="literal string">&quot;%&quot;</span><span class="punctuation">).</span><span class="name attribute">list</span><span class="punctuation">();</span></code></pre>
+<p>Zapytanie jest reprezentowane przez obiekt Query:</p>
+<pre class="code java highlight literal-block"><code><span class="name">Query</span><span class="whitespace"> </span><span class="name">query</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">createQuery</span><span class="punctuation">(</span><span class="literal string">&quot;SELECT k FROM Employee k&quot;</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="name">List</span><span class="operator">&lt;</span><span class="name">Employee</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">employees</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">query</span><span class="punctuation">.</span><span class="name attribute">getResultList</span><span class="punctuation">();</span></code></pre>
+<p>Jeśli nasze zapytanie zwraca tylko jeden element, możemy użyć metody <strong>query.getSingleResult()</strong>.</p>
+<p>Uwaga! Jeżeli zapytanie do bazy nie zwraca wyników (wynik jest pusty), to:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">metoda <strong>getResultList()</strong> zwróci <strong>null</strong>!</div>
+</div>
+<div class="line-block">
+<div class="line">metoda <strong>getSingleResult()</strong> zgłasza wyjątek (NoResultException)! (jeśli mamy więcej niż jeden wynik, otrzymujemy również wyjątek - NonUniqueResultException)</div>
+</div>
+</blockquote>
+<p>Obiekty zwrócone w zapytaniu są w stanie <strong>persisted</strong> czyli wszystkie dokonane w nich zmiany zostaną automatycznie zapisane do bazy danych (jeśli zostaną uwzględnione w transakcji - obiekty spoza transakcji nie zostaną zapisane).</p>
+<p class="tag">Zadanie 7</p>
+<p>Dodaj metodę getThemAll() pobierającą wszystkich pracowników.</p>
+<p>Uwaga! Należy pamiętać, że zapytanie używa nazwy pól, takie jakie są nazwy podane w klasie, a nie nazwy w bazie danych!</p>
+<p>Z wyjątkiem nazw klas i metod Java, w zapytaniach nie jest rozróżniana wielkość liter. Tak więc SeLeCT jest tym samym, co sELEct, jest tym samym co SELECT, ale org.hibernate.eg.FOO i org.hibernate.eg.Foo są różne, podobnie jak foo.barSet i foo.BARSET.</p>
+</section>
+<section id="join-query-example">
+<h5>Join query example</h5>
+<p>Zapytanie typu join w HQL</p>
+<pre class="code java highlight literal-block"><code><span class="name">List</span><span class="operator">&lt;</span><span class="name">Person</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">persons</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">createQuery</span><span class="punctuation">(</span><span class="whitespace">
+    </span><span class="literal string">&quot;select distinct pr &quot;</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace">
+    </span><span class="literal string">&quot;from Employee pr &quot;</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace">
+    </span><span class="literal string">&quot;join pr.phones ph &quot;</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace">
+    </span><span class="literal string">&quot;where ph.type = :phoneType&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">Employee</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="whitespace"> </span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="punctuation">.</span><span class="name attribute">setParameter</span><span class="punctuation">(</span><span class="whitespace"> </span><span class="literal string">&quot;phoneType&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">PhoneType</span><span class="punctuation">.</span><span class="name attribute">MOBILE</span><span class="whitespace"> </span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="punctuation">.</span><span class="name attribute">getResultList</span><span class="punctuation">();</span></code></pre>
+</section>
+<section id="criteria-query">
+<h5>Criteria Query</h5>
+<p>Istnieje trzeci sposób tworzenia zapytania w Hibernate, który nazywa się Criteria Query, jest on bardziej obiektowy i trudniej w nim popełnić błąd typów, czy wywołania, możesz o nim przeczytać tutaj:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://docs.jboss.org/hibernate/orm/5.4/userguide/html_single/Hibernate_User_Guide.html#criteria">https://docs.jboss.org/hibernate/orm/5.4/userguide/html_single/Hibernate_User_Guide.html#criteria</a></div>
+</div>
+</blockquote>
+</section>
+</section>
+<section id="zaleznosci-1">
+<h4>Zależności</h4>
+</section>
+<section id="zaleznosci-onetoone">
+<h4>Zależności OneToOne</h4>
+<p>Pomiędzy tabelami baz danych występują zależności takie jak 1-1, 1-*, *-*.</p>
+<p>Cel:  Zadefiniuj zależność między obiektami - niech jeden obiekt będzie polem drugiego.</p>
+<p>Czasem nasz model wymaga by oprócz typów prostych dana encja zawierała odnośnik do innej encji. Np. pracownika chcemy połączyć z jego adresem.</p>
+<p class="tag">Zadanie 8</p>
+<p>Zdefiniuj klasę address mającą pola city, street, nr, houseNumber, postcode. Tak by wszystkie oprócz houseNumber nie mogły być puste oraz kod miał co najwyżej 5 znaków (wszystkie pola powinny być typu String). Dodaj autogenerowany klucz główny. Klasa encji musi zawsze mieć zdefiniowany bezparametrowy konstruktor!</p>
+<pre class="code java highlight literal-block"><code><span class="name decorator">&#64;Entity</span><span class="whitespace">
+</span><span class="name decorator">&#64;Table</span><span class="punctuation">(</span><span class="name">name</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;ADDRESSES&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">Address</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Id</span><span class="whitespace">
+    </span><span class="name decorator">&#64;GeneratedValue</span><span class="punctuation">(</span><span class="name">generator</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;gen&quot;</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="name decorator">&#64;SequenceGenerator</span><span class="punctuation">(</span><span class="name">name</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;gen&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">sequenceName</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;author_seq&quot;</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="name decorator">&#64;Column</span><span class="punctuation">(</span><span class="name">name</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;id&quot;</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Column</span><span class="punctuation">(</span><span class="name">nullable</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword constant">false</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="name">String</span><span class="whitespace"> </span><span class="name">street</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Column</span><span class="punctuation">(</span><span class="name">nullable</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword constant">false</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="name">String</span><span class="whitespace"> </span><span class="name">city</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Column</span><span class="punctuation">(</span><span class="name">length</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal number integer">5</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">nullable</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword constant">false</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="name">String</span><span class="whitespace"> </span><span class="name">nr</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Column</span><span class="punctuation">(</span><span class="name">length</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal number integer">5</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="name">String</span><span class="whitespace"> </span><span class="name">housenr</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Column</span><span class="punctuation">(</span><span class="name">length</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal number integer">5</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">nullable</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword constant">false</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="name">String</span><span class="whitespace"> </span><span class="name">postcode</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name function">getId</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">setId</span><span class="punctuation">(</span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">id</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name function">getStreet</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">street</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">setStreet</span><span class="punctuation">(</span><span class="name">String</span><span class="whitespace"> </span><span class="name">street</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">street</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">street</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name function">getCity</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">city</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">setCity</span><span class="punctuation">(</span><span class="name">String</span><span class="whitespace"> </span><span class="name">city</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">city</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">city</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name function">getNr</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">nr</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">setNr</span><span class="punctuation">(</span><span class="name">String</span><span class="whitespace"> </span><span class="name">nr</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">nr</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">nr</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name function">getHousenr</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">housenr</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">setHousenr</span><span class="punctuation">(</span><span class="name">String</span><span class="whitespace"> </span><span class="name">housenr</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">housenr</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">housenr</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name function">getPostcode</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">postcode</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+
+    </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword type">void</span><span class="whitespace"> </span><span class="name function">setPostcode</span><span class="punctuation">(</span><span class="name">String</span><span class="whitespace"> </span><span class="name">postcode</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">postcode</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">postcode</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Dodaj w klasie Employee pole, oraz zdefiniuj w Managerze address dla pracownika Jan.</p>
+<p>Zwróć uwagę na to czy import w klasie Address jest taki sam jak import w klacie Employee!</p>
+<pre class="code java highlight literal-block"><code><span class="name decorator">&#64;OneToOne</span><span class="punctuation">(</span><span class="name">cascade</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">CascadeType</span><span class="punctuation">.</span><span class="name attribute">PERSIST</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name decorator">&#64;JoinColumn</span><span class="punctuation">(</span><span class="name">name</span><span class="operator">=</span><span class="literal string">&quot;Address_ID&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">referencedColumnName</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;id&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">Address</span><span class="whitespace"> </span><span class="name">address</span><span class="punctuation">;</span></code></pre>
+<p>Join column definiuje nazwy naszej kolumny oraz możemy zdefiniować nazwę kolumny z którą się łączy nasz element (kolumna ta musi być unikalna). Domyślnie łączymy się z kluczem głównym tabeli.</p>
+<p>W OneToOne możemy definiować dodatkowe opcje, optional oznacza czy pole jest wymagane, <strong>CASCADE</strong> oznacza czy zmiany w polu adress danej osoby będą się propagować do tabeli Address (dostępne opcje MERGE, PERSIST, REFRESH, REMOVE, ALL).</p>
+<p>Przykłady:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="http://www.coderpanda.com/jpa-one-to-one-mapping/">http://www.coderpanda.com/jpa-one-to-one-mapping/</a></div>
+</div>
+<div class="line-block">
+<div class="line"><a class="reference external" href="http://www.logicbig.com/tutorials/java-ee-tutorial/jpa/one-to-one/">http://www.logicbig.com/tutorials/java-ee-tutorial/jpa/one-to-one/</a></div>
+</div>
+</blockquote>
+<p>Pamiętaj by dodać do głównego kodu tworzenie Adresu dla pracownika i przypisaniu go do niego.</p>
+<p>Uwaga! Chcemy żeby <strong>id</strong> generowane dla adresów były inne niż te dla pracowników stąd między <strong>&#64;Id</strong> a <strong>&#64;Column</strong> wpisaliśmy:</p>
+<pre class="code java highlight literal-block"><code><span class="name decorator">&#64;GeneratedValue</span><span class="punctuation">(</span><span class="name">generator</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;gen&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name decorator">&#64;SequenceGenerator</span><span class="punctuation">(</span><span class="name">name</span><span class="operator">=</span><span class="literal string">&quot;gen&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">sequenceName</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;author_seq&quot;</span><span class="punctuation">)</span></code></pre>
+<p>Jeżeli potrzebowalibyśmy odwzorowania w obie strony między encjami musimy użyć
+adnotacji <strong>&#64;MappedBy</strong>.</p>
+<p class="tag">Zadanie 9</p>
+<p>Sprawdź jak wygląda jednostronne i obustronne mapowanie z punktu widzenia klasy. Czy jak dodam pracownika z adresem to obiekty są automatycznie dodawane do tabel?</p>
+<p class="tag">Zadanie 10</p>
+<p>Zobacz co się stanie, gdy nie zdefiniujemy wartości dla jednego z obowiązkowych pól w adresie.</p>
+<p>Co się stanie gdy dla obiektu w stanie persisted wykonamy operacje niezgodną z ograniczeniami:</p>
+<pre class="code java highlight literal-block"><code><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">beginTransaction</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="name">Address</span><span class="whitespace"> </span><span class="name">add</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">get</span><span class="punctuation">(</span><span class="name">Address</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number integer">1</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="name">employee</span><span class="punctuation">.</span><span class="name attribute">getAddress</span><span class="punctuation">().</span><span class="name attribute">setStreet</span><span class="punctuation">(</span><span class="keyword constant">null</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">getTransaction</span><span class="punctuation">().</span><span class="name attribute">commit</span><span class="punctuation">();</span></code></pre>
+<p>Przed i po transaction commit (w drugim przypadku przed refresh).
+Zobacz w debugerze jak działa refresh w przypadku &quot;CascadeType.ALL&quot;.</p>
+</section>
+<section id="zaleznosci-onetomany-manytomany">
+<h4>Zależności OneToMany, ManyToMany</h4>
+<p>W wypadku gdy chcemy aby obie klasy miały dowiązanie do siebie (np dziecko do rodzica a rodzic do dziecka) to w jednej klasie definiujemy adnotacje &#64;OneToMany a w drugiej odwołujemy się do tego mapowania przez &#64;ManyToOne).</p>
+<p>Powiązanie &#64;OneToMany łączy encję nadrzędną z co najmniej jedną encją podrzędną. Jeśli &#64;OneToMany nie ma lustrzanej asocjacji &#64;ManyToOne po stronie podrzędnej, asocjacja &#64;OneToMany jest jednokierunkowa. Jeśli po stronie podrzędnej istnieje adnotacja &#64;ManyToOne, to połączenie &#64;OneToMany jest dwukierunkowe, a programista aplikacji może nawigować po tej relacji z obu końców.</p>
+<pre class="code java highlight literal-block"><code><span class="name decorator">&#64;Entity</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">Parent</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+</span><span class="comment single">// ...</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;OneToMany</span><span class="punctuation">(</span><span class="name">mappedBy</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;parent&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">fetch</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">FetchType</span><span class="punctuation">.</span><span class="name attribute">LAZY</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">Set</span><span class="operator">&lt;</span><span class="name">Child</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">children</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">HashSet</span><span class="operator">&lt;</span><span class="name">Child</span><span class="operator">&gt;</span><span class="punctuation">();</span><span class="whitespace">
+
+</span><span class="comment single">// ...</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Entity</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">Child</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="comment single">// ...</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;ManyToOne</span><span class="punctuation">(</span><span class="name">fetch</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">FetchType</span><span class="punctuation">.</span><span class="name attribute">LAZY</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">Parent</span><span class="whitespace"> </span><span class="name">parent</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="comment single">// ...</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>&quot;The mappedBy property is what we use to tell Hibernate which variable we are using to represent the parent class in our child class.&quot;</p>
+<p class="tag">Zadanie 11</p>
+<p>Zmień zależność address - person na ManyToOne. Zwróć uwagę, że mimo, że pole nazywa się <strong>id</strong> musimy podać nazwę <em>tabela_pole</em> w odniesieniu do join column (!).</p>
+<pre class="code java highlight literal-block"><code><span class="name decorator">&#64;ManyToOne</span><span class="punctuation">(</span><span class="name">fetch</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">FetchType</span><span class="punctuation">.</span><span class="name attribute">LAZY</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">cascade</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">CascadeType</span><span class="punctuation">.</span><span class="name attribute">ALL</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name decorator">&#64;JoinColumn</span><span class="punctuation">(</span><span class="name">name</span><span class="operator">=</span><span class="literal string">&quot;address_id&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">Address</span><span class="whitespace"> </span><span class="name">address</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;OneToMany</span><span class="punctuation">(</span><span class="name">mappedBy</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;address&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">cascade</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">CascadeType</span><span class="punctuation">.</span><span class="name attribute">ALL</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">fetch</span><span class="whitespace"> </span><span class="operator">=</span><span class="name">FetchType</span><span class="punctuation">.</span><span class="name attribute">LAZY</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">Set</span><span class="operator">&lt;</span><span class="name">Employee</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">employee</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">HashSet</span><span class="operator">&lt;&gt;</span><span class="punctuation">();</span></code></pre>
+<p class="tag">Zadanie 12</p>
+<p>FetchType określa czy w przypadku pobrania jednej z tabel mamy odpytywać bazę danych o obiekt z nią połączony, jeżeli tak wybieramy FetchType.EAGER jeżeli nie i zapytanie ma być wykonane tylko gdy będziemy odwoływać się do konkretnej wartości należy wybrać FetchType.LAZY.</p>
+<p>Dodaj kod</p>
+<pre class="code java highlight literal-block"><code><span class="whitespace">            </span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="literal string">&quot;Done&quot;</span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="keyword">for</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="keyword type">int</span><span class="whitespace"> </span><span class="name">i</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal number integer">1</span><span class="punctuation">;</span><span class="whitespace"> </span><span class="name">i</span><span class="whitespace"> </span><span class="operator">&lt;</span><span class="whitespace"> </span><span class="literal number integer">10</span><span class="punctuation">;</span><span class="whitespace"> </span><span class="name">i</span><span class="operator">++</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">save</span><span class="punctuation">(</span><span class="name">Employee</span><span class="punctuation">.</span><span class="name attribute">copyEmployee</span><span class="punctuation">(</span><span class="name">emp</span><span class="punctuation">));</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">getTransaction</span><span class="punctuation">().</span><span class="name attribute">begin</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="name">Employee</span><span class="whitespace"> </span><span class="name">employee1</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">get</span><span class="punctuation">(</span><span class="name">Employee</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number integer">1</span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">getTransaction</span><span class="punctuation">().</span><span class="name attribute">commit</span><span class="punctuation">();</span><span class="whitespace">
+
+</span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">clear</span><span class="punctuation">();</span><span class="whitespace">
+
+</span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">getTransaction</span><span class="punctuation">().</span><span class="name attribute">begin</span><span class="punctuation">();</span><span class="whitespace">
+
+</span><span class="name">employee1</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">get</span><span class="punctuation">(</span><span class="name">Employee</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number integer">1</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="name">Address</span><span class="whitespace"> </span><span class="name">add</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">employee1</span><span class="punctuation">.</span><span class="name attribute">getAddress</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="name">System</span><span class="punctuation">.</span><span class="name attribute">out</span><span class="punctuation">.</span><span class="name attribute">println</span><span class="punctuation">(</span><span class="name">add</span><span class="punctuation">.</span><span class="name attribute">getCity</span><span class="punctuation">());</span><span class="whitespace">
+
+</span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">getTransaction</span><span class="punctuation">().</span><span class="name attribute">commit</span><span class="punctuation">();</span><span class="whitespace">
+
+</span><span class="name">session</span><span class="punctuation">.</span><span class="name attribute">close</span><span class="punctuation">();</span></code></pre>
+<p>Zobacz czy pytamy baze danych o address, czy zmienia się to w momencie gdy chcemy wypisać nazwę miasta?
+Zmień typ FETCH na EAGER i porównaj wyniki.</p>
+<p class="tag">Zadanie (domowe)</p>
+<p>Podejrzyj w debugerze zależność między adresem a osobami. Zmień zależność address - person na ManyToMany.</p>
+<p>Aby dodać dane w relacji należy dodać element po stronie parenta (czyli obiektu z oznaczeniem mappedBy).</p>
+<pre class="code java highlight literal-block"><code><span class="name">person</span><span class="punctuation">.</span><span class="name attribute">setAddress</span><span class="punctuation">(</span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">HashSet</span><span class="operator">&lt;&gt;</span><span class="punctuation">(</span><span class="name">emp</span><span class="punctuation">.</span><span class="name attribute">getAddress</span><span class="punctuation">()));</span></code></pre>
+<p>Sprawdź jak realizowana jest ona w bazie danych.</p>
+<section id="transakcje">
+<h5>Transakcje</h5>
+<p>Uwaga! Operacje bazodanowe w Sesji są grupowane w transakcje, co oznacza, że ​​baza danych jest synchronizowana z pozycjami w pamięci dopiero po zakończeniu transakcji.</p>
+<p>Ważny! Jeśli wystąpi błąd podczas przetwarzania transakcji, <strong>żadna</strong> z operacji wykonanych w kodzie, który został przesłany do bazy danych. Dlatego warto tworzyć osobne transakcje dla wybranych funkcjonalności.</p>
+<p>Ważne jest to, że w Hibernate operacje na bazie danych nie muszą być wykonywane w takiej kolejności, w jakiej pojawiają się w kodzie w momencie transakcji. W szczególności powoduje to, że w jednej transakcji nie możemy usunąć, a następnie dodać obiektu z tym samym kluczem głównym.</p>
+<p>Kolejność operacji w dokumentacji:</p>
+<pre class="code xml highlight literal-block"><code>Execute<span class="whitespace"> </span>all<span class="whitespace"> </span>SQL<span class="whitespace"> </span>(and<span class="whitespace"> </span>second-level<span class="whitespace"> </span>cache<span class="whitespace"> </span>updates)<span class="whitespace"> </span>in<span class="whitespace"> </span>a<span class="whitespace"> </span>special<span class="whitespace"> </span>order<span class="whitespace"> </span>so<span class="whitespace"> </span>that<span class="whitespace"> </span>foreign-key<span class="whitespace"> </span>constraints<span class="whitespace"> </span>cannot<span class="whitespace"> </span>be<span class="whitespace"> </span>violated:<span class="whitespace">
+
+</span>Inserts,<span class="whitespace"> </span>in<span class="whitespace"> </span>the<span class="whitespace"> </span>order<span class="whitespace"> </span>they<span class="whitespace"> </span>were<span class="whitespace"> </span>performed<span class="whitespace">
+</span>Updates<span class="whitespace">
+</span>Deletion<span class="whitespace"> </span>of<span class="whitespace"> </span>collection<span class="whitespace"> </span>elements<span class="whitespace">
+</span>Insertion<span class="whitespace"> </span>of<span class="whitespace"> </span>collection<span class="whitespace"> </span>elements<span class="whitespace">
+</span>Deletes,<span class="whitespace"> </span>in<span class="whitespace"> </span>the<span class="whitespace"> </span>order<span class="whitespace"> </span>they<span class="whitespace"> </span>were<span class="whitespace"> </span>performed</code></pre>
+</section>
+</section>
+<section id="flyway">
+<h4>Flyway</h4>
+<p>Flyway to lekkie i łatwe w użyciu narzędzie typu open source, które pomaga
+zarządzać zmianami w strukturze bazy danych. Dzięki niemu możesz śledzić
+i stosować zmiany w bazie danych w sposób uporządkowany i powtarzalny.</p>
+<section id="jak-to-dziala">
+<h5>Jak to działa?</h5>
+<ol class="arabic simple">
+<li><p><strong>Tworzenie migracji</strong>: Zmiany w bazie danych zapisujesz w plikach SQL,
+nazywając je zgodnie z konwencją, np. <span class="docutils literal">V1__utworz_tabele_uzytkownicy.sql</span>.</p></li>
+<li><p><strong>Przechowywanie migracji</strong>: Pliki migracji umieszczasz w określonym
+katalogu w projekcie, np. <span class="docutils literal">db/migration</span>.</p></li>
+<li><p><strong>Stosowanie migracji</strong>: Flyway automatycznie wykrywa nowe migracje
+i stosuje je do bazy danych w odpowiedniej kolejności.</p></li>
+<li><p><strong>Historia migracji</strong>: Informacje o zastosowanych migracjach są
+przechowywane w specjalnej tabeli <span class="docutils literal">flyway_schema_history</span> w bazie danych.</p></li>
+</ol>
+</section>
+<section id="dlaczego-warto-uzywac-flyway">
+<h5>Dlaczego warto używać Flyway?</h5>
+<ul class="simple">
+<li><p><strong>Prostota</strong>: Łatwe w konfiguracji i użyciu, bez zbędnych komplikacji.</p></li>
+<li><p><strong>Kontrola wersji</strong>: Umożliwia śledzenie zmian w strukturze bazy danych
+na różnych środowiskach (deweloperskim, testowym, produkcyjnym).</p></li>
+<li><p><strong>Bezpieczeństwo</strong>: Zapobiega przypadkowemu nadpisaniu lub pominięciu
+zmian w bazie danych.</p></li>
+<li><p><strong>Integracja</strong>: Działa z różnymi systemami baz danych i może być
+zintegrowane z narzędziami takimi jak Maven, Gradle czy CI/CD.</p></li>
+</ul>
+</section>
+<section id="przyklad-uzycia">
+<h5>Przykład użycia</h5>
+<p>Dodaj do pliku POM zależności:</p>
+<pre class="code java highlight literal-block"><code><span class="whitespace">        </span><span class="operator">&lt;</span><span class="name">dependency</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="operator">&lt;</span><span class="name">groupId</span><span class="operator">&gt;</span><span class="name">org</span><span class="punctuation">.</span><span class="name attribute">flywaydb</span><span class="operator">&lt;/</span><span class="name">groupId</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="operator">&lt;</span><span class="name">artifactId</span><span class="operator">&gt;</span><span class="name">flyway</span><span class="operator">-</span><span class="name">core</span><span class="operator">&lt;/</span><span class="name">artifactId</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="operator">&lt;</span><span class="name">version</span><span class="operator">&gt;</span><span class="literal number float">10.12.0</span><span class="operator">&lt;/</span><span class="name">version</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="operator">&lt;!--</span><span class="whitespace"> </span><span class="name">or</span><span class="whitespace"> </span><span class="name">latest</span><span class="whitespace"> </span><span class="operator">--&gt;</span><span class="whitespace">
+</span><span class="operator">&lt;/</span><span class="name">dependency</span><span class="operator">&gt;</span><span class="whitespace">
+</span><span class="operator">&lt;</span><span class="name">dependency</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="operator">&lt;</span><span class="name">groupId</span><span class="operator">&gt;</span><span class="name">org</span><span class="punctuation">.</span><span class="name attribute">flywaydb</span><span class="operator">&lt;/</span><span class="name">groupId</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="operator">&lt;</span><span class="name">artifactId</span><span class="operator">&gt;</span><span class="name">flyway</span><span class="operator">-</span><span class="name">database</span><span class="operator">-</span><span class="name">hsqldb</span><span class="operator">&lt;/</span><span class="name">artifactId</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="operator">&lt;</span><span class="name">version</span><span class="operator">&gt;</span><span class="literal number float">10.12.0</span><span class="operator">&lt;/</span><span class="name">version</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="operator">&lt;!--</span><span class="whitespace"> </span><span class="name">Ensure</span><span class="whitespace"> </span><span class="keyword">this</span><span class="whitespace"> </span><span class="name">matches</span><span class="whitespace"> </span><span class="name">your</span><span class="whitespace"> </span><span class="name">Flyway</span><span class="whitespace"> </span><span class="name">core</span><span class="whitespace"> </span><span class="name">version</span><span class="whitespace"> </span><span class="operator">--&gt;</span><span class="whitespace">
+</span><span class="operator">&lt;/</span><span class="name">dependency</span><span class="operator">&gt;</span></code></pre>
+<ol class="arabic">
+<li><p>Utwórz plik migracji:</p>
+<pre class="code sql literal-block"><code><span class="keyword">CREATE</span><span class="whitespace"> </span><span class="keyword">TABLE</span><span class="whitespace"> </span><span class="name">users</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="whitespace">
+    </span><span class="name">id</span><span class="whitespace"> </span><span class="name builtin">INT</span><span class="whitespace"> </span><span class="keyword">PRIMARY</span><span class="whitespace"> </span><span class="keyword">KEY</span><span class="punctuation">,</span><span class="whitespace">
+    </span><span class="name">name</span><span class="whitespace"> </span><span class="name builtin">VARCHAR</span><span class="punctuation">(</span><span class="literal number integer">100</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="keyword">NOT</span><span class="whitespace"> </span><span class="keyword">NULL</span><span class="whitespace">
+</span><span class="punctuation">);</span></code></pre>
+</li>
+<li><p>Umieść plik w katalogu <span class="docutils literal">db/migration</span>.</p></li>
+<li><p>Zmień wpis w pliku persistence.xml</p></li>
+</ol>
+<pre class="code java highlight literal-block"><code><span class="operator">&lt;</span><span class="name">property</span><span class="whitespace"> </span><span class="name">name</span><span class="operator">=</span><span class="literal string">&quot;hibernate.hbm2ddl.auto&quot;</span><span class="whitespace"> </span><span class="name">value</span><span class="operator">=</span><span class="literal string">&quot;none&quot;</span><span class="operator">/&gt;</span></code></pre>
+<ol class="arabic simple" start="4">
+<li><p>Dodaj w klasie main()</p></li>
+</ol>
+<pre class="code java highlight literal-block"><code><span class="name">Flyway</span><span class="whitespace"> </span><span class="name">flyway</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">Flyway</span><span class="punctuation">.</span><span class="name attribute">configure</span><span class="punctuation">()</span><span class="whitespace">
+        </span><span class="punctuation">.</span><span class="name attribute">dataSource</span><span class="punctuation">(</span><span class="literal string">&quot;jdbc:hsqldb:mem:PRA&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;sa&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal string">&quot;&quot;</span><span class="punctuation">)</span><span class="whitespace">
+        </span><span class="punctuation">.</span><span class="name attribute">locations</span><span class="punctuation">(</span><span class="literal string">&quot;classpath:db/migration&quot;</span><span class="punctuation">)</span><span class="whitespace">
+        </span><span class="punctuation">.</span><span class="name attribute">load</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="name">flyway</span><span class="punctuation">.</span><span class="name attribute">migrate</span><span class="punctuation">();</span></code></pre>
+<ol class="arabic simple" start="5">
+<li><p>Uruchom Flyway, aby zastosować migrację do bazy danych.</p></li>
+</ol>
+<p>Więcej informacji znajdziesz na stronie: <a class="reference external" href="https://flywaydb.org">https://flywaydb.org</a></p>
+</section>
+</section>
+<section id="extra">
+<h4>Extra</h4>
+</section>
+<section id="inheritance-class-mapping">
+<h4>Inheritance class mapping</h4>
+<p>W ramach tabeli w bazie danych możemy stosować mechanizm obiektowego dziedziczenia.</p>
+<pre class="code java highlight literal-block"><code><span class="name decorator">&#64;Entity</span><span class="punctuation">(</span><span class="name">name</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;Account&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name decorator">&#64;Inheritance</span><span class="punctuation">(</span><span class="name">strategy</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">InheritanceType</span><span class="punctuation">.</span><span class="name attribute">SINGLE_TABLE</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">static</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">Account</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Id</span><span class="whitespace">
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">Long</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name">owner</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">BigDecimal</span><span class="whitespace"> </span><span class="name">balance</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">BigDecimal</span><span class="whitespace"> </span><span class="name">interestRate</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="comment single">//Getters and setters are omitted for brevity</span><span class="whitespace">
+
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Entity</span><span class="punctuation">(</span><span class="name">name</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;DebitAccount&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">static</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">DebitAccount</span><span class="whitespace"> </span><span class="keyword declaration">extends</span><span class="whitespace"> </span><span class="name">Account</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">BigDecimal</span><span class="whitespace"> </span><span class="name">overdraftFee</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="comment single">//Getters and setters are omitted for brevity</span><span class="whitespace">
+
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Entity</span><span class="punctuation">(</span><span class="name">name</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;CreditAccount&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">static</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">CreditAccount</span><span class="whitespace"> </span><span class="keyword declaration">extends</span><span class="whitespace"> </span><span class="name">Account</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">BigDecimal</span><span class="whitespace"> </span><span class="name">creditLimit</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="comment single">//Getters and setters are omitted for brevity</span><span class="whitespace">
+
+</span><span class="punctuation">}</span></code></pre>
+</section>
+<section id="typeorm">
+<h4>TypeOrm</h4>
+<p>Przykładem ORM dla Javascript jest TypeOrm, który składnią bardzo przypomina Hibertane.</p>
+<p>More :</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://docs.jboss.org/hibernate/orm/5.4/userguide/html_single/Hibernate_User_Guide.html#entity-inheritance">https://docs.jboss.org/hibernate/orm/5.4/userguide/html_single/Hibernate_User_Guide.html#entity-inheritance</a></div>
+</div>
+</blockquote>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="footnote-1" role="note">
+<span class="label"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></span>
+<p>Wykorzystano materiały z:</p>
+</aside>
+</aside>
+<p><a class="reference external" href="https://kobietydokodu.pl/13-2-baza-danych-z-jpa-cz-2/">https://kobietydokodu.pl/13-2-baza-danych-z-jpa-cz-2/</a></p>
+<p><a class="reference external" href="http://math.uni.lodz.pl/~kowalcr/Bazy/Temat8.pdf">http://math.uni.lodz.pl/~kowalcr/Bazy/Temat8.pdf</a></p>
+<p><a class="reference external" href="https://docs.jboss.org/hibernate/orm/4.2/quickstart/en-US/html/index.html">https://docs.jboss.org/hibernate/orm/4.2/quickstart/en-US/html/index.html</a></p>
+<p><a class="reference external" href="http://www.baeldung.com/hibernate-save-persist-update-merge-saveorupdate">http://www.baeldung.com/hibernate-save-persist-update-merge-saveorupdate</a></p>
+<p><a class="reference external" href="http://www.mkyong.com/hibernate/hibernate-one-to-one-relationship-example-annotation/">http://www.mkyong.com/hibernate/hibernate-one-to-one-relationship-example-annotation/</a></p>
+<p><a class="reference external" href="https://www.javaworld.com/article/2077819/java-se/understanding-jpa-part-2-relationships-the-jpa-way.html">https://www.javaworld.com/article/2077819/java-se/understanding-jpa-part-2-relationships-the-jpa-way.html</a></p>
+<p><a class="reference external" href="http://www.baeldung.com/jpa-pagination">http://www.baeldung.com/jpa-pagination</a></p>
+</section>
+</section>
+</section></body>
+</html>
+

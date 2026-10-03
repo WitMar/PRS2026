@@ -1,0 +1,437 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>PRA07.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="pracownia-programowania">
+<h2>Pracownia Programowania</h2>
+<section id="spring-boot">
+<h3>Spring Boot</h3>
+<p class="important">Uwaga! cały kod znajduje się na gałęzi <strong>SpringBootStart</strong> w repozytorium <a class="reference external" href="https://github.com/WitMar/PRA2025">https://github.com/WitMar/PRA2025</a> . Kod końcowy w gałęzi <strong>SpringBootEnd</strong>.</p>
+<p>Jeżeli nie widzisz odpowiednich gałęzi na GitHubie wykonaj <strong>Ctr+T</strong>, a jak to nie pomoże to wybierz z menu <strong>VCS-&gt;Git-&gt;Fetch</strong>.</p>
+<section id="trojwarstwowy-model-aplikacji">
+<h4>Trójwarstwowy model aplikacji</h4>
+<p>Aplikacje tworzone w SpringBoot w większości oparte są o model architektury trójwartswowej:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">warstwa prezentacji : Controller, Pages, Display beans</div>
+<div class="line">warstwa serwisów : Services, Mapper between JPA entities and display beans</div>
+<div class="line">warstwa persystencji : JPA DAOs Repositories, JPA entities - będzie tematem kolejnych zajęć</div>
+</div>
+</blockquote>
+<p class="center"><img alt="a0" src="sprinarch.png" /></p>
+</section>
+<section id="spring-boot-1">
+<h4>Spring Boot</h4>
+<p>Spring Boot to lekki framework pozwalający na proste tworzenie aplikacji w oparciu o framework Spring. Spring Framework jest to platforma, której głównym celem jest uproszczenie procesu tworzenia oprogramowania w technologii Java/J2EE. Rdzeniem Springa jest kontener wstrzykiwania zależności, który zarządza komponentami i ich zależnościami. Obiekty zarządzane przez Springa nazywane są beanami.</p>
+<p>O samym springu mówiliśmy na poprzednich zajęciach.</p>
+<p>Startery (zależności definiowane w pliku pom.xml) są grupami zależności, które pozwalają na uruchamianie projektów Springowych minimalizując wysiłek ich konfiguracji.</p>
+<p>W naszym przypadku głównym starterem będzie:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><strong>spring-boot-starter-web</strong> służy do budowania aplikacji opartych na REST API z wykorzystaniem Spring MVC oraz serwera aplikacji Tomcat.</div>
+</div>
+</blockquote>
+<p>Podany wyżej starter sprawia, że projekt jest konfigurowany do tego by korzystać z :</p>
+<blockquote>
+<div class="line-block">
+<div class="line">Wbudowanego Serwera Tomcat</div>
+<div class="line">Hibernate for Object-Relational Mapping (ORM) - będzie tematem kolejnych zajęć</div>
+<div class="line">Apache Jackson for JSON binding</div>
+<div class="line">Spring MVC for the REST framework</div>
+</div>
+</blockquote>
+<p>Pełną listę starterów można znaleźć tutaj:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#using.build-systems.starters">https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#using.build-systems.starters</a></div>
+</div>
+</blockquote>
+<p>Aplikacje przy użyciu Springa, buduje się modułowo. Idealnie wpasowuje się to w model MVC i pozwala na iteracyjny rozrost naszej aplikacji o kolejne moduły.</p>
+<p>Jeżeli pozwolisz (przy użyciu adnotacji <strong>&#64;EnableAutoConfiguration</strong>) Spring Boot dokona w jak najszerszym sensie automatycznej konfiguracji projektu - wyszuka odpowiednie adnotacje i powoła obiekty do życia.</p>
+<p>Do generowania szkieletu aplikacji springowej możemy także posłużyć się stroną:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="http://start.spring.io/">http://start.spring.io/</a></div>
+</div>
+</blockquote>
+<p>Który wyprodukuje szkielet aplikacji springowej wraz z zależnościami.</p>
+</section>
+<section id="konfiguracja-ustawien">
+<h4>Konfiguracja ustawień</h4>
+<p>Konfiguracja znajduje się w pliku application.yml</p>
+<p>W tym momencie wykorzystujemy tylko ustawienie do zmiany domyślnego numeru portu na którym uruchamiany jest Spring.</p>
+<pre class="code bash literal-block"><code>server:<span class="whitespace">
+  </span>port<span class="whitespace"> </span>:<span class="whitespace"> </span><span class="literal number">8181</span></code></pre>
+</section>
+<section id="konfiguracja-zaleznosci">
+<h4>Konfiguracja zależności</h4>
+<p>W pliku POM definiujemy:</p>
+<pre class="code bash literal-block"><code>&lt;parent&gt;<span class="whitespace">
+    </span>&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;<span class="whitespace">
+    </span>&lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;<span class="whitespace">
+    </span>&lt;version&gt;3.3.10&lt;/version&gt;<span class="whitespace">
+</span>&lt;/parent&gt;</code></pre>
+<p>Jest to definicja wersji Spring Boota z jakiej korzystamy (<strong>3.3.10</strong>) ale także tzw. parent POM, dzięki czemu w naszym pliku POM możemy dziedziczyć wersje bibliotek z rodzica POM, tak by była między nimi pełna kompatybilność.</p>
+<p>Możemy więc w pliku POM zdefiniować:</p>
+<pre class="code bash literal-block"><code>&lt;dependency&gt;<span class="whitespace">
+    </span>&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;<span class="whitespace">
+    </span>&lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;<span class="whitespace">
+</span>&lt;/dependency&gt;<span class="whitespace">
+</span>&lt;dependency&gt;<span class="whitespace">
+    </span>&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;<span class="whitespace">
+    </span>&lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;<span class="whitespace">
+    </span>&lt;scope&gt;test&lt;/scope&gt;<span class="whitespace">
+</span>&lt;/dependency&gt;<span class="whitespace">
+</span>&lt;dependency&gt;<span class="whitespace">
+    </span>&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;<span class="whitespace">
+    </span>&lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;<span class="whitespace">
+</span>&lt;/dependency&gt;</code></pre>
+<p>Bez określania wersji i parametr ten zostanie wydziedziczony z parent POM (o ile są tam zdefiniowane). Zobacz pakiety i ich wersje na stronie :</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-parent/3.3.10">https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-parent/3.3.10</a></div>
+</div>
+</blockquote>
+<p>Do budowania aplikacji używamy następujących wtyczek, które budują JAR (a następnie z niego) plik WAR. Ta wersja powinna budowania powinna być kompatybilna ze wszystkimi wersjami Javy.</p>
+<pre class="code bash literal-block"><code>&lt;build&gt;<span class="whitespace">
+    </span>&lt;plugins&gt;<span class="whitespace">
+        </span>&lt;plugin&gt;<span class="whitespace">
+            </span>&lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;<span class="whitespace">
+            </span>&lt;artifactId&gt;maven-assembly-plugin&lt;/artifactId&gt;<span class="whitespace">
+            </span>&lt;version&gt;2.4.1&lt;/version&gt;<span class="whitespace">
+            </span>&lt;dependencies&gt;<span class="whitespace">
+                </span>&lt;dependency&gt;<span class="whitespace">
+                    </span>&lt;groupId&gt;org.codehaus.plexus&lt;/groupId&gt;<span class="whitespace">
+                    </span>&lt;artifactId&gt;plexus-archiver&lt;/artifactId&gt;<span class="whitespace">
+                    </span>&lt;version&gt;2.4.4&lt;/version&gt;<span class="whitespace">
+                </span>&lt;/dependency&gt;<span class="whitespace">
+            </span>&lt;/dependencies&gt;<span class="whitespace">
+        </span>&lt;/plugin&gt;<span class="whitespace">
+        </span>&lt;plugin&gt;<span class="whitespace">
+            </span>&lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;<span class="whitespace">
+            </span>&lt;artifactId&gt;maven-jar-plugin&lt;/artifactId&gt;<span class="whitespace">
+            </span>&lt;version&gt;3.0.0&lt;/version&gt;<span class="whitespace">
+            </span>&lt;dependencies&gt;<span class="whitespace">
+                </span>&lt;dependency&gt;<span class="whitespace">
+                    </span>&lt;groupId&gt;org.codehaus.plexus&lt;/groupId&gt;<span class="whitespace">
+                    </span>&lt;artifactId&gt;plexus-archiver&lt;/artifactId&gt;<span class="whitespace">
+                    </span>&lt;version&gt;2.4.4&lt;/version&gt;<span class="whitespace">
+                </span>&lt;/dependency&gt;<span class="whitespace">
+            </span>&lt;/dependencies&gt;<span class="whitespace">
+        </span>&lt;/plugin&gt;<span class="whitespace">
+        </span>&lt;plugin&gt;<span class="whitespace">
+            </span>&lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;<span class="whitespace">
+            </span>&lt;artifactId&gt;maven-war-plugin&lt;/artifactId&gt;<span class="whitespace">
+            </span>&lt;version&gt;3.2.0&lt;/version&gt;<span class="whitespace">
+            </span>&lt;configuration&gt;<span class="whitespace">
+                </span>&lt;dependencies&gt;<span class="whitespace">
+                    </span>&lt;dependency&gt;<span class="whitespace">
+                        </span>&lt;groupId&gt;org.codehaus.plexus&lt;/groupId&gt;<span class="whitespace">
+                        </span>&lt;artifactId&gt;plexus-archiver&lt;/artifactId&gt;<span class="whitespace">
+                        </span>&lt;version&gt;2.4.4&lt;/version&gt;<span class="whitespace">
+                    </span>&lt;/dependency&gt;<span class="whitespace">
+                </span>&lt;/dependencies&gt;<span class="whitespace">
+            </span>&lt;/configuration&gt;<span class="whitespace">
+        </span>&lt;/plugin&gt;<span class="whitespace">
+    </span>&lt;/plugins&gt;<span class="whitespace">
+</span>&lt;/build&gt;</code></pre>
+</section>
+<section id="uruchomienie">
+<h4>Uruchomienie</h4>
+<p>Główną klasą projektu jest klasa <strong>SpringApp</strong>. Znajduje się w niej funkcja main, inaczej mówiąc będzie to klasa, którą chcemy uruchamiać.</p>
+<p>Aby uruchomić aplikację Springową potrzebujemy klasę wejściową opatrzoną adnotacją <strong>&#64;SpringBootApplication</strong>, oraz wywołanie metody statycznej run() na klasie SpringApplication.</p>
+<p>Przed klasą znajdują się adnotacja</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;SpringBootApplication</span><span class="punctuation">(</span><span class="name">exclude</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name">HibernateJpaAutoConfiguration</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">})</span></code></pre>
+<p>Jest ona tak naprawdę jest zbiorem kilku innych adnotacji (<strong>&#64;SpringBootConfiguration</strong> (informacja, że obsługujemy żądania HTTP), <strong>&#64;EnableAutoConfiguration</strong> (dzięki niej, aplikacja dokona samokonfiguracji według domyślnych wartości, załaduje potrzebne moduły itp.) oraz <strong>&#64;ComponentScan</strong> (informacja, że ma przeskanować projekt w poszukiwaniu adnotacji odnośnie entity, repository, service i controller i je załadować)), informujemy tym samym, że dana klasa może być klasą rozruchową dla Springa, i zawiera w sobie podstawową konfigurację.</p>
+<p>Ta sama klasa zwierać będzie ustawienia Springa (analogicznie do poprzednich zajęć była to klasa w której definiowaliśmy samodzielnie beany).</p>
+<p>Aby uruchomić serwis wystarczy kliknąć prawym klawiszem na klasie <strong>SpringApp.java</strong> i wybrać <strong>Run</strong>. Spring Boot uruchamia wbudowany serwis aplikacji i nazwie Tomcata za nas i wgrywa tam aplikację, abyśmy sami mogli się skupić na tworzeniu kodu zamiast przejmowania się szczegółami technicznymi.</p>
+<p>Tomcata uruchamia się domyślnie na porcie <strong>8080</strong>, jeżeli ten port jest zajęty na Twoim komputerze aplikacja się nie uruchomi. Korzystając z konfiguracji ustawień możesz zmienić port na inny.</p>
+</section>
+<section id="definicja-api-swagger">
+<h4>Definicja API - Swagger</h4>
+<p>Uwaga! jeżeli uruchamiamy Springa poprzez główną klasę z Intellij nasz serwis będzie dostępny pod adresem <strong>http://localhost:8181/</strong>. Stąd jeżeli chciałbyś użyć postmana do komunikacji z serwisem korzystaj z tego adresu + ścieżki w ramach aplikacji.</p>
+<p class="tag">Zadanie</p>
+<p>Na poprzednich zajęciach widziałeś dokumentację API wygenerowaną przez bibliotekę Swagger. Nie jest ona standardowym elementem Spring Boota, aby dodać swaggera do projektu musisz wykonać następujące kroki. Dodaj do pom.xml (ten jeden krok jest już wykonany za Ciebie):</p>
+<pre class="code xml literal-block"><code><span class="name tag">&lt;dependency&gt;</span><span class="whitespace">
+  </span><span class="name tag">&lt;groupId&gt;</span>org.springdoc<span class="name tag">&lt;/groupId&gt;</span><span class="whitespace">
+  </span><span class="name tag">&lt;artifactId&gt;</span>springdoc-openapi-starter-webmvc-ui<span class="name tag">&lt;/artifactId&gt;</span><span class="whitespace">
+  </span><span class="name tag">&lt;version&gt;</span>2.2.0<span class="name tag">&lt;/version&gt;</span><span class="whitespace">
+</span><span class="name tag">&lt;/dependency&gt;</span></code></pre>
+<p>Możesz definiować elementy Swaggera dodając beana do Springa</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;Bean</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">OpenAPI</span><span class="whitespace"> </span><span class="name function">customOpenAPI</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">OpenAPI</span><span class="punctuation">()</span><span class="whitespace">
+            </span><span class="punctuation">.</span><span class="name attribute">info</span><span class="punctuation">(</span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">Info</span><span class="punctuation">()</span><span class="whitespace">
+                    </span><span class="punctuation">.</span><span class="name attribute">title</span><span class="punctuation">(</span><span class="literal string">&quot;My API&quot;</span><span class="punctuation">)</span><span class="whitespace">
+                    </span><span class="punctuation">.</span><span class="name attribute">version</span><span class="punctuation">(</span><span class="literal string">&quot;1.0&quot;</span><span class="punctuation">)</span><span class="whitespace">
+                    </span><span class="punctuation">.</span><span class="name attribute">description</span><span class="punctuation">(</span><span class="literal string">&quot;This is my awesome API.&quot;</span><span class="punctuation">));</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Uruchom klasę <strong>SpringApp</strong> sprawdź w przeglądarce na <strong>http://localhost:8181/swagger-ui/index.html#</strong> czy swagger działa.</p>
+<p class="tag">Zadanie</p>
+<p>Uruchom aplikację. Następnie wygeneruj obiekty metodą <strong>generateModel</strong> w indexController.</p>
+<p>Zobacz jak w obu przypadkach serializują się obiekty wywołując metody get na api/products oraz api/sellers.</p>
+</section>
+<section id="serializer">
+<h4>Serializer</h4>
+<p class="tag">Zadanie</p>
+<p>Zobacz, jak obiekt daty jest serializowany (wywołaj GET dla dowolnego obiektu).</p>
+<p>Podobnie jak na zajęciach z Jacksona, jeżeli chcielibyśmy zmienić format serializacji daty możemy tego dokonać ustawieniami na mapperze. Skąd jednak pobrać mapper używany przez Springa ? Najłatwiej jest zdefiniować własny mapper i przekazać go w konfiguracji Springa.</p>
+<p>dodaj do POM:</p>
+<pre class="code java literal-block"><code><span class="operator">&lt;</span><span class="name">dependency</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="operator">&lt;</span><span class="name">groupId</span><span class="operator">&gt;</span><span class="name">com</span><span class="punctuation">.</span><span class="name attribute">fasterxml</span><span class="punctuation">.</span><span class="name attribute">jackson</span><span class="punctuation">.</span><span class="name attribute">datatype</span><span class="operator">&lt;/</span><span class="name">groupId</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="operator">&lt;</span><span class="name">artifactId</span><span class="operator">&gt;</span><span class="name">jackson</span><span class="operator">-</span><span class="name">datatype</span><span class="operator">-</span><span class="name">joda</span><span class="operator">&lt;/</span><span class="name">artifactId</span><span class="operator">&gt;</span><span class="whitespace">
+    </span><span class="operator">&lt;</span><span class="name">version</span><span class="operator">&gt;</span><span class="literal number float">2.0.4</span><span class="operator">&lt;/</span><span class="name">version</span><span class="operator">&gt;</span><span class="whitespace">
+</span><span class="operator">&lt;/</span><span class="name">dependency</span><span class="operator">&gt;</span></code></pre>
+<p>Zobacz czy serializacja sie zmieniła.</p>
+<p>Następnie dodaj do klasy <strong>SpringApp</strong> wsktrzykniecie własnego Mappera z własnymi ustawieniami:</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;Bean</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">MappingJackson2HttpMessageConverter</span><span class="whitespace"> </span><span class="name function">mappingJackson2HttpMessageConverter</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">MappingJackson2HttpMessageConverter</span><span class="whitespace"> </span><span class="name">jsonConverter</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">MappingJackson2HttpMessageConverter</span><span class="punctuation">();</span><span class="whitespace">
+    </span><span class="name">ObjectMapper</span><span class="whitespace"> </span><span class="name">objectMapper</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">ObjectMapper</span><span class="punctuation">();</span><span class="whitespace">
+    </span><span class="name">objectMapper</span><span class="punctuation">.</span><span class="name attribute">registerModule</span><span class="punctuation">(</span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">JodaModule</span><span class="punctuation">());</span><span class="whitespace">
+    </span><span class="name">objectMapper</span><span class="punctuation">.</span><span class="name attribute">disable</span><span class="punctuation">(</span><span class="name">SerializationFeature</span><span class="punctuation">.</span><span class="name attribute">WRITE_DATES_AS_TIMESTAMPS</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="name">objectMapper</span><span class="punctuation">.</span><span class="name attribute">configure</span><span class="punctuation">(</span><span class="name">DeserializationFeature</span><span class="punctuation">.</span><span class="name attribute">FAIL_ON_UNKNOWN_PROPERTIES</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="keyword constant">false</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="name">jsonConverter</span><span class="punctuation">.</span><span class="name attribute">setObjectMapper</span><span class="punctuation">(</span><span class="name">objectMapper</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">jsonConverter</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>zobacz, jak data jest teraz serializowana (zrestartuj aplikację i wywołaj GET na obiekcie). Co stanie się jak zmienię SerializationFeature.WRITE_DATES_AS_TIMESTAMPS z disable na enable?</p>
+</section>
+<section id="lombok">
+<h4>Lombok</h4>
+<p><a class="reference external" href="https://projectlombok.org/">Project Lombok</a> to biblioteka dla języka Java, która upraszcza kod poprzez automatyczne generowanie powtarzalnych elementów, takich jak gettery, settery, konstruktory czy metody <span class="docutils literal">toString()</span>. Dzięki adnotacjom Lomboka, kod staje się bardziej zwięzły i łatwiejszy w utrzymaniu.</p>
+<p>Aby dodać Lomboka do projektu Maven:</p>
+<pre class="code xml literal-block"><code><span class="name tag">&lt;dependency&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;groupId&gt;</span>org.projectlombok<span class="name tag">&lt;/groupId&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;artifactId&gt;</span>lombok<span class="name tag">&lt;/artifactId&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;version&gt;</span>1.18.30<span class="name tag">&lt;/version&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;scope&gt;</span>provided<span class="name tag">&lt;/scope&gt;</span><span class="whitespace">
+</span><span class="name tag">&lt;/dependency&gt;</span></code></pre>
+<section id="adnotacje-lomboka">
+<h5>Adnotacje Lomboka</h5>
+<p>Poniżej przedstawiono najczęściej używane adnotacje:</p>
+<ul class="simple">
+<li><p><span class="docutils literal">&#64;Getter</span> i <span class="docutils literal">&#64;Setter</span> – generują metody getter i setter.</p></li>
+<li><p><span class="docutils literal">&#64;ToString</span> – generuje metodę <span class="docutils literal">toString()</span>.</p></li>
+<li><p><span class="docutils literal">&#64;EqualsAndHashCode</span> – generuje metody <span class="docutils literal">equals()</span> i <span class="docutils literal">hashCode()</span>.</p></li>
+<li><p><span class="docutils literal">&#64;NoArgsConstructor</span>, <span class="docutils literal">&#64;AllArgsConstructor</span>, <span class="docutils literal">&#64;RequiredArgsConstructor</span> – generują różne konstruktory.</p></li>
+<li><p><span class="docutils literal">&#64;Data</span> – skrót zawierający <span class="docutils literal">&#64;Getter</span>, <span class="docutils literal">&#64;Setter</span>, <span class="docutils literal">&#64;ToString</span>, <span class="docutils literal">&#64;EqualsAndHashCode</span> i <span class="docutils literal">&#64;RequiredArgsConstructor</span>.</p></li>
+<li><p><span class="docutils literal">&#64;Builder</span> – umożliwia stosowanie wzorca buildera.</p></li>
+<li><p><span class="docutils literal">&#64;Slf4j</span> – generuje logger oparty na bibliotece SLF4J.</p></li>
+</ul>
+</section>
+</section>
+<section id="przyklad">
+<h4>Przykład</h4>
+<pre class="code java literal-block"><code><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">lombok.Data</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;Data</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">Osoba</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name">imie</span><span class="punctuation">;</span><span class="whitespace">
+    </span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">String</span><span class="whitespace"> </span><span class="name">nazwisko</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Powyższy kod generuje wszystkie potrzebne gettery, settery, <span class="docutils literal">toString()</span>, <span class="docutils literal">equals()</span>, <span class="docutils literal">hashCode()</span> oraz konstruktor wymagany dla pól oznaczonych jako <span class="docutils literal">final</span>.</p>
+<section id="wspolpraca-z-ide">
+<h5>Współpraca z IDE</h5>
+<p>Lombok wymaga odpowiedniego wsparcia ze strony środowiska IDE:</p>
+<ul class="simple">
+<li><p>IntelliJ IDEA: należy zainstalować plugin Lombok oraz włączyć &quot;Annotation Processing&quot;.</p></li>
+</ul>
+</section>
+</section>
+<section id="controller">
+<h4>Controller</h4>
+<p>Kontroler to klasa odpowiedzialna za komunikację ze światem zewnętrznym (odpowiedź na zapytania z zewnątrz). W tym miejscu definiować będziemy endpointy REST API, czyli odpowiednie zachowania na zapytania HTTP.</p>
+<p>Przed nazwą klasy kontrolera umieszczamy adnotację <strong>&#64;RestController</strong>, by dać znać Springowi, że dana klasa jest kontrolerem.</p>
+<p>Dodatkowo możemy zdefiniować na klasie adnotację</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;RequestMapping</span><span class="punctuation">(</span><span class="literal string">&quot;/api&quot;</span><span class="punctuation">)</span></code></pre>
+<p>Która spowoduje, że do wszystkich ścieżek zdefiniowanych w klasie dodany zostanie przedrostek <strong>&quot;/api&quot;</strong>.</p>
+<p>Konkretne metody API definiujemy za pomocą adnotacji. Nazwa adnotacji wskazują na metodę HTTP.</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;GetMapping</span><span class="punctuation">(</span><span class="name">value</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;/products&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">produces</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">MediaType</span><span class="punctuation">.</span><span class="name attribute">APPLICATION_JSON_VALUE</span><span class="punctuation">)</span></code></pre>
+<p>oznacza zestaw mapowania funkcji metody GET. tj. jeśli adres główny naszej aplikacji to <strong>http://localhost:8181/myApp</strong>, to w celu pobrania naszych danych będziemy musieli podać adres: <strong>http://localhost:8181/myApp/api/products</strong>. Drugi parametr mówi o tym, że zwracane dane mają być serializowane do postaci JSON.</p>
+<p>Spring używa <strong>Jacksona</strong> do serializacji i deserializacji danych.</p>
+<section id="obsluga-roznych-metod-http">
+<h5>Obsługa różnych metod HTTP</h5>
+<p>Spring Boot pozwala na obsługę różnych metod HTTP za pomocą dedykowanych adnotacji:</p>
+<ul class="simple">
+<li><p><span class="docutils literal">&#64;GetMapping</span> – obsługuje żądania GET.</p></li>
+<li><p><span class="docutils literal">&#64;PostMapping</span> – obsługuje żądania POST.</p></li>
+<li><p><span class="docutils literal">&#64;PutMapping</span> – obsługuje żądania PUT.</p></li>
+<li><p><span class="docutils literal">&#64;DeleteMapping</span> – obsługuje żądania DELETE.</p></li>
+<li><p><span class="docutils literal">&#64;PatchMapping</span> – obsługuje żądania PATCH.</p></li>
+</ul>
+</section>
+<section id="parametry">
+<h5>Parametry</h5>
+<p>Kontrolery mogą przyjmować dane z różnych źródeł:</p>
+<ul class="simple">
+<li><p><span class="docutils literal">&#64;PathVariable</span> – zmienne z URL-a.</p></li>
+<li><p><span class="docutils literal">&#64;RequestParam</span> – parametry zapytania.</p></li>
+<li><p><span class="docutils literal">&#64;RequestBody</span> – dane przesyłane w ciele żądania (np. JSON).</p></li>
+<li><p><span class="docutils literal">&#64;RequestHeader</span> – nagłówki HTTP.</p></li>
+</ul>
+<p>Parametrami metody są parametry z nagłówka i ciało zapytania HTTP jak i ścieżka zapytania. Jeżeli chcemy odczytać dane ze ścieżki skorzystamy w definicji parametru z adnotacji <strong>&#64;PathVariable</strong> i nazwy którą kojarzymy z nazwą z parametry value umieszczoną w klamrach.</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;GetMapping</span><span class="punctuation">(</span><span class="name">value</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;/product/{id}&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">produces</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">MediaType</span><span class="punctuation">.</span><span class="name attribute">APPLICATION_JSON_VALUE</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">Product</span><span class="whitespace"> </span><span class="name function">getByPublicId</span><span class="punctuation">(</span><span class="name decorator">&#64;PathVariable</span><span class="punctuation">(</span><span class="literal string">&quot;id&quot;</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">publicId</span><span class="punctuation">)</span></code></pre>
+<p>W przypadku, gdy przekazujemy dane poprzez parametr zapytania HTTP (czyli ?param=value) stosujemy adnotację <strong>&#64;RequestParam</strong> i nazwę paramteru taką jaka będzie w komunikacie HTTP.</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;GetMapping</span><span class="punctuation">(</span><span class="name">value</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;/product&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">produces</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">MediaType</span><span class="punctuation">.</span><span class="name attribute">APPLICATION_JSON_VALUE</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">Product</span><span class="whitespace"> </span><span class="name function">getByParamPublicId</span><span class="punctuation">(</span><span class="name decorator">&#64;RequestParam</span><span class="punctuation">(</span><span class="literal string">&quot;id&quot;</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">publicId</span><span class="punctuation">)</span></code></pre>
+<p>W przypadku, gdy chcemy odczytać ciało zapytania HTTP stosujemy adnotację <strong>&#64;RequestBody</strong>.</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;PostMapping</span><span class="punctuation">(</span><span class="name">value</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;/product&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">ResponseEntity</span><span class="operator">&lt;</span><span class="name">Product</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">create</span><span class="punctuation">(</span><span class="name decorator">&#64;RequestBody</span><span class="whitespace"> </span><span class="name">Product</span><span class="whitespace"> </span><span class="name">product</span><span class="punctuation">)</span></code></pre>
+<p>W przypadku zwracanych parametrów możemy także zwracać obiekty klas i przez parametr <strong>produces</strong> określać sposób ich deserializacji lub dodać adnotację <strong>&#64;ResponseBody</strong> (mówi, że zwracany obiekt to JSON i zapisuje go do body komunikatu HTTP).
+Klasa <span class="docutils literal">ResponseEntity</span> pozwala na pełną kontrolę nad odpowiedzią HTTP: kodem statusu, nagłówkami i ciałem odpowiedzi.
+Możemy także w odpowiedzi przekierować zapytanie do innego endpointa poprzez zastosowanie <strong>new RedirectView(&quot;/api/products&quot;, true);</strong>.
+Bądź ostrożny, ponieważ RedirectView nie zmienia metody HTTP, tzn. przekierowanie z metody DELETE wysyła żądanie DELETE do przekierowanego adresu URL.</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;DeleteMapping</span><span class="punctuation">(</span><span class="name">value</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;/product/{id}&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">RedirectView</span><span class="whitespace"> </span><span class="name function">delete</span><span class="punctuation">(</span><span class="name decorator">&#64;PathVariable</span><span class="whitespace"> </span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">id</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">productService</span><span class="punctuation">.</span><span class="name attribute">deleteProduct</span><span class="punctuation">(</span><span class="name">id</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">RedirectView</span><span class="punctuation">(</span><span class="literal string">&quot;/api/productsList&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="keyword constant">true</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p class="tag">Zadanie</p>
+<p>Zobacz jak zachowuje się endpoint delete.</p>
+<p class="tag">Zadanie</p>
+<p>Dobrą praktyką w przypadku tworzenia obiektów w REST API jest zwracać ścieżkę do obiektu, lub cały obiekt w odpowiedzi (jako potwierdzenie / podanie użytkownikowi id stworzonego obiektu). Zamień sposób odpowiedzi na zapytanie POST na poniższą linijkę:</p>
+<pre class="code java literal-block"><code><span class="name">ResponseEntity</span><span class="punctuation">.</span><span class="name attribute">ok</span><span class="punctuation">().</span><span class="name attribute">body</span><span class="punctuation">(</span><span class="name">product</span><span class="punctuation">);</span></code></pre>
+<p>Wywołaj POST dla obiektu</p>
+<pre class="code json literal-block"><code><span class="punctuation">{</span><span class="whitespace">
+  </span><span class="name tag">&quot;bestBeforeDate&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string double">&quot;2022-12-11T19:21:25.099Z&quot;</span><span class="punctuation">,</span><span class="whitespace">
+  </span><span class="name tag">&quot;name&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string double">&quot;kartofel&quot;</span><span class="punctuation">,</span><span class="whitespace">
+  </span><span class="name tag">&quot;price&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal number integer">10</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Zobacz różnice w odpowiedzi pomiędzy POST a PUT.</p>
+</section>
+</section>
+<section id="service">
+<h4>Service</h4>
+<p>Jeżeli potrzebujemy opakować naszą interakcję z modelem danych przez logikę biznesową zastosujemy tzw. service - czyli warstwę pośrednią między danymi a widokiem.</p>
+<p>W celu zdefiniowania serwisu przed nazwą klasy serwisu umieszczamy adnotację <strong>&#64;Service</strong>.</p>
+<p>Spring wykorzystuje tzw. mechanizm wstrzykiwania zależności. To znaczy, że silnik springa jest odpowiedzialny za zarządzanie komponentami i przekazywanie ich do innych komponentów, tak by mogły być wykorzystywane razem. Kluczowa jest tu adnotacja</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;Autowired</span></code></pre>
+<p>Mówi ona springowi, że chcemy w tym miejscy pobrać obiekt komponentu zdefiniowany w systemie.</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;Autowired</span><span class="whitespace">
+</span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">ProductService</span><span class="whitespace"> </span><span class="name">productService</span><span class="punctuation">;</span></code></pre>
+<p>Adnotacja taka spowoduje, że w kontrolerze będziemy mogli wykorzystać serwis, Spring zainicjalizuje zmienną productService niejako &quot;za nas&quot; a my będziemy mogli z niej dalej korzystać.</p>
+<p>Dokładniej to co definiujemy to interfejs, którym możemy posługiwać się w naszej klasie a Spring wstrzykuje do niego implementację tego interfejsu. Stąd, aby utworzyć serwis definiujemy interfejs:</p>
+<pre class="code java literal-block"><code><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">interface</span> <span class="name class">ProductService</span></code></pre>
+<p>z nagłówkami metod. Jeżeli będziemy chcieli skorzystać w innej klasie z tego interfejsu zdefiniujemy go jako</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;Autowired</span><span class="whitespace">
+</span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">ProductService</span><span class="whitespace"> </span><span class="name">productService</span><span class="punctuation">;</span></code></pre>
+<p>Natomiast zwyczajowo konwencja mówi by implementację metod zawrzeć w klasie o nazwie <strong>ProductServiceImpl</strong>.</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;Service</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">ProductServiceImpl</span><span class="whitespace"> </span><span class="keyword declaration">implements</span><span class="whitespace"> </span><span class="name">ProductService</span></code></pre>
+<section id="inne-typy-danych">
+<h5>Inne typy danych</h5>
+<p class="tag">Zadanie</p>
+<p>Zmień zapytanie <strong>seller/{id}</strong> tak by zwracało XML-a, a nie JSON-a. By to zrobić ustaw Media Type:</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;GetMapping</span><span class="punctuation">(</span><span class="name">value</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;/seller/{id}&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">produces</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">MediaType</span><span class="punctuation">.</span><span class="name attribute">APPLICATION_XML_VALUE</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name decorator">&#64;ResponseBody</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">ResponseEntity</span><span class="operator">&lt;</span><span class="name">Seller</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">getSellerByPublicId</span><span class="punctuation">(</span><span class="name decorator">&#64;PathVariable</span><span class="punctuation">(</span><span class="literal string">&quot;id&quot;</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">publicId</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">Optional</span><span class="operator">&lt;</span><span class="name">Seller</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">seller</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">sellerService</span><span class="punctuation">.</span><span class="name attribute">getSellerById</span><span class="punctuation">(</span><span class="name">publicId</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="keyword">if</span><span class="punctuation">(</span><span class="name">seller</span><span class="punctuation">.</span><span class="name attribute">isPresent</span><span class="punctuation">())</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">ResponseEntity</span><span class="punctuation">.</span><span class="name attribute">ok</span><span class="punctuation">(</span><span class="name">seller</span><span class="punctuation">.</span><span class="name attribute">get</span><span class="punctuation">());</span><span class="whitespace">
+    </span><span class="punctuation">}</span><span class="whitespace"> </span><span class="keyword">else</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name">ResponseEntity</span><span class="punctuation">.</span><span class="name attribute">noContent</span><span class="punctuation">().</span><span class="name attribute">build</span><span class="punctuation">();</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+</section>
+</section>
+<section id="walidacja">
+<h4>Walidacja</h4>
+<p>Na koniec dodamy walidację do pola modelu i kontrolera.</p>
+<p>W kontrolerze Produktu w metodzie create dodaj walidacje</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;PostMapping</span><span class="punctuation">(</span><span class="name">value</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;/product&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">ResponseEntity</span><span class="operator">&lt;</span><span class="name">Product</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name function">create</span><span class="punctuation">(</span><span class="name decorator">&#64;RequestBody</span><span class="whitespace"> </span><span class="name decorator">&#64;NotNull</span><span class="whitespace"> </span><span class="name decorator">&#64;Valid</span><span class="whitespace">
+                                              </span><span class="name">Product</span><span class="whitespace"> </span><span class="name">product</span><span class="punctuation">)</span></code></pre>
+<p>W klasie Produktu dodaj walidacje, by cena nie mogła być większa niż 100</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;Column</span><span class="whitespace">
+</span><span class="name decorator">&#64;Max</span><span class="punctuation">(</span><span class="name">value</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal number integer">100</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">BigDecimal</span><span class="whitespace"> </span><span class="name">price</span><span class="punctuation">;</span></code></pre>
+<p>Przykłady adnotacji walidujących:</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;Data</span><span class="whitespace">
+</span><span class="name decorator">&#64;Builder</span><span class="whitespace">
+
+  </span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">UserRequestDTO</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name decorator">&#64;NotBlank</span><span class="punctuation">(</span><span class="name">message</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;Invalid Name: Empty name&quot;</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="name decorator">&#64;NotNull</span><span class="punctuation">(</span><span class="name">message</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;Invalid Name: Name is NULL&quot;</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="name decorator">&#64;Size</span><span class="punctuation">(</span><span class="name">min</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal number integer">3</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">max</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal number integer">30</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">message</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;Invalid Name: Must be of 3 - 30 characters&quot;</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="name">String</span><span class="whitespace"> </span><span class="name">name</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Email</span><span class="punctuation">(</span><span class="name">message</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;Invalid email&quot;</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="name">String</span><span class="whitespace"> </span><span class="name">email</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;NotBlank</span><span class="punctuation">(</span><span class="name">message</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;Invalid Phone number: Empty number&quot;</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="name decorator">&#64;NotNull</span><span class="punctuation">(</span><span class="name">message</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;Invalid Phone number: Number is NULL&quot;</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="name decorator">&#64;Pattern</span><span class="punctuation">(</span><span class="name">regexp</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;^\\d{10}$&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">message</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;Invalid phone number&quot;</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="name">String</span><span class="whitespace"> </span><span class="name">mobile</span><span class="punctuation">;</span><span class="whitespace">
+
+    </span><span class="name decorator">&#64;Min</span><span class="punctuation">(</span><span class="name">value</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">message</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;Invalid Age: Equals to zero or Less than zero&quot;</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="name decorator">&#64;Max</span><span class="punctuation">(</span><span class="name">value</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal number integer">100</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">message</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;Invalid Age: Exceeds 100 years&quot;</span><span class="punctuation">)</span><span class="whitespace">
+    </span><span class="name">Integer</span><span class="whitespace"> </span><span class="name">age</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Zobacz jaki jest zwracany komunikat w przypadku błędnego payloada. Aby przekazać użytkownikowi błąd możemy albo dodac wiadomość w adnotacji :</p>
+<p>import jakarta.validation.constraints.NotBlank;</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;Max</span><span class="punctuation">(</span><span class="name">value</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal number integer">100</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">message</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string">&quot;Price has to be at mst 100&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">private</span><span class="whitespace"> </span><span class="name">BigDecimal</span><span class="whitespace"> </span><span class="name">price</span><span class="punctuation">;</span></code></pre>
+<p>albo przechwycić wyjątek za pomocą exception handlera. &#64;RestControllerAdvice Jest to globalny handler wyjątków oraz miejsce do definiowania logiki współdzielonej przez wiele kontrolerów. Dodaj obsługę błędów.</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;RestControllerAdvice</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="keyword declaration">class</span> <span class="name class">GlobalExceptionHandler</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+</span><span class="name decorator">&#64;ExceptionHandler</span><span class="punctuation">(</span><span class="name">HandlerMethodValidationException</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword declaration">public</span><span class="whitespace"> </span><span class="name">ResponseEntity</span><span class="operator">&lt;</span><span class="name">Map</span><span class="operator">&lt;</span><span class="name">String</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">String</span><span class="operator">&gt;&gt;</span><span class="whitespace"> </span><span class="name function">handleHandlerMethodValidationException</span><span class="punctuation">(</span><span class="name">HandlerMethodValidationException</span><span class="whitespace"> </span><span class="name">ex</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+    </span><span class="name">Map</span><span class="operator">&lt;</span><span class="name">String</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">String</span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="name">errors</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">HashMap</span><span class="operator">&lt;&gt;</span><span class="punctuation">();</span><span class="whitespace">
+
+    </span><span class="name">ex</span><span class="punctuation">.</span><span class="name attribute">getAllErrors</span><span class="punctuation">().</span><span class="name attribute">forEach</span><span class="punctuation">(</span><span class="name">error</span><span class="whitespace"> </span><span class="operator">-&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name">String</span><span class="whitespace"> </span><span class="name">field</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">error</span><span class="punctuation">.</span><span class="name attribute">getDefaultMessage</span><span class="punctuation">();</span><span class="whitespace"> </span><span class="comment single">// object or method param</span><span class="whitespace">
+        </span><span class="name">String</span><span class="whitespace"> </span><span class="name">message</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name">error</span><span class="punctuation">.</span><span class="name attribute">getDefaultMessage</span><span class="punctuation">();</span><span class="whitespace">
+        </span><span class="name">errors</span><span class="punctuation">.</span><span class="name attribute">put</span><span class="punctuation">(</span><span class="name">field</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">message</span><span class="punctuation">);</span><span class="whitespace">
+    </span><span class="punctuation">});</span><span class="whitespace">
+
+    </span><span class="keyword">return</span><span class="whitespace"> </span><span class="keyword">new</span><span class="whitespace"> </span><span class="name">ResponseEntity</span><span class="operator">&lt;&gt;</span><span class="punctuation">(</span><span class="name">errors</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name">HttpStatus</span><span class="punctuation">.</span><span class="name attribute">BAD_REQUEST</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>}</p>
+<p class="tag">Zadanie</p>
+<p>Spróbuj dodać poprzez POST, JSON z obiektem, który nie jest poprawnym obiektem Product, porównaj wynik z odpowiedzią dla niewalidowanego endpointa PUT.</p>
+<pre class="code json literal-block"><code><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name tag">&quot;id&quot;</span><span class="punctuation">:</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="whitespace">
+        </span><span class="name tag">&quot;productId&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string double">&quot;68e886e4-4d17-4b95-8408-3718fcb9f34c&quot;</span><span class="punctuation">,</span><span class="whitespace">
+        </span><span class="name tag">&quot;name&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string double">&quot;Chleb&quot;</span><span class="punctuation">,</span><span class="whitespace">
+        </span><span class="name tag">&quot;price&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal number float">310.5</span><span class="punctuation">,</span><span class="whitespace">
+        </span><span class="name tag">&quot;bestBeforeDate&quot;</span><span class="punctuation">:</span><span class="whitespace"> </span><span class="literal string double">&quot;2021-12-12T14:06:54.280Z&quot;</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+</section>
+<section id="test">
+<h4>Test</h4>
+<p>W projekcie zdefiniowany jest pusty test z adnotacjami.</p>
+<pre class="code java literal-block"><code><span class="name decorator">&#64;RunWith</span><span class="punctuation">(</span><span class="name">SpringRunner</span><span class="punctuation">.</span><span class="name attribute">class</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name decorator">&#64;SpringBootTest</span></code></pre>
+<p>Powoduje on uruchomienie środowiska springowego (bez połączenia z bazą danych). Dzięki czemu możemy łatwo sprawdzić w momencie budowania, czy nie występują błedy w definicji ustawień i środowiska Springowego.</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="footnote-1" role="note">
+<span class="label"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></span>
+<p>Wykorzystano materiały z:</p>
+</aside>
+</aside>
+<p><a class="reference external" href="http://silversableprog.blogspot.com/2015/11/javaspring-boot-jak-rozpoczac-pisanie-w.html">http://silversableprog.blogspot.com/2015/11/javaspring-boot-jak-rozpoczac-pisanie-w.html</a></p>
+<p><a class="reference external" href="http://blog.mloza.pl/spring-boot-szybkie-tworzenie-aplikacji-web-w-javie/">http://blog.mloza.pl/spring-boot-szybkie-tworzenie-aplikacji-web-w-javie/</a></p>
+<p><a class="reference external" href="http://blog.mloza.pl/spring-boot-interakcja-z-baza-danych-czyli-spring-data-jpa/#more-70">http://blog.mloza.pl/spring-boot-interakcja-z-baza-danych-czyli-spring-data-jpa/#more-70</a></p>
+<p><a class="reference external" href="https://www.callicoder.com/spring-boot-rest-api-tutorial-with-mysql-jpa-hibernate/">https://www.callicoder.com/spring-boot-rest-api-tutorial-with-mysql-jpa-hibernate/</a></p>
+<p><a class="reference external" href="https://spring.io/guides/tutorials/bookmarks/">https://spring.io/guides/tutorials/bookmarks/</a></p>
+<p><a class="reference external" href="https://fastfoodcoding.com/tutorials/1505105199524/crud-operations-using-spring-boot-jpa-hibernate-postgresql">https://fastfoodcoding.com/tutorials/1505105199524/crud-operations-using-spring-boot-jpa-hibernate-postgresql</a></p>
+<p><a class="reference external" href="https://shakeelosmani.wordpress.com/2017/02/13/step-by-step-spring-boot-hibernate-crud-web-application-tutorial/">https://shakeelosmani.wordpress.com/2017/02/13/step-by-step-spring-boot-hibernate-crud-web-application-tutorial/</a></p>
+<p><a class="reference external" href="https://github.com/Zianwar/springboot-crud-demo">https://github.com/Zianwar/springboot-crud-demo</a></p>
+<p><a class="reference external" href="https://kobietydokodu.pl/09-spring-mvc/">https://kobietydokodu.pl/09-spring-mvc/</a></p>
+<p><a class="reference external" href="https://www.ibm.com/developerworks/library/j-spring-boot-basics-perry/index.html">https://www.ibm.com/developerworks/library/j-spring-boot-basics-perry/index.html</a></p>
+<p><a class="reference external" href="https://sites.google.com/site/telosystutorial/springmvc-jpa-springdatajpa/presentation/architecture">https://sites.google.com/site/telosystutorial/springmvc-jpa-springdatajpa/presentation/architecture</a></p>
+<p><a class="reference external" href="https://salithachathuranga94.medium.com/validation-and-exception-handling-in-spring-boot-51597b580ffd">https://salithachathuranga94.medium.com/validation-and-exception-handling-in-spring-boot-51597b580ffd</a></p>
+</section>
+</section>
+</section></body>
+</html>
+

@@ -1,0 +1,360 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>PRA10.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="programming-laboratory">
+<h2>Programming Laboratory</h2>
+<section id="react-hooks">
+<h3>React Hooks</h3>
+<p class="important">Uwaga! cały kod znajduje się na gałęziach <strong>ReactHooksStart</strong> i <strong>ReactHooksEnd</strong>  w repozytorium <a class="reference external" href="https://github.com/WitMar/PRA2025">https://github.com/WitMar/PRA2025</a> .</p>
+<p>Jeżeli nie widzisz odpowiednich gałęzi na GitHubie wykonaj <strong>Ctr+T</strong>, a jak to nie pomoże to wybierz z menu <strong>VCS-&gt;Git-&gt;Fetch</strong>.</p>
+<section id="roznice-miedzy-klasowymi-a-funkcyjnymi-komponentami">
+<h4>Różnice między klasowymi a funkcyjnymi komponentami</h4>
+<p>React używa tej samej instancji komponentu Class pomiędzy ponownymi renderowaniami. Oznacza to, że w naszym kodzie obiekt <em>this</em> odnosi się do tej samej instancji. W związku z tym działając asynchronicznie możemy zmieniać wartości tej klasy zanim dane operacje zakończą swoje działanie, co może prowadzić do błędów w naszej aplikacji.</p>
+<p>W przypadku funkcji react uruchamia całe funkcje za każdym rerenderem, w związku z tym nie ma możliwości wystąpienia tego błędu. Dotychczas jednak kłopotem było to, że w takim modelu nie mogliśmy zapisywać żadnych danych (stanu) pomiędzy wywołaniami funkcji.
+Z pomoc przychodzą nam tzw hooki.</p>
+<p><strong>&quot;React simply calls your function components over and over again when it needs to render it. You’ll need to use React Hooks to store state and plug into the React render lifecycle. And thanks to JavaScript Closures, your variables are scoped to the specific function call.”</strong></p>
+</section>
+<section id="hooks">
+<h4>Hooks</h4>
+<p>Hooks są dostępne w Reactie od wersji v16.8.0. React Hooks to proste funkcje JavaScript, których możemy użyć do oddzielenia funkcji przechowujących elementy wielokrotnego wykorzystania (jak stan) od komponentu funkcyjnego.</p>
+<p>Zauważysz, że nasz prosty komponent funkcyjny StateExample nie ma nad sobą żadnej kontroli. Poza tym tak naprawdę nie możemy nic zrobić w odniesieniu do cyklu życia renderowania w React, jak w przypadku komponentu klasowego.
+Tutaj właśnie pojawiają się Hooki!</p>
+<p>Główną zmianą, którą musisz wprowadzić w rozumieniu, jest to, że w przeciwieństwie do komponentów klasowych, komponenty funkcyjne są uruchamiane podczas każdego renderowania.</p>
+<p>Hooki to funkcje, które pozwalają „podczepić się” do funkcji stanu i cyklu życia React (mount, unmount, render) w kodzie komponentów funkcyjnych. Hooki nie działają wewnątrz klas — pozwalają używać Reacta bez komponentów klasowych.</p>
+<p>Hooki nie zastąpią Twojej wiedzy na temat podstawowych mechanizmów Reacta. Zamiast tego Hooki zapewniają bardziej bezpośredni interfejs API dla własności komponentów React, które już znasz: właściwości, stan, kontekst, referencje i cykl życia.
+Hooki oferują także nowy, potężny sposób ich łączenia.</p>
+<p>Pamiętasz na przykładzie komponentów klasowych problem ze współdzieleniem informacji o stanie między komponentami.
+Dzięki hookom możesz wyodrębnić logikę stanową z komponentu, dzięki czemu można go niezależnie przetestować i ponownie wykorzystać. Hooki umożliwiają ponowne wykorzystanie logiki stanowej bez zmiany hierarchii komponentów.</p>
+<p>Zasady hooków:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">Wywołuj Hooki tylko na najwyższym poziomie. Nie wywołuj hooków wewnątrz pętli, warunków i funkcji zagnieżdżonych.</div>
+<div class="line">Nazwy hooków zaczynają się od słowa <strong>use</strong></div>
+<div class="line">Wywołuj hooki tylko z komponentów funkcji React. Nie wywołuj hooków ze zwykłych funkcji JavaScript.</div>
+<div class="line">Hooki nie mogą być warunkowe.</div>
+<div class="line">Hooki muszą być wykonywane w tej samej kolejności na każdym renderowaniu</div>
+</div>
+</blockquote>
+<p>Poniższa operacja jest niedozwolona:</p>
+<pre class="code javascript literal-block"><code><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="punctuation">[</span><span class="name other">value</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">setValue</span><span class="punctuation">]</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">useState</span><span class="punctuation">(</span><span class="literal number float">1</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="punctuation">[</span><span class="name other">doubleValue</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">setDoubleValue</span><span class="punctuation">]</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">useState</span><span class="punctuation">(</span><span class="literal number float">1</span><span class="punctuation">);</span><span class="whitespace">
+
+</span><span class="keyword">if</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name other">value</span><span class="whitespace"> </span><span class="operator">&gt;</span><span class="whitespace"> </span><span class="literal number float">5</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name other">useEffect</span><span class="punctuation">(()</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="name other">setDoubleValue</span><span class="punctuation">(</span><span class="name other">value</span><span class="whitespace"> </span><span class="operator">*</span><span class="whitespace"> </span><span class="literal number float">2</span><span class="punctuation">),[</span><span class="name other">value</span><span class="punctuation">]);</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>i powoduje błąd &quot;Uncaught Error: Rendered more hooks than during the previous render.&quot; - hook warunkowy.</p>
+<section id="state-hooks">
+<h5>State Hooks</h5>
+<p>Stan pozwala komponentowi „zapamiętać” informacje, takie jak dane wprowadzone przez użytkownika. Na przykład komponent formularza może używać stanu do przechowywania wartości wejściowej.</p>
+<pre class="code javascript literal-block"><code><span class="keyword">import</span><span class="whitespace"> </span><span class="name other">React</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name other">useState</span><span class="whitespace"> </span><span class="punctuation">}</span><span class="whitespace"> </span><span class="keyword reserved">from</span><span class="whitespace"> </span><span class="literal string single">'react'</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="keyword declaration">function</span><span class="whitespace"> </span><span class="name other">Example</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="comment single">// Declare a new state variable, which we'll call &quot;count&quot;</span><span class="whitespace">
+
+        </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="punctuation">[</span><span class="name other">count</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">setCount</span><span class="punctuation">]</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">useState</span><span class="punctuation">(</span><span class="literal number float">0</span><span class="punctuation">);</span><span class="whitespace">
+
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name other">div</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name other">p</span><span class="operator">&gt;</span><span class="name other">You</span><span class="whitespace"> </span><span class="name other">clicked</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name other">count</span><span class="punctuation">}</span><span class="whitespace"> </span><span class="name other">times</span><span class="operator">&lt;</span><span class="error">/p&gt;</span><span class="whitespace">
+</span><span class="whitespace">                </span><span class="operator">&lt;</span><span class="name other">button</span><span class="whitespace"> </span><span class="name other">onClick</span><span class="operator">=</span><span class="punctuation">{()</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="name other">setCount</span><span class="punctuation">(</span><span class="name other">count</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="literal number float">1</span><span class="punctuation">)}</span><span class="operator">&gt;</span><span class="whitespace">
+                        </span><span class="name other">Click</span><span class="whitespace"> </span><span class="name other">me</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="error">/button&gt;</span><span class="whitespace">
+</span><span class="whitespace">                </span><span class="operator">&lt;</span><span class="error">/div&gt;</span><span class="whitespace">
+</span><span class="whitespace">        </span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Aby dodać stan do komponentu, użyj jednego z tych hooków:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><strong>useState</strong> deklaruje zmienną stanu, którą możesz bezpośrednio zaktualizować.</div>
+<div class="line"><strong>useReducer</strong> deklaruje zmienną stanu z logiką aktualizacji wewnątrz funkcji redukującej (nie bedziemy opisywać tego hooka w tych materiałach).</div>
+</div>
+</blockquote>
+<pre class="code javascript literal-block"><code><span class="keyword">import</span><span class="whitespace"> </span><span class="name other">React</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name other">useReducer</span><span class="whitespace"> </span><span class="punctuation">}</span><span class="whitespace"> </span><span class="keyword reserved">from</span><span class="whitespace"> </span><span class="literal string single">'react'</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="keyword declaration">function</span><span class="whitespace"> </span><span class="name other">reducer</span><span class="punctuation">(</span><span class="name other">state</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">action</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword">switch</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name other">action</span><span class="punctuation">.</span><span class="name other">type</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+                </span><span class="keyword">case</span><span class="whitespace"> </span><span class="literal string single">'increment'</span><span class="operator">:</span><span class="whitespace">
+                        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name other">state</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="literal number float">1</span><span class="punctuation">;</span><span class="whitespace">
+                </span><span class="keyword">default</span><span class="operator">:</span><span class="whitespace">
+                        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="name other">state</span><span class="punctuation">;</span><span class="whitespace">
+        </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="keyword declaration">function</span><span class="whitespace"> </span><span class="name other">Example</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="punctuation">[</span><span class="name other">count</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">dispatch</span><span class="punctuation">]</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">useReducer</span><span class="punctuation">(</span><span class="name other">reducer</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="literal number float">0</span><span class="punctuation">);</span><span class="whitespace">
+
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name other">div</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name other">p</span><span class="operator">&gt;</span><span class="name other">You</span><span class="whitespace"> </span><span class="name other">clicked</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name other">count</span><span class="punctuation">}</span><span class="whitespace"> </span><span class="name other">times</span><span class="operator">&lt;</span><span class="error">/p&gt;</span><span class="whitespace">
+</span><span class="whitespace">                </span><span class="operator">&lt;</span><span class="name other">button</span><span class="whitespace"> </span><span class="name other">onClick</span><span class="operator">=</span><span class="punctuation">{()</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="name other">dispatch</span><span class="punctuation">({</span><span class="whitespace"> </span><span class="name other">type</span><span class="operator">:</span><span class="whitespace"> </span><span class="literal string single">'increment'</span><span class="whitespace"> </span><span class="punctuation">})}</span><span class="operator">&gt;</span><span class="whitespace">
+                        </span><span class="name other">Click</span><span class="whitespace"> </span><span class="name other">me</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="error">/button&gt;</span><span class="whitespace">
+</span><span class="whitespace">                </span><span class="operator">&lt;</span><span class="error">/div&gt;</span><span class="whitespace">
+</span><span class="whitespace">        </span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>Tutaj useState jest hookiem. Wywołujemy go wewnątrz komponentu funkcyjnego, aby dodać do niego jakiś stan lokalny. React zachowa ten stan pomiędzy ponownymi renderowaniami jak w przypadku komponentu klasowego.</p>
+<p>Co zwraca useState? Zwraca parę wartości: bieżący stan i funkcję, która go aktualizuje. Dlatego piszemy <strong>const [count, setCount] = useState()</strong>. Działa to podobnie do this.state.count i this.setState w klasie, z tą różnicą, że otrzymujesz je w parze.
+Możesz też nazwać tę funkcję jak chcesz.</p>
+<p>Uwaga! W przypadku hooka nic nie łączy kolejnych stanów, więc trzeba zawsze definiować pełny stan!</p>
+<pre class="code javascript literal-block"><code><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="punctuation">[</span><span class="name other">user</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">setUser</span><span class="punctuation">]</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">useState</span><span class="punctuation">({</span><span class="whitespace"> </span><span class="name other">name</span><span class="operator">:</span><span class="whitespace"> </span><span class="literal string single">'Anna'</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">age</span><span class="operator">:</span><span class="whitespace"> </span><span class="literal number float">30</span><span class="whitespace"> </span><span class="punctuation">});</span></code></pre>
+<p>Jeśli zrobisz:</p>
+<pre class="code javascript literal-block"><code><span class="name other">setUser</span><span class="punctuation">({</span><span class="whitespace"> </span><span class="name other">name</span><span class="operator">:</span><span class="whitespace"> </span><span class="literal string single">'Kasia'</span><span class="whitespace"> </span><span class="punctuation">});</span></code></pre>
+<p>To age zostanie usunięte, ponieważ setUser zastępuje cały obiekt, a nie scala go automatycznie.</p>
+<p>Jedynym argumentem useState jest stan początkowy. W powyższym przykładzie jest to 0, ponieważ nasz licznik zaczyna się od zera.
+Zauważ, że w przeciwieństwie do this.state, stan tutaj nie musi być obiektem — chociaż może nim być, jeśli chcesz. Argument stanu początkowego jest używany tylko podczas pierwszego renderowania.</p>
+<p>Możemy definiować wiele wartości stanu jednocześnie, by to zrobić będziemy wywoływać funkcję useState wielokrotnie:</p>
+<pre class="code javascript literal-block"><code><span class="keyword declaration">function</span><span class="whitespace"> </span><span class="name other">Car</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="punctuation">[</span><span class="name other">brand</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">setBrand</span><span class="punctuation">]</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">useState</span><span class="punctuation">(</span><span class="literal string double">&quot;Fiat&quot;</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="punctuation">[</span><span class="name other">model</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">setModel</span><span class="punctuation">]</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">useState</span><span class="punctuation">(</span><span class="literal string double">&quot;126p&quot;</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="punctuation">[</span><span class="name other">year</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">setYear</span><span class="punctuation">]</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">useState</span><span class="punctuation">(</span><span class="literal string double">&quot;1964&quot;</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="punctuation">[</span><span class="name other">color</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">setColor</span><span class="punctuation">]</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">useState</span><span class="punctuation">(</span><span class="literal string double">&quot;red&quot;</span><span class="punctuation">);</span></code></pre>
+<p>Możemy też po prostu użyć jednego stanu i zamiast tego dołączyć obiekt:</p>
+<pre class="code javascript literal-block"><code><span class="keyword declaration">function</span><span class="whitespace"> </span><span class="name other">Car</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="punctuation">[</span><span class="name other">car</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">setCar</span><span class="punctuation">]</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">useState</span><span class="punctuation">({</span><span class="whitespace">
+                </span><span class="name other">brand</span><span class="operator">:</span><span class="whitespace"> </span><span class="literal string double">&quot;Fiat&quot;</span><span class="punctuation">,</span><span class="whitespace">
+                </span><span class="name other">model</span><span class="operator">:</span><span class="whitespace"> </span><span class="literal string double">&quot;126p&quot;</span><span class="punctuation">,</span><span class="whitespace">
+                </span><span class="name other">year</span><span class="operator">:</span><span class="whitespace"> </span><span class="literal string double">&quot;1964&quot;</span><span class="punctuation">,</span><span class="whitespace">
+                </span><span class="name other">color</span><span class="operator">:</span><span class="whitespace"> </span><span class="literal string double">&quot;red&quot;</span><span class="whitespace">
+</span><span class="punctuation">});</span></code></pre>
+<p>Domyślnie zaleca się by korzystać z:</p>
+<pre class="code javascript literal-block"><code><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="name other">updateColor</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name other">setCar</span><span class="punctuation">(</span><span class="name other">previousState</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+                </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="punctuation">...</span><span class="name other">previousState</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">color</span><span class="operator">:</span><span class="whitespace"> </span><span class="literal string double">&quot;blue&quot;</span><span class="whitespace"> </span><span class="punctuation">}</span><span class="whitespace">
+        </span><span class="punctuation">});</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>React zakłada, że jeśli wywołujesz useState wiele razy, robisz to w tej samej kolejności podczas każdego renderowania.</p>
+<p class="tag">Zadanie</p>
+<p>Uruchom przykład z hookiem useState.</p>
+</section>
+<section id="effect-hooks">
+<h5>Effect Hooks</h5>
+<p>Hook effect, useEffect, dodaje możliwość wykonywania efektów ubocznych (zmieniających stan wokół komponentu) z komponentu funkcyjnego. Służy temu samemu celowi, co <strong>componentDidMount, componentDidUpdate i componentWillUnmount</strong> w klasach React, ale jest zunifikowany w jednym API.</p>
+<pre class="code javascript literal-block"><code><span class="name other">useEffect</span><span class="punctuation">(()</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="comment single">// Update the document title using the browser API</span><span class="whitespace">
+        </span><span class="name builtin">document</span><span class="punctuation">.</span><span class="name other">title</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="literal string backtick">`You clicked </span><span class="literal string interpol">${</span><span class="name other">count</span><span class="literal string interpol">}</span><span class="literal string backtick"> times`</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="punctuation">});</span></code></pre>
+<p>Kiedy wywołujesz <strong>useEffect</strong>, mówisz Reactowi, aby uruchomił funkcję „efektu” po dodaniu zmian do DOM. Efekty są deklarowane wewnątrz komponentu, dzięki czemu mają dostęp do jego właściwości i stanu.
+Domyślnie React uruchamia efekty po każdym renderowaniu — łącznie z pierwszym renderowaniem.</p>
+<p>Podobnie jak w przypadku useState, w komponencie możesz użyć więcej niż jednego efektu. Domyślnym zachowaniem efektów jest uruchamianie efektu po każdym ukończonym renderowaniu. W ten sposób efekt jest zawsze odtwarzany, jeśli tylko zmieni się jedna z jego zależności.</p>
+<p>Aby to zaimplementować, przekaż drugi argument do useEffect, który jest tablicą wartości, od których zależy efekt. Nasz zaktualizowany przykład wygląda teraz tak:</p>
+<p>Podany effect wywoła się tylko raz</p>
+<pre class="code javascript literal-block"><code><span class="name other">useEffect</span><span class="punctuation">(()</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="comment single">//Runs only on the first render</span><span class="whitespace">
+</span><span class="punctuation">},</span><span class="whitespace"> </span><span class="punctuation">[]);</span></code></pre>
+<p>Podany efekt wywoła się przy każdej zmianie wartości &quot;props.source&quot;:</p>
+<pre class="code javascript literal-block"><code><span class="name other">useEffect</span><span class="punctuation">(</span><span class="whitespace">
+        </span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+                </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="name other">subscription</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">props</span><span class="punctuation">.</span><span class="name other">source</span><span class="punctuation">.</span><span class="name other">subscribe</span><span class="punctuation">();</span><span class="whitespace">
+                </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+                        </span><span class="name other">subscription</span><span class="punctuation">.</span><span class="name other">unsubscribe</span><span class="punctuation">();</span><span class="whitespace">
+                </span><span class="punctuation">};</span><span class="whitespace">
+        </span><span class="punctuation">},</span><span class="whitespace">
+</span><span class="punctuation">[</span><span class="name other">props</span><span class="punctuation">.</span><span class="name other">source</span><span class="punctuation">],</span><span class="whitespace">
+</span><span class="punctuation">);</span></code></pre>
+<p>Wykorzystując useEffect możemy użyć czegoś, co nazywa się czyszczeniem. Służy do tego funcja wykonywana po return (czyli w momencie niszczenia hooka) i wykorzystywana jest głównie np do czyszczenia listenerów.</p>
+<pre class="code javascript literal-block"><code><span class="name other">useEffect</span><span class="punctuation">(()</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name other">console</span><span class="punctuation">.</span><span class="name other">log</span><span class="punctuation">(</span><span class="literal string double">&quot;side effect 1&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">count</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="name other">console</span><span class="punctuation">.</span><span class="name other">log</span><span class="punctuation">(</span><span class="literal string double">&quot;DESTROYED 1&quot;</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="punctuation">};</span><span class="whitespace">
+</span><span class="punctuation">});</span></code></pre>
+<p class="tag">Zadanie</p>
+<p>Dodaj effect hook do komponentu zliczający liczbę odświeżeń komponentu setState, zobacz jego działanie.</p>
+<p class="tag">Zadanie</p>
+<p>Sprawdź podany w rozdziale hooks błąd wykonania effect w przypadku wykorzystania go w instrukcji warunkowej.</p>
+</section>
+<section id="custom-hooks">
+<h5>Custom Hooks</h5>
+<p>Niestandardowe hooki są bardziej konwencją niż funkcją. Jeśli nazwa funkcji zaczyna się od „use” i wywołuje inne hooki, mówimy, że jest to hook niestandardowy.</p>
+<p>Stan każdego komponentu jest całkowicie niezależny. Hooki pozwalają na ponowne wykorzystanie logiki stanowej, a nie samego stanu. Tak naprawdę każde wywołanie Hooka ma całkowicie izolowany stan — możesz więc nawet dwukrotnie użyć tego samego niestandardowego Hooka w jednym komponencie.</p>
+<p class="tag">Zadanie</p>
+<p>Dodaj własny hook, pamiętaj że jego nazwa musi zaczynać się od &quot;use...&quot;. Spraw by hook zwracał napis &quot;parzyste/nieparzyste&quot; zależnie od parzystości licznika.
+Dodaj jego wyświetlanie do głównego komponentu App.</p>
+<pre class="code javascript literal-block"><code><span class="keyword">import</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name other">useEffect</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">useState</span><span class="whitespace"> </span><span class="punctuation">}</span><span class="whitespace"> </span><span class="keyword reserved">from</span><span class="whitespace"> </span><span class="literal string single">'react'</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="keyword declaration">function</span><span class="whitespace"> </span><span class="name other">useCustomExample</span><span class="punctuation">(</span><span class="name other">counter</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="punctuation">[</span><span class="name other">word</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">setWord</span><span class="punctuation">]</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">useState</span><span class="punctuation">(</span><span class="literal string single">'Parzyste'</span><span class="punctuation">);</span><span class="whitespace">
+
+        </span><span class="name other">useEffect</span><span class="punctuation">(()</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+                </span><span class="keyword">if</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name other">counter</span><span class="whitespace"> </span><span class="operator">%</span><span class="whitespace"> </span><span class="literal number float">2</span><span class="whitespace"> </span><span class="operator">===</span><span class="whitespace"> </span><span class="literal number float">0</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+                </span><span class="name other">setWord</span><span class="punctuation">(</span><span class="literal string single">'Parzyste'</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="punctuation">}</span><span class="whitespace"> </span><span class="keyword">else</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+                </span><span class="name other">setWord</span><span class="punctuation">(</span><span class="literal string single">'Nieparzyste'</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="punctuation">}</span><span class="whitespace">
+</span><span class="punctuation">},</span><span class="whitespace"> </span><span class="punctuation">[</span><span class="name other">counter</span><span class="punctuation">]);</span><span class="whitespace">
+
+</span><span class="keyword">return</span><span class="whitespace"> </span><span class="name other">word</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="keyword">export</span><span class="whitespace"> </span><span class="keyword">default</span><span class="whitespace"> </span><span class="name other">useCustomExample</span><span class="punctuation">;</span></code></pre>
+<p>Użycie:</p>
+<pre class="code javascript literal-block"><code><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="name other">parity</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">useCustomExample</span><span class="punctuation">(</span><span class="name other">count</span><span class="punctuation">);</span></code></pre>
+<pre class="code javascript literal-block"><code><span class="operator">&lt;</span><span class="name other">p</span><span class="whitespace"> </span><span class="keyword declaration">class</span><span class="operator">=</span><span class="literal string double">&quot;indented&quot;</span><span class="operator">&gt;</span><span class="punctuation">{</span><span class="name other">parity</span><span class="punctuation">}</span><span class="operator">&lt;</span><span class="error">/p&gt;</span></code></pre>
+</section>
+<section id="context-hooks">
+<h5>Context hooks</h5>
+<p>Kontekst pozwala komponentowi odbierać informacje od odległych rodziców bez przekazywania ich jako props. Na przykład komponent najwyższego poziomu aplikacji może przekazać bieżący motyw interfejsu użytkownika do wszystkich komponentów poniżej, niezależnie od głębokości.</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><strong>useContext</strong> odczytuje i subskrybuje kontekst.</div>
+</div>
+</blockquote>
+<pre class="code javascript literal-block"><code><span class="keyword declaration">function</span><span class="whitespace"> </span><span class="name other">Button</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="name other">theme</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">useContext</span><span class="punctuation">(</span><span class="name other">ThemeContext</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="comment single">// ...</span></code></pre>
+<p>Parametry:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">SomeContext: Kontekst utworzony wcześniej za pomocą narzędzia createContext. Sam kontekst nie przechowuje informacji, reprezentuje jedynie rodzaj informacji, które możesz dostarczyć lub odczytać z komponentów.</div>
+</div>
+</blockquote>
+<p>Aby określić wartość kontekstu, React przeszukuje drzewo komponentów i znajduje najbliższego dostawcę kontekstu powyżej dla tego konkretnego kontekstu.</p>
+<p class="tag">Zadanie</p>
+<p>Zobacz implementację ThemeProvidera i jego użycie w index.js. Następnie dodaj to klasy app.js wywołanie zmiany stylu strony</p>
+<pre class="code javascript literal-block"><code><span class="keyword">import</span><span class="whitespace"> </span><span class="literal string single">'./App.css'</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="keyword">import</span><span class="whitespace"> </span><span class="name other">React</span><span class="whitespace"> </span><span class="keyword reserved">from</span><span class="whitespace"> </span><span class="literal string double">&quot;react&quot;</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="keyword">import</span><span class="whitespace"> </span><span class="name other">StateExample</span><span class="whitespace"> </span><span class="keyword reserved">from</span><span class="whitespace"> </span><span class="literal string double">&quot;./StateExample/StateExample&quot;</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="keyword">import</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name other">ThemeContext</span><span class="punctuation">}</span><span class="whitespace"> </span><span class="keyword reserved">from</span><span class="whitespace"> </span><span class="literal string double">&quot;./ContextExample/ThemeProvider&quot;</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="keyword">import</span><span class="whitespace"> </span><span class="name other">Form</span><span class="whitespace"> </span><span class="keyword reserved">from</span><span class="whitespace"> </span><span class="literal string double">&quot;./Form/Form&quot;</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="keyword declaration">function</span><span class="whitespace"> </span><span class="name other">App</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+
+        </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name other">theme</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">toggle</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">dark</span><span class="punctuation">}</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">React</span><span class="punctuation">.</span><span class="name other">useContext</span><span class="punctuation">(</span><span class="name other">ThemeContext</span><span class="punctuation">)</span><span class="whitespace">
+
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name other">div</span><span class="whitespace"> </span><span class="name other">className</span><span class="operator">=</span><span class="literal string double">&quot;App&quot;</span><span class="whitespace"> </span><span class="name other">style</span><span class="operator">=</span><span class="punctuation">{{</span><span class="name other">backgroundColor</span><span class="operator">:</span><span class="whitespace"> </span><span class="name other">theme</span><span class="punctuation">.</span><span class="name other">backgroundColor</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">color</span><span class="operator">:</span><span class="whitespace"> </span><span class="name other">theme</span><span class="punctuation">.</span><span class="name other">color</span><span class="punctuation">}}</span><span class="operator">&gt;</span><span class="whitespace">
+                        </span><span class="name other">Test</span><span class="whitespace">
+                        </span><span class="operator">&lt;</span><span class="name other">StateExample</span><span class="operator">/&gt;</span><span class="whitespace">
+                        </span><span class="operator">&lt;</span><span class="name other">button</span><span class="whitespace">
+                                </span><span class="name other">type</span><span class="operator">=</span><span class="literal string double">&quot;button&quot;</span><span class="whitespace">
+                                </span><span class="name other">onClick</span><span class="operator">=</span><span class="punctuation">{</span><span class="name other">toggle</span><span class="punctuation">}</span><span class="whitespace">
+                                </span><span class="name other">style</span><span class="operator">=</span><span class="punctuation">{{</span><span class="whitespace">
+                                        </span><span class="name other">backgroundColor</span><span class="operator">:</span><span class="whitespace"> </span><span class="name other">theme</span><span class="punctuation">.</span><span class="name other">backgroundColor</span><span class="punctuation">,</span><span class="whitespace">
+                                        </span><span class="name other">color</span><span class="operator">:</span><span class="whitespace"> </span><span class="name other">theme</span><span class="punctuation">.</span><span class="name other">color</span><span class="punctuation">,</span><span class="whitespace">
+                                        </span><span class="name other">outline</span><span class="operator">:</span><span class="whitespace"> </span><span class="literal string single">'none'</span><span class="whitespace">
+                                </span><span class="punctuation">}}</span><span class="whitespace">
+                        </span><span class="operator">&gt;</span><span class="whitespace">
+                                </span><span class="name other">Toggle</span><span class="whitespace"> </span><span class="name other">to</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="operator">!</span><span class="name other">dark</span><span class="whitespace"> </span><span class="operator">?</span><span class="whitespace"> </span><span class="literal string single">'Dark'</span><span class="whitespace"> </span><span class="operator">:</span><span class="whitespace"> </span><span class="literal string single">'Light'</span><span class="punctuation">}</span><span class="whitespace"> </span><span class="name other">theme</span><span class="whitespace">
+                        </span><span class="operator">&lt;</span><span class="error">/button&gt;</span><span class="whitespace">
+</span><span class="whitespace">                </span><span class="operator">&lt;</span><span class="error">/div&gt;</span><span class="whitespace">
+</span><span class="whitespace">        </span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="keyword">export</span><span class="whitespace"> </span><span class="keyword">default</span><span class="whitespace"> </span><span class="name other">App</span><span class="punctuation">;</span></code></pre>
+</section>
+<section id="ref-hook">
+<h5>Ref hook</h5>
+<p>Referencje pozwalają komponentowi przechowywać pewne informacje, które nie są używane do renderowania, takie jak węzeł DOM lub identyfikator limitu czasu. W przeciwieństwie do stanu, aktualizacja ref nie powoduje ponownego renderowania komponentu. Referencje są „ucieczką” od paradygmatu React. Są przydatne, gdy musisz pracować z systemami innymi niż React, takimi jak wbudowane interfejsy API przeglądarki.</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><strong>useRef</strong> deklaruje ref. Można w nim przechowywać dowolną wartość, ale najczęściej służy do przechowywania węzła DOM.</div>
+</div>
+</blockquote>
+<pre class="code javascript literal-block"><code><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="name other">initialRenderTimeRef</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">useRef</span><span class="punctuation">(</span><span class="operator word">new</span><span class="whitespace"> </span><span class="name builtin">Date</span><span class="punctuation">().</span><span class="name other">toLocaleString</span><span class="punctuation">());</span></code></pre>
+<p>Przykład:</p>
+<pre class="code javascript literal-block"><code><span class="keyword">import</span><span class="whitespace"> </span><span class="name other">React</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name other">useEffect</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">useRef</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">useState</span><span class="punctuation">}</span><span class="whitespace"> </span><span class="keyword reserved">from</span><span class="whitespace"> </span><span class="literal string single">'react'</span><span class="punctuation">;</span><span class="whitespace">
+</span><span class="keyword">import</span><span class="whitespace"> </span><span class="name other">useCustomExample</span><span class="whitespace"> </span><span class="keyword reserved">from</span><span class="whitespace"> </span><span class="literal string double">&quot;./UseCustomExample&quot;</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="keyword declaration">function</span><span class="whitespace"> </span><span class="name other">StateExample</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="punctuation">[</span><span class="name other">count</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">setCount</span><span class="punctuation">]</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">useState</span><span class="punctuation">(</span><span class="literal number float">0</span><span class="punctuation">);</span><span class="whitespace">
+        </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="name other">parity</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">useCustomExample</span><span class="punctuation">(</span><span class="name other">count</span><span class="punctuation">);</span><span class="whitespace">
+
+        </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="name other">initialRenderTimeRef</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">useRef</span><span class="punctuation">(</span><span class="operator word">new</span><span class="whitespace"> </span><span class="name builtin">Date</span><span class="punctuation">().</span><span class="name other">toLocaleString</span><span class="punctuation">());</span><span class="whitespace">
+
+        </span><span class="name other">useEffect</span><span class="punctuation">(()</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+                </span><span class="name other">console</span><span class="punctuation">.</span><span class="name other">log</span><span class="punctuation">(</span><span class="literal string double">&quot;side effect 1&quot;</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">count</span><span class="punctuation">);</span><span class="whitespace">
+                </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+                        </span><span class="name other">console</span><span class="punctuation">.</span><span class="name other">log</span><span class="punctuation">(</span><span class="literal string double">&quot;DESTROYED 1&quot;</span><span class="punctuation">);</span><span class="whitespace">
+                </span><span class="punctuation">};</span><span class="whitespace">
+        </span><span class="punctuation">});</span><span class="whitespace">
+
+        </span><span class="keyword declaration">function</span><span class="whitespace"> </span><span class="name other">refreshDate</span><span class="punctuation">(</span><span class="name other">param</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+                </span><span class="name other">initialRenderTimeRef</span><span class="punctuation">.</span><span class="name other">current</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="operator word">new</span><span class="whitespace"> </span><span class="name builtin">Date</span><span class="punctuation">().</span><span class="name other">toLocaleString</span><span class="punctuation">();</span><span class="whitespace">
+        </span><span class="punctuation">}</span><span class="whitespace">
+
+        </span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name other">div</span><span class="operator">&gt;</span><span class="whitespace">
+                        </span><span class="operator">&lt;</span><span class="name other">p</span><span class="operator">&gt;</span><span class="name other">You</span><span class="whitespace"> </span><span class="name other">clicked</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name other">count</span><span class="punctuation">}</span><span class="whitespace"> </span><span class="name other">times</span><span class="operator">&lt;</span><span class="error">/p&gt;</span><span class="whitespace">
+</span><span class="whitespace">                        </span><span class="operator">&lt;</span><span class="name other">p</span><span class="operator">&gt;</span><span class="name other">Initial</span><span class="whitespace"> </span><span class="name other">render</span><span class="whitespace"> </span><span class="name other">time</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="name other">stored</span><span class="whitespace"> </span><span class="operator word">in</span><span class="whitespace"> </span><span class="name other">ref</span><span class="punctuation">)</span><span class="operator">:</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="name other">initialRenderTimeRef</span><span class="punctuation">.</span><span class="name other">current</span><span class="punctuation">}</span><span class="operator">&lt;</span><span class="error">/p&gt;</span><span class="whitespace">
+</span><span class="whitespace">                        </span><span class="operator">&lt;</span><span class="name other">p</span><span class="whitespace"> </span><span class="keyword declaration">class</span><span class="operator">=</span><span class="literal string double">&quot;indented&quot;</span><span class="operator">&gt;</span><span class="whitespace">
+                                </span><span class="operator">&lt;</span><span class="name other">button</span><span class="whitespace"> </span><span class="name other">onClick</span><span class="operator">=</span><span class="punctuation">{()</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="name other">setCount</span><span class="punctuation">(</span><span class="name other">count</span><span class="whitespace"> </span><span class="operator">+</span><span class="whitespace"> </span><span class="literal number float">1</span><span class="punctuation">)}</span><span class="operator">&gt;</span><span class="whitespace">
+                                        </span><span class="name other">Click</span><span class="whitespace"> </span><span class="name other">me</span><span class="whitespace">
+                                </span><span class="operator">&lt;</span><span class="error">/button&gt;</span><span class="whitespace">
+</span><span class="whitespace">                                </span><span class="operator">&lt;</span><span class="name other">button</span><span class="whitespace"> </span><span class="name other">onClick</span><span class="operator">=</span><span class="punctuation">{()</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="name other">refreshDate</span><span class="punctuation">()}</span><span class="operator">&gt;</span><span class="whitespace">
+                                        </span><span class="name other">Refresh</span><span class="whitespace"> </span><span class="name other">Time</span><span class="whitespace">
+                                </span><span class="operator">&lt;</span><span class="error">/button&gt;</span><span class="whitespace">
+</span><span class="whitespace">                                </span><span class="operator">&lt;</span><span class="name other">p</span><span class="operator">&gt;&lt;</span><span class="error">/p&gt;</span><span class="whitespace">
+</span><span class="whitespace">                                </span><span class="operator">&lt;</span><span class="name other">p</span><span class="whitespace"> </span><span class="keyword declaration">class</span><span class="operator">=</span><span class="literal string double">&quot;indented&quot;</span><span class="operator">&gt;</span><span class="punctuation">{</span><span class="name other">parity</span><span class="punctuation">}</span><span class="operator">&lt;</span><span class="error">/p&gt;</span><span class="whitespace">
+</span><span class="whitespace">                        </span><span class="operator">&lt;</span><span class="error">/p&gt;</span><span class="whitespace">
+</span><span class="whitespace">                </span><span class="operator">&lt;</span><span class="error">/div&gt;</span><span class="whitespace">
+</span><span class="whitespace">        </span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p>export default StateExample;</p>
+<p>Hook useRef może być również użyty do śledzenia wartości poprzedniego stanu. Dzieje się tak, ponieważ jesteśmy w stanie zachować wartości useRef pomiędzy renderowaniami.</p>
+<p class="tag">Zadanie</p>
+<p>Zobacz jak działa powyższy przykład</p>
+</section>
+<section id="memo-hook">
+<h5>Memo hook</h5>
+<p>Hook Memo zwraca zapamiętaną wartość.</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><strong>useMemo</strong> przeliczy zapamiętaną wartość tylko wtedy, gdy zmieni się jedna z zależności. Ta optymalizacja pomaga uniknąć kosztownych obliczeń przy każdym renderowaniu.</div>
+</div>
+</blockquote>
+<p>Pamiętaj, że funkcja przekazana do <strong>useMemo</strong> działa podczas renderowania. Nie rób tam niczego, czego normalnie nie zrobiłbyś podczas renderowania. Na przykład skutki uboczne należą do useEffect, a nie useMemo.</p>
+<pre class="code javascript literal-block"><code><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="name other">memoizedValue</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">useMemo</span><span class="punctuation">(()</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="name other">computeExpensiveValue</span><span class="punctuation">(</span><span class="name other">a</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">b</span><span class="punctuation">),</span><span class="whitespace"> </span><span class="punctuation">[</span><span class="name other">a</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="name other">b</span><span class="punctuation">]);</span></code></pre>
+</section>
+</section>
+<section id="react-hook-form">
+<h4>React Hook Form</h4>
+<p>React Hook Form to prosta biblioteka do tworzenia formularzy w React z łatwym dodawaniem walidacji dla pól.</p>
+<pre class="code javascript literal-block"><code><span class="keyword">import</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name other">useForm</span><span class="whitespace"> </span><span class="punctuation">}</span><span class="whitespace"> </span><span class="keyword reserved">from</span><span class="whitespace"> </span><span class="literal string single">'react-hook-form'</span><span class="punctuation">;</span><span class="whitespace">
+
+</span><span class="keyword declaration">function</span><span class="whitespace"> </span><span class="name other">App</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+        </span><span class="keyword declaration">const</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace">
+                </span><span class="name other">register</span><span class="punctuation">,</span><span class="whitespace">
+                </span><span class="name other">handleSubmit</span><span class="punctuation">,</span><span class="whitespace">
+                </span><span class="name other">formState</span><span class="operator">:</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name other">errors</span><span class="whitespace"> </span><span class="punctuation">},</span><span class="whitespace">
+        </span><span class="punctuation">}</span><span class="whitespace"> </span><span class="operator">=</span><span class="whitespace"> </span><span class="name other">useForm</span><span class="punctuation">();</span><span class="whitespace">
+
+</span><span class="keyword">return</span><span class="whitespace"> </span><span class="punctuation">(</span><span class="whitespace">
+        </span><span class="operator">&lt;</span><span class="name other">form</span><span class="whitespace"> </span><span class="name other">onSubmit</span><span class="operator">=</span><span class="punctuation">{</span><span class="name other">handleSubmit</span><span class="punctuation">((</span><span class="name other">data</span><span class="punctuation">)</span><span class="whitespace"> </span><span class="punctuation">=&gt;</span><span class="whitespace"> </span><span class="name other">console</span><span class="punctuation">.</span><span class="name other">log</span><span class="punctuation">(</span><span class="name other">data</span><span class="punctuation">))}</span><span class="operator">&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name other">input</span><span class="whitespace"> </span><span class="punctuation">{...</span><span class="name other">register</span><span class="punctuation">(</span><span class="literal string single">'firstName'</span><span class="punctuation">)}</span><span class="whitespace"> </span><span class="operator">/&gt;</span><span class="whitespace">
+                </span><span class="operator">&lt;</span><span class="name other">input</span><span class="whitespace"> </span><span class="punctuation">{...</span><span class="name other">register</span><span class="punctuation">(</span><span class="literal string single">'lastName'</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name other">required</span><span class="operator">:</span><span class="whitespace"> </span><span class="keyword constant">true</span><span class="whitespace"> </span><span class="punctuation">})}</span><span class="whitespace"> </span><span class="operator">/&gt;</span><span class="whitespace">
+                </span><span class="punctuation">{</span><span class="name other">errors</span><span class="punctuation">.</span><span class="name other">lastName</span><span class="whitespace"> </span><span class="operator">&amp;&amp;</span><span class="whitespace"> </span><span class="operator">&lt;</span><span class="name other">p</span><span class="operator">&gt;</span><span class="name other">Last</span><span class="whitespace"> </span><span class="name other">name</span><span class="whitespace"> </span><span class="name other">is</span><span class="whitespace"> </span><span class="name other">required</span><span class="punctuation">.</span><span class="operator">&lt;</span><span class="error">/p&gt;}</span><span class="whitespace">
+</span><span class="whitespace">                </span><span class="operator">&lt;</span><span class="name other">input</span><span class="whitespace"> </span><span class="punctuation">{...</span><span class="name other">register</span><span class="punctuation">(</span><span class="literal string single">'age'</span><span class="punctuation">,</span><span class="whitespace"> </span><span class="punctuation">{</span><span class="whitespace"> </span><span class="name other">pattern</span><span class="operator">:</span><span class="whitespace"> </span><span class="literal string regex">/\d+/</span><span class="whitespace"> </span><span class="punctuation">})}</span><span class="whitespace"> </span><span class="operator">/&gt;</span><span class="whitespace">
+                </span><span class="punctuation">{</span><span class="name other">errors</span><span class="punctuation">.</span><span class="name other">age</span><span class="whitespace"> </span><span class="operator">&amp;&amp;</span><span class="whitespace"> </span><span class="operator">&lt;</span><span class="name other">p</span><span class="operator">&gt;</span><span class="name other">Please</span><span class="whitespace"> </span><span class="name other">enter</span><span class="whitespace"> </span><span class="name other">number</span><span class="whitespace"> </span><span class="keyword">for</span><span class="whitespace"> </span><span class="name other">age</span><span class="punctuation">.</span><span class="operator">&lt;</span><span class="error">/p&gt;}</span><span class="whitespace">
+</span><span class="whitespace">                </span><span class="operator">&lt;</span><span class="name other">input</span><span class="whitespace"> </span><span class="name other">type</span><span class="operator">=</span><span class="literal string double">&quot;submit&quot;</span><span class="whitespace"> </span><span class="operator">/&gt;</span><span class="whitespace">
+        </span><span class="operator">&lt;</span><span class="error">/form&gt;</span><span class="whitespace">
+</span><span class="punctuation">);</span><span class="whitespace">
+</span><span class="punctuation">}</span></code></pre>
+<p class="tag">Zadanie</p>
+<p>Dodaj klase Form do głównej strony App (tzn.  &lt;Form/&gt;), zobacz jej implementację.</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="footnote-1" role="note">
+<span class="label"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></span>
+<p>Wykorzystano materiały z:</p>
+</aside>
+</aside>
+<p><a class="reference external" href="https://legacy.reactjs.org/docs/hooks-intro.html">https://legacy.reactjs.org/docs/hooks-intro.html</a></p>
+<p><a class="reference external" href="https://vimalselvam.com/post/toggle-theme-using-react-hooks/">https://vimalselvam.com/post/toggle-theme-using-react-hooks/</a></p>
+<p><a class="reference external" href="https://www.w3schools.com/react/showreact.asp?filename=demo2_react_useref2">https://www.w3schools.com/react/showreact.asp?filename=demo2_react_useref2</a></p>
+<p><a class="reference external" href="https://legacy.reactjs.org/docs/hooks-reference.html">https://legacy.reactjs.org/docs/hooks-reference.html</a></p>
+<p><a class="reference external" href="https://react.dev/">https://react.dev/</a></p>
+<p><a class="reference external" href="https://www.freecodecamp.org/news/react-hooks-fundamentals/">https://www.freecodecamp.org/news/react-hooks-fundamentals/</a></p>
+<p><a class="reference external" href="https://www.react-hook-form.com/">https://www.react-hook-form.com/</a></p>
+<p><a class="reference external" href="https://sst.dev/archives/understanding-react-hooks.html">https://sst.dev/archives/understanding-react-hooks.html</a></p>
+</section>
+</section>
+</section></body>
+</html>
+
