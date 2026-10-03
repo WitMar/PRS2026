@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Przetwarzanie równoległe i strumieniowe</title>
+<title>Przetwarzanie równoległe i strumieniowe - Wykład 1</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
@@ -24,17 +24,105 @@
   .reveal .el.table table { margin: 0 auto; border-collapse: collapse; font-size: 1em; }
   .reveal .el.table td { border: 1px solid #555; padding: .3em .5em; vertical-align: top; }
   .reveal a { color: #1a73d9; }
+  /* ---------- v2: interactive slides ---------- */
+  :root { --green: rgb(83, 174, 18); --blue: #1a73d9; --red: #d93025; --muted: #666; --line: #ccc; }
+  .reveal .el.box { padding: 0 .5em; line-height: 1.3; }
+  .reveal .el.box p { margin: 0 0 .5em; }
+  .reveal .small, .reveal .hint { font-size: .7em; color: var(--muted); }
+  .reveal .btn, .reveal .opt {
+    font: inherit; font-size: .75em; padding: .3em .8em; margin: 0 .3em .3em 0; cursor: pointer;
+    border: 2px solid var(--green); background: var(--green); color: #fff; border-radius: .3em;
+  }
+  .reveal .btn.ghost { background: #fff; color: var(--green); }
+  .reveal .btn:disabled { opacity: .4; cursor: default; }
+  .reveal .simctl { display: flex; flex-wrap: wrap; align-items: center; gap: .3em .8em; font-size: .8em; margin-bottom: .5em; }
+  .reveal .simctl .btn { font-size: .9em; margin: 0; }
+  .reveal .simctl select { font: inherit; padding: .1em .3em; }
+  .reveal .stat { font-size: .8em; }
+  .reveal h4 { font-size: .8em; margin: 0 0 .3em; text-transform: none; color: #000; font-family: inherit; }
+  .reveal code { font-family: Consolas, Menlo, monospace; }
+
+  /* schedule (slide 3) */
+  .reveal .el.schedule table { font-size: .5em; border-collapse: collapse; width: 100%; }
+  .reveal .el.schedule th, .reveal .el.schedule td { border: 1px solid var(--line); padding: .15em .4em; text-align: left; }
+  .reveal .el.schedule th { background: #eef7e6; }
+  .reveal .el.schedule td:first-child { white-space: nowrap; }
+
+  /* quiz */
+  .reveal .quiz .q { font-size: 1.1em; margin-bottom: .8em; }
+  .reveal .quiz .opts { display: flex; flex-wrap: wrap; gap: .5em; margin-bottom: .6em; }
+  .reveal .quiz .opt { background: #fff; color: #000; border-color: var(--line); font-size: .9em; margin: 0; }
+  .reveal .quiz .opt.sel { border-color: var(--blue); background: #e8f0fe; }
+  .reveal .quiz .opt.good { border-color: var(--green); background: #e6f4da; }
+  .reveal .quiz .opt.bad { border-color: var(--red); background: #fce8e6; }
+  .reveal .quiz .explain { visibility: hidden; font-size: .85em; border-left: 4px solid var(--green); padding-left: .6em; margin-top: .6em; }
+  .reveal .quiz.done .explain { visibility: visible; }
+
+  /* process / thread memory */
+  .reveal #memsim .procs { display: flex; flex-wrap: wrap; gap: .6em; min-height: 11em; align-content: flex-start; }
+  .reveal #memsim .proc { border: 3px solid var(--blue); border-radius: .4em; padding: .3em; font-size: .6em; width: 15em; }
+  .reveal #memsim .proc .pt { font-weight: bold; margin-bottom: .2em; }
+  .reveal #memsim .seg { background: #e8f0fe; margin: .15em 0; padding: .1em .4em; border-radius: .2em; }
+  .reveal #memsim .ths { display: flex; flex-wrap: wrap; gap: .25em; margin-top: .3em; }
+  .reveal #memsim .th { background: #fef3c7; border: 1px solid #e0b800; padding: .1em .3em; border-radius: .2em; animation: pop .3s; }
+  @keyframes pop { from { transform: scale(.3); opacity: 0; } }
+
+  /* gantt */
+  .reveal #tlsim .gantt { font-size: .6em; margin: .5em 0; }
+  .reveal #tlsim .row { display: flex; align-items: center; height: 2.2em; margin-bottom: .3em; }
+  .reveal #tlsim .row .lbl { width: 5em; flex: none; }
+  .reveal #tlsim .track { position: relative; flex: 1; height: 100%; background: #f4f4f4; }
+  .reveal #tlsim .blk { position: absolute; top: 0; height: 100%; color: #fff; text-align: center; line-height: 2.2em; font-weight: bold; border-right: 1px solid #fff; box-sizing: border-box; }
+  .reveal #tlsim .blk.sw { background: repeating-linear-gradient(45deg, #999 0 4px, #ddd 4px 8px); }
+  .reveal #tlsim .axis { position: relative; height: 1.4em; margin-left: 5em; color: var(--muted); }
+  .reveal #tlsim .axis span { position: absolute; transform: translateX(-50%); }
+
+  /* race */
+  .reveal #racesim .race { display: flex; gap: 1em; align-items: stretch; }
+  .reveal #racesim .thread, .reveal #racesim .shared { flex: 1; border: 2px solid var(--line); border-radius: .4em; padding: .4em .6em; font-size: .75em; }
+  .reveal #racesim .shared { flex: .8; text-align: center; background: #f7fbf3; }
+  .reveal #racesim .x { font-size: 2em; margin: .3em 0; }
+  .reveal #racesim .code { list-style: none; margin: 0 0 .4em; padding: 0; font-family: Consolas, Menlo, monospace; font-size: .9em; }
+  .reveal #racesim .code li { padding: .05em .4em; border-radius: .2em; }
+  .reveal #racesim .code li.done { color: #aaa; }
+  .reveal #racesim .code li.next { background: #fef3c7; }
+  .reveal #racesim .code li.blocked { background: #fce8e6; }
+  .reveal #racesim .result { font-size: .9em; font-weight: bold; min-height: 1.3em; margin: .4em 0 .2em; }
+  .reveal #racesim .result.bad { color: var(--red); }
+  .reveal #racesim .result.good { color: var(--green); }
+  .reveal #racesim .log { font-size: .6em; color: var(--muted); }
+
+  /* stream */
+  .reveal #streamsim .lane { margin-bottom: .4em; }
+  .reveal #streamsim .events { display: flex; gap: .25em; height: 2.1em; align-items: center; overflow: hidden; border-bottom: 1px solid var(--line); }
+  .reveal #streamsim .ev { flex: none; font-size: .55em; width: 3.4em; text-align: center; padding: .2em 0; border-radius: .3em; background: #e8f0fe; animation: pop .25s; }
+  .reveal #streamsim .ev.hot { background: #fce8e6; border: 1px solid var(--red); }
+  .reveal #streamsim .ev.wait { opacity: .55; }
+  .reveal #streamsim .out { font-size: .65em; margin: .2em 0 0; min-height: 1.3em; }
+  .reveal #streamsim .out .alarm { color: var(--red); font-weight: bold; }
+
+  /* code + GIL */
+  .reveal pre.code-wrap { width: 100%; margin: 0 0 .4em; box-shadow: none; font-size: .62em; }
+  .reveal pre.code-wrap code { max-height: none; padding: .6em; }
+  .reveal .textflow p { margin-bottom: .6em; }
+  .reveal table.simple { border-collapse: collapse; font-size: .7em; margin: .2em 0 .8em; width: 100%; }
+  .reveal table.simple th, .reveal table.simple td { border: 1px solid var(--line); padding: .3em .5em; vertical-align: top; text-align: left; }
+  .reveal table.simple th { background: #eef7e6; }
+
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 <div class="reveal">
 <div class="slides">
 <section data-background-color="#ffffff" data-keywords="PRS">
-<div class="el text" style="left:2.179%;top:58.254%;width:47.930%;height:33.102%;"><p><a href="https://usosweb.amu.edu.pl/kontroler.php?_action=katalog2/przedmioty/pokazPrzedmiot&amp;kod=06-DPRSUA0">Przetwarzanie równoległe i strumieniowe</a> [06-S2APD04]</p>
+<div class="el text" style="left:2.179%;top:58.254%;width:57.930%;height:33.102%;"><p><a href="https://usosweb.amu.edu.pl/kontroler.php?_action=katalog2/przedmioty/pokazPrzedmiot&kod=06-S2APD04-F00339">Przetwarzanie równoległe i strumieniowe</a> [06-S2APD04]</p>
 
 <p>Środa</p>
 
-<p>Wykład 8.15 - 9.45 (lub zdalnie!)</p>
+<p>Wykłady 8.15 - 9.45 / (lub "zdalnie")</p>
 
 <p>Laboratoria 10.00 - 11.30</p>
 </div>
@@ -60,24 +148,40 @@
 
 <ul>
 	<li><span style="font-size:1.125em">Pytania testowe - moodle</span></li>
-	<li><span style="font-size:1.125em">Egzamin w sesji</span></li>
+	<li><span style="font-size:1.125em">Lub egzamin w sesji</span></li>
 </ul>
 
 <h3><span style="font-size:1.125em"><strong>Laboratoria</strong></span></h3>
 
 <ul>
-	<li><span style="font-size:1.125em">Projekt I -&nbsp; python, proste przetwarzanie 25%.</span></li>
-	<li><span style="font-size:1.125em">Projekt II - przetwarzanie strumieniowe w Apache Flink 25%.</span></li>
-	<li><span style="font-size:1.125em">Zadania ćwiczenia - moodle 50%.</span></li>
+    <li><span style="font-size:1.125em">Projekt I -&nbsp; python, proste przetwarzanie równolełe 25%.</span></li>
+	<li><span style="font-size:1.125em">Projekt II - złożone przetwarzanie równolełe 25%.</span></li>
+    <li><span style="font-size:1.125em">Projekt III - przetwarzanie strumieniowe w Apache Flink 25%.</span></li>
+	<li><span style="font-size:1.125em">Zadania ćwiczenia - moodle 25%.</span></li>
 </ul>
 </div>
 </section>
 <section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zaliczenie</strong></span></p>
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Organizacja roku</strong></span></p>
 </div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el img" style="left:2.179%;top:19.418%;width:39.209%;height:80.579%;"><img src="images/file-66f94f1088499.png" alt=""></div>
-<div class="el text link" style="left:56.645%;top:58.254%;width:40.000%;height:40.000%;"><a href="https://mw.home.amu.edu.pl" target="_blank">mw.home.amu.edu.pl</a></div>
+<div class="el schedule" style="left:2%;top:19%;width:55%;height:79%"><table><thead><tr><th>Dzień</th><th>Wykład</th></tr></thead><tbody>
+<tr><td>07.10.2026</td><td>Wielowątkowość, procesy, przełączanie procesora</td></tr>
+<tr><td>14.10.2026</td><td>Strumienie w Python, map, filter, reduce, zip, podstawowe struktury danych (zdalny)</td></tr>
+<tr><td>21.10.2026</td><td>Implementacja wątków w Python, Wait, Notify, Synchronizacja, Semafory</td></tr>
+<tr><td>28.10.2026</td><td>Anomalie związane z przetwarzaniem równoległym, zagłodzenie, race condition, zakleszczenie (zdalny)</td></tr>
+<tr><td>04.11.2026</td><td>Klasyczne problemy synchronizacji procesów</td></tr>
+<tr><td>11.11.2026</td><td>Święto Niepodległości - brak zajęć</td></tr>
+<tr><td>18.11.2026</td><td>Thread Pool, Executory w Python (zdalny)</td></tr>
+<tr><td>25.11.2026</td><td>Algorytmy równoległe (zdalny)</td></tr>
+<tr><td>02.12.2026</td><td>Aplikacje do przetwarzana danych. Przetwarzanie danych strumieniowych w Streamz</td></tr>
+<tr><td>09.12.2026</td><td>Korutyny i async w Python (zdalny)</td></tr>
+<tr><td>16.12.2026</td><td>Dane sensoryczne, serwer danych, broker danych, biblioteki przetwarzania strumieniowego</td></tr>
+<tr><td>13.01.2027</td><td>Przetwarzanie danych strumieniowych w Apache Flink - API i model danych (zdalny)</td></tr>
+<tr><td>20.01.2027</td><td>Przetwarzanie danych strumieniowych w Apache Flink - przetwarzanie strumieniowe, okna czasowe</td></tr>
+<tr><td>27.01.2027</td><td>Kafka, Kafka streams, connectory, confluent cloud (zdalny)</td></tr>
+<tr><td>03.02.2027</td><td>Projekt II sprawdzenie</td></tr></tbody></table></div>
+<div class="el text link" style="left:56.645%;top:58.254%;width:40.000%;height:40.000%;"><a href="https://mw.web.amu.edu.pl" target="_blank">mw.web.amu.edu.pl</a></div>
 </section>
 <section data-background-color="#ffffff" data-keywords="Wątki">
 <div class="el text" style="left:2.179%;top:51.782%;width:49.020%;height:38.836%;"><p><span style="font-size:1.5em">Procesory w naszych komputerach wykonują wiele <strong>programów</strong>: systemowych i użytkownika.&nbsp;<br>
@@ -95,11 +199,11 @@ Wykonania (uruchomienia) programów nazywamy <strong>procesami</strong>.</span><
 <div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Procesory</strong></span></p>
 </div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el text" style="left:2.179%;top:19.418%;width:71.895%;height:75.515%;"><p><span style="font-size:1.5em">Każdy <strong>program</strong>, aplikacja, działa na zasadzie instrukcji, które są wykonywane w tym samym czasie, podzielone na tzw. wątki.</span></p>
+<div class="el text" style="left:2.179%;top:19.418%;width:71.895%;height:75.515%;"><p><span style="font-size:1.5em">Każdy <strong>program</strong>, aplikacja, działa na zasadzie instrukcji, które są wykonywane w tym samym czasie podzielone na tzw. wątki.</span></p>
 
 <p><span style="font-size:1.5em">Istnieje wątek główny, który np. w przypadku aplikacji odpowiada za interakcję z użytkownikiem oraz wątki poboczne.&nbsp;</span></p>
 
-<p><span style="font-size:1.5em">Procesor o N rdzeniach potrafi obsługiwać 2*N wątków <strong>równolegle</strong>.</span></p>
+<p><span style="font-size:1.5em">Procesor o N rdzeniach wykonuje <strong>równolegle</strong> N wątków, a z technologią Hyper-Threading (SMT) do 2*N wątków sprzętowych.</span></p>
 </div>
 </section>
 <section data-background-color="#ffffff">
@@ -128,7 +232,7 @@ Wykonania (uruchomienia) programów nazywamy <strong>procesami</strong>.</span><
 <div class="el text" style="left:1.089%;top:23.733%;width:98.039%;height:75.515%;"><p><span style="font-size:1.5em"><strong>Proces</strong> (nazywany też czasem <strong>zadaniem</strong>) jest odseparowany od innych instancji procesów. </span></p>
 
 <ul>
-	<li><span style="font-size:1.5em">Procesy to <strong>programy</strong>, które są wykonywane na procesorze. </span></li>
+	<li><span style="font-size:1.5em">Proces to uruchomiony program, czyli instancja programu wykonywana pod kontrolą systemu operacyjnego. </span></li>
 	<li><span style="font-size:1.5em">Proces może tworzyć inne procesy, które są znane jako procesy <strong>potomne</strong> (child processes). </span></li>
 	<li><span style="font-size:1.5em">Procesy są <strong>odizolowane</strong>, co oznacza, że ​​nie współdzielą pamięci z żadnym innym procesem.</span><br>
 	&nbsp;</li>
@@ -146,10 +250,10 @@ Wykonania (uruchomienia) programów nazywamy <strong>procesami</strong>.</span><
 <p><span style="font-size:1.25em">Każdy proces ma własny obszar przydzielonej mu <strong>pamięci operacyjnej.</strong> Pamięć operacyjna zwykle jest podzielona na cztery części (nazywane segmentami):</span></p>
 
 <ul>
-	<li><span style="font-size:1.25em">&nbsp; &nbsp; <strong>segment kodu</strong> -- zawiera instrukcje wykonywanego programu,</span></li>
-	<li><span style="font-size:1.25em">&nbsp; &nbsp; <strong>segment danych</strong> -- zawiera zmienne globalne programu,</span></li>
-	<li><span style="font-size:1.25em">&nbsp; &nbsp; <strong>stos</strong> -- jest używany do wywoływania procedur, przekazywania parametrów i wyników, oraz przechowywania zmiennych lokalnych,</span></li>
-	<li><span style="font-size:1.25em">&nbsp; &nbsp; <strong>sterta</strong> -- z tego obszaru przydzielana jest pamięć dla zmiennych dynamicznych.&nbsp;</span></li>
+	<li class="fragment"><span style="font-size:1.25em">&nbsp; &nbsp; <strong>segment kodu</strong> -- zawiera instrukcje wykonywanego programu,</span></li>
+	<li class="fragment"><span style="font-size:1.25em">&nbsp; &nbsp; <strong>segment danych</strong> -- zawiera zmienne globalne programu,</span></li>
+	<li class="fragment"><span style="font-size:1.25em">&nbsp; &nbsp; <strong>stos</strong> -- jest używany do wywoływania procedur, przekazywania parametrów i wyników, oraz przechowywania zmiennych lokalnych,</span></li>
+	<li class="fragment"><span style="font-size:1.25em">&nbsp; &nbsp; <strong>sterta</strong> -- z tego obszaru przydzielana jest pamięć dla zmiennych dynamicznych.&nbsp;</span></li>
 </ul>
 </div>
 <aside class="notes"><p>Każdy proces ma własny licznik instrukcji, który wskazuje następną instrukcję do wykonania, oraz własny obszar przydzielonej mu pamięci operacyjnej.</p>
@@ -159,7 +263,7 @@ Wykonania (uruchomienia) programów nazywamy <strong>procesami</strong>.</span><
 <div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Proces</strong></span></p>
 </div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el text" style="left:1.089%;top:23.733%;width:93.682%;height:75.515%;"><p><span style="font-size:1.5em">W systemie może istnieć <strong>wiele procesów</strong> (wiele niezależnych przetwarzań), stąd ważne jest utrzymanie informacji o tym, które zasoby przedzielone na potrzeby każdego przetwarzania.&nbsp;</span></p>
+<div class="el text" style="left:1.089%;top:23.733%;width:93.682%;height:75.515%;"><p><span style="font-size:1.5em">W systemie może istnieć <strong>wiele procesów</strong> (wiele niezależnych przetwarzań), stąd ważne jest utrzymanie informacji o tym, które zasoby zostały przydzielone na potrzeby każdego przetwarzania.&nbsp;</span></p>
 </div>
 <div class="el img" style="left:17.429%;top:47.035%;width:66.449%;height:53.043%;"><img src="images/image-NrjAAr8M.png" alt=""></div>
 </section>
@@ -218,10 +322,10 @@ Wykonania (uruchomienia) programów nazywamy <strong>procesami</strong>.</span><
 </div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el text" style="left:2.179%;top:23.733%;width:94.771%;height:71.200%;"><ul>
-	<li><span style="font-size:1.5em">Każdy wątek należy do dokładnie <strong>jednego procesu</strong> i żaden wątek nie może istnieć w oderwaniu od procesu.</span></li>
-	<li><span style="font-size:1.5em">Każdy wątek reprezentuje <strong>oddzielny</strong> przepływ sterowania.</span></li>
-	<li><span style="font-size:1.5em">Wątki zostały z powodzeniem zastosowane w implementacji rozwiązań internetowych, serwerów, stron WWW itp.</span></li>
-	<li><span style="font-size:1.5em">Mogą być wykonywane na <strong>jednym</strong> procesorze lub na <strong>wielu</strong> procesorach (rdzeniach)</span></li>
+	<li class="fragment"><span style="font-size:1.5em">Każdy wątek należy do dokładnie <strong>jednego procesu</strong> i żaden wątek nie może istnieć w oderwaniu od procesu.</span></li>
+	<li class="fragment"><span style="font-size:1.5em">Każdy wątek reprezentuje <strong>oddzielny</strong> przepływ sterowania.</span></li>
+	<li class="fragment"><span style="font-size:1.5em">Wątki zostały z powodzeniem zastosowane w implementacji rozwiązań internetowych, serwerów, stron WWW itp.</span></li>
+	<li class="fragment"><span style="font-size:1.5em">Mogą być wykonywane na <strong>jednym</strong> procesorze lub na <strong>wielu</strong> procesorach (rdzeniach)</span></li>
 </ul>
 </div>
 </section>
@@ -231,9 +335,9 @@ Wykonania (uruchomienia) programów nazywamy <strong>procesami</strong>.</span><
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el text" style="left:2.179%;top:23.733%;width:95.861%;height:71.200%;"><p><span style="font-size:1.5em">Korzyści ze stosowania wątków są rozmaite. Przede wszystkim <strong>wydajność</strong>: powołanie do życia wielu wątków jest znacznie tańsze niż stworzenie wielu <strong>ciężkich procesów.</strong> </span></p>
 
-<p><span style="font-size:1.5em">Wątki mogą bez ograniczeń <strong>współdzielić</strong> przestrzeń danych procesu. Tak samo skomunikowane procesy (przez wspólny obszar pamięci), musiałyby korzystać ze złożonej usługi systemu operacyjnego, jaką jest pamięć dzielona.&nbsp;</span></p>
+<p class="fragment"><span style="font-size:1.5em">Wątki mogą bez ograniczeń <strong>współdzielić</strong> przestrzeń danych procesu. Tak samo skomunikowane procesy (przez wspólny obszar pamięci), musiałyby korzystać ze złożonej usługi systemu operacyjnego, jaką jest pamięć dzielona.&nbsp;</span></p>
 
-<p><span style="font-size:1.5em">Wątki współdzielą zasoby (procesor, pamięć, kod) w ramach <strong>jednego procesu</strong>.</span></p>
+<p class="fragment"><span style="font-size:1.5em">Wątki współdzielą zasoby (procesor, pamięć, kod) w ramach <strong>jednego procesu</strong>.</span></p>
 </div>
 </section>
 <section data-background-color="#ffffff">
@@ -251,6 +355,22 @@ Wykonania (uruchomienia) programów nazywamy <strong>procesami</strong>.</span><
 <p><span style="font-size:1.25em">– Ma dostęp do przestrzeni adresowej, plików i innych zasobów <strong>procesu</strong></span></p>
 </div>
 <div class="el img" style="left:49.020%;top:23.733%;width:49.112%;height:71.200%;"><img src="images/image-uf40f88Z.png" alt=""></div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Proces vs wątek: pamięć</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="memsim">
+  <div class="simctl">
+    <button class="btn" data-act="proc">+ proces</button>
+    <button class="btn" data-act="thread">+ wątek w ostatnim procesie</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+    <span class="stat">Zużycie pamięci (umowne): <b class="mem">0</b> &nbsp;|&nbsp; procesy: <b class="np">0</b>, wątki: <b class="nt">0</b></span>
+  </div>
+  <div class="procs"></div>
+  <p class="hint">Proces dostaje własny kod, dane i stertę (koszt 10). Każdy wątek to tylko stos i rejestry (koszt 1), a resztę dzieli z procesem.</p>
+</div></div>
+<aside class="notes">Dodaj 2 procesy, potem kilka wątków i porównaj licznik pamięci.</aside>
 </section>
 <section data-background-color="#ffffff">
 <div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Proces vs Wątek podsumowanie</strong></span></p>
@@ -295,6 +415,11 @@ Wykonania (uruchomienia) programów nazywamy <strong>procesami</strong>.</span><
 </div>
 </section>
 <section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%"><div class="quiz multi"><p class="q">Co współdzielą ze sobą wątki <b>tego samego</b> procesu? (zaznacz wszystkie)</p><div class="opts"><button class="opt" data-ok="0">stos</button><button class="opt" data-ok="1">stertę</button><button class="opt" data-ok="0">rejestry procesora</button><button class="opt" data-ok="1">segment kodu</button><button class="opt" data-ok="1">otwarte pliki</button><button class="opt" data-ok="0">licznik rozkazów</button></div><button class="btn check">Sprawdź</button><p class="explain">Wspólne są sterta, kod, dane i otwarte pliki. Każdy wątek ma własny stos, rejestry i licznik rozkazów.</p></div></div>
+</section>
+<section data-background-color="#ffffff">
 <div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wielowątkowość</strong></span></p>
 </div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
@@ -315,18 +440,8 @@ Wykonania (uruchomienia) programów nazywamy <strong>procesami</strong>.</span><
 <p><span style="font-size:1.5em">Wątki uruchomione na tym samym procesorze są przełączane w krótkich przedziałach czasu, co sprawia wrażenie, że wykonują się <strong>równolegle</strong>.&nbsp;</span></p>
 </div>
 </section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Współbieżne vs równoległe</strong></span></p>
-</div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el text" style="left:2.179%;top:28.048%;width:96.950%;height:67.532%;"><p><span style="font-size:1.5em">W przypadku procesorów <strong>wielordzeniowych</strong> lub <strong>wielowątkowych</strong>, możliwe jest faktycznie współbieżne przetwarzanie.&nbsp;</span></p>
 
-<p>&nbsp;</p>
-
-<p><span style="font-size:1.5em">W architekturach <strong>jednowątkowych</strong> w celu zapobieżenia zatrzymaniu przetwarzania wątków przez duże zadanie, stosuje się technikę <strong>wywłaszczania</strong> i <strong>multitaskingu</strong>.</span></p>
-</div>
-</section>
-<section data-background-color="#ffffff">
+    <section data-background-color="#ffffff">
 <div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Współbieżne vs równoległe</strong></span></p>
 </div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
@@ -335,6 +450,41 @@ Wykonania (uruchomienia) programów nazywamy <strong>procesami</strong>.</span><
 <p><span style="font-size:1.5em">Przetwarzanie <strong>współbieżne</strong> jest pojęciem bardziej ogólnym w stosunku do przetwarzania <strong>równoległego</strong>. W związku z tym każde przetwarzanie <strong>równoległe</strong> jest przetwarzaniem <strong>współbieżnym</strong>, ale nie każde przetwarzanie <strong>współbieżne</strong> jest przetwarzaniem <strong>równoległym.</strong></span></p>
 </div>
 </section>
+
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Współbieżne vs równoległe</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:28.048%;width:96.950%;height:67.532%;"><p><span style="font-size:1.5em">W przypadku procesorów <strong>wielordzeniowych</strong> lub <strong>wielowątkowych</strong>, możliwe jest faktycznie <strong>równoległe</strong> przetwarzanie.&nbsp;</span></p>
+
+<p>&nbsp;</p>
+
+<p><span style="font-size:1.5em">W architekturach <strong>jednowątkowych</strong> w celu zapobieżenia zatrzymaniu przetwarzania wątków przez duże zadanie, stosuje się technikę <strong>wywłaszczania</strong> i <strong>multitaskingu</strong>.</span></p>
+</div>
+</section>
+
+
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Współbieżne vs równoległe: symulacja</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="tlsim">
+  <div class="simctl">
+    <label>Rdzenie: <select class="cores"><option>1</option><option selected>2</option><option>4</option></select></label>
+    <label>Kwant czasu: <select class="quantum"><option>1</option><option selected>2</option><option>3</option><option>6</option></select></label>
+    <label>Koszt przełączenia kontekstu: <select class="cost"><option value="0">0</option><option value="0.5" selected>0,5</option><option value="1">1</option></select></label>
+  </div>
+  <div class="gantt"></div>
+  <p class="stat">Czas całkowity: <b class="total"></b> &nbsp;|&nbsp; czas stracony na przełączanie: <b class="lost"></b></p>
+  <p class="hint">4 zadania (A-D), każde potrzebuje 6 jednostek czasu procesora. Przy 1 rdzeniu zadania się <b>przeplatają</b>, co jest przetwarzaniem współbieżnym. Przy 4 rdzeniach wykonują się naprawdę <b>równolegle</b>. Kreskowane pola to przełączanie kontekstu.</p>
+</div></div>
+<aside class="notes">Pokaż 1 rdzeń z kwantem 1 i kosztem 1: połowa czasu idzie na przełączanie. Potem 4 rdzenie.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%"><div class="quiz"><p class="q">Czy każde przetwarzanie <b>współbieżne</b> jest przetwarzaniem <b>równoległym</b>?</p><div class="opts"><button class="opt" data-ok="0">Tak</button><button class="opt" data-ok="1">Nie</button></div><p class="explain">Nie. Na jednym rdzeniu wątki tylko się przeplatają (współbieżność). Równoległość wymaga wielu rdzeni. Za to każde przetwarzanie równoległe jest współbieżne.</p></div></div>
+</section>
 <section data-background-color="#ffffff">
 <div class="el img" style="left:69.717%;top:54.587%;width:22.937%;height:45.309%;"><img src="images/image-5NJG3f1H.jpg" alt=""></div>
 <div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Program współbieżny</strong></span></p>
@@ -342,9 +492,9 @@ Wykonania (uruchomienia) programów nazywamy <strong>procesami</strong>.</span><
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el text" style="left:2.179%;top:30.206%;width:66.445%;height:65.374%;"><p><span style="font-size:1.5em">Program <strong>współbieżny</strong> jest poprawny jeśli posiada własności <strong>bezpieczeństwa</strong> i <strong>żywotności</strong>.</span></p>
 
-<p><span style="font-size:1.5em">● Własność bezpieczeństwa - nigdy nie dojdzie do niepożądanej sytuacji (wejścia w niepożądany stan)&nbsp;</span></p>
+<p class="fragment"><span style="font-size:1.5em">● Własność bezpieczeństwa - nigdy nie dojdzie do niepożądanej sytuacji (wejścia w niepożądany stan)&nbsp;</span></p>
 
-<p><span style="font-size:1.5em">● Własność żywotności – jeżeli proces jest wstrzymany w oczekiwaniu na zdarzenie to zdarzenie to zajdzie w skończonym czasie</span></p>
+<p class="fragment"><span style="font-size:1.5em">● Własność żywotności – jeżeli proces jest wstrzymany w oczekiwaniu na zdarzenie to zdarzenie to zajdzie w skończonym czasie</span></p>
 </div>
 <div class="el img" style="left:68.627%;top:21.576%;width:27.233%;height:37.849%;"><img src="images/image-wPiX9s1m.jpg" alt=""></div>
 </section>
@@ -363,11 +513,78 @@ Wykonania (uruchomienia) programów nazywamy <strong>procesami</strong>.</span><
 </div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el text" style="left:1.089%;top:23.733%;width:97.821%;height:71.200%;"><ul>
-	<li><span style="font-size:1.5em">Problemy z <strong>dostępem do danych</strong>, w których dwa wątki odczytują i modyfikują te same dane. Bez odpowiedniego wykorzystania mechanizmów blokujących może dojść do niespójności danych.</span></li>
-	<li><span style="font-size:1.5em">Problemy z <strong>brakiem wątków</strong> i rywalizacją o zasoby pojawiają się, gdy wiele wątków próbuje uzyskać dostęp do pojedynczego chronionego zasobu.</span></li>
-	<li><span style="font-size:1.5em">Problemy <strong>rożnych ścieżek wywołań</strong> w zależności od przydziału zasobów procesora.</span></li>
+	<li class="fragment"><span style="font-size:1.5em">Problemy z <strong>dostępem do danych</strong>, w których dwa wątki odczytują i modyfikują te same dane. Bez odpowiedniego wykorzystania mechanizmów blokujących może dojść do niespójności danych.</span></li>
+	<li class="fragment"><span style="font-size:1.5em"><strong>Zagłodzenie</strong> wątków i rywalizacja o zasoby pojawiają się, gdy wiele wątków próbuje uzyskać dostęp do pojedynczego chronionego zasobu.</span></li>
+	<li class="fragment"><span style="font-size:1.5em">Problemy <strong>różnych ścieżek wywołań</strong> w zależności od przydziału zasobów procesora.</span></li>
 </ul>
 </div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wyścig (race condition): spróbuj sam</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="racesim">
+  <div class="simctl">
+    <label class="toggle"><input type="checkbox" class="uselock"> użyj <code>Lock</code></label>
+    <button class="btn" data-t="0">Krok wątku A</button>
+    <button class="btn" data-t="1">Krok wątku B</button>
+    <button class="btn ghost" data-act="random">Losowy przeplot</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+  </div>
+  <div class="race">
+    <div class="thread t0"><h4>Wątek A</h4><ol class="code"></ol><p>rejestr tmp = <b class="reg">-</b></p></div>
+    <div class="shared"><h4>Pamięć współdzielona</h4><div class="x">x = <b>0</b></div><div class="lockst"></div></div>
+    <div class="thread t1"><h4>Wątek B</h4><ol class="code"></ol><p>rejestr tmp = <b class="reg">-</b></p></div>
+  </div>
+  <p class="result"></p>
+  <p class="log"></p>
+</div></div>
+<aside class="notes">Zadanie dla sali: znajdźcie przeplot, który da x = 1. Potem włączcie Lock.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wyścig w Pythonie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape data-line-numbers="|1-3|5-8|10-13|15-18">
+import threading
+licznik = 0
+lock = threading.Lock()
+
+def dodawaj(n):
+    global licznik
+    for _ in range(n):
+        licznik += 1          # odczyt, dodanie, zapis: to NIE jest atomowe!
+
+def dodawaj_bezpiecznie(n):
+    global licznik
+    for _ in range(n):
+        with lock: licznik += 1
+
+watki = [threading.Thread(target=dodawaj, args=(1_000_000,)) for _ in range(4)]
+for w in watki: w.start()
+for w in watki: w.join()
+print(licznik)   # oczekujemy 4 000 000
+</code></pre>
+<p class="small">Bez blokady wynik <b>może</b> być mniejszy niż 4 000 000. W nowszych wersjach CPythona zdarza się to rzadziej, ale poprawność nie jest gwarantowana. W wersji bez GIL (free-threaded) błąd pojawia się łatwo. Sprawdzimy to na laboratoriach.</p></div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Python i GIL</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="textflow">
+<p><strong>GIL</strong> (Global Interpreter Lock): w standardowym CPythonie w danej chwili kod bajtowy Pythona wykonuje <strong>tylko jeden wątek</strong>.</p>
+<table class="simple">
+<tr><th>Typ zadania</th><th>Przykład</th><th>Czego użyć</th></tr>
+<tr class="fragment"><td><strong>I/O-bound</strong>: czekanie na sieć, dysk, bazę</td><td>pobieranie 100 stron WWW</td><td><code>threading</code>, <code>asyncio</code>: wątki czekają, a GIL jest wtedy zwalniany</td></tr>
+<tr class="fragment"><td><strong>CPU-bound</strong>: obliczenia</td><td>przetwarzanie obrazów, liczenie</td><td><code>multiprocessing</code>, <code>ProcessPoolExecutor</code>: osobne procesy, każdy z własnym GIL</td></tr>
+</table>
+<p class="fragment">Od Pythona 3.13 istnieje wersja <strong>free-threaded</strong> (bez GIL, PEP 703), a od 3.14 jest ona oficjalnie wspierana (jeszcze nie jako domyślna). Wątki mogą w niej naprawdę działać równolegle.</p>
+</div></div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%"><div class="quiz"><p class="q">Program w standardowym CPythonie liczy sumę kwadratów (CPU-bound) w <b>4 wątkach</b> na <b>4 rdzeniach</b>. Jakiego przyspieszenia się spodziewać względem 1 wątku?</p><div class="opts"><button class="opt" data-ok="0">ok. 4x</button><button class="opt" data-ok="0">ok. 2x</button><button class="opt" data-ok="1">ok. 1x, albo nawet wolniej</button></div><p class="explain">Przez GIL obliczenia w wątkach nie idą równolegle. Do zadań CPU-bound używamy procesów (multiprocessing).</p></div></div>
 </section>
 <section data-background-color="#ffffff">
 <div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie strumieniowe</strong></span></p>
@@ -390,17 +607,35 @@ Wykonania (uruchomienia) programów nazywamy <strong>procesami</strong>.</span><
 </div>
 </section>
 <section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wsadowo vs strumieniowo: symulacja</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="streamsim">
+  <div class="simctl">
+    <button class="btn" data-act="start">Start / pauza</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+    <span class="stat">Próg alarmu: temperatura &gt; <b>30&deg;C</b></span>
+  </div>
+  <div class="lanes">
+    <div class="lane"><h4>Czujnik (źródło zdarzeń)</h4><div class="events src"></div></div>
+    <div class="lane"><h4>Wsadowo: przetwarzanie co 8 zdarzeń</h4><div class="events batch"></div><p class="out bout">-</p></div>
+    <div class="lane"><h4>Strumieniowo: każde zdarzenie od razu</h4><div class="events stream"></div><p class="out sout">-</p></div>
+  </div>
+</div></div>
+<aside class="notes">Zwróć uwagę na opóźnienie wykrycia alarmu w trybie wsadowym.</aside>
+</section>
+<section data-background-color="#ffffff">
 <div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie strumieniowe</strong></span></p>
 </div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el text" style="left:2.179%;top:21.576%;width:95.861%;height:75.515%;"><p><span style="font-size:1.25em">Działania, które przetwarzanie strumieniowe wykonuje na danych, obejmują </span></p>
 
 <ul>
-	<li><span style="font-size:1.25em"><strong>agregacje</strong> (np. obliczenia, takie jak suma, średnia, odchylenie standardowe), </span></li>
-	<li><span style="font-size:1.25em"><strong>analizy</strong> (np. przewidywanie przyszłego zdarzenia na podstawie wzorców danych), </span></li>
-	<li><span style="font-size:1.25em"><strong>przekształcenia</strong> (np. zmiana liczby na format daty ), </span></li>
-	<li><span style="font-size:1.25em"><strong>wzbogacanie</strong> (np. łączenie punktu danych z innymi źródłami danych w celu stworzenia większego kontekstu i znaczenia) </span></li>
-	<li><span style="font-size:1.25em"><strong>przetwarzanie</strong> (np. wstawianie danych do bazy danych).</span></li>
+	<li class="fragment"><span style="font-size:1.25em"><strong>agregacje</strong> (np. obliczenia, takie jak suma, średnia, odchylenie standardowe), </span></li>
+	<li class="fragment"><span style="font-size:1.25em"><strong>analizy</strong> (np. przewidywanie przyszłego zdarzenia na podstawie wzorców danych), </span></li>
+	<li class="fragment"><span style="font-size:1.25em"><strong>przekształcenia</strong> (np. zmiana liczby na format daty ), </span></li>
+	<li class="fragment"><span style="font-size:1.25em"><strong>wzbogacanie</strong> (np. łączenie punktu danych z innymi źródłami danych w celu stworzenia większego kontekstu i znaczenia) </span></li>
+	<li class="fragment"><span style="font-size:1.25em"><strong>przetwarzanie</strong> (np. wstawianie danych do bazy danych).</span></li>
 </ul>
 </div>
 </section>
@@ -410,7 +645,7 @@ Wykonania (uruchomienia) programów nazywamy <strong>procesami</strong>.</span><
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el text" style="left:2.179%;top:21.576%;width:95.861%;height:75.515%;"><p><span style="font-size:1.5em">Przetwarzanie strumieni jest najczęściej stosowane do danych generowanych jako <strong>seria zdarzeń,</strong> takich jak dane z sensorów, systemów przetwarzania płatności oraz logów aplikacji.&nbsp;</span></p>
 
-<p><span style="font-size:1.5em">Z przetwarzaniem w tym modelu związane są pojęcia brokera danych takiego jak <strong>Apache Kafka®</strong> oraz biblioteki przetwarzającymi dane <strong>Apache Spark, Hadoop czy też Apache Flink</strong>.</span></p>
+<p><span style="font-size:1.5em">Z przetwarzaniem w tym modelu związane są pojęcia brokera danych takiego jak <strong>Apache Kafka®</strong> oraz biblioteki przetwarzające dane <strong>Apache Spark, Hadoop czy też Apache Flink</strong>.</span></p>
 
 <p><span style="font-size:1.5em">Będą one tematem drugiej części przedmiotu.</span></p>
 </div>
@@ -419,13 +654,222 @@ Wykonania (uruchomienia) programów nazywamy <strong>procesami</strong>.</span><
 </div>
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/plugin.js"></script>
 <script>
   Reveal.initialize({
     width: 1280, height: 720, margin: 0.02,
     center: false, hash: true, slideNumber: 'c/t',
     transition: 'slide',
-    plugins: [RevealNotes]
+    chalkboard: { boardmarkerWidth: 4, chalkWidth: 5 },
+    plugins: [RevealNotes, RevealHighlight, RevealChalkboard]
   });
+</script>
+<script>
+// ---------- quizzes ----------
+document.querySelectorAll('.quiz').forEach(q => {
+  const opts = [...q.querySelectorAll('.opt')];
+  const reveal = () => {
+    opts.forEach(o => {
+      if (o.dataset.ok === '1') o.classList.add('good');
+      else if (o.classList.contains('sel')) o.classList.add('bad');
+    });
+    q.classList.add('done');
+  };
+  if (q.classList.contains('multi')) {
+    opts.forEach(o => o.addEventListener('click', () => { if (!q.classList.contains('done')) o.classList.toggle('sel'); }));
+    q.querySelector('.check').addEventListener('click', reveal);
+  } else {
+    opts.forEach(o => o.addEventListener('click', () => {
+      if (q.classList.contains('done')) return;
+      o.classList.add('sel'); reveal();
+    }));
+  }
+});
+
+// ---------- process vs thread memory ----------
+(() => {
+  const root = document.getElementById('memsim'); if (!root) return;
+  let procs;
+  const render = () => {
+    root.querySelector('.procs').innerHTML = procs.map((t, i) =>
+      `<div class="proc"><div class="pt">Proces ${i + 1}</div>
+        <div class="seg">kod</div><div class="seg">dane (zmienne globalne)</div><div class="seg">sterta</div>
+        <div class="ths">${Array.from({ length: t }, (_, j) => `<span class="th">wątek ${j + 1}: stos + rejestry</span>`).join('')}</div></div>`).join('');
+    const nt = procs.reduce((a, b) => a + b, 0);
+    root.querySelector('.np').textContent = procs.length;
+    root.querySelector('.nt').textContent = nt;
+    root.querySelector('.mem').textContent = procs.length * 10 + nt;
+  };
+  const reset = () => { procs = [1]; render(); };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act; if (!a) return;
+    if (a === 'proc' && procs.length < 6) procs.push(1);
+    if (a === 'thread' && procs[procs.length - 1] < 8) procs[procs.length - 1]++;
+    if (a === 'reset') return reset();
+    render();
+  });
+  reset();
+})();
+
+// ---------- concurrency vs parallelism timeline ----------
+(() => {
+  const root = document.getElementById('tlsim'); if (!root) return;
+  const COLORS = ['#1a73d9', '#53ae12', '#e8710a', '#9334e6'];
+  const sel = c => root.querySelector(c);
+  const simulate = (cores, q, cost) => {
+    const tasks = [0, 1, 2, 3].map(i => ({ rem: 6, ready: 0 }));
+    const queue = [0, 1, 2, 3];
+    const free = Array(cores).fill(0), last = Array(cores).fill(null);
+    const blocks = Array.from({ length: cores }, () => []);
+    let lost = 0;
+    while (queue.length) {
+      let k = 0; free.forEach((f, i) => { if (f < free[k]) k = i; });
+      let qi = queue.findIndex(t => tasks[t].ready <= free[k]);
+      if (qi < 0) { qi = 0; queue.forEach((t, i) => { if (tasks[t].ready < tasks[queue[qi]].ready) qi = i; }); }
+      const t = queue.splice(qi, 1)[0];
+      let start = Math.max(free[k], tasks[t].ready);
+      if (last[k] !== null && last[k] !== t && cost > 0) {
+        blocks[k].push({ s: start, e: start + cost, sw: true }); start += cost; lost += cost;
+      }
+      const run = Math.min(q, tasks[t].rem);
+      blocks[k].push({ s: start, e: start + run, t });
+      tasks[t].rem -= run; tasks[t].ready = start + run; free[k] = start + run; last[k] = t;
+      if (tasks[t].rem > 0) queue.push(t);
+    }
+    return { blocks, total: Math.max(...free), lost };
+  };
+  const render = () => {
+    const cores = +sel('.cores').value, q = +sel('.quantum').value, cost = +sel('.cost').value;
+    const { blocks, total, lost } = simulate(cores, q, cost);
+    const scale = Math.max(30, Math.ceil(total / 5) * 5); // same axis for most configurations, so they compare
+    const pct = v => (v / scale * 100) + '%';
+    let h = blocks.map((bs, i) => `<div class="row"><span class="lbl">Rdzeń ${i + 1}</span><div class="track">${
+      bs.map(b => b.sw
+        ? `<div class="blk sw" style="left:${pct(b.s)};width:${pct(b.e - b.s)}" title="przełączanie kontekstu"></div>`
+        : `<div class="blk" style="left:${pct(b.s)};width:${pct(b.e - b.s)};background:${COLORS[b.t]}">${'ABCD'[b.t]}</div>`).join('')
+    }</div></div>`).join('');
+    h += `<div class="axis">${Array.from({ length: scale / 5 + 1 }, (_, i) => `<span style="left:${pct(i * 5)}">${i * 5}</span>`).join('')}</div>`;
+    sel('.gantt').innerHTML = h;
+    sel('.total').textContent = total.toLocaleString('pl-PL') + ' (bez narzutu: ' + (24 / cores) + ')';
+    sel('.lost').textContent = lost.toLocaleString('pl-PL') + ' (' + Math.round(lost / (total * cores) * 100) + '% czasu rdzeni)';
+  };
+  root.addEventListener('change', render);
+  render();
+})();
+
+// ---------- race condition ----------
+(() => {
+  const root = document.getElementById('racesim'); if (!root) return;
+  const PLAIN = ['tmp = x', 'tmp = tmp + 1', 'x = tmp'];
+  const LOCKED = ['lock.acquire()', 'tmp = x', 'tmp = tmp + 1', 'x = tmp', 'lock.release()'];
+  const NAMES = ['A', 'B'];
+  let prog, pc, reg, x, owner, blocked, log;
+  const useLock = root.querySelector('.uselock');
+  const done = t => pc[t] >= prog.length;
+  const render = () => {
+    [0, 1].forEach(t => {
+      const th = root.querySelector('.t' + t);
+      th.querySelector('.code').innerHTML = prog.map((l, i) =>
+        `<li class="${i < pc[t] ? 'done' : i === pc[t] ? (blocked[t] ? 'blocked' : 'next') : ''}">${l}</li>`).join('');
+      th.querySelector('.reg').textContent = reg[t] === null ? '-' : reg[t];
+      root.querySelector(`[data-t="${t}"]`).disabled = done(t);
+    });
+    root.querySelector('.x b').textContent = x;
+    root.querySelector('.lockst').textContent = useLock.checked ? (owner === null ? 'lock: wolny' : `lock: trzyma wątek ${NAMES[owner]}`) : '';
+    const res = root.querySelector('.result');
+    if (done(0) && done(1)) {
+      res.className = 'result ' + (x === 2 ? 'good' : 'bad');
+      res.textContent = x === 2 ? 'x = 2: wynik poprawny' : 'x = 1: utracona aktualizacja! Obie operacje odczytały tę samą wartość x.';
+    } else { res.className = 'result'; res.textContent = 'Zadanie: znajdź przeplot kroków, który da x = 1.'; }
+    root.querySelector('.log').textContent = log.length ? 'Przeplot: ' + log.join(' → ') : '';
+  };
+  const step = t => {
+    if (done(t)) return false;
+    const line = prog[pc[t]];
+    if (line === 'lock.acquire()') {
+      if (owner !== null && owner !== t) { blocked[t] = true; log.push(`${NAMES[t]} czeka`); render(); return false; }
+      owner = t;
+    } else if (line === 'tmp = x') reg[t] = x;
+    else if (line === 'tmp = tmp + 1') reg[t]++;
+    else if (line === 'x = tmp') x = reg[t];
+    else if (line === 'lock.release()') { owner = null; blocked = [false, false]; }
+    blocked[t] = false;
+    log.push(`${NAMES[t]}: ${line}`);
+    pc[t]++; render(); return true;
+  };
+  const reset = () => {
+    prog = useLock.checked ? LOCKED : PLAIN;
+    pc = [0, 0]; reg = [null, null]; x = 0; owner = null; blocked = [false, false]; log = [];
+    render();
+  };
+  root.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.t !== undefined) step(+b.dataset.t);
+    if (b.dataset.act === 'reset') reset();
+    if (b.dataset.act === 'random') {
+      reset();
+      let guard = 50;
+      while (!(done(0) && done(1)) && guard--) {
+        const t = done(0) ? 1 : done(1) ? 0 : Math.random() < .5 ? 0 : 1;
+        if (!step(t)) step(1 - t);
+      }
+    }
+  });
+  useLock.addEventListener('change', reset);
+  reset();
+})();
+
+// ---------- batch vs stream ----------
+const streamSim = (() => {
+  const root = document.getElementById('streamsim'); if (!root) return null;
+  const BATCH = 8, KEEP = 16;
+  let timer = null, t, buffer, batchNo, alarmsStream, alarmsBatch;
+  const lane = c => root.querySelector('.events.' + c);
+  const ev = (e, extra = '') => `<span class="ev ${e.v > 30 ? 'hot' : ''} ${extra}">${e.v}°C</span>`;
+  const push = (c, html) => {
+    const l = lane(c); l.insertAdjacentHTML('beforeend', html);
+    while (l.children.length > KEEP) l.firstElementChild.remove();
+  };
+  const tick = () => {
+    t++;
+    const e = { t, v: Math.random() < .12 ? 31 + Math.floor(Math.random() * 5) : 19 + Math.floor(Math.random() * 7) };
+    push('src', ev(e));
+    push('stream', ev(e));
+    if (e.v > 30) {
+      alarmsStream++;
+      root.querySelector('.sout').innerHTML = `<span class="alarm">ALARM ${e.v}°C w ${e.t}. sekundzie, wykryty od razu (opóźnienie 0 s)</span>. Alarmów: ${alarmsStream}`;
+    }
+    buffer.push(e);
+    lane('batch').innerHTML = buffer.map(b => ev(b, 'wait')).join('');
+    if (buffer.length === BATCH) {
+      batchNo++;
+      const avg = (buffer.reduce((a, b) => a + b.v, 0) / BATCH).toFixed(1);
+      const hot = buffer.filter(b => b.v > 30);
+      alarmsBatch += hot.length;
+      root.querySelector('.bout').innerHTML = `Partia #${batchNo}: średnia ${avg}°C. ` + (hot.length
+        ? `<span class="alarm">ALARM ${hot[0].v}°C z ${hot[0].t}. sekundy wykryty dopiero teraz (opóźnienie ${t - hot[0].t} s)</span>`
+        : 'brak alarmów');
+      lane('batch').innerHTML = buffer.map(b => ev(b)).join('');
+      buffer = [];
+    }
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const reset = () => {
+    stop(); t = 0; buffer = []; batchNo = 0; alarmsStream = 0; alarmsBatch = 0;
+    ['src', 'batch', 'stream'].forEach(c => lane(c).innerHTML = '');
+    root.querySelector('.bout').textContent = '-'; root.querySelector('.sout').textContent = '-';
+  };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'start') timer ? stop() : (timer = setInterval(tick, 600));
+    if (a === 'reset') reset();
+  });
+  reset();
+  return { stop };
+})();
+Reveal.on('slidechanged', () => streamSim && streamSim.stop());
+
 </script>
 </body>
 </html>
