@@ -1,0 +1,710 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>PRS03.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="laboratorium-3-implementacja-watkow-w-python-synchronizacja-lock-wait-notify-semafory">
+<h2>Laboratorium 3 - Implementacja wątków w Python, Synchronizacja, Lock, Wait, Notify, Semafory</h2>
+<p>Uwaga! w przypadku niepoprawnego zakończenia ktoregoś z kodów poniżej
+musicie Państwo zrestartować Kernel Jupytera żeby móc uruchamiać
+programy. Jest to spowodowane zawieszeniem się wątka przetwarzania,
+który czeka na zakończenie wątku, który być może nigdy się nie skończy!</p>
+<p>Inna opcja to uruchamianie programów w PyCharm gdzie zawsze możemy
+wymusić zakończenie (zabicie) procesu.</p>
+</section>
+<section id="watki">
+<h2>Wątki</h2>
+<p>Klasa <strong>Thread</strong> reprezentuje działanie uruchamiane w osobnym wątku.</p>
+<p>Przetwarzanie można określić na dwa sposoby: przekazując funkcję do
+konstruktora lub przesłaniając metodę run() w podklasie. Pierwszą metodę
+poznaliśmy na pierwszych zajęciach. W przypadku podklasy, żadne inne
+metody (z wyjątkiem konstruktora) nie powinny być nadpisywane w
+podklasie. Innymi słowy, nadpisuj tylko metody <strong>init()</strong> i <strong>run()</strong>:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">threading</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">time</span><span class="whitespace">
+
+</span><span class="keyword">class</span> <span class="name class">MyThread</span><span class="punctuation">(</span><span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">):</span><span class="whitespace">
+
+</span>    <span class="keyword">def</span> <span class="name function">run</span><span class="punctuation">(</span><span class="name builtin pseudo">self</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">time</span><span class="operator">.</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="keyword">return</span><span class="whitespace">
+
+</span><span class="name">t</span> <span class="operator">=</span> <span class="name">MyThread</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">t</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Wątek t.is_alive()='</span><span class="punctuation">,</span> <span class="name">t</span><span class="operator">.</span><span class="name">is_alive</span><span class="punctuation">())</span><span class="whitespace">
+</span><span class="name">t</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Wątek t.is_alive()='</span><span class="punctuation">,</span> <span class="name">t</span><span class="operator">.</span><span class="name">is_alive</span><span class="punctuation">())</span></code></pre>
+<pre class="literal-block">Wątek t.is_alive()= True
+Wątek t.is_alive()= False</pre>
+<p>Konstruktor klasy Thread wygląda następująco:</p>
+<blockquote>
+<p>class threading.Thread(group=None, target=None, name=None, args=(),
+kwargs={}, *, daemon=None)</p>
+</blockquote>
+<p>Ten konstruktor powinien być zawsze wywoływany z argumentami słów
+kluczowych.</p>
+<p>Argumenty:</p>
+<p><strong>group</strong> powinna mieć wartość <em>None</em>; zarezerwowane dla przyszłych
+rozszerzeń, gdy zostanie zaimplementowana klasa ThreadGroup.</p>
+<p><strong>target</strong> to wywoływalny obiekt (funkjca), który ma zostać wywołany
+przez metodę run(). Domyślnie <em>None</em>, co oznacza, że wywołujemy po
+prostu run.</p>
+<p><strong>name</strong> to nazwa wątku. Domyślnie unikalna nazwa jest tworzona w
+postaci „Wątek-N”, gdzie N jest liczbą całkowitą.</p>
+<p><strong>args</strong> to lista lub krotka argumentów dla wywołania docelowego.
+Domyślnie to ().</p>
+<p><strong>kwargs</strong> jest słownikiem argumentów słów kluczowych dla wywołania
+docelowego. Domyślnie {}.</p>
+<p>Uruchomienie wątków z parametrem poprzez utworzenie podklasy Thread
+wygląda następująco:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">threading</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">time</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">logging</span><span class="whitespace">
+
+</span><span class="name">logging</span><span class="operator">.</span><span class="name">basicConfig</span><span class="punctuation">(</span><span class="name">level</span><span class="operator">=</span><span class="name">logging</span><span class="operator">.</span><span class="name">DEBUG</span><span class="punctuation">,</span><span class="whitespace">
+</span>                    <span class="name builtin">format</span><span class="operator">=</span><span class="literal string single">'(</span><span class="literal string interpol">%(threadName)-9s</span><span class="literal string single">) </span><span class="literal string interpol">%(message)s</span><span class="literal string single">'</span><span class="punctuation">,)</span><span class="whitespace">
+
+</span><span class="keyword">class</span> <span class="name class">MyThread</span><span class="punctuation">(</span><span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">):</span><span class="whitespace">
+
+</span>    <span class="keyword">def</span> <span class="name function magic">__init__</span><span class="punctuation">(</span><span class="name builtin pseudo">self</span><span class="punctuation">,</span> <span class="name">group</span><span class="operator">=</span><span class="keyword constant">None</span><span class="punctuation">,</span> <span class="name">target</span><span class="operator">=</span><span class="keyword constant">None</span><span class="punctuation">,</span> <span class="name">name</span><span class="operator">=</span><span class="keyword constant">None</span><span class="punctuation">,</span><span class="whitespace">
+</span>                 <span class="name">args</span><span class="operator">=</span><span class="punctuation">(),</span> <span class="name">kwargs</span><span class="operator">=</span><span class="keyword constant">None</span><span class="punctuation">,</span> <span class="name">verbose</span><span class="operator">=</span><span class="keyword constant">None</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name builtin">super</span><span class="punctuation">(</span><span class="name">MyThread</span><span class="punctuation">,</span><span class="name builtin pseudo">self</span><span class="punctuation">)</span><span class="operator">.</span><span class="name function magic">__init__</span><span class="punctuation">(</span><span class="name">group</span><span class="operator">=</span><span class="name">group</span><span class="punctuation">,</span> <span class="name">target</span><span class="operator">=</span><span class="name">target</span><span class="punctuation">,</span><span class="whitespace">
+</span>                                  <span class="name">name</span><span class="operator">=</span><span class="name">name</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">args</span> <span class="operator">=</span> <span class="name">args</span><span class="whitespace">
+</span>        <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">kwargs</span> <span class="operator">=</span> <span class="name">kwargs</span><span class="whitespace">
+</span>        <span class="keyword">return</span><span class="whitespace">
+
+</span>    <span class="keyword">def</span> <span class="name function">run</span><span class="punctuation">(</span><span class="name builtin pseudo">self</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Parametry args </span><span class="literal string interpol">%s</span><span class="literal string double"> oraz kwargs </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">args</span><span class="punctuation">,</span> <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">kwargs</span><span class="punctuation">))</span><span class="whitespace">
+</span>        <span class="keyword">return</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">t</span> <span class="operator">=</span> <span class="name">MyThread</span><span class="punctuation">(</span><span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">i</span><span class="punctuation">,),</span> <span class="name">kwargs</span><span class="operator">=</span><span class="punctuation">{</span><span class="literal string single">'a'</span><span class="punctuation">:</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal string single">'b'</span><span class="punctuation">:</span><span class="literal number integer">2</span><span class="punctuation">})</span><span class="whitespace">
+</span>        <span class="name">t</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Parametry args (0,) oraz kwargs {'a': 1, 'b': 2}
+Parametry args (1,) oraz kwargs {'a': 1, 'b': 2}
+Parametry args (2,) oraz kwargs {'a': 1, 'b': 2}</pre>
+<section id="metody-modulu-threading">
+<h3>Metody modułu threading</h3>
+<p>Do działania na wątkach użyteczne mogą być funkcje z modułu threading
+takie jak: <strong>enumerate(), current_thread(), get_ident()</strong> - opisane na
+wykładzie.</p>
+<p>Uwaga! Uruchom w PyCharm jeżeli w Jupiterze będą problemy, zwróć uwagę,
+że w Jupiter jest wiele dodatkowych wątków oprócz uruchamianych przez
+nas stąd stosujemy warunki żeby wyfiltrować tylko te tworzone przez nas:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">threading</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">time</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">random</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">fun</span><span class="punctuation">():</span><span class="whitespace">
+</span>    <span class="name">t</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">currentThread</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">r</span> <span class="operator">=</span> <span class="name">random</span><span class="operator">.</span><span class="name">randint</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="literal number integer">3</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'sleeping </span><span class="literal string interpol">%s</span><span class="literal string single">'</span> <span class="operator">%</span> <span class="name">r</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">time</span><span class="operator">.</span><span class="name">sleep</span><span class="punctuation">(</span><span class="name">r</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'ending </span><span class="literal string interpol">%s</span><span class="literal string single"> </span><span class="literal string interpol">%s</span><span class="literal string single">'</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">threading</span><span class="operator">.</span><span class="name">get_ident</span><span class="punctuation">(),</span> <span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+</span>    <span class="keyword">return</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">names</span> <span class="operator">=</span> <span class="punctuation">[]</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">t</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">fun</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">t</span><span class="operator">.</span><span class="name">setDaemon</span><span class="punctuation">(</span><span class="keyword constant">True</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">t</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="name">names</span><span class="operator">+=</span><span class="name">t</span><span class="operator">.</span><span class="name">getName</span><span class="punctuation">()</span><span class="whitespace">
+
+</span>    <span class="name">main_thread</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">main_thread</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">threading</span><span class="operator">.</span><span class="name">enumerate</span><span class="punctuation">())</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">t</span> <span class="operator word">in</span> <span class="name">threading</span><span class="operator">.</span><span class="name">enumerate</span><span class="punctuation">():</span><span class="whitespace">
+</span>        <span class="keyword">if</span> <span class="name">t</span> <span class="operator word">is</span> <span class="name">main_thread</span> <span class="operator word">or</span> <span class="name">t</span><span class="operator">.</span><span class="name">getName</span><span class="punctuation">()</span> <span class="operator word">not</span> <span class="operator word">in</span> <span class="name">names</span><span class="punctuation">:</span><span class="whitespace">
+</span>            <span class="keyword">continue</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'joining </span><span class="literal string interpol">%s</span><span class="literal string single">'</span> <span class="operator">%</span> <span class="name">t</span><span class="operator">.</span><span class="name">getName</span><span class="punctuation">())</span><span class="whitespace">
+</span>        <span class="name">t</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">sleeping 1
+sleeping 2
+sleeping 1
+&lt;_MainThread(MainThread, started 140066318255936)&gt;
+[&lt;_MainThread(MainThread, started 140066318255936)&gt;, &lt;Thread(IOPub, started daemon 140066222970624)&gt;, &lt;Heartbeat(Heartbeat, started daemon 140066214577920)&gt;, &lt;Thread(Thread-3, started daemon 140065980274432)&gt;, &lt;Thread(Thread-4, started daemon 140065971881728)&gt;, &lt;ControlThread(Control, started daemon 140065963489024)&gt;, &lt;HistorySavingThread(IPythonHistorySavingThread, started 140065955096320)&gt;, &lt;ParentPollerUnix(Thread-2, started daemon 140065946703616)&gt;, &lt;Thread(Thread-39, started daemon 140065594406656)&gt;, &lt;Thread(Thread-41, started daemon 140065569228544)&gt;, &lt;Thread(Thread-42, started daemon 140065577621248)&gt;, &lt;Thread(Thread-43, started daemon 140065552443136)&gt;, &lt;Thread(Thread-44, started daemon 140065586013952)&gt;]
+ending 140065594406656 Thread-39
+ending 140065569228544 Thread-41
+ending 140065577621248 Thread-42
+ending 140065586013952 Thread-44
+ending 140065552443136 Thread-43</pre>
+</section>
+<section id="local-data">
+<h3>Local data</h3>
+<p>Podczas gdy niektóre zasoby muszą być blokowane, aby wiele wątków mogło
+z nich korzystać jednocześnie, inne muszą być chronione, aby były ukryte
+przed widokami wątków, które ich nie „posiadają”. Funkcja local() tworzy
+obiekt zdolny do ukrywania wartości przed widokiem w oddzielnych
+wątkach.</p>
+<p>Thread-local data to dane, których wartości są związane z wątkiem. Aby
+zarządzać danymi lokalnymi wątku, po prostu utwórz instancję local (lub
+podklasę) i przechowuj na niej atrybuty:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">threading</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">(</span><span class="name">value</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">global</span> <span class="name">data</span><span class="whitespace">
+</span>    <span class="name">data</span><span class="operator">.</span><span class="name">counter</span> <span class="operator">=</span> <span class="literal number integer">0</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="literal number integer">10</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">time</span><span class="operator">.</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number float">0.1</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">data</span><span class="operator">.</span><span class="name">counter</span> <span class="operator">+=</span><span class="literal number integer">1</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Stored value: </span><span class="literal string interpol">{</span><span class="name">data</span><span class="operator">.</span><span class="name">counter</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">data</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">local</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">task</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,))</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number float">0.5</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">task</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,))</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Stored value: 9
+Stored value: 9</pre>
+<p>Poniżej przykład dla którego otrzymamy nieprawidłowe wartości w
+przypadku wykorzystania zwykłej zmiennej globalnej.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">threading</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">(</span><span class="name">value</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">global</span> <span class="name">data</span><span class="whitespace">
+</span>    <span class="name">data</span> <span class="operator">=</span> <span class="literal number integer">0</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="literal number integer">10</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">time</span><span class="operator">.</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number float">0.1</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">data</span> <span class="operator">+=</span><span class="literal number integer">1</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Stored value: </span><span class="literal string interpol">{</span><span class="name">data</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">)</span><span class="whitespace">
+
+
+</span><span class="name">data</span> <span class="operator">=</span> <span class="literal number integer">0</span><span class="whitespace">
+</span><span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">task</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,))</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number float">0.5</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">task</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,))</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Stored value: 7
+Stored value: 13</pre>
+</section>
+</section>
+<section id="zamek-lock">
+<h2>Zamek (lock)</h2>
+<p><strong>Lock</strong> - klasa implementująca obiekt blokady. Gdy jeden wątek uzyska
+blokadę, kolejne próby jego uzyskania blokują wykonanie innych wątków,
+aż do jego zwolnienia. Zamek służy do <strong>synchronizacji</strong> procesów, czyli
+w najprostszym scenariuszu zabezpieczenia przed równoczesnym zapisem
+przez wiele wątków wartości we wspólne miejsce w pamięci operacyjnej.
+Samo zastosowanie może być jednak szerze i służyć do kontroli przepływu
+i działania wątków poprzez ustawianie blokad synchronizujących kolejne
+kroki naszego programu.</p>
+<p>Metody:</p>
+<blockquote>
+<p><strong>acquire</strong>(blocking=True, timeout=- 1)</p>
+</blockquote>
+<p>Uzyskaj blokadę, blokującą lub nieblokującą.</p>
+<p>Argument blocking może być stosowany do “fałszywego” blokowania
+(blocking = False powoduje stworzenie tzw blokady nieblokującej) oznacza
+niezablokowanie zamka dla innych operacji acquire z blocking = false,
+ale w przypadku gdy inny wątek z blocking = true spróbuje go zablokować
+otrzyma błąd.</p>
+<p>W przypadku wywołania z argumentem limitu czasu zmiennoprzecinkowego
+ustawionym na wartość dodatnią blokuje maksymalnie na liczbę sekund
+określoną przez limit czasu i tak długo, jak blokada nie może zostać
+nabyta. Argument limitu czasu -1 określa nieograniczone oczekiwanie.</p>
+<p>Zwracana wartość to <strong>True</strong>, jeśli blokada została uzyskana pomyślnie,
+<strong>False</strong>, jeśli nie.</p>
+<blockquote>
+<p><strong>release</strong>()</p>
+</blockquote>
+<p>Zwolnij blokadę. Można to wywołać z dowolnego wątku, nie tylko wątku,
+który uzyskał blokadę. Gdy zamek jest zablokowany, zresetuj go do stanu
+odblokowanego i wróć. Jeśli jakiekolwiek inne wątki są zablokowane w
+oczekiwaniu na odblokowanie blokady, pozwól dokładnie jednemu z nich
+kontynuować.</p>
+<p>Po wywołaniu na odblokowanej blokadzie zgłaszany jest <strong>RuntimeError</strong>.</p>
+<blockquote>
+<p><strong>locked</strong>()</p>
+</blockquote>
+<p>Zwróć wartość <strong>True</strong>, jeśli blokada została uzyskana.</p>
+<p>Poniżej przykład kodu symulującego błąd synchronizacji procesów:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Thread</span><span class="punctuation">,</span> <span class="name">Lock</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+
+</span><span class="name">counter</span> <span class="operator">=</span> <span class="literal number integer">0</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">increase</span><span class="punctuation">(</span><span class="name">by</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">global</span> <span class="name">counter</span><span class="whitespace">
+</span>    <span class="name">local_counter</span> <span class="operator">=</span> <span class="name">counter</span><span class="whitespace">
+</span>    <span class="name">local_counter</span> <span class="operator">+=</span> <span class="name">by</span><span class="whitespace">
+</span>    <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number float">0.1</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">counter</span> <span class="operator">=</span> <span class="name">local_counter</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;counter= </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="name">counter</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="comment single"># create threads</span><span class="whitespace">
+</span><span class="name">t1</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">increase</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="punctuation">))</span><span class="whitespace">
+</span><span class="name">t2</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">increase</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,</span> <span class="punctuation">))</span><span class="whitespace">
+
+</span><span class="comment single"># start the threads</span><span class="whitespace">
+</span><span class="name">t1</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">t2</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="comment single"># wait for the threads to complete</span><span class="whitespace">
+</span><span class="name">t1</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">t2</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;The final counter is </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="name">counter</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">counter= 1
+counter= 2
+The final counter is 2</pre>
+<p>Ten sam kod z zabezpieczeniem dostępu poprzez <strong>lock</strong>. Teraz tylko
+jeden koc może wykonywać zadania w synchronizawanej sekcji miedzy
+<strong>lock.acquire()</strong> a <strong>lock.release()</strong>.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Thread</span><span class="punctuation">,</span> <span class="name">Lock</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+
+
+</span><span class="name">counter</span> <span class="operator">=</span> <span class="literal number integer">0</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span> <span class="name function">increase</span><span class="punctuation">(</span><span class="name">by</span><span class="punctuation">,</span> <span class="name">lock</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">global</span> <span class="name">counter</span><span class="whitespace">
+
+</span>    <span class="name">lock</span><span class="operator">.</span><span class="name">acquire</span><span class="punctuation">()</span><span class="whitespace">
+
+</span>    <span class="name">local_counter</span> <span class="operator">=</span> <span class="name">counter</span><span class="whitespace">
+</span>    <span class="name">local_counter</span> <span class="operator">+=</span> <span class="name">by</span><span class="whitespace">
+
+</span>    <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number float">0.1</span><span class="punctuation">)</span><span class="whitespace">
+
+</span>    <span class="name">counter</span> <span class="operator">=</span> <span class="name">local_counter</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;counter= </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="name">counter</span><span class="punctuation">)</span><span class="whitespace">
+
+</span>    <span class="name">lock</span><span class="operator">.</span><span class="name">release</span><span class="punctuation">()</span><span class="whitespace">
+
+
+</span><span class="name">lock</span> <span class="operator">=</span> <span class="name">Lock</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="comment single"># create threads</span><span class="whitespace">
+</span><span class="name">t1</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">increase</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="name">lock</span><span class="punctuation">))</span><span class="whitespace">
+</span><span class="name">t2</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">increase</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,</span> <span class="name">lock</span><span class="punctuation">))</span><span class="whitespace">
+
+</span><span class="comment single"># start the threads</span><span class="whitespace">
+</span><span class="name">t1</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">t2</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+
+
+</span><span class="comment single"># wait for the threads to complete</span><span class="whitespace">
+</span><span class="name">t1</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">t2</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;The final counter is </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="name">counter</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">counter= 1
+counter= 3
+The final counter is 3</pre>
+</section>
+<section id="zamek-rlock">
+<h2>Zamek RLock</h2>
+<p>Domyślna blokada <strong>Lock</strong> nie rozpoznaje, który wątek aktualnie blokuje
+zasób.</p>
+<p>Jeśli dostęp do udostępnionego zasobu jest uzyskiwany przez dowolny
+wątek, inne wątki próbujące uzyskać dostęp do udostępnionego zasobu
+zostaną zablokowane, nawet jeśli jest to ten sam wątek, który zablokował
+już wcześniej udostępniony zasób. Blokada ponownego wejścia (<strong>RLlock</strong>)
+jest używana w takich sytuacjach, aby zapobiec niepożądanemu blokowaniu
+dostępu do udostępnionego zasobu.</p>
+<p>Jeśli udostępniony zasób znajduje się w <strong>RLock</strong>, można go bezpiecznie
+wywołać ponownie. Dostęp do zasobu RLocked można uzyskać wielokrotnie za
+pomocą różnych wątków, chociaż nadal działa poprawnie, gdy jest
+wywoływany przez różne wątki. Spójrzmy na poniższy przykład, aby
+zrozumieć użycie RLocks.</p>
+<p>Poniższy program się nie zakończy (<strong>Uwaga! uruchomienie go w Jupyter
+zawiesi sesję interpretatora, więc postaraj uruchomić go w Pycharm</strong>):</p>
+<pre class="code python highlight literal-block"><code><span class="operator">//</span> <span class="name">Uruchom</span> <span class="name">mnie</span> <span class="name">w</span> <span class="name">PyCharm</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">threading</span><span class="whitespace">
+
+</span><span class="name">counter</span> <span class="operator">=</span> <span class="literal number integer">0</span><span class="whitespace">
+
+</span><span class="name">lock</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Lock</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">lock</span><span class="operator">.</span><span class="name">acquire</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">counter</span> <span class="operator">=</span> <span class="name">counter</span> <span class="operator">+</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span><span class="name">lock</span><span class="operator">.</span><span class="name">acquire</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">counter</span> <span class="operator">=</span> <span class="name">counter</span> <span class="operator">+</span><span class="literal number integer">1</span><span class="whitespace">
+</span><span class="name">lock</span><span class="operator">.</span><span class="name">release</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">lock</span><span class="operator">.</span><span class="name">release</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">counter</span><span class="punctuation">)</span></code></pre>
+<p>W przypadku zamiany Lock na Rlock nie mamy już tego problemu:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">threading</span><span class="whitespace">
+
+</span><span class="name">counter</span> <span class="operator">=</span> <span class="literal number integer">0</span><span class="whitespace">
+
+</span><span class="name">lock</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">RLock</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">lock</span><span class="operator">.</span><span class="name">acquire</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">counter</span> <span class="operator">=</span> <span class="name">counter</span> <span class="operator">+</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span><span class="name">lock</span><span class="operator">.</span><span class="name">acquire</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">counter</span> <span class="operator">=</span> <span class="name">counter</span> <span class="operator">+</span><span class="literal number integer">1</span><span class="whitespace">
+</span><span class="name">lock</span><span class="operator">.</span><span class="name">release</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">lock</span><span class="operator">.</span><span class="name">release</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">counter</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block"> 2
+
+
+Uwaga! Musimy wywołać release() raz dla każdego acquire() blokady
+obiektu RLock !</pre>
+<section id="podsumowanie">
+<h3>Podsumowanie</h3>
+<table>
+<thead>
+<tr><th class="head"><p>Lock</p></th>
+<th class="head"><p>RLock</p></th>
+</tr>
+</thead>
+<tbody>
+<tr><td><p>Obiekt Lock nie może zostać ponownie
+pozyskany przez żaden wątek, chyba że
+zostanie zwolniony przez wątek, który
+uzyskuje dostęp do udostępnionego zasobu.</p></td>
+<td><p>Obiekt RLock może
+być pozyskiwany
+wiele razy przez
+dowolny wątek.</p></td>
+</tr>
+<tr><td><p>Obiekt Lock może zostać zwolniony przez
+dowolny wątek.</p></td>
+<td><p>Obiekt RLock może
+zostać zwolniony
+tylko przez wątek,
+który go pozyskał.</p></td>
+</tr>
+<tr><td><p>Obiekt Lock nie może należeć do nikogo</p></td>
+<td><p>Obiekt RLock może
+należeć do wielu
+wątków.</p></td>
+</tr>
+<tr><td><p>Wykonywanie obiektu Lock jest szybsze.</p></td>
+<td><p>Wykonywanie obiektu
+RLock jest
+wolniejsze niż
+obiektu Lock</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="condition-objects">
+<h2>Condition Objects</h2>
+<p>Python udostępnia zmienną warunkową za pośrednictwem klasy
+<strong>multiprocessing.Condition</strong></p>
+<p>Możemy utworzyć zmienną condition, która domyślnie utworzy nową blokadę
+Rlock (klasa multiprocessing.RLock), która będzie używana do blokowania
+dostępu do synchronizawanego kontekstu.</p>
+<p>Aby proces mógł skorzystać z warunku, musi go uzyskać i zwolnić,
+podobnie jak blokadę Lock. Można to osiągnąć ręcznie za pomocą funkcji
+<strong>acquire()</strong> i <strong>release()</strong>:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing</span> <span class="keyword namespace">import</span> <span class="name">Condition</span><span class="whitespace">
+
+</span><span class="name">condition</span> <span class="operator">=</span> <span class="name">Condition</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Start&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">condition</span><span class="operator">.</span><span class="name">acquire</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">condition</span><span class="operator">.</span><span class="name">release</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Finish&quot;</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">Start
+Finish</pre>
+<p>Alternatywą dla bezpośredniego wywołania funkcji acquire() i release()
+jest skorzystanie z menedżera kontekstu, który automatycznie wykona za
+nas zajęcie/zwolnienie blokady. Funkcja <strong>wait()</strong> domyślnie czeka w
+nieskończoność, aż inny wątek nie złosi <strong>notify()</strong>. Możemy również
+przekazać argument „timeout”, który pozwoli procesowi zatrzymać
+blokowanie po upływie określonego czasu w sekundach.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing</span> <span class="keyword namespace">import</span> <span class="name">Condition</span><span class="whitespace">
+
+</span><span class="name">condition</span> <span class="operator">=</span> <span class="name">Condition</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="keyword">with</span> <span class="name">condition</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Waiting&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">condition</span><span class="operator">.</span><span class="name">wait</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Koniec&quot;</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">Waiting
+Koniec</pre>
+<p>Możemy powiadomić pojedynczy oczekujący proces na blokadzie za pomocą
+funkcji notify().</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing</span> <span class="keyword namespace">import</span> <span class="name">Condition</span><span class="whitespace">
+
+</span><span class="name">condition</span> <span class="operator">=</span> <span class="name">Condition</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="keyword">with</span> <span class="name">condition</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Waiting&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">condition</span><span class="operator">.</span><span class="name">notify</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Koniec&quot;</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">Waiting
+Koniec</pre>
+<p>Możemy również powiadomić podzbiór procesów oczekujących, ustawiając
+argument „n” na całkowitą liczbę procesów do powiadomienia, na przykład.
+Na koniec możemy powiadomić wszystkie procesy oczekujące na warunek za
+pomocą funkcji <strong>notify_all()</strong>.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing</span> <span class="keyword namespace">import</span> <span class="name">Condition</span><span class="whitespace">
+
+</span><span class="name">condition</span> <span class="operator">=</span> <span class="name">Condition</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="keyword">with</span> <span class="name">condition</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Waiting&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">condition</span><span class="operator">.</span><span class="name">notify</span><span class="punctuation">(</span><span class="name">n</span><span class="operator">=</span><span class="literal number integer">3</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">condition</span><span class="operator">.</span><span class="name">notify_all</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Koniec&quot;</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">Waiting
+Koniec</pre>
+<p>Proces musi uzyskać warunek przed oczekiwaniem na niego lub
+powiadomieniem oczekujących procesów. Niepowodzenie w uzyskaniu warunku
+(blokada w warunku) przed wykonaniem tych działań spowoduje błąd
+<strong>RuntimeError</strong>.</p>
+<p>Przykład:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">threading</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing</span> <span class="keyword namespace">import</span> <span class="name">Condition</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">czekam</span><span class="punctuation">(</span><span class="name">condition</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">with</span> <span class="name">condition</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Czekam na blokadę'</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">condition</span><span class="operator">.</span><span class="name">wait</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Działam z blokadą równocześnie!'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">dzialam</span><span class="punctuation">(</span><span class="name">condition</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Koniec procesowania'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="keyword">with</span> <span class="name">condition</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Zwalniam blokadę'</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">condition</span><span class="operator">.</span><span class="name">notify_all</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="comment single"># entry point</span><span class="whitespace">
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+
+</span>    <span class="name">condition</span> <span class="operator">=</span> <span class="name">Condition</span><span class="punctuation">()</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Start'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="keyword">with</span> <span class="name">condition</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="name">worker</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">czekam</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">condition</span><span class="punctuation">,))</span><span class="whitespace">
+</span>        <span class="name">worker2</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">dzialam</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">condition</span><span class="punctuation">,))</span><span class="whitespace">
+</span>        <span class="name">worker</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="name">worker2</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="name">condition</span><span class="operator">.</span><span class="name">wait</span><span class="punctuation">()</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Koniec Main'</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">Start
+Czekam na blokadę
+Koniec procesowania
+Zwalniam blokadę
+Działam z blokadą równocześnie!
+Koniec Main</pre>
+<p>Condition może nam posłużyć do implementacji przetwarzania w modelu
+<strong>producent-consument</strong> z tzw. aktywnym czekaniem przez konsumenta:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">random</span> <span class="keyword namespace">import</span> <span class="name">random</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Thread</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">queue</span> <span class="keyword namespace">import</span> <span class="name">Queue</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing</span> <span class="keyword namespace">import</span> <span class="name">Condition</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">producer</span><span class="punctuation">(</span><span class="name">queue</span><span class="punctuation">,</span> <span class="name">condition</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Producent: Running'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="keyword">with</span> <span class="name">condition</span><span class="punctuation">:</span><span class="whitespace">
+</span>            <span class="name">value</span> <span class="operator">=</span> <span class="name">random</span><span class="punctuation">()</span><span class="whitespace">
+</span>            <span class="name">queue</span><span class="operator">.</span><span class="name">put</span><span class="punctuation">(</span><span class="name">value</span><span class="punctuation">)</span><span class="whitespace">
+</span>            <span class="name">condition</span><span class="operator">.</span><span class="name">notify</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Wyslalem </span><span class="literal string interpol">%s</span><span class="literal string single">'</span> <span class="operator">%</span> <span class="name">value</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Producer: Done'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">consumer</span><span class="punctuation">(</span><span class="name">queue</span><span class="punctuation">,</span> <span class="name">condition</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">with</span> <span class="name">condition</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Consument: Running'</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">):</span><span class="whitespace">
+</span>            <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Czekam'</span><span class="punctuation">)</span><span class="whitespace">
+</span>            <span class="name">condition</span><span class="operator">.</span><span class="name">wait</span><span class="punctuation">()</span><span class="whitespace">
+</span>            <span class="name">value</span> <span class="operator">=</span> <span class="name">queue</span><span class="operator">.</span><span class="name">get</span><span class="punctuation">()</span><span class="whitespace">
+</span>            <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number float">0.2</span><span class="punctuation">)</span><span class="whitespace">
+</span>            <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Dostałem </span><span class="literal string interpol">%s</span><span class="literal string single">'</span> <span class="operator">%</span> <span class="name">value</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Consument: Done'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">queue</span> <span class="operator">=</span> <span class="name">Queue</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">condition</span> <span class="operator">=</span> <span class="name">Condition</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">consumer</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">consumer</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">queue</span><span class="punctuation">,</span><span class="name">condition</span><span class="punctuation">,))</span><span class="whitespace">
+</span><span class="name">consumer</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">producer</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">producer</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">queue</span><span class="punctuation">,</span><span class="name">condition</span><span class="punctuation">,))</span><span class="whitespace">
+</span><span class="name">producer</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">producer</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">consumer</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Consument: Running
+Czekam
+Producent: Running
+Wyslalem 0.7246806531871689
+Dostałem 0.7246806531871689
+Czekam
+Wyslalem 0.764394712675697
+Dostałem 0.764394712675697
+Czekam
+Wyslalem 0.9139622626543684
+Dostałem 0.9139622626543684
+Czekam
+Wyslalem 0.9383895972218189
+Dostałem 0.9383895972218189
+Czekam
+Wyslalem 0.14412814317848
+Dostałem 0.14412814317848
+Consument: Done
+Producer: Done</pre>
+</section>
+<section id="semafory">
+<h2>Semafory</h2>
+<p>Jest to jedna z najstarszych metod synchronizacji w historii
+informatyki, wymyślony przez Edsgera W. Dijkstrę (używał nazw P() i V()
+zamiast acquire() i release()). Najprościej mówiąc semafor to zamek
+który pozwala na jednoczesny dostęp do synchronizowanej sekcji
+zdefiniowanej w nim liczbie wątków.</p>
+<p>Semafor zarządza wewnętrznym licznikiem, który jest zmniejszany przez
+każde wywołanie funkcji <strong>acquire()</strong> i zwiększany przez każde wywołanie
+funkcji <strong>release()</strong>. Licznik nigdy nie może spaść poniżej zera; kiedy
+<strong>acquire()</strong> stwierdzi, że wartość licznika wynosi zero, blokuje się,
+czekając, aż jakiś inny wątek wywoła <strong>release()</strong>.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="operator">*</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">time</span><span class="whitespace">
+
+</span><span class="name">obj</span> <span class="operator">=</span> <span class="name">Semaphore</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span> <span class="name function">display</span><span class="punctuation">(</span><span class="name">name</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">obj</span><span class="operator">.</span><span class="name">acquire</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Sem down </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="name">name</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Semafor value </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="name">obj</span><span class="operator">.</span><span class="name">_value</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">time</span><span class="operator">.</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">obj</span><span class="operator">.</span><span class="name">release</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Sem up </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="name">name</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Semafor value </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="name">obj</span><span class="operator">.</span><span class="name">_value</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">t1</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">display</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal string single">'Thread-1'</span><span class="punctuation">,))</span><span class="whitespace">
+</span><span class="name">t2</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">display</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal string single">'Thread-2'</span><span class="punctuation">,))</span><span class="whitespace">
+</span><span class="name">t3</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">display</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal string single">'Thread-3'</span><span class="punctuation">,))</span><span class="whitespace">
+</span><span class="name">t4</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">display</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal string single">'Thread-4'</span><span class="punctuation">,))</span><span class="whitespace">
+
+</span><span class="name">t1</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">t2</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">t3</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">t4</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Sem down Thread-1
+Semafor value 1
+Sem down Thread-2
+Semafor value 0
+Sem up Thread-1Sem down Thread-3
+Semafor value 0
+
+Semafor value 0
+Sem up Thread-2
+Semafor value 1
+Sem down Thread-2
+Semafor value 0
+Sem up Thread-3
+Semafor value 1
+Sem down Thread-3
+Semafor value 0
+Sem up Thread-2
+Semafor value 1
+Sem down Thread-1
+Semafor value 0
+Sem up Thread-3Sem up Thread-1
+Semafor value 2
+Sem down Thread-4
+Semafor value 1
+
+Semafor value 1
+Sem up Thread-4
+Semafor value 2
+Sem down Thread-4
+Semafor value 1
+Sem up Thread-4
+Semafor value 2</pre>
+</section>
+<section id="event-object">
+<h2>Event Object</h2>
+<p>Jest to prostszą wersją Condition (bez zabezpieczenia jednoczesnego
+dostępu do zasobów poprzez acquire i release) i służy jako mechanizmów
+komunikacji między wątkami: jeden wątek sygnalizuje zdarzenie, a inne na
+nie czekają.</p>
+<p>Obiekt zdarzenia zarządza wewnętrzną flagą, którą można ustawić na
+wartość <strong>true</strong> za pomocą metody <strong>set()</strong> i zresetować na wartość
+<strong>false</strong> za pomocą metody <strong>clear()</strong> . Metoda <strong>wait()</strong> blokuje
+wykonanie, dopóki flaga nie będzie prawdziwa.</p>
+<p>Możemy przepisać powyższy przykład tak by działał dla event objects:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">random</span> <span class="keyword namespace">import</span> <span class="name">random</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Thread</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Event</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">queue</span> <span class="keyword namespace">import</span> <span class="name">Queue</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">producer</span><span class="punctuation">(</span><span class="name">queue</span><span class="punctuation">,</span> <span class="name">condition</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Producent: Running'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">value</span> <span class="operator">=</span> <span class="name">random</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="name">queue</span><span class="operator">.</span><span class="name">put</span><span class="punctuation">(</span><span class="name">value</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Jak flaga? </span><span class="literal string interpol">%s</span><span class="literal string single">'</span> <span class="operator">%</span> <span class="name">condition</span><span class="operator">.</span><span class="name">is_set</span><span class="punctuation">())</span><span class="whitespace">
+</span>        <span class="name">condition</span><span class="operator">.</span><span class="name">set</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Wyslalem </span><span class="literal string interpol">%s</span><span class="literal string single">'</span> <span class="operator">%</span> <span class="name">value</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Producer: Done'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">consumer</span><span class="punctuation">(</span><span class="name">queue</span><span class="punctuation">,</span> <span class="name">condition</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Consument: Running'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Czekam'</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">condition</span><span class="operator">.</span><span class="name">wait</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Jak flaga? </span><span class="literal string interpol">%s</span><span class="literal string single">'</span> <span class="operator">%</span> <span class="name">condition</span><span class="operator">.</span><span class="name">is_set</span><span class="punctuation">())</span><span class="whitespace">
+</span>        <span class="name">condition</span><span class="operator">.</span><span class="name">clear</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="name">value</span> <span class="operator">=</span> <span class="name">queue</span><span class="operator">.</span><span class="name">get</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number float">0.2</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Dostałem </span><span class="literal string interpol">%s</span><span class="literal string single">'</span> <span class="operator">%</span> <span class="name">value</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Consument: Done'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">queue</span> <span class="operator">=</span> <span class="name">Queue</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">condition</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Event</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">consumer</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">consumer</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">queue</span><span class="punctuation">,</span><span class="name">condition</span><span class="punctuation">,))</span><span class="whitespace">
+</span><span class="name">consumer</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">producer</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">producer</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">queue</span><span class="punctuation">,</span><span class="name">condition</span><span class="punctuation">,))</span><span class="whitespace">
+</span><span class="name">producer</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">producer</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">consumer</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Consument: Running
+Czekam
+Producent: Running
+Jak flaga? False
+Wyslalem 0.01176724153986497
+Jak flaga? True
+Dostałem 0.01176724153986497
+Czekam
+Jak flaga? False
+Wyslalem 0.7551721515228753
+Jak flaga? True
+Dostałem 0.7551721515228753
+Czekam
+Jak flaga? False
+Wyslalem 0.8645864714182996
+Jak flaga? True
+Dostałem 0.8645864714182996
+Czekam
+Jak flaga? False
+Wyslalem 0.8301915595032113
+Jak flaga? True
+Dostałem 0.8301915595032113
+Czekam
+Jak flaga? False
+Wyslalem 0.5119799983830534
+Jak flaga? True
+Dostałem 0.5119799983830534
+Consument: Done
+Producer: Done</pre>
+</section></body>
+</html>
+

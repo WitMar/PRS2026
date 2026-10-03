@@ -1,0 +1,260 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<title>PRS08.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="przetwarzanie-rownolegle-i-strumieniowe">
+<h2>Przetwarzanie równoległe i strumieniowe</h2>
+<section id="zasoby">
+<h3>Zasoby</h3>
+<blockquote>
+<div class="line-block">
+<div class="line"><strong>Zamek</strong> - Lock, umożliwiający zamykanie lock i otwieranie unclock, wątki czekają na zasób i są wznawiane w nieznanej nam kolejności</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Zamek</strong> - Lock, z metodą tryLock która przepuszcza działanie dalej jeżeli w danym momencie zasób jest dla nas niedostępny</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Zamek ReadWrite</strong> - ReadWriteLock, umożliwiający zamykanie lock i otwieranie unclock, oraz podział operacji na odczyty i zapisy, wątki czekają na zasób i są wznawiane w nieznanej nam kolejności</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Condition</strong> - związane z zamkiem umożliwiające czekanie na metodzie await() oraz wznawianie przez metodę signal() lub signalAll()</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Semafor</strong> - blokada umożliwiająca przejście więcej niż jednemu wątkowi, Lock jest przykładem semafora binarnego</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Zmienne atomowe</strong> - synchronizowane zmienne, których wartość może sterować przetwarzaniem</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Synchronizowane kolekcje</strong> - listy, mapy, zbiory, na których operacje wielowątkowe sa bezpieczne.</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>BlockingQueue</strong> - kolejka która blokuje wątek gdy nie ma elementów do pobrania</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Licznik</strong> - Latch, umożliwiający zliczanie wątków przez countDown() oraz czekanie na przyjście X wątków na metodzie await(), nie można użyć o wielokrotnie.</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Bariera</strong> - cykliczny licznik zatrzymujący wątki poprzez wykonanie await() i przepuszczający po przyjściu X wątków, następnie restartujący się od początku.</div>
+</div>
+</blockquote>
+</section>
+<section id="synchronizacja-rozwiazanie-oparte-na-analizie-zasobow">
+<h3>Synchronizacja rozwiązanie oparte na analizie zasobów</h3>
+<p>Podejście oparte na tworzeniu niezależnych kolejek dla zadań, które na siebie nie wpływają, oraz tworzenia specjalnych zadań dla synchronizacji:</p>
+<p class="center"><img alt="col0" src="podejscieWatkow.png" /></p>
+<p>Zalety:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">Bardzo proste w implementacji.</div>
+</div>
+<div class="line-block">
+<div class="line">Uzyskanie sekwencyjnego wykonania przez podział sekwencyjnego wywołania w miarę możliwości na podgrupy.</div>
+</div>
+</blockquote>
+<p>Wady:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">Ograniczona liczba wątków, jeden na kolejkę. Co zrobić jak kolejek jest więcej niż wątków?</div>
+</div>
+<div class="line-block">
+<div class="line">Nie przenosi się na działanie niesekwencyjne.</div>
+</div>
+</blockquote>
+<p>Podejście oparte na blokowaniu zasobów w sposób taki, żeby wątki na raz nie zmieniały wartości, z których korzystają inne wątki</p>
+<p class="center"><img alt="col1" src="diagramZadanie.png" /></p>
+<p>Zalety:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">Raport sprzedaży i zaopatrzenie mogą się wykonać jednocześnie.</div>
+</div>
+<div class="line-block">
+<div class="line">Uzyskanie sekwencyjnego wykonania przez dodanie zamku na kolejce - kolejne zadanie nie dopuszcza nikogo do wykonywania operacji na zasobach dopóki same nie dostanie odpowiednich zasobów.</div>
+</div>
+</blockquote>
+<p>Wady:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">W przypadku dwóch zadań o sprzedaży i wielu o podanie ceny, zadania o sprzedaży blokują zadania z cenami, choć nie powinny.</div>
+</div>
+<div class="line-block">
+<div class="line">Co zrobić żeby móc działać niesekwencyjnie a rozwiązanie cały czas było poprawne?</div>
+</div>
+</blockquote>
+<p>Pytanie :</p>
+<blockquote>
+<div class="line-block">
+<div class="line">Co stanie się, gdy będziemy blokować zasoby poza kolejką?</div>
+</div>
+</blockquote>
+<p class="center"><img alt="col2" src="diagramZadanie2.png" /></p>
+<p>Co może pójśc nie tak?</p>
+<p>Jak zapewnić by zadania o sprzedaży nie blokowały zadań innych? Czy opcja pierwsza może nam pomóc w rozwiązaniu problemu?</p>
+<p>W podejściu niesekwencyjnym. Zakładamy, że chcemy <strong>zamówienia rozpatrywać w kolejności</strong>, ale <strong>zaopatrzenia możemy rozpatrywać jak chcemy</strong>. <strong>Raporty i inwentaryzacje nadal chcemy wykonywać synchronizując stan na dany moment czasu</strong>. Możemy też pokusić się o synchronizację danych typów towarów a nie całego magazynu w przypadku zamówień.</p>
+<p>Propozycja: przydział kolejek zadań do wątków, tak by one wzajemnie przyznawały zadania w zależnośći od sytuacji. Daje to nam możliwość skalowalności liczby wątków na dowolną liczbę i zmieniające się warunki jak chodzi o nowe typy zadan i zaleźnośći.</p>
+<p class="center"><img alt="col3" src="prs4.png" /></p>
+</section>
+<section id="zaliczenie-i">
+<h3>Zaliczenie I</h3>
+<blockquote>
+<p>Jedna godzina <strong>15.30</strong> w poniedziałek <strong>09.05.2022</strong>, podział na dwie grupy, zaliczenie po 45 min.</p>
+<div class="line-block">
+<div class="line">a) <strong>Test</strong> - pytanie testowe z &quot;teorii&quot;, przypadki - jaki będzie wynik działania kodu lub wykazanie przypadków kiedy zadane rozwiązanie nie działa, podanie w których przypadkach  przedstawione w  pseudokodzie rozwiązanie zadziała, a kiedy nie</div>
+</div>
+</blockquote>
+<p>Przykład:</p>
+<p>Wskaż prawdziwe zdania:</p>
+<blockquote>
+<blockquote>
+<div class="line-block">
+<div class="line">* Latch jako blokada może być wykorzystywany wielokrotnie</div>
+<div class="line">* Bariera jako blokada może być wykorzystywana wielokrotnie</div>
+<div class="line">* Bariera umożliwia synchronizację wielu wątków</div>
+<div class="line">* Latch umożliwia synchronizację wielu wątków</div>
+</div>
+</blockquote>
+<div class="line-block">
+<div class="line">b) <strong>Implementacja zadania w języku Java</strong> :</div>
+</div>
+</blockquote>
+<p>Zmodyfikowana wersja poprzedniego zadania nr 1 bez ograniczenia o synchroniczności, z nowymi elementami, więcej produktów, zakupy i zaopatrzenie wielu produktów na raz.</p>
+<blockquote>
+<div class="line-block">
+<div class="line">c) <strong>Podanie kontrprzykładów</strong> (na zajęciach) albo odpowiedź, że zadana implementacja zawsze zadziała.</div>
+</div>
+</blockquote>
+<p>Zadanie(TYP, wartość_parametru (opcjonalnie), czas_uśpienia (w milisek));</p>
+<p>Np przykład:</p>
+<pre class="code java highlight literal-block"><code><span class="keyword">new</span> <span class="name">Zadanie</span><span class="punctuation">(</span><span class="name">TYP</span><span class="punctuation">,</span> <span class="literal number integer">5</span><span class="punctuation">,</span> <span class="literal number integer">1000</span><span class="punctuation">);</span>
+
+    <span class="name">lub</span>
+
+<span class="name">Zadanie</span><span class="punctuation">.</span><span class="name attribute">builder</span><span class="punctuation">().</span><span class="name attribute">item</span><span class="punctuation">(</span><span class="name">Items</span><span class="punctuation">.</span><span class="name attribute">SZKLANKA</span><span class="punctuation">)</span>
+                                     <span class="punctuation">.</span><span class="name attribute">parameter</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">)</span>
+                                     <span class="punctuation">.</span><span class="name attribute">sleep</span><span class="punctuation">(</span><span class="literal number integer">1000</span><span class="punctuation">)</span>
+                                     <span class="punctuation">.</span><span class="name attribute">build</span><span class="punctuation">()</span></code></pre>
+<p>Pusta lista na odpowiedź że działa. 5 scenariuszy po 5 prób, 4% za każdą próbę.</p>
+<p>Przykład:</p>
+<p>Kod:</p>
+<pre class="code java highlight literal-block"><code><span class="name">ConcurrentHashMap</span><span class="operator">&lt;</span><span class="name">Items</span><span class="punctuation">,</span> <span class="name">Integer</span><span class="operator">&gt;</span> <span class="name">warehouse</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="name">ConcurrentHashMap</span><span class="punctuation">();</span>
+<span class="name">AtomicLong</span> <span class="name">sold</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="name">AtomicLong</span><span class="punctuation">(</span><span class="literal number integer">0</span><span class="name">L</span><span class="punctuation">);</span>
+<span class="name">BlockingQueue</span><span class="operator">&lt;</span><span class="name">Zadanie</span><span class="operator">&gt;</span> <span class="name">kolejka</span><span class="punctuation">;</span>
+
+<span class="keyword declaration">public</span> <span class="name function">ShopZadanie</span><span class="punctuation">(</span><span class="name">BlockingQueue</span><span class="operator">&lt;</span><span class="name">Zadanie</span><span class="operator">&gt;</span> <span class="name">kolejka</span><span class="punctuation">)</span> <span class="punctuation">{</span>
+    <span class="keyword">this</span><span class="punctuation">.</span><span class="name attribute">kolejka</span> <span class="operator">=</span> <span class="name">kolejka</span><span class="punctuation">;</span>
+    <span class="name">warehouse</span><span class="punctuation">.</span><span class="name attribute">put</span><span class="punctuation">(</span><span class="name">Items</span><span class="punctuation">.</span><span class="name attribute">SZKLANKA</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">);</span>
+<span class="punctuation">}</span>
+
+<span class="keyword declaration">public</span> <span class="keyword type">void</span> <span class="name function">wykonaj</span><span class="punctuation">(</span><span class="name">Zadanie</span> <span class="name">zadanie</span><span class="punctuation">)</span> <span class="punctuation">{</span>
+    <span class="keyword">if</span><span class="punctuation">(</span><span class="name">warehouse</span><span class="punctuation">.</span><span class="name attribute">get</span><span class="punctuation">(</span><span class="name">zadanie</span><span class="punctuation">.</span><span class="name attribute">item</span><span class="punctuation">)</span> <span class="operator">&gt;</span> <span class="literal number integer">0</span><span class="punctuation">)</span> <span class="punctuation">{</span>
+        <span class="keyword">try</span> <span class="punctuation">{</span>
+            <span class="name">Thread</span><span class="punctuation">.</span><span class="name attribute">sleep</span><span class="punctuation">(</span><span class="name">zadanie</span><span class="punctuation">.</span><span class="name attribute">sleep</span><span class="punctuation">);</span>
+        <span class="punctuation">}</span> <span class="keyword">catch</span> <span class="punctuation">(</span><span class="name">InterruptedException</span> <span class="name">e</span><span class="punctuation">)</span> <span class="punctuation">{</span>
+            <span class="name">e</span><span class="punctuation">.</span><span class="name attribute">printStackTrace</span><span class="punctuation">();</span>
+        <span class="punctuation">}</span>
+        <span class="name">sold</span><span class="punctuation">.</span><span class="name attribute">incrementAndGet</span><span class="punctuation">();</span>
+    <span class="punctuation">}</span>
+<span class="punctuation">}</span>
+
+<span class="keyword declaration">public</span> <span class="keyword type">void</span> <span class="name function">uruchom</span><span class="punctuation">()</span> <span class="punctuation">{</span>
+    <span class="name">Lock</span> <span class="name">zamek</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="name">ReentrantLock</span><span class="punctuation">();</span>
+
+    <span class="comment single">// Wszystkie wątki działają w taki sam sposób
+</span>    <span class="name">Thread</span> <span class="name">thread1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="name">Thread</span><span class="punctuation">(()</span> <span class="operator">-&gt;</span> <span class="punctuation">{</span>
+        <span class="name">zamek</span><span class="punctuation">.</span><span class="name attribute">lock</span><span class="punctuation">();</span>
+        <span class="keyword">while</span><span class="punctuation">(</span><span class="name">kolejka</span><span class="punctuation">.</span><span class="name attribute">size</span><span class="punctuation">()</span> <span class="operator">&gt;</span> <span class="literal number integer">0</span><span class="punctuation">)</span> <span class="punctuation">{</span>
+          <span class="name">Zadanie</span> <span class="name">zadanie</span> <span class="operator">=</span> <span class="name">kolejka</span><span class="punctuation">.</span><span class="name attribute">poll</span><span class="punctuation">();</span>
+          <span class="name">zamek</span><span class="punctuation">.</span><span class="name attribute">unlock</span><span class="punctuation">();</span>
+          <span class="name">wykonaj</span><span class="punctuation">(</span><span class="name">zadanie</span><span class="punctuation">);</span>
+          <span class="name">zamek</span><span class="punctuation">.</span><span class="name attribute">lock</span><span class="punctuation">();</span>
+        <span class="punctuation">}</span>
+        <span class="name">zamek</span><span class="punctuation">.</span><span class="name attribute">unlock</span><span class="punctuation">();</span>
+    <span class="punctuation">});</span>
+
+    <span class="name">Thread</span> <span class="name">thread2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="name">Thread</span><span class="punctuation">(()</span> <span class="operator">-&gt;</span> <span class="punctuation">{</span>
+        <span class="name">zamek</span><span class="punctuation">.</span><span class="name attribute">lock</span><span class="punctuation">();</span>
+        <span class="keyword">while</span><span class="punctuation">(</span><span class="name">kolejka</span><span class="punctuation">.</span><span class="name attribute">size</span><span class="punctuation">()</span> <span class="operator">&gt;</span> <span class="literal number integer">0</span><span class="punctuation">)</span> <span class="punctuation">{</span>
+            <span class="name">Zadanie</span> <span class="name">zadanie</span> <span class="operator">=</span> <span class="name">kolejka</span><span class="punctuation">.</span><span class="name attribute">poll</span><span class="punctuation">();</span>
+            <span class="name">zamek</span><span class="punctuation">.</span><span class="name attribute">unlock</span><span class="punctuation">();</span>
+            <span class="name">wykonaj</span><span class="punctuation">(</span><span class="name">zadanie</span><span class="punctuation">);</span>
+            <span class="name">zamek</span><span class="punctuation">.</span><span class="name attribute">lock</span><span class="punctuation">();</span>
+        <span class="punctuation">}</span>
+        <span class="name">zamek</span><span class="punctuation">.</span><span class="name attribute">unlock</span><span class="punctuation">();</span>
+    <span class="punctuation">});</span>
+
+    <span class="name">Thread</span> <span class="name">thread3</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="name">Thread</span><span class="punctuation">(()</span> <span class="operator">-&gt;</span> <span class="punctuation">{</span>
+        <span class="name">zamek</span><span class="punctuation">.</span><span class="name attribute">lock</span><span class="punctuation">();</span>
+        <span class="keyword">while</span><span class="punctuation">(</span><span class="name">kolejka</span><span class="punctuation">.</span><span class="name attribute">size</span><span class="punctuation">()</span> <span class="operator">&gt;</span> <span class="literal number integer">0</span><span class="punctuation">)</span> <span class="punctuation">{</span>
+            <span class="name">Zadanie</span> <span class="name">zadanie</span> <span class="operator">=</span> <span class="name">kolejka</span><span class="punctuation">.</span><span class="name attribute">poll</span><span class="punctuation">();</span>
+            <span class="name">zamek</span><span class="punctuation">.</span><span class="name attribute">unlock</span><span class="punctuation">();</span>
+            <span class="name">wykonaj</span><span class="punctuation">(</span><span class="name">zadanie</span><span class="punctuation">);</span>
+            <span class="name">zamek</span><span class="punctuation">.</span><span class="name attribute">lock</span><span class="punctuation">();</span>
+        <span class="punctuation">}</span>
+        <span class="name">zamek</span><span class="punctuation">.</span><span class="name attribute">unlock</span><span class="punctuation">();</span>
+    <span class="punctuation">});</span>
+
+
+    <span class="name">thread1</span><span class="punctuation">.</span><span class="name attribute">start</span><span class="punctuation">();</span>
+    <span class="name">thread2</span><span class="punctuation">.</span><span class="name attribute">start</span><span class="punctuation">();</span>
+    <span class="name">thread3</span><span class="punctuation">.</span><span class="name attribute">start</span><span class="punctuation">();</span>
+
+    <span class="keyword">try</span> <span class="punctuation">{</span>
+        <span class="name">thread1</span><span class="punctuation">.</span><span class="name attribute">join</span><span class="punctuation">();</span>
+        <span class="name">thread2</span><span class="punctuation">.</span><span class="name attribute">join</span><span class="punctuation">();</span>
+        <span class="name">thread3</span><span class="punctuation">.</span><span class="name attribute">join</span><span class="punctuation">();</span>
+        <span class="comment single">// Sprawdzamy czy nie sprzedano więcej niż 2 sztuk
+</span>        <span class="name">assertThat</span><span class="punctuation">(</span><span class="name">sold</span><span class="punctuation">.</span><span class="name attribute">get</span><span class="punctuation">()).</span><span class="name attribute">isLessThanOrEqualTo</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">);</span>
+    <span class="punctuation">}</span> <span class="keyword">catch</span> <span class="punctuation">(</span><span class="name">InterruptedException</span> <span class="name">e</span><span class="punctuation">)</span> <span class="punctuation">{</span>
+        <span class="name">e</span><span class="punctuation">.</span><span class="name attribute">printStackTrace</span><span class="punctuation">();</span>
+    <span class="punctuation">}</span>
+<span class="punctuation">}</span></code></pre>
+<p>Diagram:</p>
+<p class="center"><img alt="col5" src="ZadanieSchemat.png" /></p>
+<p>Przykładowa odpowiedź :</p>
+<pre class="code java highlight literal-block"><code><span class="name">kolejka</span><span class="punctuation">.</span><span class="name attribute">add</span><span class="punctuation">(</span><span class="name">Zadanie</span><span class="punctuation">.</span><span class="name attribute">builder</span><span class="punctuation">()</span>
+        <span class="punctuation">.</span><span class="name attribute">item</span><span class="punctuation">(</span><span class="name">Items</span><span class="punctuation">.</span><span class="name attribute">SZKLANKA</span><span class="punctuation">)</span>
+        <span class="punctuation">.</span><span class="name attribute">sleep</span><span class="punctuation">(</span><span class="literal number integer">3000</span><span class="punctuation">)</span>
+        <span class="punctuation">.</span><span class="name attribute">build</span><span class="punctuation">());</span>
+<span class="name">kolejka</span><span class="punctuation">.</span><span class="name attribute">add</span><span class="punctuation">(</span><span class="name">Zadanie</span><span class="punctuation">.</span><span class="name attribute">builder</span><span class="punctuation">()</span>
+        <span class="punctuation">.</span><span class="name attribute">item</span><span class="punctuation">(</span><span class="name">Items</span><span class="punctuation">.</span><span class="name attribute">SZKLANKA</span><span class="punctuation">)</span>
+        <span class="punctuation">.</span><span class="name attribute">sleep</span><span class="punctuation">(</span><span class="literal number integer">2000</span><span class="punctuation">)</span>
+        <span class="punctuation">.</span><span class="name attribute">build</span><span class="punctuation">());</span>
+<span class="name">kolejka</span><span class="punctuation">.</span><span class="name attribute">add</span><span class="punctuation">(</span><span class="name">Zadanie</span><span class="punctuation">.</span><span class="name attribute">builder</span><span class="punctuation">()</span>
+        <span class="punctuation">.</span><span class="name attribute">item</span><span class="punctuation">(</span><span class="name">Items</span><span class="punctuation">.</span><span class="name attribute">SZKLANKA</span><span class="punctuation">)</span>
+        <span class="punctuation">.</span><span class="name attribute">sleep</span><span class="punctuation">(</span><span class="literal number integer">1000</span><span class="punctuation">)</span>
+        <span class="punctuation">.</span><span class="name attribute">build</span><span class="punctuation">());</span></code></pre>
+<p>Lub</p>
+<pre class="code java highlight literal-block"><code><span class="name">IntStream</span><span class="punctuation">.</span><span class="name attribute">rangeClosed</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="literal number integer">3</span><span class="punctuation">).</span><span class="name attribute">forEach</span><span class="punctuation">(</span><span class="name">it</span> <span class="operator">-&gt;</span> <span class="punctuation">{</span>
+           <span class="name">kolejka</span><span class="punctuation">.</span><span class="name attribute">add</span><span class="punctuation">(</span><span class="name">Zadanie</span><span class="punctuation">.</span><span class="name attribute">builder</span><span class="punctuation">()</span>
+                    <span class="punctuation">.</span><span class="name attribute">item</span><span class="punctuation">(</span><span class="name">Items</span><span class="punctuation">.</span><span class="name attribute">SZKLANKA</span><span class="punctuation">)</span>
+                    <span class="punctuation">.</span><span class="name attribute">sleep</span><span class="punctuation">(</span><span class="literal number integer">1000</span><span class="punctuation">)</span>
+                    <span class="punctuation">.</span><span class="name attribute">build</span><span class="punctuation">());</span>
+        <span class="punctuation">});</span></code></pre>
+<p>Głosowanie:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://app.rankedvote.co/elections/19116/Zaliczenie/19415/vote">https://app.rankedvote.co/elections/19116/Zaliczenie/19415/vote</a></div>
+</div>
+</blockquote>
+<p>Podaj numer indkesu jako ID, imię dowolne.</p>
+<p>Uszereguj opcje od najbardziej preferowanej do najmniej preferowanej.</p>
+<dl class="footnote brackets">
+<dt class="label" id="id1"><span class="brackets">*</span></dt>
+<dd><p>Wykorzystano materiały z:</p>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://www.rankedvote.co/guides/understanding-ranked-choice-voting/how-does-ranked-choice-voting-work">https://www.rankedvote.co/guides/understanding-ranked-choice-voting/how-does-ranked-choice-voting-work</a></div>
+</div>
+</dd>
+</dl>
+</section>
+</section></body>
+</html>
+

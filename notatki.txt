@@ -1,0 +1,5 @@
+Projekt https://stackoverflow.com/questions/14088294/multithreaded-web-server-in-python?fbclid=IwAR2VKG8EWn2q-BqVzhw5rXf7xO5Ls2bHCqY-DFvcpFEycysNdvwa0oag7-8
+
+https://realpython.com/intro-to-python-threading/?fbclid=IwAR2xjcO0TclSOffOAfjMZ6rPbhXraF1oNkNCehYxMCEAZZgEzrWBZGoi6-8
+
+https://realpython.com/intro-to-python-threading/

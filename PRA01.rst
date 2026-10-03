@@ -1,417 +1,661 @@
 .. role:: todo
 
-.. role:: raw-latex(raw)
-            :format: latex html
+Narzędzia i organizacja zajęć
+=============================
 
-==========================================
-Programming Laboratory
-==========================================
+Wykłady w postaci HTML będą pojawiać się na serwisie **Moodle**
+https://lms.amu.edu.pl/sci/course/view.php?id=333
 
-------------------------------------
-Środowisko developerskie
-------------------------------------
+W tym samym miejscu obecne będą materiały na laboratoria. Na samym dole
+materiałów na laboratoria publikowany będzie plik notatnika **Jupyter**,
+który można otworzyć w serwisie https://jupyter.wmi.amu.edu.pl by móc
+skorzystać z interaktywnych opcji uruchamiania kodów.
 
-.. class:: important 
+W ramach uruchamiania programów oraz debuggowania pomocne może być także
+bardziej złożone **IDE** (ang. Integrated Development Environment) o
+nazwie **PyCharm**, opisane poniżej.
 
-    Uwaga! Kod z którego będziemy korzystać na zajęciach jest dostępny na branchu **IntroductionClassesStart** w repozytorium https://github.com/WitMar/PRA2025.git . Kod końcowy można znaleźć na branchu **IntroductionClassesEnd**.
+W ramach wykładu na serwisie **Moodle** znajdziecie Państwo pytania
+testowe na które macie **2** tygodnie na odpowiedź. Tam też pod nazwą
+**Zadania** znajdować się będa zadania do wykonania na zajęciach
+laboratoryjnych (także dostępne przez **2** tygodnie do czasu zajęć).
+Korzystają one z pluginu **CodeRunner** systemu **Moodle**.
 
 Edytor
-=======
-
-Implementując programy w języku Java, rekomendowanym (i aktualnie jednym z najpopularniejszych) IDE jest IntelliJ IDEA dostępny za darmo w wersji Community (link poniżej) (jako studenci możecie Państwo prosić o darmowy dostęp do wersji Ultimate - https://www.jetbrains.com/community/education/#students):
-
-    | https://www.jetbrains.com/idea/download/
-
-GIT
-=======
-
-Git:
-Git to rozproszony system kontroli wersji, który pozwala na przechowywanie wersji kodu źródłowego w różnych gałęziach. Dzięki Gitowi możesz pracować nad nowymi funkcjami w oddzielnych gałęziach, a potem łączyć je z główną wersją (gałąź main lub master). Git daje ci dużą elastyczność w zarządzaniu wersjami kodu, ale nie narzuca określonego sposobu pracy z gałęziami.
-
-Git posiada trzy stany, w których mogą znajdować się pliki: zatwierdzony, zmodyfikowany i śledzony. Zatwierdzony oznacza, że dane zostały bezpiecznie zachowane w Twojej lokalnej bazie danych. 
-Zmodyfikowany oznacza, że plik został zmieniony, ale zmiany nie zostały wprowadzone do bazy danych. Śledzony - oznacza, że zmodyfikowany plik został przeznaczony do zatwierdzenia w bieżącej postaci w następnej operacji commit.
-
-Podstawowy sposób pracy z Git wygląda mniej więcej tak:
-
-	| * Dokonujesz modyfikacji plików w katalogu roboczym.
-	|
-	| * Oznaczasz zmodyfikowane pliki jako śledzone, dodając ich bieżący stan (migawkę) do przechowalni.
-	|
-	| * Dokonujesz zatwierdzenia (commit), podczas którego zawartość plików z przechowalni zapisywana jest jako migawka projektu w katalogu Git.
-
-
-Gitflow
---------
-
-Gitflow to konkretna metodologia rozwoju oprogramowania, która wprowadza szereg wytycznych dotyczących tworzenia i zarządzania gałęziami w projekcie. Gitflow organizuje cykl życia projektu na gałęzie przeznaczone do różnych celów, takich jak rozwój funkcji, poprawki błędów, wydania, etc. Jest to przydatne szczególnie w dużych zespołach, gdzie potrzebna jest większa kontrola nad procesem wytwarzania oprogramowania.
-
-Podstawowe gałęzie w Gitflow:
------------------------------
-
-1. **`main`** - gałąź zawierająca stabilną wersję aplikacji, gotową do wdrożenia.
-2. **`develop`** - gałąź, na której zbierane są wszystkie nowe funkcje i zmiany. To główna gałąź do pracy w trakcie cyklu życia projektu.
-3. **`feature/`** - gałęzie wykorzystywane do pracy nad nowymi funkcjami. Są one tworzone na podstawie gałęzi `develop`.
-4. **`release/`** - gałęzie przeznaczone do przygotowania nowego wydania. Pozwalają na testowanie i przygotowanie stabilnej wersji przed wdrożeniem.
-5. **`hotfix/`** - gałęzie do szybkich poprawek błędów w wersji produkcyjnej.
-
-Przykład różnic:
-----------------
-
-- **W Git** nie masz narzuconych zasad dotyczących gałęzi. Możesz pracować na jednej gałęzi lub tworzyć własne.
-- **W Gitflow** masz określoną strukturę gałęzi, która wspomaga organizację pracy zespołowej. Zawsze pracujesz na gałęzi `develop` do tworzenia funkcji, a potem tworzysz gałęzie `release` i `hotfix`, jeśli jest to konieczne.
-
-.. class:: center
-	
-	|a10|
-	
-.. |a10| image:: git.png	
-
-.. class:: tag 
-
-	Zadanie 1
-
-Jeżeli nie posiadasz konta na platformie GitHub to załóż na nim konto
-	
-	| https://github.com/
-	
-Otwórz repozytorium
-
-	| https://github.com/WitMar/PRA2025.git
-	
-Skopiuj adres http repozytorium do tego by otworzyć je w IntelliJ. Otwórz **Idea intellij** na swoim komputerze.
-
-W przypadku, gdy uruchamiasz edytor poraz pierwszy zobaczysz wyskakujące okno i wybierz z niego **Project from version control**, w przypadku, gdy nie jest to Twoje pierwsze uruchomienie wejdź na **File-> New -> Project From Version Control** i następnie jako opcję wybierz (powinna być domyślnie wybrana) **Git**.
-
-Skopiuj w pokazującym się nowym oknie adres dostępny po wybraniu na stronie GitHub opcji **CloneOrDownload** (uwaga wybierz adres z opcja HTTPS, adres w opcji SSH nie zadziała!!).
-
-.. class:: center
-	
-	|1|
-	
-.. |1| image:: cloneGit.png
-
-Domyślnie po uruchomieniu znajdujesz się na branchu **Main**, który u nas zawiera tylko plik Readme.
-Wybierz w lewym dolnym rogu aplikacji nazwę brancha i przenieś się na branch **IntroductionClassesStart** (kliknij prawym przyciskiem myszy i checkout).
-
-.. class:: center
-	
-	|a2|
-	
-.. |a2| image:: develop.png
-
-Powinieneś uzyskać następujący efekt - z dokładnością do nazwy klasy. Uwaga jeśli kod nie jest pokolorowany tak jak oczekujesz (jak w przykładzie na dole) znaczy to, że środowisko nie rozpoznało automatycznie twojego pliku Mavena:
-
-.. class:: center
-	
-	|kod|
-	
-.. |kod| image:: kod.png
-
-W przypadku gdy środowisko nie wykrylo ustawień Maven (nie ma z prawej strpny na pasku kategorii z "m") wybierz ikonkę lupki i wpisz maven, wybierz opcję **Add Maven Project**.
-
-.. class:: center
-	
-	|amm|
-	
-.. |amm| image:: mmaven.png
-
-.. class:: center
-	
-	|aMV|
-	
-.. |aMV| image:: mavenAdd.png
-
-Następnie znajdź katalog do którego ściągnąłeś kod i wybierz plik **pom.xml**. Powinieneś otrzymać poniższy wynik (spójrz na ikonki przy plikach!). Z prawej strony ekranu pojawiła się zakładka **Maven**, wybierz w niej opcję **COMPILE** i uruchom (zielony trójkąt w zakładce lub kliknij dwa razy napis compile).
-
-.. class:: center
-	
-	|a3|
-	
-.. |a3| image:: kod.png
-
-Jeżeli nadal kod nie jest dobrze pokolorowany wejdź w opcje **File -> Project Structure**, ustaw wersje Javy na 17 w zakładce **Project** oraz składni w zakładce **Module** też na java 17.
-
-.. class:: center
-	
-	|a33|
-	
-.. |a33| image:: projectsettings.png
-
-Sprawdź wersje kompilatora używanego przez IDE **File -> settings -> compiler**, też wybierz wersję Java 17.
-
-.. class:: center
-	
-	|a113|
-	
-.. |a113| image:: java10.png
-   
-MAVEN
-=======
-
-Maven to system budowania aplikacji, który pomaga nam zautomatyzować proces kompilacji i generowania plików uruchomieniowych **jar-ów, war-ów** itp. Narzuca on specyficzną strukturę projektu.
-
-    | * **pom.xml** – główny plik konfiguracji Maven
-    
-    | 
-    
-    | * **/src/main** – katalog, gdzie znajdziemy pliki naszego programu, są tam dwa podkatalogi: java – tutaj trafiają wszystkie klasy (cały kod naszego modułu)
-    
-    |   
-    
-    | * **resources** – tutaj będą wszystkie pliki, które nie są kodem, np. grafiki, pliki XML, konfiguracje w przypadku projektów webowych będziemy mieli także katalog webapp, który jest używany do umieszczania wszystkich treści webowych
-
-    |
-
-    | * **/src/test** - ma podobną strukturę jak katalog *main* z tą różnicą, że jest on wykorzystywany tylko w trakcie automatycznych testów (będzie to tematem kolejnych zajęć)
-    
-    |
-    
-    | * **/target** – tutaj trafia skompilowany projekt (czyli np. w postaci wykonywalnego pliku JAR lub aplikacji webowej WAR)
-
-W prawym górnym rogu znajdziemy zakładkę "Maven". Jeżeli nie masz takiej zakładki włączysz ją poprzez wybranie 
-**View -> Tool Windows -> Maven**.
-
-Po rozwinięciu powinniśmy widzieć listę instrukcji (jeżeli nie wybieramy odśwież - dwie zielone strzałki, jak nie pomoże klikamy plusik i wskazujemy na plik **pom.xml** w naszym projekcie i ok).
-
-.. class:: tag 
-
-    Zadanie 2
-    
-Wykonaj w zakładce Mavena **Clean + Install**, powinieneś otrzymać komunikat BUILD SUCCESS
-
-.. class:: center
-	
-	|a22|
-	
-.. |a22| image:: cleanInstall.png
-
-Po tym etapie plik Main.java powinien mieć obok nazwy klasy kółeczko, jeżeli tak nie jest najlepiej powtórz wszystkie operacje od początku.
-
-Więcej o Mavenie można znaleźć np tutaj:
-
-    | https://kobietydokodu.pl/7-maven-i-tajemnice-pliku-pom-xml/
-
-    | http://tutorials.jenkov.com/maven/maven-tutorial.html
-
-Maven dokumentacja:
-
-    | https://maven.apache.org/guides/getting-started/index.html 
-    
-Tworzenie pliku Jar w Maven:
-
-    | http://www.baeldung.com/executable-jar-with-maven       
-    
-.. class:: tag 
-
-    Zadanie 3
-    
-Spróbuj uruchomić klasę Main.java (pracy klik myszki i wybór opcji **Run**). Wykonaj to samo na pliku z rozszerzeniem .jar (*java -jar nazwa_pliku*) z katalogu o nazwie target. Zobacz jaki będzie efekt.
-
-Dodaj do pliku Maven definicje manifestu dla pliku Jar. Aby to zrobić skorzystamy z dostępnego tzw. pluginu do Mavena. 
-
-.. code:: XML
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>introduction.HelloWorld</mainClass>>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-    
-**Main class** jest ścieżką do uruchamianej klasy.   
-Uruchom plik jar raz jeszcze i zobacz wynik.    
-
-Logger
-===========
-
-Bardzo ważnym i pomocnym elementem projektu informatycznego jest logowanie komunikatów / błędów. Szczególnie użyteczne są możliwości dzielenia logów na poziomy, zapisywanie automatyczne do pliku, a także możliwość analizy aplikacji wielowątkowych. Przykładem biblioteki do logowania jest **log4j**.
-
-Aby używać w naszym projekcie biblioteki **log4j** dodajmy do naszego projektu (do pliku mavena **pom.xml**) zależność do biblioteki logowania log4j wklejając tam:
-
-.. class:: highlight
-
-.. code:: XML
-
-    <dependencies>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.17</version>
-        </dependency>
-    </dependencies>
-
-W ogólności jeżeli chcemy dodać bibliotekę log4j do projektu, aby znaleźć odpowiedni wpis wystarczy w google wpisać *maven log4j*. Pierwszy link powinien zaprowadzić nas na stronę:
-
-    | https://mvnrepository.com/artifact/log4j/log4j 
-    
-Po wyborze wersji zobaczymy wpis:    
-
-    | https://mvnrepository.com/artifact/log4j/log4j/1.2.17
-
-Uwaga! Za pierwszym razem dodaliśmy tag **dependencies** w przyszłości będziemy tylko wklejać odpowiednie dependencje pomiędzy ten tag.
-
-Odśwież zakładkę Mavena powieneś widzieć na niej nową kategorię o nazwie **Dependencies** a w niej jeden wpis na temat log4j.
-
-Teraz dodamy do klasy Main.java wywołanie loggera. Dodaj do klasy zmienną globalną:
-
-.. code:: python
-
-    Logger log = Logger.getLogger("name");
-    
-Uwaga! Dodając nowy obiekt zwróć uwagę, że korzystać z biblioteki **log4j**, gdyż w Javie jest wiele bibliotek o nazwie Logger, i wykorzystanie innej nie zadziała tak jak chcemy. Innymi słowy spójrz czy w powstałym imporcie w nazwie klasy jest **log4j**.
-
-Dodaj w metodzie main() wywołanie:
-
-.. code:: python
-
-    log.info("message");
-
-.. class:: tag 
-
-    Zadanie 4
-    
-Uruchom klasę Main.java zobacz czy widzisz wiadomość "message".
-
-Log4j
 ------
 
-Powód dla którego nie widzisz wiadomości jest to, że nie zdefiniowaliśmy ustawień loggera, w związku z czym informacje na nim zapisywane nie są nigdzie przekazywane.
+Implementując programy w języku Python, rekomendowanym (i aktualnie
+jednym z najpopularniejszych) rodzin IDE jest zespół oprogramowania
+dostarczany przez firmę **JetBrains**. Oprogramowanie to jest dostępne
+za darmo w wersji Community (link poniżej). Jako studenci możecie
+Państwo prosić o darmowy dostęp do wersji Ultimate -
+https://www.jetbrains.com/community/education/#students):
 
-Aby stworzyć pliku ustawień musimy utworzyć w katalogu **Resources** plik o nazwie **log4j.properties**;
+   https://www.jetbrains.com/pycharm
 
-Wklej do pliku następujące ustawienia:
+Otwórz program PyCharm. Powinieneś zobaczyć następujący ekran:
 
-.. code:: python
+.. class:: center
+	
+	|a|
+	
+.. |a| image:: a.png
 
-    # Root logger option
-    log4j.rootLogger=DEBUG, stdout, file
+Utwórz **New Project -> Pure Python**.
 
-    # Redirect log messages to console
-    log4j.appender.stdout=org.apache.log4j.ConsoleAppender
-    log4j.appender.stdout.Target=System.out
-    log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
-    log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
+W pierwszej lini przy location możesz zmienić nazwę projektu na własną i
+wybrać **create**.
 
-    # Redirect log messages to a log file, support file rolling.
-    log4j.appender.file=org.apache.log4j.RollingFileAppender
-    log4j.appender.file.File=log.log
-    log4j.appender.file.MaxFileSize=5MB
-    log4j.appender.file.MaxBackupIndex=10
-    log4j.appender.file.layout=org.apache.log4j.PatternLayout
-    log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n
+.. class:: center
+	
+	|b|
+	
+.. |b| image:: b.png
 
-Ustawienia mówią o tym by wszystkie logi o statusie ponad DEBUG były wypisywane na ekran i zapisywane w pliku log.log.   
+Powinieneś zobaczyć ekran edytora. Otwórz plik **main.py** wybierając z
+go z lewej strony w menu projektu. Tak wygląda menu:
 
-Więcej informacji o log4j można doczytać tutaj:
+.. class:: center
+	
+	|c|
+	
+.. |c| image:: c.png
 
-    | https://www.mkyong.com/logging/log4j-hello-world-example/
-    
-.. class:: tag 
+Dokładniej działania edytora i elementy skrótów klawiszowych poznamy na
+kolejnych zajęciach. Na ten moment istotne będą da elementy. Pierwszy to
+uruchomienie programu za pomocą zielonego trójkąta w górnym prawym rogu
+ekranu lub po wyborze prawym klawiszem myszy na ekranie z kodem lub
+pliku i wybór opcji Run ‘main’.
 
-    Zadanie 5
+.. class:: center
+	
+	|d|
+	
+.. |d| image:: d.png
 
-Uruchom klasę Main.java, powinieneś zobaczyć na ekranie komunikat "message". W katalogu projektu powinnien też zostać stworzony plik o nazwie **log.log**.
+Wiedząc jak uruchamiać programy pozostaje nam poznać sposób dodawania
+zależności do projektu.
 
+Zależności
+----------
 
-JAR
------    
-   
-JAR jest skompilowanym uruchamialnym plikiem javy. Możesz go uruchomić z IDE lub z konsoli wpisując komendę *java -jar filename*.
-   
-Spróbujmy uruchomić nasz skompilowany plik jar ponownie. Jak widać nie pojawia się w nim linijka z loggera. Jest to wynikiem tego, że domyślnie jar nie zawiera bibliotek i zależności w sobie oczekują że będą dostępne w katalogu uruchomieniowym.
-Standardową opcją jest jednak "pakowanie" ich w pliku jar tak by był on samodzielnie uruchamialnym się programem. W tym celu musimy użyć innego pluginu Mavena.
+W przypadku gdy wykorzystujemy zewnętrzne moduły przez import może
+okazać się, że nasze lokalne środowisko nie ma zainstalowanego jakiegoś
+pakietu lub program nie działa z posiadaną przez nas wersją pakietu,
+tylko oczekuje konkretnej innej wersji. W takim wypadku z reguły
+programiści udostępniają plik w którym opisane są zależności projektu.
 
+Standardem dla języka Python jest definiowanie zależności w pliku o
+nazwie *requirements.txt*.
 
-Dodaj do pliku pom.xml (w odpowiednie miejsce!!) następujący kod:
+Dodaj do projektu w **PyCharm** plik *requirements.txt* (prawy klawiszem
+myszy na folder i **New -> File**).
+
+W treści pliku umieść.
 
 .. class:: highlight
 
-.. code:: XML
+.. code:: json
+
+	multithreading==0.2.0
+	loguru==0.6.0
+	requests==2.28.2
+
+Multithreading jest biblioteką napisaną przez do kolejkowania i
+wykonywania zadań wielowątkowo, opiera się ona na module threading który
+zostanie omówiony w kolejnym rozdziale. Dla nas jest tylko przykładem
+dla pokazania jak działają zależności i plik requirements w Python.
+Wybierz w IDE opcję **install requirements**.
+
+.. class:: center
+	
+	|e|
+	
+.. |e| image:: e.png
+
+Następnie zamień implementację **main.py** na poniższą i sprawdź czy
+możesz o uruchomić.
+
+.. class:: highlight
+
+.. code:: python
+
+    import multithreading
+    
+    class Demo(multithreading.MultiThread):
+        def task(self, task):
+            print(task)
             
-	<build>
-		<plugins>
-		<plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-assembly-plugin</artifactId>
-			<configuration>
-			<descriptorRefs>
-				<descriptorRef>jar-with-dependencies</descriptorRef>
-			</descriptorRefs>
-			<archive>
-				<manifest>
-					<mainClass>com.howtodoinjava.app.MainClass</mainClass>
-				</manifest>
-			</archive>
-			</configuration>
-		<executions>
-			<execution>
-				<id>make-assembly</id>
-				<phase>package</phase>
-				<goals>
-				<goal>single</goal>
-				</goals>
-			</execution>
-		</executions>
-		</plugin>	
-		</plugins>
-	</build>
+    demo = Demo(threads=3)
     
-.. class:: tag 
+    # Start threads
+    demo.start_threads()
     
-    Zadanie 6
-
-Skompiluj projekt używając **Clean + Install** w Maven i uruchom plik .jar z katalogu target, powinien zadziałać.
-
-
-Commit
----------
-
-.. class:: tag 
+    # Adding task to queue
+    demo.add_task(1)
+    demo.add_task(2)
+    demo.add_task(3)
     
-    Zadanie 7
+    # Wait until queue is empty
+    demo.join()
 
-Zakommituj swój kod do repozytorium pod nowy branch o nazwie IntroductionClassesWithLogger.
+
+
+::
+
+
+    ---------------------------------------------------------------------------
+
+    ModuleNotFoundError                       Traceback (most recent call last)
+
+    Cell In [8], line 1
+    ----> 1 import multithreading
+          3 class Demo(multithreading.MultiThread):
+          4     def task(self, task):
+
+
+    ModuleNotFoundError: No module named 'multithreading'
+
+
+Uwaga! W ramach programów uruchamianych przez **Moodle** oraz
+**Jupyter** nie są dostępne wszystkie zależności i biblioteki a
+instalacja ich jest możliwa tylko przez administratora systemu (powyżej
+mamy taki przyklad). W związku z tym w przypadku korzystania z
+niestandardowych pakietów proszę wykorzystywać **PyCharm**.
+
+Wątki i synchronizacja
+======================
+
+W tym rozdziale dowiemy się jak tworzyć wątki w języku Python
+korzystając ze standardowej biblioteki.
+
+Thread
+------
+
+Standardowa biblioteka Pythona udostępnia moduł *threading*, który
+zawieraja większość operacji związanych z wielowątkowością. Klasa
+**Thread** w tym module zapewnia przejrzysty interfejs do pracy z
+wątkami.
+
+.. class:: highlight
+
+.. code:: python
+
+    import threading
     
-Commit w IntelliJ
-------------------
-
-    :todo:`Ctrl + k` służy do commitowania kodu lokalnie do repozytorium
-
-    :todo:`Ctrl + Shift + k` służy do commitowania kodu do zewnętrznego repozytorium, aby wybrać nową nazwę brancha kliknij na nazwę brancha w okienku komitowania.
-
-    :todo:`Ctrl + t` służy do odświeżania projektu - ściągania zmian z serwera
-
-Przy pierwszym połączeniu powinniśmy być zapytani o użytkownika i hasło. Można też połączyć "na stałe" intellij z kontem na github przez ustawienia **Settings->Version Control->GitHub**.    
+    from time import gmtime, strftime
     
-Inne: 
+    
+    def thread_function(name):
+        
+        print("Time %s | Thread %s: starting" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),name))
+    
+        print("Time %s | Thread %s: Name : %s" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),name,threading.current_thread().name))    
+        
+        print("Time %s | Thread %s: finishing" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),name))
+    
+    
+    print("Time %s | Name : %s" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),threading.current_thread().name))
+    
+    print("Time %s | Main Thread : before creating thread" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    
+    x = threading.Thread(target=thread_function, args=(1,))
+    
+    print("Time %s | Main Thread : before running thread" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    
+    x.start()
+    
+    print("Time %s | Main Thread : wait for the thread to finish" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    
+    print("Time %s | Main Thread : all done" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
 
-By rozwiązać konflikty należy zmergować się z kodem do którego commitujemy i rozwiązać konflikty w nowo otwartym oknie.
-
-Aby ściągnąć kod danego commita do siebie bez merga gałęzi możemy wykonać operację **Cherry Pick**
-
-GIT large files
----------------------
-
-Czasem chcemy zapisać w repozytorium duże pliki (po kilkadziesiąt lub więcen megabajtów). Z reguły pliki takie nie zmieniają swojej postaci - są to media lub np modele sztucznej inteligencji. GIT przechowuje każdą wersję kodu jako kopię wszystkich plików, w takim
-wypadku nasze repozytorium gwałtownie zwiększałoby swój rozmiar. Rozwiązaniem jest stosowanie tzw GLS czyli przechowywania w osobnym miejscu tylko zmieniających się wersji tych plików. 
-
-	| https://docs.github.com/en/repositories/working-with-files/managing-large-files/configuring-git-large-file-storage
-	
-	| https://git-lfs.github.com/
 
 
-Finalny kod
-------------
+.. parsed-literal::
 
-W przypadku problemów (zgubiłeś się lub byłeś nieobecny) finalny kod powstały na zajęciach możesz znaleźć na gałęzi **IntroductionClassesEnd**.
-	
+    Time 2023-02-26 18:32:16 | Name : MainThread
+    Time 2023-02-26 18:32:16 | Main Thread : before creating thread
+    Time 2023-02-26 18:32:16 | Main Thread : before running thread
+    Time 2023-02-26 18:32:16 | Thread 1: starting
+    Time 2023-02-26 18:32:16 | Thread 1: Name : Thread-13
+    Time 2023-02-26 18:32:16 | Thread 1: finishing
+    Time 2023-02-26 18:32:16 | Main Thread : wait for the thread to finish
+    Time 2023-02-26 18:32:16 | Main Thread : all done
+
+
+Jak widać sam wątek definiujemy w najprostszym scenariuszu poprzez
+wykonanie
+
+   :todo:`threading.Thread(target=thread_function, args=(1,))`
+
+Czyli definicję obiektu klasy Thread jako argument podając funkcję,
+którą wykona nasz wątek oraz parametry tej funkcji. W naszym wypadku
+przekazujemy tam liczbę, która ma być dla nas naszą *nazwą* aktualnie
+tworzonego wątku. Aby wątek uruchomić musimy wykonać na tym obiekcie
+metodę start().
+
+Powyższy kod zawiera też wywołanie funkcji systemowej gmtime() w celu
+wypisania czasu wykonania komend.
+
+Kolejna obserwacją którą możemy dokonać jest taka, że w powyższym
+wykonaniu możemy zaobserwować, że nasz program działa już na dwóch
+wątkach, pierwszy to tak zwany główny wątek programu, który uruchamiamy
+startując wykonanie programu. Od niego tworzony jest dopiero drugi
+wątek. Żeby odczytać nazwę systemową wątku korzystamy z funkcji:
+
+   :todo:`threading.current_thread().name`
+
+Zobaczmy co stanie się gdy zdefiniujemy w kodzie dwa dodatkowe wątki :
+
+.. class:: highlight
+
+.. code:: python
+
+    import threading
+    
+    from time import gmtime, strftime
+    
+    
+    def thread_function(name):
+        
+        print("Time %s | Thread %s: starting" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),name))
+    
+        print("Time %s | Thread %s: Name : %s" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),name,threading.current_thread().name))    
+        
+        print("Time %s | Thread %s: finishing" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),name))
+    
+    
+    print("Time %s | Name : %s" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),threading.current_thread().name))
+    
+    print("Time %s | Main Thread : before creating thread" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    
+    x = threading.Thread(target=thread_function, args=(1,))
+    x2 = threading.Thread(target=thread_function, args=(2,))
+    
+    print("Time %s | Main Thread : before running thread" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    
+    x.start()
+    x2.start()
+    
+    print("Time %s | Main Thread : wait for the thread to finish" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    
+    print("Time %s | Main Thread : all done" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+
+
+
+.. parsed-literal::
+
+    Time 2023-02-26 18:32:18 | Name : MainThread
+    Time 2023-02-26 18:32:18 | Main Thread : before creating thread
+    Time 2023-02-26 18:32:18 | Main Thread : before running thread
+    Time 2023-02-26 18:32:18 | Thread 1: starting
+    Time 2023-02-26 18:32:18 | Thread 1: Name : Thread-14
+    Time 2023-02-26 18:32:18 | Thread 1: finishing
+    Time 2023-02-26 18:32:18 | Thread 2: starting
+    Time 2023-02-26 18:32:18 | Thread 2: Name : Thread-15
+    Time 2023-02-26 18:32:18 | Thread 2: finishing
+    Time 2023-02-26 18:32:18 | Main Thread : wait for the thread to finish
+    Time 2023-02-26 18:32:18 | Main Thread : all done
+
+
+W powyższym przypadku dołożyliśmy dodatkowy wątek i uruchomiliśmy go
+razem z pierwszym. Jak widać przetwarzanie pierwszego wątku zakończyło
+się zanim drugi rozpoczął swoje działanie. Nie jest to zapewne
+oczekiwany efekt. W celu opóźnienia wykonania wątku możemy wykorzystać
+metodę modułu time o nazwie sleep().
+
+   :todo:`time(sleep(2))`
+
+Powoduje uśpienie wątku na 2 sec. To znaczy zatrzymanie jego wykonywania
+i oddanie sterowania do innych wątków w systemie. Zobaczmy na efekty
+zmiany.
+
+.. class:: highlight
+
+.. code:: python
+
+    import threading
+    import time
+    
+    from time import gmtime, strftime
+    
+    
+    def thread_function(name):
+        
+        print("Time %s | Thread %s: starting" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),name))
+    
+        print("Time %s | Thread %s: Name : %s" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),name,threading.current_thread().name))    
+        
+        time.sleep(2)
+        
+        print("Time %s | Thread %s: finishing" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),name))
+    
+    
+    print("Time %s | Name : %s" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),threading.current_thread().name))
+    
+    print("Time %s | Main Thread : before creating thread" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    
+    x = threading.Thread(target=thread_function, args=(1,))
+    x2 = threading.Thread(target=thread_function, args=(2,))
+    
+    print("Time %s | Main Thread : before running thread" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    
+    x.start()
+    x2.start()
+    
+    print("Time %s | Main Thread : wait for the thread to finish" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    
+    print("Time %s | Main Thread : all done" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+
+
+.. parsed-literal::
+
+    Time 2023-02-26 18:32:37 | Name : MainThread
+    Time 2023-02-26 18:32:37 | Main Thread : before creating thread
+    Time 2023-02-26 18:32:37 | Main Thread : before running thread
+    Time 2023-02-26 18:32:37 | Thread 1: starting
+    Time 2023-02-26 18:32:37 | Thread 1: Name : Thread-20
+    Time 2023-02-26 18:32:37 | Thread 2: starting
+    Time 2023-02-26 18:32:37 | Thread 2: Name : Thread-21
+    Time 2023-02-26 18:32:37 | Main Thread : wait for the thread to finish
+    Time 2023-02-26 18:32:37 | Main Thread : all done
+    Time 2023-02-26 18:32:39 | Thread 1: finishing
+    Time 2023-02-26 18:32:39 | Thread 2: finishing
+
+
+   Zrób to sam! > Sprawdź co stanie się gdy zamiast time.sleep(2)
+   zrobisz time.sleep(0). Czy jak wykonasz tę operację w pętli,
+   powiedzmy 100 razy, to wynik będzie inny ?
+
+Deamon
+------
+
+Co może dziwić w naszym ostatnim przykładzie to to, że nasze wątki
+kończą się już po tym gdy wątek główny się zakończył. W takim wypadku
+czy wątek główny nie powinien zamykać całego procesu i tym samym kończyć
+wykonanie całego programu i potomnych wątków ?
+
+W informatyce **deamon** to proces działający w tle. W przypadku wątków
+będących **deamonami** zostaną one zamknięte natychmiast po zamknięciu
+programu. Jednym ze sposobów myślenia o tych definicjach jest rozważenie
+wątku demona jako wątku działającego w tle bez martwienia się o jego
+zamknięcie.
+
+Jeśli program uruchamia **wątki**, które **nie są demonami**, program
+będzie czekał na zakończenie tych wątków przed zakończeniem działania.
+Jednak wątki, które są demonami, są po prostu zabijane, gdziekolwiek się
+znajdują, gdy program jest zamykany.
+
+Po zakończeniu programu w Pythonie częścią procesu zamykania jest
+wyczyszczenie / zamknięcie wątków. Jeśli spojrzysz na źródło
+implementacji *threading*, zobaczysz, że threading._shutdown()
+przechodzi przez wszystkie uruchomione wątki i wywołuje .join() na
+każdym, który nie ma ustawionej flagi **demona**.
+
+Co robi więc funkcja
+
+   :todo:`join()`
+
+Czeka aż wykonanie danego wątku się zakończy, aby przejść dalej.
+
+Najpierw spójrzmy jak będzie wyglądać wykonanie programu w przypadku,
+gdy nasze wątki będą zdefiniowane jako deamony.
+
+.. class:: highlight
+
+.. code:: python
+
+    import threading
+    import time
+    
+    from time import gmtime, strftime
+    
+    
+    def thread_function(name):
+        
+        print("Time %s | Thread %s: starting" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),name))
+    
+        print("Time %s | Thread %s: Name : %s" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),name,threading.current_thread().name))    
+        
+        time.sleep(2)
+        
+        print("Time %s | Thread %s: finishing" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),name))
+    
+    
+    print("Time %s | Name : %s" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),threading.current_thread().name))
+    
+    print("Time %s | Main Thread : before creating thread" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    
+    x = threading.Thread(target=thread_function, args=(1,), daemon=True)
+    x2 = threading.Thread(target=thread_function, args=(2,), daemon=True)
+    
+    print("Time %s | Main Thread : before running thread" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    
+    x.start()
+    x2.start()
+    
+    print("Time %s | Main Thread : wait for the thread to finish" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    
+    print("Time %s | Main Thread : all done" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+
+
+.. parsed-literal::
+
+    Time 2023-02-26 18:32:59 | Name : MainThread
+    Time 2023-02-26 18:32:59 | Main Thread : before creating thread
+    Time 2023-02-26 18:32:59 | Main Thread : before running thread
+    Time 2023-02-26 18:32:59 | Thread 1: starting
+    Time 2023-02-26 18:32:59 | Thread 1: Name : Thread-24
+    Time 2023-02-26 18:32:59 | Thread 2: starting
+    Time 2023-02-26 18:32:59 | Thread 2: Name : Thread-25
+    Time 2023-02-26 18:32:59 | Main Thread : wait for the thread to finish
+    Time 2023-02-26 18:32:59 | Main Thread : all done
+    Time 2023-02-26 18:33:01 | Thread 1: finishing
+    Time 2023-02-26 18:33:01 | Thread 2: finishing
+
+
+**Uwaga!** Jupyter nie pozwala nam uruchamiać deamon threadów, dlatego
+nie zobaczysz tu efektu, polecam uruchomić powyższy przykład w IDE
+PyCharm.
+
+Teraz zobaczmy co stanie się w przypadku dodania opcji join() przed
+zakończeniem głównego wątku.
+
+.. class:: highlight
+
+.. code:: python
+
+    import threading
+    import time
+    
+    from time import gmtime, strftime
+    
+    
+    def thread_function(name):
+        
+        print("Time %s | Thread %s: starting" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),name))
+    
+        print("Time %s | Thread %s: Name : %s" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),name,threading.current_thread().name))    
+        
+        time.sleep(2)
+        
+        print("Time %s | Thread %s: finishing" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),name))
+    
+    
+    print("Time %s | Name : %s" % (strftime("%Y-%m-%d %H:%M:%S", gmtime()),threading.current_thread().name))
+    
+    print("Time %s | Main Thread : before creating thread" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    
+    x = threading.Thread(target=thread_function, args=(1,), daemon=True)
+    x2 = threading.Thread(target=thread_function, args=(2,), daemon=True)
+    
+    print("Time %s | Main Thread : before running thread" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    
+    x.start()
+    x2.start()
+    
+    print("Time %s | Main Thread : wait for the thread to finish" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+    
+    x.join()
+    x2.join()
+    
+    print("Time %s | Main Thread : all done" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
+
+
+.. parsed-literal::
+
+    Time 2023-02-26 18:32:56 | Name : MainThread
+    Time 2023-02-26 18:32:56 | Main Thread : before creating thread
+    Time 2023-02-26 18:32:56 | Main Thread : before running thread
+    Time 2023-02-26 18:32:56 | Thread 1: starting
+    Time 2023-02-26 18:32:56 | Thread 1: Name : Thread-22
+    Time 2023-02-26 18:32:56 | Thread 2: starting
+    Time 2023-02-26 18:32:56 | Thread 2: Name : Thread-23
+    Time 2023-02-26 18:32:56 | Main Thread : wait for the thread to finish
+    Time 2023-02-26 18:32:58 | Thread 1: finishing
+    Time 2023-02-26 18:32:58 | Thread 2: finishing
+    Time 2023-02-26 18:32:58 | Main Thread : all done
+
+
+Błędy jednoczesnego dostępu
+---------------------------
+
+Głównym problemem w przetwarzaniu równoległym jest sytuacja w której
+wiele wątków wykonuje operacje na tym samym obiekcie. Żeby było to
+możliwe obiekt ten musi być oczywiście globalny i mutowalny.
+
+W przypadku, gdy mamy licznik zliczający wykonanie operacji i wątek
+**A** wykonuje operację licznik+=1 oraz wątek **B** wykonuje tę samą
+operację, to może dojść do błędu. Wynika on z tego, że operacje odczytu
+wartości, zwiększenia wartości i zapisania wartości w zmiennej nie są
+wykonywane **atomowo**. Oznacza to, że wykonanie operacji może zostać
+przerwane w każdym z tych momentów.
+
+Załóżmy, że zmienna licznik miała wartość **0**. Wątek **A** odczyta
+wartość **0** i zostanie przerwany, wtedy w miedzyczasie wątek **B**
+zwiększy wartość licznik do **1** i wznowi się wątek **A** nie jest on
+świadomy zmiany wartości, gdyż odczytał już wcześniej **0** i przejdzie
+do operacji zwiększenia wartości o jeden. W efekcie na koniec
+przetwarzania wartość licznik będzie równa **1**, a nie **2** jakbyśmy
+się spodziewali.
+
+Zmienne utworzone poza funkcjami nazywane są **zmiennymi globalnymi**.
+Zmienne globalne mogą być używane przez wszystkich, zarówno wewnątrz
+funkcji, jak i na zewnątrz.
+
+.. class:: highlight
+
+.. code:: python
+
+    licznik = 1
+    
+    def myfunc():
+      print("Licznik wynosi %d" % licznik)
+    
+    myfunc() 
+
+
+.. parsed-literal::
+
+    Licznik wynosi 1
+
+
+Tutaj widzimy, że uzyskaliśmy dostęp do zmiennej globalnej z wnętrza
+funkcji.
+
+Jeśli jednak spróbujemy zmodyfikować zmienną globalną z wnętrza funkcji,
+to otrzymamy błąd:
+
+.. class:: highlight
+
+.. code:: python
+
+    # global variable
+    licznik = 1 
+    
+    def add():
+    
+         # increment licznik by 1
+        licznik += 1
+    
+        print(licznik)
+    
+    add()
+
+
+::
+
+
+    ---------------------------------------------------------------------------
+
+    UnboundLocalError                         Traceback (most recent call last)
+
+    Cell In [6], line 11
+          7     licznik += 1
+          9     print(licznik)
+    ---> 11 add()
+
+
+    Cell In [6], line 7, in add()
+          4 def add():
+          5 
+          6      # increment licznik by 1
+    ----> 7     licznik += 1
+          9     print(licznik)
+
+
+    UnboundLocalError: local variable 'licznik' referenced before assignment
+
+
+Dzieje się tak, ponieważ możemy uzyskać dostęp tylko do zmiennej
+globalnej, ale nie możemy jej modyfikować z poziomu funkcji.
+
+Rozwiązaniem tego problemu jest użycie słowa kluczowego global.
+
+.. class:: highlight
+
+.. code:: python
+
+    # global variable
+    licznik = 1 
+    
+    def add():
+    
+        # use of global keyword
+        global licznik
+    
+        # increment c by 2
+        licznik += 1 
+    
+        print(licznik)
+    
+    add()
+
+Wykonaj zadanie na **moodle** by zaobserwować w praktyce błąd
+równoczesnego dostępu do zmiennej.
+
+**Uwaga!** to czy wywołanie błędu się powiedzie zależy od stanu systemu
+w danej chwili więc możesz być zmuszony uruchomić program pare razy
+zanim uda się osiąnąć cel.
+
+Print
+-----
+
+Metoda print w języku python nie jest synchronizowana. Zaletą jest więc
+to, że jest szybka i nie zwalnia działania programu. Wadą jest to, że
+nie ma gwarancji, że operacje zostaną wypisane na ekran w kolejności ich
+wykonania (czyli np. w przypadku wyjątku możemy otrzymać informacje o
+błędzie przed otrzymaniem wszystkich oczekiwanych komunikatów na
+ekranie).
+
+Nie musimy się jednak obawiać, że wypisywane komunikaty nałożą się na
+siebie, gdyż print jest tzw operacją monolityczną więc wykonywana jest
+zawsze nieprzerwanie w całości. Normalnym jest więc, że niekiedy możemy
+otrzymać dwa printy “sklejone” razem, jednak nigdy nie nałożą się one na
+siebie w sposób który nie pozwoliłby nam na odczyt zapisywanego
+komunikatu.
+
+Jupyter plik
+==============
+
+http://mw.home.amu.edu.pl/zajecia/PRS2023/Zajecia1Jupyter.ipynb

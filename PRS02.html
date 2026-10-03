@@ -1,0 +1,502 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>PRS02.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="laboratorium-2-debuggowanie-programow-w-python-mapowanie-danych-przetwarzanie-danych">
+<h2>Laboratorium 2 - Debuggowanie programów w Python, mapowanie danych, przetwarzanie danych</h2>
+</section>
+<section id="debuggowanie-w-pycharm">
+<h2>Debuggowanie w PyCharm</h2>
+<p>Kod numer 1, wklej kod do nowego pliku w Pycharm i uruchom. Vowel to
+samogłoski a consonants to spółgłoski.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword">def</span> <span class="name function">count_vowels</span><span class="punctuation">(</span><span class="name">word</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">vowels</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="literal string single">'a'</span><span class="punctuation">,</span> <span class="literal string single">'e'</span><span class="punctuation">,</span> <span class="literal string single">'i'</span><span class="punctuation">,</span> <span class="literal string single">'o'</span><span class="punctuation">,</span> <span class="literal string single">'u'</span><span class="punctuation">]</span><span class="whitespace">
+</span>    <span class="name">count</span> <span class="operator">=</span> <span class="literal number integer">0</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">char</span> <span class="operator word">in</span> <span class="name">word</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="keyword">if</span> <span class="name">char</span> <span class="operator word">in</span> <span class="name">vowels</span><span class="punctuation">:</span><span class="whitespace">
+</span>            <span class="name">count</span> <span class="operator">+=</span> <span class="literal number integer">1</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">count</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span> <span class="name function">count_consonants</span><span class="punctuation">(</span><span class="name">word</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">vowels</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="literal string single">'a'</span><span class="punctuation">,</span> <span class="literal string single">'e'</span><span class="punctuation">,</span> <span class="literal string single">'i'</span><span class="punctuation">,</span> <span class="literal string single">'o'</span><span class="punctuation">,</span> <span class="literal string single">'u'</span><span class="punctuation">]</span><span class="whitespace">
+</span>    <span class="name">count</span> <span class="operator">=</span> <span class="literal number integer">0</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">char</span> <span class="operator word">in</span> <span class="name">word</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="keyword">if</span> <span class="name">char</span><span class="operator">.</span><span class="name">isalpha</span><span class="punctuation">()</span> <span class="operator word">and</span> <span class="name">char</span> <span class="operator word">not</span> <span class="operator word">in</span> <span class="name">vowels</span><span class="punctuation">:</span><span class="whitespace">
+</span>            <span class="name">count</span> <span class="operator">+=</span> <span class="literal number integer">1</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">count</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span> <span class="name function">main</span><span class="punctuation">():</span><span class="whitespace">
+</span>    <span class="name">word</span> <span class="operator">=</span> <span class="name builtin">input</span><span class="punctuation">(</span><span class="literal string double">&quot;Enter a word: &quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">vowels</span> <span class="operator">=</span> <span class="name">count_vowels</span><span class="punctuation">(</span><span class="name">word</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">consonants</span> <span class="operator">=</span> <span class="name">count_consonants</span><span class="punctuation">(</span><span class="name">word</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;The word&quot;</span><span class="punctuation">,</span> <span class="name">word</span><span class="punctuation">,</span> <span class="literal string double">&quot;contains&quot;</span><span class="punctuation">,</span> <span class="name">vowels</span><span class="punctuation">,</span> <span class="literal string double">&quot;vowels and&quot;</span><span class="punctuation">,</span> <span class="name">consonants</span><span class="punctuation">,</span> <span class="literal string double">&quot;consonants.&quot;</span><span class="punctuation">)</span><span class="whitespace">
+
+
+</span><span class="comment single"># User needs to debug the error below</span><span class="whitespace">
+</span><span class="name">main</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Enter a word:  Ala</pre>
+<pre class="literal-block">The word Ala contains 1 vowels and 2 consonants.</pre>
+<p>Uruchom kod dla słowa “Ala”. Zwrócona odpowiedź nie jest poprawna.
+Znajdź błąd. Aby znaleźć błąd w programie można posłużyć się procesem
+debuggowania, czyli uruchamiania programu krok po kroku w celu
+sprawdzenia jego działania w kolejnych iteracjach.</p>
+<p>W celu uruchomienia programu w trybie debuggowania w Pycharm należy
+wybrać zamiast zielonej strzałki, ikonkę zielonego robaczka, lub też
+kliknąć na pliku prawym przyciskiem myszy i wybrać opcję <strong>Debug</strong>
+(powinna być zaraz pod Run).</p>
+<p class="center"><img alt="b" src="b.png" /></p>
+<p>Z debuggowaniem związane jest pojęcie breakpointa, czyli punktu
+zatrzymania wykonania. Aby dodać breakpoint w PyCharm należy nacisnąć
+obok numeru linii programu tak by pojawiła się czerwona kropka, ona
+symbolizuje właśnie breakpoint.</p>
+<p class="center"><img alt="a" src="a.png" /></p>
+<p>Gdy program osiągnie breakpoint zatrzyma swoje wykonanie i w edytorze
+kodu zobaczymy podświetloną linię - znaczy to, że program wykonał
+wszystkie operacje do tej linii (<strong>ale nie wliczając jej</strong>).</p>
+<p class="center"><img alt="c" src="c.png" /></p>
+<p>Dodatkowo w menu podręcznym na dole ekranu pojawić powinno się okno z
+podglądem wartości zmiennych w danym punkcie wykonania.</p>
+<p class="center"><img alt="d" src="d.png" /></p>
+<p>Od tego momentu możemy wykonać trzy operacje</p>
+<blockquote>
+<p><strong>F9</strong> - wznawia uruchomienie programu do osiągnięcia następnego
+breakpointa</p>
+</blockquote>
+<!--  -->
+<blockquote>
+<p><strong>F8</strong> - uruchamia kolejną linijkę programu na poziomie na którym się
+znajdujemy (czyli obecnie zaznaczoną)</p>
+<p><strong>F7</strong> - wykonuje kolejną linię programu (czyli w przypadku wykonania
+funkcji wejdzie do środka metody i wykona pierwszą linijkę tej metody
+a w przypadku prostej operacji wykona poświetloną właśnie linijkę.</p>
+</blockquote>
+<p>Przetestuj działanie dodając breakpoint w 21 linijce programu i
+wybierając raz <strong>F7</strong> raz <strong>F8</strong> raz <strong>F9</strong>.</p>
+<p>Następnie ustaw breakpoint w 11 linijce programu i przejdź przez pętle
+linijka po linijce, czy widzisz gdzie jest błąd w zliczaniu spółgłosek?</p>
+<p>Czasem w sprawdzaniu co się dzieje pomaga nam opcja Evaluate expression
+gdzie możemy wpisać dowolny kod i zobaczyć jego wynik.</p>
+<p class="center"><img alt="e" src="e.png" /></p>
+<p>Uwaga! Dostępna jest ona oczywiście tylko w trybie debuggowania! Wybierz
+evaluate expression i wpisz w środek</p>
+<blockquote>
+<p>‘A’.isalpha()</p>
+</blockquote>
+<!--  -->
+<blockquote>
+<p>‘A’ not in vowels</p>
+</blockquote>
+<p>Zauważ, że aby evaluator wiedział co oznacza lista vowels muszę
+wykonaniem programu dojśc do miejsca gdzie lista ta była zadeklarowana!</p>
+<p class="center"><img alt="f" src="f.png" /></p>
+<p>Zauważ też że ewaluator może wpływać na zmienne w działającym programie,
+może wiec zmieniać jego wykonanie i stan (nawet po wyjściu z jego
+okienka), używaj go więc rozważnie!</p>
+<p class="center"><img alt="g" src="g.png" /></p>
+<p>Jak widać błędem było nieuwględnienie wielkich liter w przetwarzaniu.
+Popraw bład i uruchom program raz jeszcze.</p>
+<p>Gdy klikniemy prawym przyciskiem na breakpoint pojawi się nam okno opcji
+dla breakpointa. Możemy ustawić w nim warunek - wtedy program zatrzyma
+się w tym miejscu tylko gdy warunek będzie spełniony. Druga istotna dla
+nas później opcja to możliwość zatrzymania tylko wątku który dotarł do
+tego miejsca lub wszystkich wątków programu (będzie to wykorzystane na
+kolejnych zajęciach).</p>
+<p class="center"><img alt="h" src="h.png" /></p>
+<p>Kod 2: Ten kod używa zmodyfikowanego algorytmu szybkiego wyboru, aby
+znaleźć medianę bez sortowania listy. Funkcja find_median() wielokrotnie
+dzieli listę na elementy, które są mniejsze, równe lub większe niż
+losowo wybrany element przestawny, aż znajdzie element, który pojawia
+się na środku listy.</p>
+</section>
+<section id="przetwarzanie-i-generowanie-danych">
+<h2>Przetwarzanie i generowanie danych</h2>
+<section id="iteratory">
+<h3>Iteratory</h3>
+<p>Poniżej znajdziemy przyklady implementacji iteratorów w Python. Sprawdź
+co stanie się w sytuacji, gdy dojdziemy do końca iteratora.</p>
+<pre class="code python highlight literal-block"><code><span class="name">L</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">]</span><span class="whitespace">
+</span><span class="name">it</span> <span class="operator">=</span> <span class="name builtin">iter</span><span class="punctuation">(</span><span class="name">L</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">it</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">it</span><span class="operator">.</span><span class="name function magic">__next__</span><span class="punctuation">())</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">next</span><span class="punctuation">(</span><span class="name">it</span><span class="punctuation">))</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">it</span><span class="operator">.</span><span class="name function magic">__next__</span><span class="punctuation">())</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">next</span><span class="punctuation">(</span><span class="name">it</span><span class="punctuation">))</span></code></pre>
+<pre class="literal-block">1
+2
+3</pre>
+<pre class="literal-block">---------------------------------------------------------------------------
+
+StopIteration                             Traceback (most recent call last)
+
+Cell In [2], line 8
+      6 print(next(it))
+      7 print(it.__next__())
+----&gt; 8 print(next(it))
+
+
+StopIteration:</pre>
+<p>Gdy wywołasz iter() na słowniku, otrzymasz iterator, który przegląda
+klucze słownika:</p>
+<pre class="code python highlight literal-block"><code><span class="name">slownik</span> <span class="operator">=</span> <span class="punctuation">{</span><span class="literal string single">'Jan'</span><span class="punctuation">:</span> <span class="literal string single">'Sty'</span><span class="punctuation">,</span> <span class="literal string single">'Feb'</span><span class="punctuation">:</span> <span class="literal string single">'Lut'</span><span class="punctuation">,</span> <span class="literal string single">'Mar'</span><span class="punctuation">:</span> <span class="literal string single">'Mar'</span><span class="punctuation">,</span> <span class="literal string single">'Apr'</span><span class="punctuation">:</span> <span class="literal string single">'Kwi'</span><span class="punctuation">,</span> <span class="literal string single">'May'</span><span class="punctuation">:</span> <span class="literal string single">'Maj'</span><span class="punctuation">,</span> <span class="literal string single">'Jun'</span><span class="punctuation">:</span> <span class="literal string single">'Cze'</span><span class="punctuation">,</span><span class="whitespace">
+</span>     <span class="literal string single">'Jul'</span><span class="punctuation">:</span> <span class="literal string single">'Lip'</span><span class="punctuation">,</span> <span class="literal string single">'Aug'</span><span class="punctuation">:</span> <span class="literal string single">'Sie'</span><span class="punctuation">,</span> <span class="literal string single">'Sep'</span><span class="punctuation">:</span> <span class="literal string single">'Wrz'</span><span class="punctuation">,</span> <span class="literal string single">'Oct'</span><span class="punctuation">:</span> <span class="literal string single">'Paz'</span><span class="punctuation">,</span> <span class="literal string single">'Nov'</span><span class="punctuation">:</span> <span class="literal string single">'Lis'</span><span class="punctuation">,</span> <span class="literal string single">'Dec'</span><span class="punctuation">:</span> <span class="literal string single">'Gru'</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name">it</span> <span class="operator">=</span> <span class="name builtin">iter</span><span class="punctuation">(</span><span class="name">slownik</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">a</span> <span class="operator">=</span> <span class="name builtin">next</span><span class="punctuation">(</span><span class="name">it</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">a</span><span class="punctuation">,</span> <span class="name">slownik</span><span class="punctuation">[</span><span class="name">a</span><span class="punctuation">])</span><span class="whitespace">
+</span><span class="name">a</span> <span class="operator">=</span> <span class="name builtin">next</span><span class="punctuation">(</span><span class="name">it</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">a</span><span class="punctuation">,</span> <span class="name">slownik</span><span class="punctuation">[</span><span class="name">a</span><span class="punctuation">])</span><span class="whitespace">
+</span><span class="name">a</span> <span class="operator">=</span> <span class="name builtin">next</span><span class="punctuation">(</span><span class="name">it</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">a</span><span class="punctuation">,</span> <span class="name">slownik</span><span class="punctuation">[</span><span class="name">a</span><span class="punctuation">])</span><span class="whitespace">
+</span><span class="name">a</span> <span class="operator">=</span> <span class="name builtin">next</span><span class="punctuation">(</span><span class="name">it</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">a</span><span class="punctuation">,</span> <span class="name">slownik</span><span class="punctuation">[</span><span class="name">a</span><span class="punctuation">])</span><span class="whitespace">
+</span><span class="name">a</span> <span class="operator">=</span> <span class="name builtin">next</span><span class="punctuation">(</span><span class="name">it</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">a</span><span class="punctuation">,</span> <span class="name">slownik</span><span class="punctuation">[</span><span class="name">a</span><span class="punctuation">])</span></code></pre>
+<pre class="literal-block">Jan Sty
+Feb Lut
+Mar Mar
+Apr Kwi
+May Maj</pre>
+<p>Słowniki posiadają metody, które zwracają inne iteratory. Aby iterować
+po wartościach lub parach klucz/wartość, po prostu użyj metod values()
+lub items() w celu uzyskania odpowiedniego iteratora.</p>
+<pre class="code python highlight literal-block"><code><span class="name">slownik</span> <span class="operator">=</span> <span class="punctuation">{</span><span class="literal string single">'Jan'</span><span class="punctuation">:</span> <span class="literal string single">'Sty'</span><span class="punctuation">,</span> <span class="literal string single">'Feb'</span><span class="punctuation">:</span> <span class="literal string single">'Lut'</span><span class="punctuation">,</span> <span class="literal string single">'Mar'</span><span class="punctuation">:</span> <span class="literal string single">'Mar'</span><span class="punctuation">,</span> <span class="literal string single">'Apr'</span><span class="punctuation">:</span> <span class="literal string single">'Kwi'</span><span class="punctuation">,</span> <span class="literal string single">'May'</span><span class="punctuation">:</span> <span class="literal string single">'Maj'</span><span class="punctuation">,</span> <span class="literal string single">'Jun'</span><span class="punctuation">:</span> <span class="literal string single">'Cze'</span><span class="punctuation">,</span><span class="whitespace">
+</span>     <span class="literal string single">'Jul'</span><span class="punctuation">:</span> <span class="literal string single">'Lip'</span><span class="punctuation">,</span> <span class="literal string single">'Aug'</span><span class="punctuation">:</span> <span class="literal string single">'Sie'</span><span class="punctuation">,</span> <span class="literal string single">'Sep'</span><span class="punctuation">:</span> <span class="literal string single">'Wrz'</span><span class="punctuation">,</span> <span class="literal string single">'Oct'</span><span class="punctuation">:</span> <span class="literal string single">'Paz'</span><span class="punctuation">,</span> <span class="literal string single">'Nov'</span><span class="punctuation">:</span> <span class="literal string single">'Lis'</span><span class="punctuation">,</span> <span class="literal string single">'Dec'</span><span class="punctuation">:</span> <span class="literal string single">'Gru'</span><span class="punctuation">}</span><span class="whitespace">
+
+</span><span class="name">it</span> <span class="operator">=</span> <span class="name">slownik</span><span class="operator">.</span><span class="name">values</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">it</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">it</span> <span class="operator">=</span> <span class="name">slownik</span><span class="operator">.</span><span class="name">items</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">it</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">dict_values(['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze', 'Lip', 'Sie', 'Wrz', 'Paz', 'Lis', 'Gru'])
+dict_items([('Jan', 'Sty'), ('Feb', 'Lut'), ('Mar', 'Mar'), ('Apr', 'Kwi'), ('May', 'Maj'), ('Jun', 'Cze'), ('Jul', 'Lip'), ('Aug', 'Sie'), ('Sep', 'Wrz'), ('Oct', 'Paz'), ('Nov', 'Lis'), ('Dec', 'Gru')])</pre>
+<section id="iterator-na-liste">
+<h4>Iterator na listę</h4>
+<p>Możemy zamienić obiekt iteratora na listę lub kolekcję korzystając z
+metod list() oraz tuple().</p>
+<pre class="code python highlight literal-block"><code><span class="name">L</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">]</span><span class="whitespace">
+</span><span class="name">iterator</span> <span class="operator">=</span> <span class="name builtin">iter</span><span class="punctuation">(</span><span class="name">L</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">t</span> <span class="operator">=</span> <span class="name builtin">list</span><span class="punctuation">(</span><span class="name">iterator</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">t</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">iterator</span> <span class="operator">=</span> <span class="name builtin">iter</span><span class="punctuation">(</span><span class="name">L</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">t</span> <span class="operator">=</span> <span class="name builtin">tuple</span><span class="punctuation">(</span><span class="name">iterator</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">t</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">[1, 2, 3]
+(1, 2, 3)</pre>
+</section>
+<section id="wlasny-iterator">
+<h4>Własny iterator</h4>
+<p>Możemy definiować własne klasy iteratorów. Przykładowa implementacja
+obiektu odliczającego (będącego zarazem nieskończonym iteratorem)
+znajduje się poniżej:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">collections.abc</span> <span class="keyword namespace">import</span> <span class="name">Iterator</span><span class="whitespace">
+
+</span><span class="keyword">class</span> <span class="name class">count</span><span class="punctuation">(</span><span class="name">Iterator</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">def</span> <span class="name function magic">__init__</span><span class="punctuation">(</span><span class="name builtin pseudo">self</span><span class="punctuation">,</span> <span class="name">start</span><span class="operator">=</span><span class="literal number integer">0</span><span class="punctuation">,</span> <span class="name">step</span><span class="operator">=</span><span class="literal number integer">1</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">c</span><span class="punctuation">,</span> <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">step</span> <span class="operator">=</span> <span class="name">start</span><span class="operator">-</span><span class="name">step</span><span class="punctuation">,</span> <span class="name">step</span><span class="whitespace">
+
+</span>    <span class="keyword">def</span> <span class="name function magic">__next__</span><span class="punctuation">(</span><span class="name builtin pseudo">self</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">c</span> <span class="operator">+=</span> <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">step</span><span class="whitespace">
+</span>        <span class="keyword">return</span> <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">c</span><span class="whitespace">
+
+</span><span class="name">count</span> <span class="operator">=</span> <span class="name">count</span><span class="punctuation">(</span><span class="literal number integer">0</span><span class="punctuation">,</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">next</span><span class="punctuation">(</span><span class="name">count</span><span class="punctuation">))</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">next</span><span class="punctuation">(</span><span class="name">count</span><span class="punctuation">))</span></code></pre>
+<pre class="literal-block">0
+1</pre>
+</section>
+</section>
+</section>
+<section id="generatory">
+<h2>Generatory</h2>
+<p>Funkcja zawierająca słowo kluczowe <strong>yield</strong> jest funkcją generatora.
+Kompilator kodu bajtowego Pythona identyfikuje go, co w rezultacie
+powoduje inną kompilację funkcji. Co więcej, wywołanie funkcji
+generatora zwróci generator obsługujący protokół iteratora, a nie
+pojedynczą wartość.</p>
+<pre class="code python highlight literal-block"><code><span class="name">seq1</span> <span class="operator">=</span> <span class="literal string single">'ABC'</span><span class="whitespace">
+</span><span class="name">seq2</span> <span class="operator">=</span> <span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="punctuation">[(</span><span class="name">x</span><span class="punctuation">,</span> <span class="name">y</span><span class="punctuation">)</span> <span class="keyword">for</span> <span class="name">x</span> <span class="operator word">in</span> <span class="name">seq1</span> <span class="keyword">for</span> <span class="name">y</span> <span class="operator word">in</span> <span class="name">seq2</span><span class="punctuation">]</span></code></pre>
+<pre class="literal-block">[('A', 1),
+ ('A', 2),
+ ('A', 3),
+ ('B', 1),
+ ('B', 2),
+ ('B', 3),
+ ('C', 1),
+ ('C', 2),
+ ('C', 3)]</pre>
+<pre class="code python highlight literal-block"><code><span class="keyword">def</span> <span class="name function">generate_pairs</span><span class="punctuation">(</span><span class="name">A</span><span class="punctuation">,</span><span class="name">B</span><span class="punctuation">):</span><span class="whitespace">
+</span>   <span class="keyword">for</span> <span class="name">x</span> <span class="operator word">in</span> <span class="name">A</span><span class="punctuation">:</span><span class="whitespace">
+</span>       <span class="keyword">for</span> <span class="name">y</span> <span class="operator word">in</span> <span class="name">B</span><span class="punctuation">:</span><span class="whitespace">
+</span>           <span class="keyword">yield</span> <span class="punctuation">(</span><span class="name">x</span><span class="punctuation">,</span> <span class="name">y</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">seq1</span> <span class="operator">=</span> <span class="literal string single">'ABC'</span><span class="whitespace">
+</span><span class="name">seq2</span> <span class="operator">=</span> <span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">gen</span> <span class="operator">=</span> <span class="name">generate_pairs</span><span class="punctuation">(</span><span class="name">seq1</span><span class="punctuation">,</span><span class="name">seq2</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">gen</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">next</span><span class="punctuation">(</span><span class="name">gen</span><span class="punctuation">))</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">next</span><span class="punctuation">(</span><span class="name">gen</span><span class="punctuation">))</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">next</span><span class="punctuation">(</span><span class="name">gen</span><span class="punctuation">))</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">next</span><span class="punctuation">(</span><span class="name">gen</span><span class="punctuation">))</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">next</span><span class="punctuation">(</span><span class="name">gen</span><span class="punctuation">))</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">next</span><span class="punctuation">(</span><span class="name">gen</span><span class="punctuation">))</span></code></pre>
+<pre class="literal-block">&lt;generator object generate_pairs at 0x7f6874793c80&gt;
+('A', 1)
+('A', 2)
+('A', 3)
+('B', 1)
+('B', 2)
+('B', 3)</pre>
+</section>
+<section id="lambda">
+<h2>Lambda</h2>
+<p>W Pythonie funkcja Lambda jest funkcją anonimową, co oznacza, że jest
+<strong>funkcją bez nazwy</strong>. Może mieć dowolną liczbę argumentów, ale tylko
+jedno wyrażenie, które jest obliczane i zwracane. <strong>Musi mieć wartość
+zwracaną</strong>. Najprostsza lambda to funkcja identycznościowa.</p>
+<pre class="code python highlight literal-block"><code><span class="name">ident</span> <span class="operator">=</span> <span class="keyword">lambda</span> <span class="name">x</span> <span class="punctuation">:</span> <span class="name">x</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">ident</span><span class="punctuation">(</span><span class="literal number integer">6</span><span class="punctuation">))</span></code></pre>
+<pre class="literal-block">6</pre>
+<p>Ponieważ funkcja lambda musi mieć wartość zwracaną dla każdego
+prawidłowego wejścia, nie możemy jej zdefiniować za pomocą <strong>if</strong>, ale
+<strong>bez else</strong>, ponieważ nie określamy, co zwrócimy, jeśli warunek if
+będzie fałszywy, tj. jego część else. Zrozummy to na prostym przykładzie
+funkcji lambda, która zwraca liczbę tylko gdy jest ona dodatnia:</p>
+<pre class="code python highlight literal-block"><code><span class="name builtin">abs</span> <span class="operator">=</span> <span class="keyword">lambda</span> <span class="name">x</span> <span class="punctuation">:</span> <span class="name">x</span> <span class="keyword">if</span><span class="punctuation">(</span><span class="name">x</span> <span class="operator">&gt;</span> <span class="literal number integer">0</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">abs</span><span class="punctuation">(</span><span class="literal number integer">6</span><span class="punctuation">))</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">abs</span><span class="punctuation">(</span><span class="operator">-</span><span class="literal number integer">6</span><span class="punctuation">))</span></code></pre>
+<pre class="literal-block">  Cell In [10], line 1
+    abs = lambda x : x if(x &gt; 0)
+                                ^
+SyntaxError: invalid syntax</pre>
+<p>Funkcja lambda musi zwracać wartość, a ta funkcja zwraca x, jeśli &lt;
+code&gt;x &gt; 0 i nie określa, co zostanie zwrócone, jeśli wartość x jest
+mniejsza lub równa 0.</p>
+<p>Aby to poprawić, musimy określić, co zostanie zwrócone, jeśli warunek if
+będzie fałszywy, tj. musimy określić jego część else.</p>
+<pre class="code python highlight literal-block"><code><span class="name builtin">abs</span> <span class="operator">=</span> <span class="keyword">lambda</span> <span class="name">x</span> <span class="punctuation">:</span> <span class="name">x</span> <span class="keyword">if</span><span class="punctuation">(</span><span class="name">x</span> <span class="operator">&gt;</span> <span class="literal number integer">0</span><span class="punctuation">)</span> <span class="keyword">else</span> <span class="operator">-</span><span class="name">x</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">abs</span><span class="punctuation">(</span><span class="literal number integer">6</span><span class="punctuation">))</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">abs</span><span class="punctuation">(</span><span class="operator">-</span><span class="literal number integer">6</span><span class="punctuation">))</span></code></pre>
+<pre class="literal-block">6
+6</pre>
+<pre class="code python highlight literal-block"><code><span class="name builtin">max</span> <span class="operator">=</span> <span class="keyword">lambda</span> <span class="name">a</span><span class="punctuation">,</span> <span class="name">b</span> <span class="punctuation">:</span> <span class="name">a</span> <span class="keyword">if</span><span class="punctuation">(</span><span class="name">a</span> <span class="operator">&gt;</span> <span class="name">b</span><span class="punctuation">)</span> <span class="keyword">else</span> <span class="name">b</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">max</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">))</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">max</span><span class="punctuation">(</span><span class="literal number integer">10</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">))</span></code></pre>
+<pre class="literal-block">2
+10</pre>
+<p>Połączenie lambdy z list comprehension. W każdej iteracji wewnątrz list
+comprehension tworzymy nową funkcję lambda z domyślnym argumentem x
+(gdzie x jest bieżącym elementem iteracji). Później, wewnątrz pętli for,
+wywołujemy ten sam obiekt funkcji z domyślnym argumentem za pomocą
+item() i uzyskujemy pożądaną wartość. Zatem is_even_list przechowuje
+listę obiektów funkcji lambda.</p>
+<pre class="code python highlight literal-block"><code><span class="name">is_even_list</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="keyword">lambda</span> <span class="name">arg</span> <span class="operator">=</span> <span class="name">x</span><span class="punctuation">:</span> <span class="name">arg</span><span class="operator">%</span><span class="literal number integer">5</span> <span class="keyword">for</span> <span class="name">x</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">11</span><span class="punctuation">)]</span><span class="whitespace">
+
+</span><span class="keyword">for</span> <span class="name">item</span> <span class="operator word">in</span> <span class="name">is_even_list</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">item</span><span class="punctuation">())</span></code></pre>
+<pre class="literal-block">1
+2
+3
+4
+0
+1
+2
+3
+4
+0</pre>
+<p>Wywołanie lambdy przez inną lambdę</p>
+<pre class="code python highlight literal-block"><code><span class="name">List</span> <span class="operator">=</span> <span class="punctuation">[[</span><span class="literal number integer">2</span><span class="punctuation">,</span><span class="literal number integer">3</span><span class="punctuation">,</span><span class="literal number integer">4</span><span class="punctuation">],[</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">4</span><span class="punctuation">,</span> <span class="literal number integer">16</span><span class="punctuation">,</span> <span class="literal number integer">64</span><span class="punctuation">],[</span><span class="literal number integer">3</span><span class="punctuation">,</span> <span class="literal number integer">6</span><span class="punctuation">,</span> <span class="literal number integer">9</span><span class="punctuation">,</span> <span class="literal number integer">12</span><span class="punctuation">]]</span><span class="whitespace">
+
+</span><span class="comment single"># Sort each sublist</span><span class="whitespace">
+</span><span class="name">sortList</span> <span class="operator">=</span> <span class="keyword">lambda</span> <span class="name">x</span><span class="punctuation">:</span> <span class="punctuation">(</span><span class="name builtin">sorted</span><span class="punctuation">(</span><span class="name">i</span><span class="punctuation">)</span> <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name">x</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name">sortList</span><span class="punctuation">(</span><span class="name">List</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">i</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">multiplyByTwo</span> <span class="operator">=</span> <span class="keyword">lambda</span> <span class="name">x</span><span class="punctuation">,</span> <span class="name">f</span> <span class="punctuation">:</span> <span class="punctuation">[</span><span class="name">y</span> <span class="keyword">for</span> <span class="name">y</span> <span class="operator word">in</span> <span class="name">f</span><span class="punctuation">(</span><span class="name">x</span><span class="punctuation">)]</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">multiplyByTwo</span><span class="punctuation">(</span><span class="name">List</span><span class="punctuation">,</span><span class="name">sortList</span><span class="punctuation">))</span></code></pre>
+<pre class="literal-block">[2, 3, 4]
+[1, 4, 16, 64]
+[3, 6, 9, 12]
+[[2, 3, 4], [1, 4, 16, 64], [3, 6, 9, 12]]</pre>
+</section>
+<section id="list-comprehension">
+<h2>List comprehension</h2>
+<p>List comprehension to elegancki sposób definiowania i tworzenia list na
+podstawie istniejących list. Składnia [expression for item in list]. Moc
+list comprehension to to że może zidentyfikować, kiedy otrzyma stringa
+lub tuple i pracować na nich jak na liście.</p>
+<p>Operacje w list comprehension możesz zrobić za pomocą pętli. Jednak nie
+każdą pętlę można przepisać jako list comprehension. Są one jednak
+bardziej eleganckim i zwięzłym zapisem wielu akcji.</p>
+<pre class="code python highlight literal-block"><code><span class="name">word_letter</span> <span class="operator">=</span> <span class="punctuation">[</span> <span class="name">letter</span> <span class="keyword">for</span> <span class="name">letter</span> <span class="operator word">in</span> <span class="literal string single">'word'</span> <span class="punctuation">]</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span> <span class="name">word_letter</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">['w', 'o', 'r', 'd']</pre>
+<pre class="code python highlight literal-block"><code><span class="name">number_list</span> <span class="operator">=</span> <span class="punctuation">[</span> <span class="name">x</span> <span class="keyword">for</span> <span class="name">x</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">20</span><span class="punctuation">)</span> <span class="keyword">if</span> <span class="name">x</span> <span class="operator">%</span> <span class="literal number integer">2</span> <span class="operator">==</span> <span class="literal number integer">0</span><span class="punctuation">]</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">number_list</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">[0, 2, 4, 6, 8, 10, 12, 14, 16, 18]</pre>
+<p>Podwójny warunek logiczny (nested if)</p>
+<pre class="code python highlight literal-block"><code><span class="name">num_list</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="name">y</span> <span class="keyword">for</span> <span class="name">y</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">100</span><span class="punctuation">)</span> <span class="keyword">if</span> <span class="name">y</span> <span class="operator">%</span> <span class="literal number integer">2</span> <span class="operator">==</span> <span class="literal number integer">0</span> <span class="keyword">if</span> <span class="name">y</span> <span class="operator">%</span> <span class="literal number integer">5</span> <span class="operator">==</span> <span class="literal number integer">0</span><span class="punctuation">]</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">num_list</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">[0, 10, 20, 30, 40, 50, 60, 70, 80, 90]</pre>
+<p>Tutaj sprawdź rozumienie listy:</p>
+<pre class="literal-block">Czy y jest podzielne przez 2, czy nie?
+Czy y jest podzielne przez 5, czy nie?</pre>
+<p>Jeśli y spełnia oba warunki, y jest dołączane do num_list. Zwróć uwagę
+na różnicę między filtrowaniem po pętli a zmianą elementu - przed <strong>for
+in</strong> oraz to w jakiej kolejności są wykonywane.</p>
+<pre class="code python highlight literal-block"><code><span class="name">num_list</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="literal string single">'A'</span> <span class="keyword">if</span> <span class="name">y</span> <span class="operator">%</span> <span class="literal number integer">20</span> <span class="operator">==</span> <span class="literal number integer">0</span> <span class="keyword">else</span> <span class="literal string single">'B'</span> <span class="keyword">for</span> <span class="name">y</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">100</span><span class="punctuation">)</span> <span class="keyword">if</span> <span class="name">y</span> <span class="operator">%</span> <span class="literal number integer">2</span> <span class="operator">==</span> <span class="literal number integer">0</span> <span class="keyword">if</span> <span class="name">y</span> <span class="operator">%</span> <span class="literal number integer">5</span> <span class="operator">==</span> <span class="literal number integer">0</span><span class="punctuation">]</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">num_list</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">num_list</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="name">rr</span> <span class="keyword">for</span> <span class="name">rr</span> <span class="operator word">in</span> <span class="punctuation">[</span><span class="literal number integer">10</span> <span class="keyword">if</span> <span class="name">y</span> <span class="operator">%</span> <span class="literal number integer">25</span> <span class="operator">==</span> <span class="literal number integer">0</span> <span class="keyword">else</span> <span class="literal number integer">7</span> <span class="keyword">for</span> <span class="name">y</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">100</span><span class="punctuation">)]</span> <span class="keyword">if</span> <span class="name">rr</span> <span class="operator">%</span> <span class="literal number integer">2</span> <span class="operator">==</span> <span class="literal number integer">0</span> <span class="keyword">if</span> <span class="name">rr</span> <span class="operator">%</span> <span class="literal number integer">5</span> <span class="operator">==</span> <span class="literal number integer">0</span><span class="punctuation">]</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">num_list</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">['A', 'B', 'A', 'B', 'A', 'B', 'A', 'B', 'A', 'B']
+[10, 10, 10, 10]</pre>
+<p>Zanieżdzone pętle:</p>
+<pre class="code python highlight literal-block"><code><span class="name">matrix</span> <span class="operator">=</span> <span class="punctuation">[[</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">],</span> <span class="punctuation">[</span><span class="literal number integer">3</span><span class="punctuation">,</span><span class="literal number integer">4</span><span class="punctuation">],</span> <span class="punctuation">[</span><span class="literal number integer">5</span><span class="punctuation">,</span><span class="literal number integer">6</span><span class="punctuation">],</span> <span class="punctuation">[</span><span class="literal number integer">7</span><span class="punctuation">,</span><span class="literal number integer">8</span><span class="punctuation">]]</span><span class="whitespace">
+</span><span class="name">transpose</span> <span class="operator">=</span> <span class="punctuation">[[</span><span class="name">row</span><span class="punctuation">[</span><span class="name">i</span><span class="punctuation">]</span> <span class="keyword">for</span> <span class="name">row</span> <span class="operator word">in</span> <span class="name">matrix</span><span class="punctuation">]</span> <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)]</span><span class="whitespace">
+</span><span class="name builtin">print</span> <span class="punctuation">(</span><span class="name">transpose</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">[[1, 3, 5, 7], [2, 4, 6, 8]]</pre>
+</section>
+<section id="zip">
+<h2>Zip</h2>
+<p>Połączenie dwóch list argumentów w jedną listę krotek może być trudne.
+Na szczęście python udostępnia funkcję zip. Spowoduje to automatyczne
+spakowanie <strong>N</strong> list w jedną listę krotek (każda krotka zawiera N
+elementów).</p>
+<pre class="code python highlight literal-block"><code><span class="name">a</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">,</span> <span class="literal number integer">4</span><span class="punctuation">,</span> <span class="literal number integer">5</span><span class="punctuation">]</span><span class="whitespace">
+</span><span class="name">b</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="literal number integer">6</span><span class="punctuation">,</span> <span class="literal number integer">7</span><span class="punctuation">,</span> <span class="literal number integer">8</span><span class="punctuation">,</span> <span class="literal number integer">9</span><span class="punctuation">,</span> <span class="literal number integer">10</span><span class="punctuation">]</span><span class="whitespace">
+</span><span class="name">c</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="literal number integer">11</span><span class="punctuation">,</span> <span class="literal number integer">12</span><span class="punctuation">,</span> <span class="literal number integer">13</span><span class="punctuation">,</span> <span class="literal number integer">14</span><span class="punctuation">,</span> <span class="literal number integer">15</span><span class="punctuation">]</span><span class="whitespace">
+
+</span><span class="name">args</span> <span class="operator">=</span> <span class="name builtin">zip</span><span class="punctuation">(</span><span class="name">a</span><span class="punctuation">,</span> <span class="name">b</span><span class="punctuation">,</span> <span class="name">c</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">list</span><span class="punctuation">(</span><span class="name">args</span><span class="punctuation">))</span></code></pre>
+<pre class="literal-block">[(1, 6, 11), (2, 7, 12), (3, 8, 13), (4, 9, 14), (5, 10, 15)]</pre>
+</section>
+<section id="filter">
+<h2>Filter</h2>
+<p>Filter() zatrzymuje tylko te elementy, w których generuje wartość
+<strong>True</strong>, a usuwa wszystkie dane wejściowe, które wygenerowały wartość
+<strong>False</strong>.</p>
+<p>Filter przyjmuje dwa argumenty funkcję i iterowalny obiekt.</p>
+<pre class="code python highlight literal-block"><code><span class="name">li</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="literal number integer">5</span><span class="punctuation">,</span> <span class="operator">-</span><span class="literal number integer">5</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="operator">-</span><span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">0</span><span class="punctuation">,</span> <span class="literal number integer">62</span><span class="punctuation">,</span> <span class="operator">-</span><span class="literal number integer">77</span><span class="punctuation">,</span> <span class="literal number integer">23</span><span class="punctuation">,</span> <span class="literal number integer">73</span><span class="punctuation">,</span> <span class="operator">-</span><span class="literal number integer">61</span><span class="punctuation">]</span><span class="whitespace">
+
+</span><span class="name">final_list</span> <span class="operator">=</span> <span class="name builtin">list</span><span class="punctuation">(</span><span class="name builtin">filter</span><span class="punctuation">(</span><span class="keyword">lambda</span> <span class="name">x</span><span class="punctuation">:</span> <span class="punctuation">(</span><span class="name">x</span> <span class="operator">&gt;</span> <span class="literal number integer">0</span><span class="punctuation">),</span> <span class="name">li</span><span class="punctuation">))</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">final_list</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">[5, 2, 62, 23, 73]</pre>
+</section>
+<section id="map">
+<h2>Map</h2>
+<p>Funkcja map() w Pythonie przyjmuje jako argument funkcję i listę
+argumetów. Działa podobnie do list comprehension. Funkcja jest
+wywoływana za pomocą funkcji lambda i zwracana jest nowa lista wartości,
+która zawiera wszystkie zmodyfikowane elementy wejściowe zwrócone przez
+tę funkcję. Przykłady:</p>
+<pre class="code python highlight literal-block"><code><span class="name">li</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="literal number integer">5</span><span class="punctuation">,</span> <span class="operator">-</span><span class="literal number integer">5</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="operator">-</span><span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">0</span><span class="punctuation">,</span> <span class="literal number integer">62</span><span class="punctuation">,</span> <span class="operator">-</span><span class="literal number integer">77</span><span class="punctuation">,</span> <span class="literal number integer">23</span><span class="punctuation">,</span> <span class="literal number integer">73</span><span class="punctuation">,</span> <span class="operator">-</span><span class="literal number integer">61</span><span class="punctuation">]</span><span class="whitespace">
+
+</span><span class="name">final_list</span> <span class="operator">=</span> <span class="name builtin">list</span><span class="punctuation">(</span><span class="name builtin">map</span><span class="punctuation">(</span><span class="keyword">lambda</span> <span class="name">x</span><span class="punctuation">:</span> <span class="name">x</span><span class="operator">*</span><span class="literal number integer">2</span><span class="punctuation">,</span> <span class="name">li</span><span class="punctuation">))</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">final_list</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">[10, -10, 4, -4, 0, 124, -154, 46, 146, -122]</pre>
+<pre class="code python highlight literal-block"><code><span class="name">countries</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="literal string single">'poland'</span><span class="punctuation">,</span> <span class="literal string single">'france'</span><span class="punctuation">,</span> <span class="literal string single">'spain'</span><span class="punctuation">]</span><span class="whitespace">
+
+</span><span class="name">uppered_countries</span> <span class="operator">=</span> <span class="name builtin">list</span><span class="punctuation">(</span><span class="name builtin">map</span><span class="punctuation">(</span><span class="keyword">lambda</span> <span class="name">countries</span><span class="punctuation">:</span> <span class="name">countries</span><span class="operator">.</span><span class="name">upper</span><span class="punctuation">(),</span> <span class="name">countries</span><span class="punctuation">))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">uppered_countries</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">['POLAND', 'FRANCE', 'SPAIN']</pre>
+<p>Przypadek większej liczby argumentów oraz wykorzystania funkcji nazwanej
+zamiast lambdy:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword">def</span> <span class="name function">add</span><span class="punctuation">(</span><span class="name">x</span><span class="punctuation">,</span> <span class="name">y</span><span class="punctuation">):</span><span class="whitespace">
+    </span><span class="literal string doc">&quot;&quot;&quot;Return the sum of the two arguments&quot;&quot;&quot;</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">x</span> <span class="operator">+</span> <span class="name">y</span><span class="whitespace">
+
+</span><span class="name">a</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">,</span> <span class="literal number integer">4</span><span class="punctuation">,</span> <span class="literal number integer">5</span><span class="punctuation">]</span><span class="whitespace">
+</span><span class="name">b</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="literal number integer">6</span><span class="punctuation">,</span> <span class="literal number integer">7</span><span class="punctuation">,</span> <span class="literal number integer">8</span><span class="punctuation">,</span> <span class="literal number integer">9</span><span class="punctuation">,</span> <span class="literal number integer">10</span><span class="punctuation">]</span><span class="whitespace">
+
+</span><span class="name">result</span> <span class="operator">=</span> <span class="name builtin">map</span><span class="punctuation">(</span><span class="name">add</span><span class="punctuation">,</span> <span class="name">a</span><span class="punctuation">,</span> <span class="name">b</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">list</span><span class="punctuation">(</span><span class="name">result</span><span class="punctuation">))</span></code></pre>
+<pre class="literal-block">[7, 9, 11, 13, 15]</pre>
+</section>
+<section id="reduce">
+<h2>Reduce</h2>
+<p>Funkcja reduce() w Pythonie przyjmuje jako argument funkcję i listę.
+Funkcja jest wywoływana za pomocą funkcji <strong>lambda</strong>, a zwracany jest
+nowy zredukowany wynik. Funkcja reduce() należy do modułu functools.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">functools</span> <span class="keyword namespace">import</span> <span class="name">reduce</span><span class="whitespace">
+</span><span class="name">li</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">,</span> <span class="literal number integer">4</span><span class="punctuation">,</span> <span class="literal number integer">5</span><span class="punctuation">,</span> <span class="literal number integer">6</span><span class="punctuation">]</span><span class="whitespace">
+</span><span class="name builtin">sum</span> <span class="operator">=</span> <span class="name">reduce</span><span class="punctuation">((</span><span class="keyword">lambda</span> <span class="name">x</span><span class="punctuation">,</span> <span class="name">y</span><span class="punctuation">:</span> <span class="name">x</span> <span class="operator">+</span> <span class="name">y</span><span class="punctuation">),</span> <span class="name">li</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">sum</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">21</pre>
+<p>W tym wypadku wynik poprzedniego przetwarzania jest dodawany do
+kolejnego itd (((((1+2)+3)+4)+5)+6). Lambda w reduce powinna przyjmować
+dwa argumenty.</p>
+</section>
+<section id="podsumowanie">
+<h2>Podsumowanie</h2>
+<table>
+<thead>
+<tr><th class="head"></th>
+<th class="head"><p>Map</p></th>
+<th class="head"><p>Filter</p></th>
+<th class="head"><p>Reduce</p></th>
+<th class="head"></th>
+</tr>
+</thead>
+<tbody>
+<tr><td><p>I
+nput
+vs
+ou
+tput</p></td>
+<td><p>N do N</p></td>
+<td><p>N do M, gdzie N&gt;=M</p></td>
+<td><p>N do 1</p></td>
+<td></td>
+</tr>
+<tr><td><p>W
+ykor
+zyst
+anie</p></td>
+<td><p>Transformacja i
+wzbogacenie danych</p></td>
+<td><p>Filtrowanie danych</p></td>
+<td><p>Redukcja do
+pojedynczej
+wartości</p></td>
+<td></td>
+</tr>
+<tr><td><p>A
+plik
+acja</p></td>
+<td><p>Każda dana
+wejściowa
+przechodzi przez
+funkcję</p></td>
+<td><p>Odrzucane dane dla
+których warunek
+jest false</p></td>
+<td><p>Parami redukcja
+wejścia do jednej
+wartości</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section></body>
+</html>
+

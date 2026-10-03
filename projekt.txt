@@ -1,0 +1,44 @@
+Projekt opis:
+
+Komunikacja między Klientem a Serwerem powinna się odbywać za pomocą REAT_API i danych zapisanych jako JSON
+
+Aplikacja klienta student:
+
+Przed uruchomieniem wpisujemy do kodu adres IP komputera prowadzącego (lub lokalnie uruchamiając adres komputera na którym uruchamiamy serwer).
+
+Po wyborze "c" w konsoli program powinien łączyć się z serwerem wysylając mu własny adres IP i port do komunikacji. Serwer wysyła komunikat potwierdzenia połączenia który jest wyświetlany na ekranie.
+
+Aplikacja klienta ma także endpoint do odbioru danych od serwera (opisanych niżej). Po odbiorze danych, są one przekazywane do kolejki Queue. 
+Przetwarzanie danych w jednym wątku cos co pobiera wszystkie dane, na koniec je sortuje i wypisuje wyniki.
+
+Aplikacja Serwerowa:
+
+Posiada endpoint na którym dokonuje się "handshake" gdzie kliencie wysyłają swój adres IP i port a serwer odsyła potwierdzenie nawiązania połączenia.
+Przy każym połączeniu serwer podaje łączną liczbę połączonych klientów.
+
+Po wybraniu "s" w konsoli serwer zaczyna generować dane wysyłając je na specjalny endpoint klientów.
+
+Sewer generuje losowo zadaną w kodzie liczbę danych wybierając losowo dzień z zakresu ( w kodzie jako range(0,X)), dzień jest liczbą całkowitą, typ danych jako string
+
+DataTypes = Enum('DataType', ['TEMP', 'HUM', 'LIGHT', 'PRESS', 'PREC', 'KONIEC']) 
+
+Generowane liczby są losowe z zakresów zdefiniowanych dla każdego parametru jako RANGE, wartości są rzeczywiste. 'KONIEC' jest szczególnym parametrem mówiącym o zakończeniu transmisji danych.
+
+typy kominikatów:
+
+{'ZAPIS' , Datatype, Dzien, Wartość}
+
+np
+
+{'ZAPIS', TEMP, 1, 12}
+{'ZAPIS', HUM, 3, 888}
+{'ZAPIS', KONIEC, 1, 1}
+
+
+Po wygenerowaniu danych serwer przesyła komunikat KONIEC do klienta.
+
+Serwer zapamiętuje dla każdego parametru, każdego dnia i każdego klienta średnia, max, min, mediane wartości.
+Dodatkowo zapamiętuje czas wysyłania ostatniego zapytania i czas odpowiedzi od klienta odczytów. 
+Po otrzymaniu odpowiedzi od klienta serwer zapisuje wynik porównanie wyniku klienta i wlasnych obliczeń.
+
+Uwaga! każda logowana przez serwer informacja jest też zapisywana do pliku!

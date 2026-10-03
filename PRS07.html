@@ -1,0 +1,696 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>PRS07.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="laboratorium-7-thread-pool-i-executory-w-python">
+<h2>Laboratorium 7 - Thread Pool i Executory w Python</h2>
+</section>
+<section id="dodatkowe-metody-synchronizacji">
+<h2>Dodatkowe metody synchronizacji</h2>
+<section id="event">
+<h3>Event</h3>
+<p>Python udostępnia obiekt zdarzenia za pośrednictwem klasy
+threading.Event.</p>
+<p>Zdarzenie jest prostym prymitywem współbieżności, który umożliwia
+komunikację między wątkami.</p>
+<p>Obiekt Threading.Event opakowuje zmienną logiczną, która może być
+„ustawiona” (prawda) lub „nieustawiona” (fałsz). Wątki współużytkujące
+instancję zdarzenia mogą sprawdzać, czy zdarzenie jest ustawione,
+ustawiać zdarzenie, kasować zdarzenie lub czekać na ustawienie
+zdarzenia.</p>
+<p>Threading.Event zapewnia łatwy sposób współdzielenia zmiennej logicznej
+między wątkami, która może działać jako wyzwalacz akcji.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">threading</span><span class="whitespace">
+
+</span><span class="name">event</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Event</span><span class="punctuation">()</span></code></pre>
+<p>Do ustawiania wartości true służy funkcja <strong>set()</strong> a do czekania na
+wartość true służy funkcja <strong>wait()</strong>. Przykład:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">random</span> <span class="keyword namespace">import</span> <span class="name">random</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Thread</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Event</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">(</span><span class="name">event</span><span class="punctuation">,</span> <span class="name">number</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">event</span><span class="operator">.</span><span class="name">wait</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">value</span> <span class="operator">=</span> <span class="name">random</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">sleep</span><span class="punctuation">(</span><span class="name">value</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Thread </span><span class="literal string interpol">{</span><span class="name">number</span><span class="literal string interpol">}</span><span class="literal string single"> got </span><span class="literal string interpol">{</span><span class="name">value</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">sleep</span><span class="punctuation">(</span><span class="name">value</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">event</span> <span class="operator">=</span> <span class="name">Event</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">thread</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">task</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">event</span><span class="punctuation">,</span> <span class="name">i</span><span class="punctuation">))</span><span class="whitespace">
+</span>    <span class="name">thread</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Main thread blocking...'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">event</span><span class="operator">.</span><span class="name">set</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Main thread blocking...
+Thread 2 got 0.0905810157918302
+Thread 1 got 0.29938274432374745
+Thread 3 got 0.3827683096186707
+Thread 4 got 0.46137967365279275
+Thread 0 got 0.6282123321402183</pre>
+<p>Uzycie clear i is_set():</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">random</span> <span class="keyword namespace">import</span> <span class="name">random</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Thread</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Event</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">(</span><span class="name">event</span><span class="punctuation">,</span> <span class="name">number</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">event</span><span class="operator">.</span><span class="name">wait</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">value</span> <span class="operator">=</span> <span class="name">random</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">sleep</span><span class="punctuation">(</span><span class="name">value</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">event</span><span class="operator">.</span><span class="name">is_set</span><span class="punctuation">())</span><span class="whitespace">
+</span>    <span class="name">event</span><span class="operator">.</span><span class="name">clear</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">event</span><span class="operator">.</span><span class="name">is_set</span><span class="punctuation">())</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Thread </span><span class="literal string interpol">{</span><span class="name">number</span><span class="literal string interpol">}</span><span class="literal string single"> got </span><span class="literal string interpol">{</span><span class="name">value</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">sleep</span><span class="punctuation">(</span><span class="name">value</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">event</span><span class="operator">.</span><span class="name">set</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">event</span> <span class="operator">=</span> <span class="name">Event</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">thread</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">task</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">event</span><span class="punctuation">,</span> <span class="name">i</span><span class="punctuation">))</span><span class="whitespace">
+</span>    <span class="name">thread</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Main thread blocking...'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">event</span><span class="operator">.</span><span class="name">set</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Main thread blocking...
+True
+False
+Thread 3 got 0.16971435437230664
+True
+False
+Thread 4 got 0.3947643335340075
+False
+False
+Thread 2 got 0.6601305334674352
+False
+False
+Thread 0 got 0.692246900797233
+False
+False
+Thread 1 got 0.7431957790318557</pre>
+</section>
+<section id="bariera">
+<h3>Bariera</h3>
+<p>Bariera jest kolejną metodą synchronizacji procesów. Python udostępnia
+barierę poprzez klasę threading.Barrier.</p>
+<p>Instancja bariery musi najpierw zostać utworzona i skonfigurowana za
+pomocą konstruktora, określając liczbę wątków, które muszą zarejestrować
+się na blokadzie, zanim bariera zostanie zniesiona.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">threading</span><span class="whitespace">
+
+</span><span class="name">barrier</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Barrier</span><span class="punctuation">(</span><span class="literal number integer">10</span><span class="punctuation">)</span></code></pre>
+<p>Przykład użycia bariery, czekamy na zakończenie wszystkich wątków by
+zakończyć główny wątek programu:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">threading</span><span class="whitespace">
+
+</span><span class="name">barrier</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Barrier</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">run</span><span class="punctuation">(</span><span class="name builtin">id</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">str</span><span class="punctuation">(</span><span class="name builtin">id</span><span class="punctuation">)</span> <span class="operator">+</span> <span class="literal string double">&quot;</span><span class="literal string escape">\n</span><span class="literal string double">&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">barrier</span><span class="operator">.</span><span class="name">wait</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">thread1</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">run</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">100</span><span class="punctuation">,))</span><span class="whitespace">
+</span><span class="name">thread2</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">run</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">101</span><span class="punctuation">,))</span><span class="whitespace">
+
+</span><span class="name">thread1</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">thread2</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">barrier</span><span class="operator">.</span><span class="name">wait</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Exit</span><span class="literal string escape">\n</span><span class="literal string double">&quot;</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">100
+
+101
+
+Exit</pre>
+<p>Przykład użycia bariery z action. Funkcja z action wywoływana jest tylko
+raz, gdy bariera jest zwalniania i jest wywoływana przed zwolnieniem
+wątków do działania!</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">threading</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">printHi</span><span class="punctuation">():</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Barrier reached&quot;</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">barrier</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Barrier</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">,</span> <span class="name">action</span><span class="operator">=</span><span class="name">printHi</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">run</span><span class="punctuation">(</span><span class="name builtin">id</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">barrier</span><span class="operator">.</span><span class="name">wait</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">str</span><span class="punctuation">(</span><span class="name builtin">id</span><span class="punctuation">)</span> <span class="operator">+</span> <span class="literal string double">&quot;</span><span class="literal string escape">\n</span><span class="literal string double">&quot;</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">thread1</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">run</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">100</span><span class="punctuation">,))</span><span class="whitespace">
+</span><span class="name">thread2</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">run</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">101</span><span class="punctuation">,))</span><span class="whitespace">
+
+</span><span class="name">thread1</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">thread2</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">barrier</span><span class="operator">.</span><span class="name">wait</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Exit</span><span class="literal string escape">\n</span><span class="literal string double">&quot;</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">Barrier reached
+Exit
+
+100
+
+101</pre>
+<p>Parametry obiektu bariery:</p>
+<p><strong>abort:</strong> Zmienia stan bariery na broken. Wszystkie wątki które
+wywołają wait() na takiej barierze otrzymają wyjątek BrokenBarrierError</p>
+<p>Składnia:</p>
+<p>barrier.abort()</p>
+<p><strong>reset:</strong> Resetuje licznik bariery. Każdy oczekujący na niej wątek
+otrzyma błąd BrokenBarrierError</p>
+<p>Syntax:</p>
+<p>barrier.reset()</p>
+<p><strong>broken</strong>: Wartość logiczna, która ma wartość True, jeśli bariera jest
+w stanie zepsutym.</p>
+<p>Składnia:</p>
+<p>bariera.broken</p>
+<p><strong>parties</strong>: liczba wątków wymaganych do przejścia przez barierę.</p>
+<p>Składnia:</p>
+<p>barrier.parties</p>
+<p><strong>n_waiting:</strong> Liczba wątków oczekujących w danym momencie na barierze</p>
+<p>Składnia:</p>
+<p>barrier.n_waiting</p>
+<p>Bariera może być wykorzystywana cyklicznie, wiele razy:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">threading</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">printHi</span><span class="punctuation">():</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Barrier reached&quot;</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">barrier</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Barrier</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">,</span> <span class="name">action</span><span class="operator">=</span><span class="name">printHi</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">run</span><span class="punctuation">(</span><span class="name builtin">id</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">barrier</span><span class="operator">.</span><span class="name">n_waiting</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">barrier</span><span class="operator">.</span><span class="name">wait</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name builtin">str</span><span class="punctuation">(</span><span class="name builtin">id</span><span class="punctuation">)</span> <span class="operator">+</span> <span class="literal string double">&quot;</span><span class="literal string escape">\n</span><span class="literal string double">&quot;</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">thread1</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">run</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">100</span><span class="punctuation">,))</span><span class="whitespace">
+</span><span class="name">thread2</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">run</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">101</span><span class="punctuation">,))</span><span class="whitespace">
+
+</span><span class="name">thread1</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">thread2</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">barrier</span><span class="operator">.</span><span class="name">wait</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Barrier left&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">barrier</span><span class="operator">.</span><span class="name">broken</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">barrier</span><span class="operator">.</span><span class="name">reset</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">barrier</span><span class="operator">.</span><span class="name">broken</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">thread3</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">run</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">100</span><span class="punctuation">,))</span><span class="whitespace">
+</span><span class="name">thread4</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">run</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">101</span><span class="punctuation">,))</span><span class="whitespace">
+</span><span class="name">thread3</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">thread4</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">barrier</span><span class="operator">.</span><span class="name">wait</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Exit</span><span class="literal string escape">\n</span><span class="literal string double">&quot;</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">0
+1
+Barrier reached
+Barrier left
+False
+False
+101
+
+100
+
+0
+1
+Barrier reached
+Exit
+
+101
+
+100</pre>
+</section>
+<section id="timer">
+<h3>Timer</h3>
+<p>Ta klasa reprezentuje akcję, która powinna zostać uruchomiona dopiero po
+upływie określonej ilości czasu — licznik czasu. Timer jest podklasą
+Thread i jako taki działa również jako przykład tworzenia
+niestandardowych wątków.</p>
+<p>Timer czasu są uruchamiane, podobnie jak wątki, przez wywołanie ich
+metody start(). Timer czasu można zatrzymać (zanim jego akcja się
+rozpocznie) przez wywołanie metody cancel().</p>
+<p>Uwaga! Przedział czasu, przez który licznik czasu będzie czekał przed
+wykonaniem swojej akcji, może nie być dokładnie taki sam, jak przedział
+czasu określony przez użytkownika.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">threading</span> <span class="keyword">as</span> <span class="name namespace">th</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">pri</span><span class="punctuation">():</span><span class="whitespace">
+</span>   <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Zombie is still alive </span><span class="literal string escape">\n</span><span class="literal string double">&quot;</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">S</span> <span class="operator">=</span> <span class="name">th</span><span class="operator">.</span><span class="name">Timer</span><span class="punctuation">(</span><span class="literal number float">2.0</span><span class="punctuation">,</span> <span class="name">pri</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">S</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Exit Program</span><span class="literal string escape">\n</span><span class="literal string double">&quot;</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">Exit Program
+
+Zombie is still alive</pre>
+<p>Wykonanie funcji timer możemy przerwać wykonując cancel().</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">threading</span> <span class="keyword">as</span> <span class="name namespace">th</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">pri</span><span class="punctuation">():</span><span class="whitespace">
+</span>   <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Zombie is still alive </span><span class="literal string escape">\n</span><span class="literal string double">&quot;</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">S</span> <span class="operator">=</span> <span class="name">th</span><span class="operator">.</span><span class="name">Timer</span><span class="punctuation">(</span><span class="literal number float">2.0</span><span class="punctuation">,</span> <span class="name">pri</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">S</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;PROGRAM TERMINATION</span><span class="literal string escape">\n</span><span class="literal string double">&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">S</span><span class="operator">.</span><span class="name">cancel</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">PROGRAM TERMINATION</pre>
+</section>
+</section>
+<section id="pool">
+<h2>Pool</h2>
+<p>Pula procesów to wzorzec programistyczny służący do automatycznego
+zarządzania pulą procesów roboczych.</p>
+<p>Pula odpowiada za ustaloną liczbę procesów.</p>
+<p>Python udostępnia pulę procesów za pośrednictwem klasy
+multiprocessing.Pool.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing</span> <span class="keyword namespace">import</span> <span class="name">Pool</span><span class="whitespace">
+
+</span><span class="name">work</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="literal number integer">2</span><span class="punctuation">,</span><span class="literal number integer">3</span><span class="punctuation">]</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">multi</span><span class="punctuation">(</span><span class="name">x</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">x</span><span class="operator">*</span><span class="name">x</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">pool_handler</span><span class="punctuation">():</span><span class="whitespace">
+</span>    <span class="name">p</span> <span class="operator">=</span> <span class="name">Pool</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">p</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="name">multi</span><span class="punctuation">,</span> <span class="name">work</span><span class="punctuation">))</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">pool_handler</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">[1, 4, 9]</pre>
+<p>Istnieją cztery główne etapy cyklu życia korzystania z klasy
+multiprocessing.Pool, są to: tworzenie, przesyłanie zadań, oczekiwanie i
+zamykanie.</p>
+<pre class="literal-block">Utwórz: Utwórz pulę procesów, wywołując konstruktor multiprocessing.Pool().
+ Prześlij: przesyłaj zadania synchronicznie lub asynchronicznie.
+     2a. Przesyłaj zadania synchronicznie
+     2b. Przesyłaj zadania asynchronicznie
+ Czekaj: Poczekaj i uzyskaj wyniki po ukończeniu zadań (opcjonalnie).
+     3a. Poczekaj na zakończenie obiektów Result
+     3b. Poczekaj na obiekty AsyncResult dla Result
+ Shutdown: Zamknij pulę procesów, wywołując close().
+     4a. Zamknij automatycznie za pomocą Menedżera kontekstu</pre>
+<p>Tworzenie puli wątków:</p>
+<p>Pulę procesów tworzymy, podając argumenty konstruktorowi klasy
+multiprocessing.Pool.</p>
+<p>Argumenty dla konstruktora są następujące:</p>
+<pre class="literal-block">procesy: maksymalna liczba procesów roboczych do użycia w puli.
+inicjator: Funkcja wykonywana po utworzeniu każdego procesu roboczego.
+initargs: Argumenty funkcji inicjalizacji procesu roboczego.
+maxtasksperchild: Ogranicz maksymalną liczbę zadań wykonywanych przez każdy proces roboczy.
+context: Skonfiguruj kontekst przetwarzania wieloprocesowego, taki jak metoda uruchamiania procesu.</pre>
+<p>Domyślnie konstruktor klasy multiprocessing.Pool nie przyjmuje żadnych
+argumentów.</p>
+<p>pool = multiprocessing.Pool()</p>
+<p>Spowoduje to utworzenie puli procesów, która będzie wykorzystywać liczbę
+procesów roboczych odpowiadającą liczbie logicznych rdzeni procesora w
+systemie.</p>
+<p>pool = multiprocessing.Pool(2)</p>
+<p>Definiuje ile procesów ma być tworzone w puli - w tym przypadku dwa.</p>
+<p>Poniżej podany jest przykład konfiguracji inicjalizacji procesów w puli:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">multiprocessing</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing</span> <span class="keyword namespace">import</span> <span class="name">current_process</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">current_thread</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">():</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Wykonanie, process=</span><span class="literal string interpol">{</span><span class="name">current_process</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="literal string interpol">}</span><span class="literal string single">, thread=</span><span class="literal string interpol">{</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">initialization</span><span class="punctuation">():</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Inicjalizacja, process=</span><span class="literal string interpol">{</span><span class="name">current_process</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="literal string interpol">}</span><span class="literal string single">, thread=</span><span class="literal string interpol">{</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">pool</span> <span class="operator">=</span> <span class="name">multiprocessing</span><span class="operator">.</span><span class="name">Pool</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">,</span> <span class="name">initializer</span><span class="operator">=</span><span class="name">initialization</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">_</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">pool</span><span class="operator">.</span><span class="name">apply</span><span class="punctuation">(</span><span class="name">task</span><span class="punctuation">)</span><span class="whitespace">
+
+</span>    <span class="name">pool</span><span class="operator">.</span><span class="name">close</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">pool</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Inicjalizacja, process=ForkPoolWorker-7, thread=MainThreadInicjalizacja, process=ForkPoolWorker-8, thread=MainThread
+
+Inicjalizacja, process=ForkPoolWorker-9, thread=MainThreadWykonanie, process=ForkPoolWorker-7, thread=MainThread
+
+Wykonanie, process=ForkPoolWorker-8, thread=MainThread
+Wykonanie, process=ForkPoolWorker-9, thread=MainThread
+Wykonanie, process=ForkPoolWorker-7, thread=MainThread
+Wykonanie, process=ForkPoolWorker-8, thread=MainThread</pre>
+<p>Pool mozemy wywoływać też kontektowo z wkorzystanie słowa kluczowego
+<strong>with</strong>:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">multiprocessing</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing</span> <span class="keyword namespace">import</span> <span class="name">current_process</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">current_thread</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">():</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Wykonanie, process=</span><span class="literal string interpol">{</span><span class="name">current_process</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="literal string interpol">}</span><span class="literal string single">, thread=</span><span class="literal string interpol">{</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">initialization</span><span class="punctuation">():</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Inicjalizacja, process=</span><span class="literal string interpol">{</span><span class="name">current_process</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="literal string interpol">}</span><span class="literal string single">, thread=</span><span class="literal string interpol">{</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="keyword">with</span> <span class="name">Pool</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">,</span> <span class="name">initializer</span><span class="operator">=</span><span class="name">worker_init</span><span class="punctuation">,</span> <span class="name">initargs</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">start</span><span class="punctuation">,</span><span class="name">lock</span><span class="punctuation">,))</span> <span class="keyword">as</span> <span class="name">pool</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="keyword">for</span> <span class="name">_</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">):</span><span class="whitespace">
+</span>            <span class="name">pool</span><span class="operator">.</span><span class="name">apply</span><span class="punctuation">(</span><span class="name">task</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">pool</span><span class="operator">.</span><span class="name">close</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="name">pool</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Initializing worker with: 0
+Initializing worker with: 0
+Initializing worker with: 0
+Wykonanie, process=ForkPoolWorker-23, thread=MainThread
+Wykonanie, process=ForkPoolWorker-24, thread=MainThread</pre>
+<p>Zadania są wysyłane do puli, a procesy robocze są tworzone w razie
+potrzeby do wykonania zadań.</p>
+<p>Po utworzeniu procesów roboczych są one inicjowane, a następnie
+rozpoczynają wykonywanie wydanych zadań.</p>
+<p>Co ważne, każdy proces roboczy jest inicjowany tylko raz i tylko przed
+rozpoczęciem wykonywania zadań w puli, nawet jeżeli nie będzie
+wykorzystywany (jak widać powyżej).</p>
+<p>Za pomocą inicjalizacji można definiować globalne zmienne dla danego
+workera (wątku). Zauważ, że zmienne te nie są wspołdzielone między
+wątkami:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">multiprocessing</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing.pool</span> <span class="keyword namespace">import</span> <span class="name">Pool</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">add</span><span class="punctuation">():</span><span class="whitespace">
+</span>    <span class="keyword">global</span> <span class="name">lock</span><span class="whitespace">
+</span>    <span class="name">lock</span><span class="operator">.</span><span class="name">acquire</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="keyword">global</span> <span class="name">counter</span><span class="whitespace">
+</span>    <span class="name">counter</span> <span class="operator">+=</span> <span class="literal number integer">1</span><span class="whitespace">
+</span>    <span class="name">lock</span><span class="operator">.</span><span class="name">release</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Worker executing with: </span><span class="literal string interpol">{</span><span class="name">counter</span><span class="literal string interpol">}</span><span class="literal string single"> </span><span class="literal string interpol">{</span><span class="name">lock</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">,</span> <span class="name">flush</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number float">0.1</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">worker_init</span><span class="punctuation">(</span><span class="name">custom</span><span class="punctuation">,</span> <span class="name">mlock</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">global</span> <span class="name">counter</span><span class="whitespace">
+</span>    <span class="name">counter</span> <span class="operator">=</span> <span class="name">custom</span><span class="whitespace">
+</span>    <span class="keyword">global</span> <span class="name">lock</span><span class="whitespace">
+</span>    <span class="name">lock</span> <span class="operator">=</span> <span class="name">mlock</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Initializing worker with: </span><span class="literal string interpol">{</span><span class="name">counter</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">,</span> <span class="name">flush</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">start</span> <span class="operator">=</span> <span class="literal number integer">0</span><span class="whitespace">
+</span>    <span class="name">lock</span> <span class="operator">=</span> <span class="name">multiprocessing</span><span class="operator">.</span><span class="name">Lock</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="keyword">with</span> <span class="name">Pool</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,</span> <span class="name">initializer</span><span class="operator">=</span><span class="name">worker_init</span><span class="punctuation">,</span> <span class="name">initargs</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">start</span><span class="punctuation">,</span><span class="name">lock</span><span class="punctuation">,))</span> <span class="keyword">as</span> <span class="name">pool</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="keyword">for</span> <span class="name">_</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">10</span><span class="punctuation">):</span><span class="whitespace">
+</span>            <span class="name">pool</span><span class="operator">.</span><span class="name">apply</span><span class="punctuation">(</span><span class="name">add</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">pool</span><span class="operator">.</span><span class="name">close</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="name">pool</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Initializing worker with: 0
+Initializing worker with: 0
+Worker executing with: 1 &lt;Lock(owner=None)&gt;
+Worker executing with: 1 &lt;Lock(owner=None)&gt;
+Worker executing with: 2 &lt;Lock(owner=None)&gt;
+Worker executing with: 2 &lt;Lock(owner=None)&gt;
+Worker executing with: 3 &lt;Lock(owner=None)&gt;
+Worker executing with: 3 &lt;Lock(owner=None)&gt;
+Worker executing with: 4 &lt;Lock(owner=None)&gt;
+Worker executing with: 4 &lt;Lock(owner=None)&gt;
+Worker executing with: 5 &lt;Lock(owner=None)&gt;
+Worker executing with: 5 &lt;Lock(owner=None)&gt;</pre>
+<p>Przy zmianie na multiprocess.Value</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">multiprocessing</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing.pool</span> <span class="keyword namespace">import</span> <span class="name">Pool</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">add</span><span class="punctuation">():</span><span class="whitespace">
+</span>    <span class="keyword">global</span> <span class="name">lock</span><span class="whitespace">
+</span>    <span class="name">lock</span><span class="operator">.</span><span class="name">acquire</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="keyword">global</span> <span class="name">counter</span><span class="whitespace">
+</span>    <span class="name">counter</span><span class="operator">.</span><span class="name">value</span> <span class="operator">+=</span> <span class="literal number float">1.0</span><span class="whitespace">
+</span>    <span class="name">lock</span><span class="operator">.</span><span class="name">release</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Worker executing with: </span><span class="literal string interpol">{</span><span class="name">counter</span><span class="operator">.</span><span class="name">value</span><span class="literal string interpol">}</span><span class="literal string single"> </span><span class="literal string interpol">{</span><span class="name">lock</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">,</span> <span class="name">flush</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number float">0.1</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">worker_init</span><span class="punctuation">(</span><span class="name">custom</span><span class="punctuation">,</span> <span class="name">mlock</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">global</span> <span class="name">counter</span><span class="whitespace">
+</span>    <span class="name">counter</span> <span class="operator">=</span> <span class="name">custom</span><span class="whitespace">
+</span>    <span class="keyword">global</span> <span class="name">lock</span><span class="whitespace">
+</span>    <span class="name">lock</span> <span class="operator">=</span> <span class="name">mlock</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Initializing worker with: </span><span class="literal string interpol">{</span><span class="name">counter</span><span class="operator">.</span><span class="name">value</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">,</span> <span class="name">flush</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">start</span> <span class="operator">=</span> <span class="name">multiprocessing</span><span class="operator">.</span><span class="name">Value</span><span class="punctuation">(</span><span class="literal string single">'d'</span><span class="punctuation">,</span><span class="literal number integer">0</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">lock</span> <span class="operator">=</span> <span class="name">multiprocessing</span><span class="operator">.</span><span class="name">Lock</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="keyword">with</span> <span class="name">Pool</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,</span> <span class="name">initializer</span><span class="operator">=</span><span class="name">worker_init</span><span class="punctuation">,</span> <span class="name">initargs</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">start</span><span class="punctuation">,</span><span class="name">lock</span><span class="punctuation">,))</span> <span class="keyword">as</span> <span class="name">pool</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="keyword">for</span> <span class="name">_</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">10</span><span class="punctuation">):</span><span class="whitespace">
+</span>            <span class="name">pool</span><span class="operator">.</span><span class="name">apply</span><span class="punctuation">(</span><span class="name">add</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">pool</span><span class="operator">.</span><span class="name">close</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="name">pool</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Initializing worker with: 0.0
+Initializing worker with: 0.0
+Worker executing with: 1.0 &lt;Lock(owner=None)&gt;
+Worker executing with: 2.0 &lt;Lock(owner=None)&gt;
+Worker executing with: 3.0 &lt;Lock(owner=None)&gt;
+Worker executing with: 4.0 &lt;Lock(owner=None)&gt;
+Worker executing with: 5.0 &lt;Lock(owner=None)&gt;
+Worker executing with: 6.0 &lt;Lock(owner=None)&gt;
+Worker executing with: 7.0 &lt;Lock(owner=None)&gt;
+Worker executing with: 8.0 &lt;Lock(owner=None)&gt;
+Worker executing with: 9.0 &lt;Lock(owner=None)&gt;
+Worker executing with: 10.0 &lt;Lock(owner=None)&gt;</pre>
+<p>Jak już zauważyłeś zadania do wykonania przez Pool dodajemy przez
+<strong>apply()</strong> lub <strong>map()</strong></p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing.pool</span> <span class="keyword namespace">import</span> <span class="name">Pool</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">(</span><span class="name">identifier</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Task </span><span class="literal string interpol">{</span><span class="name">identifier</span><span class="literal string interpol">}</span><span class="literal string single"> executing </span><span class="literal string interpol">{</span><span class="name">current_process</span><span class="punctuation">()</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">identifier</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="keyword">with</span> <span class="name">Pool</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span> <span class="keyword">as</span> <span class="name">pool</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="keyword">for</span> <span class="name">result</span> <span class="operator word">in</span> <span class="name">pool</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="name">task</span><span class="punctuation">,</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">)):</span><span class="whitespace">
+</span>            <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Got result: </span><span class="literal string interpol">{</span><span class="name">result</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">Task 0 executing &lt;ForkProcess name='ForkPoolWorker-40' parent=247962 started daemon&gt;
+Task 2 executing &lt;ForkProcess name='ForkPoolWorker-40' parent=247962 started daemon&gt;
+Task 3 executing &lt;ForkProcess name='ForkPoolWorker-40' parent=247962 started daemon&gt;
+Task 4 executing &lt;ForkProcess name='ForkPoolWorker-40' parent=247962 started daemon&gt;
+Task 1 executing &lt;ForkProcess name='ForkPoolWorker-41' parent=247962 started daemon&gt;
+Got result: 0
+Got result: 1
+Got result: 2
+Got result: 3
+Got result: 4</pre>
+<p>Jeżeli możemy otrzymywać wyniki jeden za drugim możemy skorzystać z
+imap(), dostaniemy wtedy wyniki szybciej zaraz po przetworzeniu jak i
+zużyjemy mniej pamięci bo będą one dodawane do kolejki pojedynczo a nie
+wszystkie na raz czekając w pamięci na wykonanie:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing.pool</span> <span class="keyword namespace">import</span> <span class="name">Pool</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">(</span><span class="name">identifier</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Task </span><span class="literal string interpol">{</span><span class="name">identifier</span><span class="literal string interpol">}</span><span class="literal string single"> executing </span><span class="literal string interpol">{</span><span class="name">current_process</span><span class="punctuation">()</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">identifier</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="keyword">with</span> <span class="name">Pool</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span> <span class="keyword">as</span> <span class="name">pool</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="keyword">for</span> <span class="name">result</span> <span class="operator word">in</span> <span class="name">pool</span><span class="operator">.</span><span class="name">imap_unordered</span><span class="punctuation">(</span><span class="name">task</span><span class="punctuation">,</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">)):</span><span class="whitespace">
+</span>            <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Got result: </span><span class="literal string interpol">{</span><span class="name">result</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">Task 0 executing &lt;ForkProcess name='ForkPoolWorker-13' parent=249305 started daemon&gt;Task 1 executing &lt;ForkProcess name='ForkPoolWorker-14' parent=249305 started daemon&gt;
+
+Task 2 executing &lt;ForkProcess name='ForkPoolWorker-13' parent=249305 started daemon&gt;
+Task 3 executing &lt;ForkProcess name='ForkPoolWorker-13' parent=249305 started daemon&gt;
+Task 4 executing &lt;ForkProcess name='ForkPoolWorker-13' parent=249305 started daemon&gt;
+Got result: 0
+Got result: 2
+Got result: 3
+Got result: 4
+Got result: 1</pre>
+<p>Zadania możemy też wykonywać asynchronicznie przy wykorzystaniu
+<strong>apply_async()</strong>, <strong>map_async()</strong>. Do czekania na wynik obliczeń
+wykorzystujemy metode <strong>wait()</strong> a pobranie wyniku wykonujemy za pomocą
+<strong>get()</strong>.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing.pool</span> <span class="keyword namespace">import</span> <span class="name">Pool</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing</span> <span class="keyword namespace">import</span> <span class="name">Process</span><span class="punctuation">,</span> <span class="name">current_process</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">(</span><span class="name">identifier</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Task </span><span class="literal string interpol">{</span><span class="name">identifier</span><span class="literal string interpol">}</span><span class="literal string single"> executing </span><span class="literal string interpol">{</span><span class="name">current_process</span><span class="punctuation">()</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">identifier</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="keyword">with</span> <span class="name">Pool</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span> <span class="keyword">as</span> <span class="name">pool</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="name">result</span> <span class="operator">=</span> <span class="name">pool</span><span class="operator">.</span><span class="name">map_async</span><span class="punctuation">(</span><span class="name">task</span><span class="punctuation">,</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">))</span><span class="whitespace">
+</span>        <span class="name">result</span><span class="operator">.</span><span class="name">wait</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Got result: </span><span class="literal string interpol">{</span><span class="name">result</span><span class="operator">.</span><span class="name">get</span><span class="punctuation">()</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">Task 0 executing &lt;ForkProcess name='ForkPoolWorker-50' parent=247962 started daemon&gt;Task 1 executing &lt;ForkProcess name='ForkPoolWorker-51' parent=247962 started daemon&gt;
+
+Task 2 executing &lt;ForkProcess name='ForkPoolWorker-50' parent=247962 started daemon&gt;
+Task 3 executing &lt;ForkProcess name='ForkPoolWorker-51' parent=247962 started daemon&gt;
+Task 4 executing &lt;ForkProcess name='ForkPoolWorker-50' parent=247962 started daemon&gt;
+Got result: [0, 1, 2, 3, 4]</pre>
+<p>W przypadku przetwarzania asynchronicznego możemy zdefiniować funkcję
+<strong>callback</strong> która będzie wykonana po zakończeniu działania
+przetwarzania map.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing.pool</span> <span class="keyword namespace">import</span> <span class="name">Pool</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing</span> <span class="keyword namespace">import</span> <span class="name">Process</span><span class="punctuation">,</span> <span class="name">current_process</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">(</span><span class="name">identifier</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Task </span><span class="literal string interpol">{</span><span class="name">identifier</span><span class="literal string interpol">}</span><span class="literal string single"> executing </span><span class="literal string interpol">{</span><span class="name">current_process</span><span class="punctuation">()</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">identifier</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">custom_callback</span><span class="punctuation">(</span><span class="name">result</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Got result: </span><span class="literal string interpol">{</span><span class="name">result</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="keyword">with</span> <span class="name">Pool</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span> <span class="keyword">as</span> <span class="name">pool</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="name">res</span> <span class="operator">=</span> <span class="name">pool</span><span class="operator">.</span><span class="name">map_async</span><span class="punctuation">(</span><span class="name">task</span><span class="punctuation">,</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">),</span> <span class="name">callback</span><span class="operator">=</span><span class="name">custom_callback</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">res</span><span class="operator">.</span><span class="name">wait</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Task 0 executing &lt;ForkProcess name='ForkPoolWorker-11' parent=249305 started daemon&gt;Task 1 executing &lt;ForkProcess name='ForkPoolWorker-12' parent=249305 started daemon&gt;
+Task 2 executing &lt;ForkProcess name='ForkPoolWorker-11' parent=249305 started daemon&gt;
+
+Got result: [0, 1, 2]</pre>
+<p>Poniżej podsumowano kluczowe różnice między tymi dwiema funkcjami:</p>
+<pre class="literal-block">Funkcja map_async() nie blokuje, podczas gdy funkcja map() blokuje.
+Funkcja map_async() zwraca AsyncResult, podczas gdy funkcja map() zwraca iterowalną kolekcje zwracanych wartości z funkcji docelowej.
+Funkcja map_async() może wykonywać funkcje callback w przypadku zwracanych wartości i błędów, podczas gdy funkcja map() nie obsługuje funkcji callback.</pre>
+<section id="kolejki">
+<h3>Kolejki</h3>
+<p>Klasa multiprocess.Queue jest prawie klonem klasy Queue.Queue. Kolejki
+są bezpieczne dla wątków i procesów i mogą służyć jako medium wymiany
+informacji między wątkami.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing</span> <span class="keyword namespace">import</span> <span class="name">Process</span><span class="punctuation">,</span> <span class="name">Queue</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">f</span><span class="punctuation">(</span><span class="name">q</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">q</span><span class="operator">.</span><span class="name">put</span><span class="punctuation">([</span><span class="literal number integer">42</span><span class="punctuation">,</span> <span class="keyword constant">None</span><span class="punctuation">,</span> <span class="literal string single">'hello'</span><span class="punctuation">])</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">q</span> <span class="operator">=</span> <span class="name">Queue</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">p</span> <span class="operator">=</span> <span class="name">Process</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">f</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">q</span><span class="punctuation">,))</span><span class="whitespace">
+</span>    <span class="name">p</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">q</span><span class="operator">.</span><span class="name">get</span><span class="punctuation">())</span>    <span class="comment single"># prints &quot;[42, None, 'hello']&quot;</span><span class="whitespace">
+</span>    <span class="name">p</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">[42, None, 'hello']</pre>
+</section>
+<section id="shared-memory">
+<h3>Shared memory</h3>
+<p>SharedMemory ma stały rozmiar i przechowuje dane bajtowe.</p>
+<p>Typy Pythona można konwertować na tablice bajtów i przechowywać w
+SharedMemory oraz odczytywać jako tablice bajtów i konwertować z
+powrotem na typy Pythona.</p>
+<p>Umożliwia procesom odczytywanie i zapisywanie z tej samej pamięci, co
+jest szybsze i wydajniejsze niż udostępnianie danych poprzez
+przekazywanie komunikatów, na przykład przez multiprocessing.Queue [2].</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing.shared_memory</span> <span class="keyword namespace">import</span> <span class="name">SharedMemory</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing</span> <span class="keyword namespace">import</span> <span class="name">Process</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">(</span><span class="name">shared_mem</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">shared_mem</span><span class="operator">.</span><span class="name">buf</span><span class="punctuation">[:</span><span class="literal number integer">24</span><span class="punctuation">]</span> <span class="operator">=</span> <span class="literal string affix">b</span><span class="literal string single">'Hello from child process'</span><span class="whitespace">
+</span>    <span class="name">shared_mem</span><span class="operator">.</span><span class="name">close</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">shared_mem</span> <span class="operator">=</span> <span class="name">SharedMemory</span><span class="punctuation">(</span><span class="name">create</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">,</span> <span class="name">size</span><span class="operator">=</span><span class="literal number integer">100</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">process</span> <span class="operator">=</span> <span class="name">Process</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">task</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">shared_mem</span><span class="punctuation">,))</span><span class="whitespace">
+</span>    <span class="name">process</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">process</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+
+</span>    <span class="name">data</span> <span class="operator">=</span> <span class="name builtin">bytes</span><span class="punctuation">(</span><span class="name">shared_mem</span><span class="operator">.</span><span class="name">buf</span><span class="punctuation">[:</span><span class="literal number integer">24</span><span class="punctuation">])</span><span class="operator">.</span><span class="name">decode</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">data</span><span class="punctuation">)</span><span class="whitespace">
+
+</span>    <span class="name">shared_mem</span><span class="operator">.</span><span class="name">close</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">shared_mem</span><span class="operator">.</span><span class="name">unlink</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Hello from child process</pre>
+</section>
+<section id="dodatkowe-uwagi">
+<h3>Dodatkowe uwagi</h3>
+<p>Różnica między threadPool a processPool, czyli wykonania wielowątkowego
+i wieloprocesorowego [1]. Porównaj jak poniższy kod zachowa się na
+systemie Windows!</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">time</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">multiprocessing</span> <span class="keyword">as</span> <span class="name namespace">mp</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing.pool</span> <span class="keyword namespace">import</span> <span class="name">ThreadPool</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">numpy</span> <span class="keyword">as</span> <span class="name namespace">np</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">pickle</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">main</span><span class="punctuation">():</span><span class="whitespace">
+</span>    <span class="name">arr</span> <span class="operator">=</span> <span class="name">np</span><span class="operator">.</span><span class="name">ones</span><span class="punctuation">((</span><span class="literal number integer">1024</span><span class="punctuation">,</span> <span class="literal number integer">1024</span><span class="punctuation">,</span> <span class="literal number integer">1024</span><span class="punctuation">),</span> <span class="name">dtype</span><span class="operator">=</span><span class="name">np</span><span class="operator">.</span><span class="name">uint8</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">expected_sum</span> <span class="operator">=</span> <span class="name">np</span><span class="operator">.</span><span class="name">sum</span><span class="punctuation">(</span><span class="name">arr</span><span class="punctuation">)</span><span class="whitespace">
+
+</span>    <span class="keyword">with</span> <span class="name">ThreadPool</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span> <span class="keyword">as</span> <span class="name">threadpool</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="name">start</span> <span class="operator">=</span> <span class="name">time</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="keyword">assert</span> <span class="punctuation">(</span><span class="whitespace">
+</span>            <span class="name">threadpool</span><span class="operator">.</span><span class="name">apply</span><span class="punctuation">(</span><span class="name">np</span><span class="operator">.</span><span class="name">sum</span><span class="punctuation">,</span> <span class="punctuation">(</span><span class="name">arr</span><span class="punctuation">,))</span> <span class="operator">==</span> <span class="name">expected_sum</span><span class="whitespace">
+</span>        <span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Thread pool:&quot;</span><span class="punctuation">,</span> <span class="name">time</span><span class="punctuation">()</span> <span class="operator">-</span> <span class="name">start</span><span class="punctuation">)</span><span class="whitespace">
+
+</span>    <span class="keyword">with</span> <span class="name">mp</span><span class="operator">.</span><span class="name">get_context</span><span class="punctuation">(</span><span class="literal string double">&quot;spawn&quot;</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">Pool</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span> <span class="keyword">as</span> <span class="name">processpool</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="name">start</span> <span class="operator">=</span> <span class="name">time</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="keyword">assert</span> <span class="punctuation">(</span><span class="whitespace">
+</span>            <span class="name">processpool</span><span class="operator">.</span><span class="name">apply</span><span class="punctuation">(</span><span class="name">np</span><span class="operator">.</span><span class="name">sum</span><span class="punctuation">,</span> <span class="punctuation">(</span><span class="name">arr</span><span class="punctuation">,))</span> <span class="operator">==</span> <span class="name">expected_sum</span><span class="whitespace">
+</span>        <span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Process pool:&quot;</span><span class="punctuation">,</span> <span class="name">time</span><span class="punctuation">()</span> <span class="operator">-</span> <span class="name">start</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string double">&quot;__main__&quot;</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">main</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Thread pool: 0.7617292404174805
+Process pool: 4.805462121963501</pre>
+<p>NumPy zwalnia interpreter globalny GIL z wykonywania wielu swoich
+operacji, co oznacza, że możesz używać wielu rdzeni procesora nawet z
+wątkami [1]</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">numpy</span> <span class="keyword">as</span> <span class="name namespace">np</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">time</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing.pool</span> <span class="keyword namespace">import</span> <span class="name">ThreadPool</span><span class="whitespace">
+
+</span><span class="name">arr</span> <span class="operator">=</span> <span class="name">np</span><span class="operator">.</span><span class="name">ones</span><span class="punctuation">((</span><span class="literal number integer">1024</span><span class="punctuation">,</span> <span class="literal number integer">1024</span><span class="punctuation">,</span> <span class="literal number integer">1024</span><span class="punctuation">))</span><span class="whitespace">
+
+</span><span class="name">start</span> <span class="operator">=</span> <span class="name">time</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">10</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">arr</span><span class="operator">.</span><span class="name">sum</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Sequential:&quot;</span><span class="punctuation">,</span> <span class="name">time</span><span class="punctuation">()</span> <span class="operator">-</span> <span class="name">start</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">expected</span> <span class="operator">=</span> <span class="name">arr</span><span class="operator">.</span><span class="name">sum</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">start</span> <span class="operator">=</span> <span class="name">time</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="keyword">with</span> <span class="name">ThreadPool</span><span class="punctuation">(</span><span class="literal number integer">4</span><span class="punctuation">)</span> <span class="keyword">as</span> <span class="name">pool</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">result</span> <span class="operator">=</span> <span class="name">pool</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="name">np</span><span class="operator">.</span><span class="name">sum</span><span class="punctuation">,</span> <span class="punctuation">[</span><span class="name">arr</span><span class="punctuation">]</span> <span class="operator">*</span> <span class="literal number integer">10</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="keyword">assert</span> <span class="name">result</span> <span class="operator">==</span> <span class="punctuation">[</span><span class="name">expected</span><span class="punctuation">]</span> <span class="operator">*</span> <span class="literal number integer">10</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;4 threads:&quot;</span><span class="punctuation">,</span> <span class="name">time</span><span class="punctuation">()</span> <span class="operator">-</span> <span class="name">start</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">Sequential: 5.484835386276245
+4 threads: 1.8242735862731934</pre>
+<p>Przykład Scikit-learn [3], jeden wątek:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">sklearn.ensemble</span> <span class="keyword namespace">import</span> <span class="name">RandomForestClassifier</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">sklearn</span> <span class="keyword namespace">import</span> <span class="name">datasets</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">time</span><span class="whitespace">
+
+</span><span class="name">X</span><span class="punctuation">,</span> <span class="name">y</span> <span class="operator">=</span> <span class="name">datasets</span><span class="operator">.</span><span class="name">make_classification</span><span class="punctuation">(</span><span class="name">n_samples</span><span class="operator">=</span><span class="literal number integer">10000</span><span class="punctuation">,</span> <span class="name">n_features</span><span class="operator">=</span><span class="literal number integer">50</span><span class="punctuation">,</span> <span class="name">n_informative</span><span class="operator">=</span><span class="literal number integer">20</span><span class="punctuation">,</span> <span class="name">n_classes</span><span class="operator">=</span><span class="literal number integer">10</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">start</span> <span class="operator">=</span> <span class="name">time</span><span class="operator">.</span><span class="name">time</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">model</span> <span class="operator">=</span> <span class="name">RandomForestClassifier</span><span class="punctuation">(</span><span class="name">n_estimators</span><span class="operator">=</span><span class="literal number integer">500</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">model</span><span class="operator">.</span><span class="name">fit</span><span class="punctuation">(</span><span class="name">X</span><span class="punctuation">,</span> <span class="name">y</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Time:'</span><span class="punctuation">,</span> <span class="name">time</span><span class="operator">.</span><span class="name">time</span><span class="punctuation">()</span><span class="operator">-</span><span class="name">start</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">Time: 30.666493892669678</pre>
+<p>vs 4 wątki:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">sklearn.ensemble</span> <span class="keyword namespace">import</span> <span class="name">RandomForestClassifier</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">sklearn</span> <span class="keyword namespace">import</span> <span class="name">datasets</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">time</span><span class="whitespace">
+
+</span><span class="name">X</span><span class="punctuation">,</span> <span class="name">y</span> <span class="operator">=</span> <span class="name">datasets</span><span class="operator">.</span><span class="name">make_classification</span><span class="punctuation">(</span><span class="name">n_samples</span><span class="operator">=</span><span class="literal number integer">10000</span><span class="punctuation">,</span> <span class="name">n_features</span><span class="operator">=</span><span class="literal number integer">50</span><span class="punctuation">,</span> <span class="name">n_informative</span><span class="operator">=</span><span class="literal number integer">20</span><span class="punctuation">,</span> <span class="name">n_classes</span><span class="operator">=</span><span class="literal number integer">10</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">start</span> <span class="operator">=</span> <span class="name">time</span><span class="operator">.</span><span class="name">time</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">model</span> <span class="operator">=</span> <span class="name">RandomForestClassifier</span><span class="punctuation">(</span><span class="name">n_estimators</span><span class="operator">=</span><span class="literal number integer">500</span><span class="punctuation">,</span> <span class="name">n_jobs</span><span class="operator">=</span><span class="literal number integer">4</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">model</span><span class="operator">.</span><span class="name">fit</span><span class="punctuation">(</span><span class="name">X</span><span class="punctuation">,</span> <span class="name">y</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Time:'</span><span class="punctuation">,</span> <span class="name">time</span><span class="operator">.</span><span class="name">time</span><span class="punctuation">()</span><span class="operator">-</span><span class="name">start</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">Time: 8.18601655960083</pre>
+<p>Źródła:</p>
+<p>[1] <a class="reference external" href="https://pythonspeed.com/articles/faster-multiprocessing-pickle/">https://pythonspeed.com/articles/faster-multiprocessing-pickle/</a></p>
+<p>[2] <a class="reference external" href="https://superfastpython.com/multiprocessing-sharedmemory/">https://superfastpython.com/multiprocessing-sharedmemory/</a></p>
+<p>[3]
+<a class="reference external" href="https://blog.floydhub.com/multiprocessing-vs-threading-in-python-what-every-data-scientist-needs-to-know/">https://blog.floydhub.com/multiprocessing-vs-threading-in-python-what-every-data-scientist-needs-to-know/</a></p>
+</section>
+</section></body>
+</html>
+

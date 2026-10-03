@@ -1,0 +1,510 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>PRS04.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="laboratorium-4-multiprocessing-anomalie-zwiazane-z-przetwarzaniem-rownoleglym-zaglodzenie-race-condition-zakleszczenie">
+<h2>Laboratorium 4 - Multiprocessing. Anomalie związane z przetwarzaniem równoległym, zagłodzenie, race condition, zakleszczenie</h2>
+<section id="multiprocessing">
+<h3>multiprocessing</h3>
+<p><strong>multiprocessing</strong> to pakiet obsługujący tworzenie procesów przy użyciu
+interfejsu API podobnie do modułu thread.</p>
+<p>Pakiet multiprocessing oferuje zarówno lokalną, jak i zdalną
+współbieżność, skutecznie omijając globalną blokadę interpretera,
+używając podprocesów zamiast wątków. Dzięki temu moduł wieloprocesorowy
+pozwala programiście na pełne wykorzystanie wielu procesorów na danej
+maszynie. Działa zarówno na systemie Unix, jak i Windows.</p>
+<p>W przetwarzaniu multiprocessing procesy są tworzone przez utworzenie
+obiektu <strong>Process</strong>, a następnie wywołanie jego metody <strong>start()</strong>.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing</span> <span class="keyword namespace">import</span> <span class="name">Process</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">():</span><span class="whitespace">
+</span>    <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'This is from another process'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">process</span> <span class="operator">=</span> <span class="name">Process</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">task</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">process</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Waiting for the process...'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">process</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Waiting for the process...
+This is from another process</pre>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing</span> <span class="keyword namespace">import</span> <span class="name">Process</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">f</span><span class="punctuation">(</span><span class="name">name</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Cześć'</span><span class="punctuation">,</span> <span class="name">name</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">p</span> <span class="operator">=</span> <span class="name">Process</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">f</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal string single">'Marcin'</span><span class="punctuation">,))</span><span class="whitespace">
+</span>    <span class="name">p</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">p</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Cześć Marcin</pre>
+<p>Podobnie możemy tworzyć proces jako podklase klasy Process:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing</span> <span class="keyword namespace">import</span> <span class="name">Process</span><span class="whitespace">
+
+</span><span class="keyword">class</span> <span class="name class">CustomProcess</span><span class="punctuation">(</span><span class="name">Process</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">def</span> <span class="name function">run</span><span class="punctuation">(</span><span class="name builtin pseudo">self</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'This is coming from another process'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">process</span> <span class="operator">=</span> <span class="name">CustomProcess</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">process</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Waiting for the process to finish'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">process</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Waiting for the process to finish
+This is coming from another process</pre>
+<p>Jak widać w poniższym przykładzie wykonywany kod uruchamia nowy process
+w systemie.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing</span> <span class="keyword namespace">import</span> <span class="name">Process</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">os</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">info</span><span class="punctuation">(</span><span class="name">title</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">title</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'module name:'</span><span class="punctuation">,</span> <span class="name variable magic">__name__</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'parent process:'</span><span class="punctuation">,</span> <span class="name">os</span><span class="operator">.</span><span class="name">getppid</span><span class="punctuation">())</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'process id:'</span><span class="punctuation">,</span> <span class="name">os</span><span class="operator">.</span><span class="name">getpid</span><span class="punctuation">())</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">f</span><span class="punctuation">(</span><span class="name">name</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">info</span><span class="punctuation">(</span><span class="literal string single">'function f'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Cześć'</span><span class="punctuation">,</span> <span class="name">name</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">info</span><span class="punctuation">(</span><span class="literal string single">'main funkcja'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">p</span> <span class="operator">=</span> <span class="name">Process</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">f</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal string single">'Marcin'</span><span class="punctuation">,))</span><span class="whitespace">
+</span>    <span class="name">p</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">p</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">main funkcja
+module name: __main__
+parent process: 58469
+process id: 59795
+function f
+module name: __main__
+parent process: 59795
+process id: 60127
+Cześć Marcin</pre>
+<p>Wykorzystanie Lock w multiprocessing</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing</span> <span class="keyword namespace">import</span> <span class="name">Process</span><span class="punctuation">,</span> <span class="name">Lock</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">f</span><span class="punctuation">(</span><span class="name">l</span><span class="punctuation">,</span> <span class="name">i</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">l</span><span class="operator">.</span><span class="name">acquire</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="keyword">try</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'hello world'</span><span class="punctuation">,</span> <span class="name">i</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="keyword">finally</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="name">l</span><span class="operator">.</span><span class="name">release</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">lock</span> <span class="operator">=</span> <span class="name">Lock</span><span class="punctuation">()</span><span class="whitespace">
+
+</span>    <span class="keyword">for</span> <span class="name">num</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">10</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">Process</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">f</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">lock</span><span class="punctuation">,</span> <span class="name">num</span><span class="punctuation">))</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">hello world 0
+hello world 1
+hello world 2
+hello world 3
+hello world 4
+hello world 5
+hello world 6
+hello world 7
+hello world 8
+hello world 9</pre>
+<p>Dane między procesami być przechowywane na mapie pamięci współdzielone
+przy użyciu <strong>Value</strong> lub <strong>Array</strong>.</p>
+<p>Zmienne współdzielone oznaczają, że zmiany dokonane w jednym procesie są
+zawsze propagowane i udostępniane innym procesom. Wystąpienie
+multiprocessing.Value można zdefiniować w konstruktorze klasy jako
+zmienną. Konstruktor klasy multiprocessing.Value wymaga od nas
+określenia typu danych oraz wartości początkowej. Definicje
+konstruktorów obiektów:</p>
+<blockquote>
+<p>multiprocessing.Array(typecode_or_type, size_or_initializer, *,
+lock=True)</p>
+</blockquote>
+<!--  -->
+<blockquote>
+<p>multiprocessing.Value(typecode_or_type, *args, lock=True)</p>
+</blockquote>
+<p>Typy z moduly ctypes: ‘i’ - int, ‘d’ - double, c_char - char, c_bool -
+bool, c_wchar_p - String.</p>
+<p>Jeśli blokada ma wartość True (wartość domyślna), tworzony jest nowy
+obiekt blokady w celu synchronizacji dostępu do wartości. Jeśli lock
+jest obiektem Lock lub RLock, zostanie użyty do synchronizacji dostępu
+do wartości. Jeśli blokada ma wartość False, dostęp do zwróconego
+obiektu nie będzie automatycznie chroniony blokadą, więc niekoniecznie
+będzie „bezpieczny dla procesu”.</p>
+<p>Na przykład:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">multiprocessing</span> <span class="keyword namespace">import</span> <span class="name">Process</span><span class="punctuation">,</span> <span class="name">Value</span><span class="punctuation">,</span> <span class="name">Array</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">ctypes</span> <span class="keyword namespace">import</span> <span class="name">Structure</span><span class="punctuation">,</span> <span class="name">c_bool</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">f</span><span class="punctuation">(</span><span class="name">n</span><span class="punctuation">,</span> <span class="name">a</span><span class="punctuation">,</span> <span class="name">m</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">n</span><span class="operator">.</span><span class="name">value</span> <span class="operator">=</span> <span class="literal number float">3.1415927</span><span class="whitespace">
+</span>    <span class="name">m</span><span class="operator">.</span><span class="name">value</span> <span class="operator">=</span> <span class="keyword constant">True</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="name builtin">len</span><span class="punctuation">(</span><span class="name">a</span><span class="punctuation">)):</span><span class="whitespace">
+</span>        <span class="name">a</span><span class="punctuation">[</span><span class="name">i</span><span class="punctuation">]</span> <span class="operator">=</span> <span class="operator">-</span><span class="name">a</span><span class="punctuation">[</span><span class="name">i</span><span class="punctuation">]</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">num</span> <span class="operator">=</span> <span class="name">Value</span><span class="punctuation">(</span><span class="literal string single">'d'</span><span class="punctuation">,</span> <span class="literal number float">0.0</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">bools</span> <span class="operator">=</span> <span class="name">Value</span><span class="punctuation">(</span><span class="name">c_bool</span><span class="punctuation">,</span> <span class="keyword constant">False</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">arr</span> <span class="operator">=</span> <span class="name">Array</span><span class="punctuation">(</span><span class="literal string single">'i'</span><span class="punctuation">,</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">10</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name">p</span> <span class="operator">=</span> <span class="name">Process</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">f</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">num</span><span class="punctuation">,</span> <span class="name">arr</span><span class="punctuation">,</span> <span class="name">bools</span><span class="punctuation">))</span><span class="whitespace">
+</span>    <span class="name">p</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">p</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">num</span><span class="operator">.</span><span class="name">value</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">bools</span><span class="operator">.</span><span class="name">value</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">arr</span><span class="punctuation">[:])</span></code></pre>
+<pre class="literal-block">3.1415927
+True
+[0, -1, -2, -3, -4, -5, -6, -7, -8, -9]</pre>
+<p>Tworzenie nowych procesów czy wątków? Jak zobaczymy niżej jako że
+Jupyter działa na Linuxie uruchamiane są nowe wątki poprzez fork.
+Uruchom program u siebie na systemie windows.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">multiprocessing</span><span class="whitespace">
+
+</span><span class="name">methods</span> <span class="operator">=</span> <span class="name">multiprocessing</span><span class="operator">.</span><span class="name">get_all_start_methods</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">methods</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">method</span> <span class="operator">=</span> <span class="name">multiprocessing</span><span class="operator">.</span><span class="name">get_start_method</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">method</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">['fork', 'spawn', 'forkserver']
+fork</pre>
+<p>Aby sprawdzić czy warto wykorzystywać ten moduł sprawdź liczbę rdzeni na
+komputerze z któreo korzystasz (odpal lokalnie!)</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">multiprocessing</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Number of cpu : &quot;</span><span class="punctuation">,</span> <span class="name">multiprocessing</span><span class="operator">.</span><span class="name">cpu_count</span><span class="punctuation">())</span></code></pre>
+<pre class="literal-block">Number of cpu :  6</pre>
+</section>
+<section id="race-condition">
+<h3>Race condition</h3>
+<p>Przykład:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Thread</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">adder</span><span class="punctuation">(</span><span class="name">amount</span><span class="punctuation">,</span> <span class="name">repeats</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">global</span> <span class="name">value</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">_</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="name">repeats</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">value</span> <span class="operator">+=</span> <span class="name">amount</span><span class="operator">*</span><span class="literal number integer">2</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">subtractor</span><span class="punctuation">(</span><span class="name">amount</span><span class="punctuation">,</span> <span class="name">repeats</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">global</span> <span class="name">value</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">_</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="name">repeats</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">value</span> <span class="operator">-=</span> <span class="name">amount</span><span class="operator">*</span><span class="literal number integer">2</span><span class="whitespace">
+
+</span><span class="name">value</span> <span class="operator">=</span> <span class="literal number integer">0</span><span class="whitespace">
+</span><span class="name">adder_thread</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">adder</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">10</span><span class="punctuation">,</span> <span class="literal number integer">500000</span><span class="punctuation">))</span><span class="whitespace">
+</span><span class="name">adder_thread</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">subtractor_thread</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">subtractor</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">10</span><span class="punctuation">,</span> <span class="literal number integer">500000</span><span class="punctuation">))</span><span class="whitespace">
+</span><span class="name">subtractor_thread</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Waiting for threads to finish...'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">adder_thread</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">subtractor_thread</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Value: </span><span class="literal string interpol">{</span><span class="name">value</span><span class="literal string interpol">}</span><span class="literal string single">'</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">Waiting for threads to finish...
+Value: 4731260</pre>
+</section>
+<section id="zakleszczenie">
+<h3>Zakleszczenie</h3>
+<p>Przykład watki czekają na siebie (złe użycie join()):</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">current_thread</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Thread</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">(</span><span class="name">other</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'[</span><span class="literal string interpol">{</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="literal string interpol">}</span><span class="literal string single">] waiting on [</span><span class="literal string interpol">{</span><span class="name">other</span><span class="operator">.</span><span class="name">name</span><span class="literal string interpol">}</span><span class="literal string single">]...'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">other</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">main_thread</span> <span class="operator">=</span> <span class="name">current_thread</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">new_thread</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">task</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">main_thread</span><span class="punctuation">,))</span><span class="whitespace">
+</span><span class="name">new_thread</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">task</span><span class="punctuation">(</span><span class="name">new_thread</span><span class="punctuation">)</span></code></pre>
+<p>Przykład złe blokowanie locków:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Thread</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Lock</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">(</span><span class="name">number</span><span class="punctuation">,</span> <span class="name">lock1</span><span class="punctuation">,</span> <span class="name">lock2</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Thread </span><span class="literal string interpol">{</span><span class="name">number</span><span class="literal string interpol">}</span><span class="literal string single"> acquiring lock 1...'</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="keyword">with</span> <span class="name">lock1</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Thread </span><span class="literal string interpol">{</span><span class="name">number</span><span class="literal string interpol">}</span><span class="literal string single"> acquiring lock 2...'</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="keyword">with</span> <span class="name">lock2</span><span class="punctuation">:</span><span class="whitespace">
+</span>            <span class="keyword">pass</span><span class="whitespace">
+
+</span><span class="name">lock1</span> <span class="operator">=</span> <span class="name">Lock</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">lock2</span> <span class="operator">=</span> <span class="name">Lock</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">thread1</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">task</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="name">lock1</span><span class="punctuation">,</span> <span class="name">lock2</span><span class="punctuation">))</span><span class="whitespace">
+</span><span class="name">thread2</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">task</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,</span> <span class="name">lock2</span><span class="punctuation">,</span> <span class="name">lock1</span><span class="punctuation">))</span><span class="whitespace">
+</span><span class="name">thread1</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">thread2</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">thread1</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">thread2</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+</section>
+<section id="zaglodzenie">
+<h3>Zagłodzenie</h3>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Thread</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Lock</span><span class="whitespace">
+
+</span><span class="comment single"># task</span><span class="whitespace">
+</span><span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">(</span><span class="name">lock</span><span class="punctuation">,</span> <span class="name">identifier</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">with</span> <span class="name">lock</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">):</span><span class="whitespace">
+</span>            <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Thread </span><span class="literal string interpol">{</span><span class="name">identifier</span><span class="literal string interpol">}</span><span class="literal string single"> working'</span><span class="punctuation">)</span><span class="whitespace">
+</span>            <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">lock</span> <span class="operator">=</span> <span class="name">Lock</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">threads</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">task</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">lock</span><span class="punctuation">,</span><span class="name">i</span><span class="punctuation">))</span> <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)]</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">thread</span> <span class="operator word">in</span> <span class="name">threads</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">thread</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">thread</span> <span class="operator word">in</span> <span class="name">threads</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">thread</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Thread 0 working
+Thread 0 working
+Thread 0 working
+Thread 0 working
+Thread 0 working
+Thread 1 working
+Thread 1 working
+Thread 1 working
+Thread 1 working
+Thread 1 working</pre>
+<p>Fix nr 1</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Thread</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Lock</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">(</span><span class="name">lock</span><span class="punctuation">,</span> <span class="name">identifier</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">lock</span><span class="operator">.</span><span class="name">acquire</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Thread </span><span class="literal string interpol">{</span><span class="name">identifier</span><span class="literal string interpol">}</span><span class="literal string single"> working'</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">lock</span><span class="operator">.</span><span class="name">release</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">lock</span> <span class="operator">=</span> <span class="name">Lock</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">threads</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">task</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">lock</span><span class="punctuation">,</span><span class="name">i</span><span class="punctuation">))</span> <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)]</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">thread</span> <span class="operator word">in</span> <span class="name">threads</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">thread</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">thread</span> <span class="operator word">in</span> <span class="name">threads</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">thread</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Thread 0 working
+Thread 0 working
+Thread 0 working
+Thread 0 working
+Thread 0 working
+Thread 1 working
+Thread 1 working
+Thread 1 working
+Thread 1 working
+Thread 1 working</pre>
+<p>Nadal nie jest sprawiedliwie, fix nr 2:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Thread</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Semaphore</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">(</span><span class="name">lock</span><span class="punctuation">,</span> <span class="name">identifier</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="keyword">with</span> <span class="name">lock</span><span class="punctuation">:</span><span class="whitespace">
+</span>            <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Thread </span><span class="literal string interpol">{</span><span class="name">identifier</span><span class="literal string interpol">}</span><span class="literal string single"> working'</span><span class="punctuation">)</span><span class="whitespace">
+</span>            <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">lock</span> <span class="operator">=</span> <span class="name">Semaphore</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">threads</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">task</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">lock</span><span class="punctuation">,</span><span class="name">i</span><span class="punctuation">))</span> <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)]</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">thread</span> <span class="operator word">in</span> <span class="name">threads</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">thread</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">thread</span> <span class="operator word">in</span> <span class="name">threads</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">thread</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Thread 0 working
+Thread 0 working
+Thread 0 working
+Thread 0 working
+Thread 0 working
+Thread 1 working
+Thread 1 working
+Thread 1 working
+Thread 1 working
+Thread 1 working</pre>
+<p>Żeby wymusić przełączenie najlepiej użyć sleep()</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Thread</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Semaphore</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">(</span><span class="name">lock</span><span class="punctuation">,</span> <span class="name">identifier</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number float">0.001</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="keyword">with</span> <span class="name">lock</span><span class="punctuation">:</span><span class="whitespace">
+</span>            <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Thread </span><span class="literal string interpol">{</span><span class="name">identifier</span><span class="literal string interpol">}</span><span class="literal string single"> working'</span><span class="punctuation">)</span><span class="whitespace">
+</span>            <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">lock</span> <span class="operator">=</span> <span class="name">Semaphore</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">threads</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">task</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">lock</span><span class="punctuation">,</span><span class="name">i</span><span class="punctuation">))</span> <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)]</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">thread</span> <span class="operator word">in</span> <span class="name">threads</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">thread</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">thread</span> <span class="operator word">in</span> <span class="name">threads</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">thread</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Thread 0 working
+Thread 1 working
+Thread 0 working
+Thread 1 working
+Thread 0 working
+Thread 1 working
+Thread 0 working
+Thread 1 working
+Thread 0 working
+Thread 1 working</pre>
+</section>
+<section id="livelock">
+<h3>Livelock</h3>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Thread</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Lock</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">(</span><span class="name">number</span><span class="punctuation">,</span> <span class="name">lock1</span><span class="punctuation">,</span> <span class="name">lock2</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">10</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="keyword">with</span> <span class="name">lock1</span><span class="punctuation">:</span><span class="whitespace">
+</span>            <span class="name">sleep</span><span class="punctuation">(</span><span class="literal number float">0.1</span><span class="punctuation">)</span><span class="whitespace">
+</span>            <span class="keyword">if</span> <span class="name">lock2</span><span class="operator">.</span><span class="name">locked</span><span class="punctuation">():</span><span class="whitespace">
+</span>                <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Task </span><span class="literal string interpol">{</span><span class="name">number</span><span class="literal string interpol">}</span><span class="literal string single"> cannot get the second lock, giving up...'</span><span class="punctuation">)</span><span class="whitespace">
+</span>            <span class="keyword">else</span><span class="punctuation">:</span><span class="whitespace">
+</span>                <span class="keyword">with</span> <span class="name">lock2</span><span class="punctuation">:</span><span class="whitespace">
+</span>                    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string single">'Task </span><span class="literal string interpol">{</span><span class="name">number</span><span class="literal string interpol">}</span><span class="literal string single"> made it, all done.'</span><span class="punctuation">)</span><span class="whitespace">
+</span>                    <span class="keyword">break</span><span class="whitespace">
+
+</span><span class="name">lock1</span> <span class="operator">=</span> <span class="name">Lock</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">lock2</span> <span class="operator">=</span> <span class="name">Lock</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">thread1</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">task</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">0</span><span class="punctuation">,</span> <span class="name">lock1</span><span class="punctuation">,</span> <span class="name">lock2</span><span class="punctuation">))</span><span class="whitespace">
+</span><span class="name">thread2</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">task</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="name">lock2</span><span class="punctuation">,</span> <span class="name">lock1</span><span class="punctuation">))</span><span class="whitespace">
+</span><span class="name">thread1</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">thread2</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">thread1</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">thread2</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Task 0 cannot get the second lock, giving up...
+Task 1 cannot get the second lock, giving up...
+Task 0 cannot get the second lock, giving up...
+Task 1 cannot get the second lock, giving up...
+Task 0 cannot get the second lock, giving up...
+Task 1 cannot get the second lock, giving up...
+Task 0 cannot get the second lock, giving up...
+Task 1 cannot get the second lock, giving up...
+Task 0 cannot get the second lock, giving up...
+Task 1 cannot get the second lock, giving up...
+Task 0 cannot get the second lock, giving up...
+Task 1 cannot get the second lock, giving up...
+Task 0 cannot get the second lock, giving up...
+Task 1 cannot get the second lock, giving up...
+Task 0 cannot get the second lock, giving up...
+Task 1 cannot get the second lock, giving up...
+Task 0 cannot get the second lock, giving up...
+Task 1 cannot get the second lock, giving up...
+Task 0 cannot get the second lock, giving up...
+Task 1 made it, all done.</pre>
+</section>
+<section id="zadanie">
+<h3>Zadanie</h3>
+<p>Przeanalizuj poniższy kod sklepu sprzedającego trzy elementy następnie
+wykonaj zadania na moodle (debbuger z Pycharm może ci pomóc w analizie).</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">enum</span> <span class="keyword namespace">import</span> <span class="name">Enum</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">random</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">threading</span> <span class="keyword namespace">import</span> <span class="name">Thread</span><span class="punctuation">,</span> <span class="name">Lock</span><span class="punctuation">,</span> <span class="name">current_thread</span><span class="whitespace">
+
+</span><span class="keyword">class</span> <span class="name class">Items</span><span class="punctuation">(</span><span class="name">Enum</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">GARNEK</span> <span class="operator">=</span> <span class="literal number integer">0</span><span class="whitespace">
+</span>    <span class="name">SZKLANKA</span> <span class="operator">=</span> <span class="literal number integer">1</span><span class="whitespace">
+</span>    <span class="name">TALERZ</span> <span class="operator">=</span> <span class="literal number integer">2</span><span class="whitespace">
+
+</span><span class="keyword">class</span> <span class="name class">Shop</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">listLock</span> <span class="operator">=</span> <span class="punctuation">[]</span><span class="whitespace">
+</span>    <span class="name">warehouse</span> <span class="operator">=</span> <span class="punctuation">{}</span><span class="whitespace">
+
+</span>    <span class="keyword">def</span> <span class="name function magic">__init__</span><span class="punctuation">(</span><span class="name builtin pseudo">self</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">listLock</span><span class="operator">.</span><span class="name">append</span><span class="punctuation">(</span><span class="name">Lock</span><span class="punctuation">())</span><span class="whitespace">
+</span>        <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">listLock</span><span class="operator">.</span><span class="name">append</span><span class="punctuation">(</span><span class="name">Lock</span><span class="punctuation">())</span><span class="whitespace">
+</span>        <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">listLock</span><span class="operator">.</span><span class="name">append</span><span class="punctuation">(</span><span class="name">Lock</span><span class="punctuation">())</span><span class="whitespace">
+</span>        <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">warehouse</span><span class="punctuation">[</span><span class="name">Items</span><span class="operator">.</span><span class="name">GARNEK</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">]</span> <span class="operator">=</span> <span class="literal number integer">10000</span><span class="whitespace">
+</span>        <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">warehouse</span><span class="punctuation">[</span><span class="name">Items</span><span class="operator">.</span><span class="name">TALERZ</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">]</span> <span class="operator">=</span> <span class="literal number integer">200</span><span class="whitespace">
+</span>        <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">warehouse</span><span class="punctuation">[</span><span class="name">Items</span><span class="operator">.</span><span class="name">SZKLANKA</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">]</span> <span class="operator">=</span> <span class="literal number integer">800</span><span class="whitespace">
+
+</span>    <span class="keyword">def</span> <span class="name function">purchase</span><span class="punctuation">(</span><span class="name builtin pseudo">self</span><span class="punctuation">,</span> <span class="name">item</span><span class="punctuation">,</span> <span class="name">wynik</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="comment single">#print(&quot;Kupuje %s %s&quot; % (item, current_thread().name))</span><span class="whitespace">
+</span>        <span class="name">stockSize</span> <span class="operator">=</span> <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">warehouse</span><span class="punctuation">[</span><span class="name">item</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">]</span><span class="whitespace">
+</span>        <span class="keyword">if</span> <span class="punctuation">(</span><span class="name">stockSize</span> <span class="operator">&gt;</span> <span class="literal number integer">0</span><span class="punctuation">):</span><span class="whitespace">
+</span>            <span class="comment single">#print(&quot;Zakup zaakceptowany - Na stanie %s %s %s&quot; % (item.name, stockSize, current_thread().name))</span><span class="whitespace">
+</span>            <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">warehouse</span><span class="punctuation">[</span><span class="name">item</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">]</span> <span class="operator">=</span> <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">warehouse</span><span class="punctuation">[</span><span class="name">item</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">]</span> <span class="operator">-</span> <span class="literal number integer">1</span><span class="whitespace">
+</span>        <span class="keyword">else</span><span class="punctuation">:</span><span class="whitespace">
+</span>            <span class="comment single">#print(&quot;Zakup odrzucony - nie ma dostępnych więcej elementów %s %s&quot; % (item.name, current_thread().name))</span><span class="whitespace">
+</span>            <span class="name">wynik</span><span class="punctuation">[</span><span class="name">item</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">]</span> <span class="operator">=</span> <span class="name">wynik</span><span class="punctuation">[</span><span class="name">item</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">]</span> <span class="operator">+</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">shopper</span><span class="punctuation">(</span><span class="name">shop</span><span class="punctuation">,</span> <span class="name">shoppingList</span><span class="punctuation">,</span> <span class="name">wynik</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">el</span> <span class="operator word">in</span> <span class="name">shoppingList</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="name">shop</span><span class="operator">.</span><span class="name">purchase</span><span class="punctuation">(</span><span class="name">el</span><span class="punctuation">,</span> <span class="name">wynik</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">if</span> <span class="name variable magic">__name__</span> <span class="operator">==</span> <span class="literal string single">'__main__'</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">shop</span> <span class="operator">=</span> <span class="name">Shop</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">shoppingList_1</span> <span class="operator">=</span> <span class="punctuation">[]</span><span class="whitespace">
+</span>    <span class="name">shoppingList_2</span> <span class="operator">=</span> <span class="punctuation">[]</span><span class="whitespace">
+</span>    <span class="name">shoppingList_3</span> <span class="operator">=</span> <span class="punctuation">[]</span><span class="whitespace">
+</span>    <span class="name">shoppingList_4</span> <span class="operator">=</span> <span class="punctuation">[]</span><span class="whitespace">
+</span>    <span class="name">ile</span> <span class="operator">=</span> <span class="punctuation">{</span><span class="name">Items</span><span class="operator">.</span><span class="name">GARNEK</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">:</span>  <span class="literal number integer">10000</span><span class="punctuation">,</span> <span class="name">Items</span><span class="operator">.</span><span class="name">TALERZ</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">:</span>  <span class="literal number integer">200</span><span class="punctuation">,</span> <span class="name">Items</span><span class="operator">.</span><span class="name">SZKLANKA</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">:</span> <span class="literal number integer">800</span><span class="punctuation">}</span><span class="whitespace">
+</span>    <span class="name">wynik</span> <span class="operator">=</span> <span class="punctuation">{</span><span class="name">Items</span><span class="operator">.</span><span class="name">GARNEK</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">:</span>  <span class="literal number integer">0</span><span class="punctuation">,</span> <span class="name">Items</span><span class="operator">.</span><span class="name">TALERZ</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">:</span>  <span class="literal number integer">0</span><span class="punctuation">,</span> <span class="name">Items</span><span class="operator">.</span><span class="name">SZKLANKA</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">:</span> <span class="literal number integer">0</span><span class="punctuation">}</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">_</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">0</span><span class="punctuation">,</span> <span class="literal number integer">50000</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">r</span> <span class="operator">=</span> <span class="name">random</span><span class="operator">.</span><span class="name">randrange</span><span class="punctuation">(</span><span class="literal number integer">0</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">item</span> <span class="operator">=</span> <span class="name builtin">list</span><span class="punctuation">(</span><span class="name">Items</span><span class="punctuation">)[</span><span class="name">r</span><span class="punctuation">]</span><span class="whitespace">
+</span>        <span class="name">shoppingList_1</span><span class="operator">.</span><span class="name">append</span><span class="punctuation">(</span><span class="name">item</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">ile</span><span class="punctuation">[</span><span class="name">item</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">]</span> <span class="operator">=</span> <span class="name">ile</span><span class="punctuation">[</span><span class="name">item</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">]</span> <span class="operator">-</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span>    <span class="keyword">for</span> <span class="name">_</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">0</span><span class="punctuation">,</span> <span class="literal number integer">50000</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">r</span> <span class="operator">=</span> <span class="name">random</span><span class="operator">.</span><span class="name">randrange</span><span class="punctuation">(</span><span class="literal number integer">0</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">item</span> <span class="operator">=</span> <span class="name builtin">list</span><span class="punctuation">(</span><span class="name">Items</span><span class="punctuation">)[</span><span class="name">r</span><span class="punctuation">]</span><span class="whitespace">
+</span>        <span class="name">shoppingList_2</span><span class="operator">.</span><span class="name">append</span><span class="punctuation">(</span><span class="name">item</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">ile</span><span class="punctuation">[</span><span class="name">item</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">]</span> <span class="operator">=</span> <span class="name">ile</span><span class="punctuation">[</span><span class="name">item</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">]</span> <span class="operator">-</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span>    <span class="keyword">for</span> <span class="name">_</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">0</span><span class="punctuation">,</span> <span class="literal number integer">50000</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">r</span> <span class="operator">=</span> <span class="name">random</span><span class="operator">.</span><span class="name">randrange</span><span class="punctuation">(</span><span class="literal number integer">0</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">item</span> <span class="operator">=</span> <span class="name builtin">list</span><span class="punctuation">(</span><span class="name">Items</span><span class="punctuation">)[</span><span class="name">r</span><span class="punctuation">]</span><span class="whitespace">
+</span>        <span class="name">shoppingList_3</span><span class="operator">.</span><span class="name">append</span><span class="punctuation">(</span><span class="name">item</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">ile</span><span class="punctuation">[</span><span class="name">item</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">]</span> <span class="operator">=</span> <span class="name">ile</span><span class="punctuation">[</span><span class="name">item</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">]</span> <span class="operator">-</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span>    <span class="keyword">for</span> <span class="name">_</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">0</span><span class="punctuation">,</span> <span class="literal number integer">5000</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">r</span> <span class="operator">=</span> <span class="name">random</span><span class="operator">.</span><span class="name">randrange</span><span class="punctuation">(</span><span class="literal number integer">0</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">item</span> <span class="operator">=</span> <span class="name builtin">list</span><span class="punctuation">(</span><span class="name">Items</span><span class="punctuation">)[</span><span class="name">r</span><span class="punctuation">]</span><span class="whitespace">
+</span>        <span class="name">shoppingList_4</span><span class="operator">.</span><span class="name">append</span><span class="punctuation">(</span><span class="name">item</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">ile</span><span class="punctuation">[</span><span class="name">item</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">]</span> <span class="operator">=</span> <span class="name">ile</span><span class="punctuation">[</span><span class="name">item</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">]</span> <span class="operator">-</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span>    <span class="name">thread1</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">shopper</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">shop</span><span class="punctuation">,</span><span class="name">shoppingList_1</span><span class="punctuation">,</span> <span class="name">wynik</span><span class="punctuation">,))</span><span class="whitespace">
+</span>    <span class="name">thread2</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">shopper</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">shop</span><span class="punctuation">,</span><span class="name">shoppingList_2</span><span class="punctuation">,</span> <span class="name">wynik</span><span class="punctuation">,))</span><span class="whitespace">
+</span>    <span class="name">thread3</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">shopper</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">shop</span><span class="punctuation">,</span><span class="name">shoppingList_3</span><span class="punctuation">,</span> <span class="name">wynik</span><span class="punctuation">,))</span><span class="whitespace">
+</span>    <span class="name">thread4</span> <span class="operator">=</span> <span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">shopper</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">shop</span><span class="punctuation">,</span><span class="name">shoppingList_4</span><span class="punctuation">,</span> <span class="name">wynik</span><span class="punctuation">,))</span><span class="whitespace">
+
+</span>    <span class="name">thread1</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">thread2</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">thread3</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">thread4</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+
+</span>    <span class="name">thread1</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">thread2</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">thread3</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">thread4</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+
+</span>    <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name">Items</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="keyword">if</span> <span class="name">ile</span><span class="punctuation">[</span><span class="name">i</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">]</span> <span class="operator">&gt;</span> <span class="literal number integer">0</span><span class="punctuation">:</span><span class="whitespace">
+</span>            <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Ok&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="keyword">else</span><span class="punctuation">:</span><span class="whitespace">
+</span>            <span class="keyword">if</span> <span class="name">ile</span><span class="punctuation">[</span><span class="name">i</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">]</span> <span class="operator">==</span> <span class="operator">-</span><span class="name">wynik</span><span class="punctuation">[</span><span class="name">i</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">]:</span><span class="whitespace">
+</span>                <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Ok&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span>            <span class="keyword">else</span><span class="punctuation">:</span><span class="whitespace">
+</span>                <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Źle&quot;</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">Źle
+Źle
+Źle</pre>
+</section>
+</section></body>
+</html>
+

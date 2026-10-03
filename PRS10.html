@@ -1,0 +1,1044 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>PRS10.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="laboratoria-10-przetwarzanie-danych-strumieniowych-w-apache-flink-api-model-danych">
+<h2>Laboratoria 10 - Przetwarzanie danych strumieniowych w Apache Flink - API, model danych</h2>
+<p><strong>PyFlink</strong> to interfejs API Pythona dla <strong>Apache Flink</strong>, który
+umożliwia tworzenie skalowalnych obciążeń wsadowych i strumieniowych,
+takich jak potoki przetwarzania danych w czasie rzeczywistym,
+eksploracyjna analiza danych na dużą skalę, potoki uczenia maszynowego
+(ML) i procesy ETL.</p>
+<p>Instalacja na własnym komputerze:</p>
+<pre class="code python highlight literal-block"><code><span class="name">python</span> <span class="operator">-</span><span class="name">m</span> <span class="name">pip</span> <span class="name">install</span> <span class="name">apache</span><span class="operator">-</span><span class="name">flink</span><span class="operator">==</span><span class="literal number float">1.17.1</span></code></pre>
+<p>Począwszy od Flink 1.11, obsługiwane jest również lokalne uruchamianie
+zadań PyFlink w systemie Windows, dzięki czemu można opracowywać i
+debugować zadania PyFlink w systemie Windows.</p>
+<section id="datastream">
+<h3>Datastream</h3>
+<p>Strumienie danych w bibliotece Flink nazywamy DataStream - strumieniami
+danych. Służą one do opisu zarówno danych do przetwarzania
+<strong>strumieniowego</strong> jak i <strong>batchowego</strong>, które w bibliotece Flink
+posiadają ten sam interfejs do wykonywania operacji na danych.</p>
+<p>Przetwarzanie strumieni danych DataStream we Flink to zwykłe programy,
+które realizują transformacje na strumieniach danych (np. filtrowanie,
+aktualizowanie stanu, definiowanie okien, agregowanie). Strumienie
+danych są początkowo tworzone z różnych źródeł (np. kolejki komunikatów,
+strumienie gniazd, pliki). Wyniki są zwracane przez ujścia (sink), które
+mogą na przykład zapisywać dane do plików lub na standardowe wyjście (na
+przykład terminal wiersza poleceń). Programy Flink działają w różnych
+kontekstach, samodzielnie lub osadzone w innych programach. Wykonanie
+może odbywać się w lokalnej maszynie JVM lub w klastrach wielu maszyn.</p>
+</section>
+<section id="struktura-programu-w-apache-flink">
+<h3>Struktura programu w Apache Flink</h3>
+<p>Programy Flink wyglądają jak zwykłe programy, które przekształcają
+strumienie danych. Każdy program składa się z tych samych podstawowych
+części:</p>
+<pre class="literal-block">Uzyskaj środowisko wykonawcze,
+Załaduj/utwórz dane początkowe / źródło danych,
+Określ przekształcenia na tych danych,
+Określ, gdzie umieścić wyniki swoich obliczeń,
+Uruchom wykonanie programu</pre>
+</section>
+<section id="srodowisko-uruchomieniowe">
+<h3>Środowisko uruchomieniowe</h3>
+<p>StreamExecutionEnvironment jest podstawą wszystkich programów Flink.
+Możesz go uzyskać za pomocą tych statycznych metod na obiekcie
+StreamExecutionEnvironment:</p>
+<p>getExecutionEnvironment();</p>
+<p>createLocalEnvironment();</p>
+<p>createRemoteEnvironment(String host, int port, String... jarFiles);</p>
+<p>W naszym przypadku będziemy korzystać z <strong>getExecutionEnvironment()</strong>,
+ponieważ wywołuje on potrzebną funkcję w zależności od kontekstu: jeśli
+wykonujesz swój program w IDE lub jako zwykły program Java, utworzy
+lokalne środowisko, które wykona twój program na twojej lokalnej
+maszynie. Środowisko zapewnia metody kontrolowania wykonywania zadań
+(takie jak ustawienie parametrów równoległości lub odporności na
+błędy/punkty kontrolne) oraz interakcji ze światem zewnętrznym (dostęp
+do danych).</p>
+<p>Przykład tworzenia środowiska i ustawiania / odczytu paramertów można
+znaleźć poniżej:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.common</span> <span class="keyword namespace">import</span> <span class="name">ExecutionMode</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream</span> <span class="keyword namespace">import</span> <span class="name">StreamExecutionEnvironment</span><span class="punctuation">,</span> <span class="name">RuntimeExecutionMode</span><span class="whitespace">
+
+</span><span class="name">env</span> <span class="operator">=</span> <span class="name">StreamExecutionEnvironment</span><span class="operator">.</span><span class="name">get_execution_environment</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">env</span><span class="operator">.</span><span class="name">set_runtime_mode</span><span class="punctuation">(</span><span class="name">RuntimeExecutionMode</span><span class="operator">.</span><span class="name">STREAMING</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">env</span><span class="operator">.</span><span class="name">get_config</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">get_execution_mode</span><span class="punctuation">())</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">env</span><span class="operator">.</span><span class="name">get_config</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">get_parallelism</span><span class="punctuation">())</span><span class="whitespace">
+
+</span><span class="name">env</span><span class="operator">.</span><span class="name">get_config</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">set_execution_mode</span><span class="punctuation">(</span><span class="name">ExecutionMode</span><span class="operator">.</span><span class="name">BATCH</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">env</span><span class="operator">.</span><span class="name">get_config</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">get_execution_mode</span><span class="punctuation">())</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">env</span><span class="operator">.</span><span class="name">get_config</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">get_parallelism</span><span class="punctuation">())</span></code></pre>
+<pre class="literal-block">ExecutionMode.PIPELINED
+6
+ExecutionMode.BATCH
+6</pre>
+<p>Tryb wykonywania (runtime_mode) <strong>STREAMING</strong> to sposób wykonywania
+programów w zależności czy dane są skończone czy też nie. Streamin
+powinno być używane w przypadku zadań bez ograniczeń, które wymagają
+ciągłego przetwarzania przyrostowego i oczekuje się, że pozostaną w
+trybie online przez nieokreślony czas.</p>
+<p>Ponadto istnieje tryb wykonywania w stylu wsadowym, który nazywamy
+trybem wykonywania <strong>BATCH</strong>. Wykonuje to zadania w sposób bardziej
+przypominający ramy przetwarzania wsadowego, takie jak MapReduce. Batch
+powinno być używane w przypadku zadań ograniczonych, dla których znane
+są stałe dane wejściowe i które nie są wykonywane w sposób ciągły.</p>
+<p>Trzecia opcja to <strong>AUTOMATIC</strong> pozwalająca wybrać tryb przetwarzania
+bazując na typie źródła danych.</p>
+<p>Zunifikowane podejście Apache Flink do przetwarzania strumieniowego i
+wsadowego oznacza, że aplikacja DataStream wykonywana na ograniczonych
+danych wejściowych będzie generować <strong>takie same</strong> wyniki końcowe
+niezależnie od skonfigurowanego trybu wykonywania.</p>
+<p>Ważne jest, aby zauważyć, co oznacza tutaj final: zadanie wykonywane w
+trybie STREAMING może generować przyrostowe aktualizacje (pomyśl o
+upsertach w bazie danych), podczas gdy zadanie BATCH dałoby tylko jeden
+końcowy wynik na końcu.</p>
+<p>Obok runtime mode możemy zdefiniować także execution mode - określa on w
+jaki sposób program wsadowy jest wykonywany pod względem wymiany danych:
+potokowo lub wsadowo.</p>
+<p>Istnieje jeszcze jedna skrócona forma pobierania ustawień dla
+przetwarzania batchowego lub strumieniowego, która jest stosowana w
+niektórych przykładach ponizej.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.table</span> <span class="keyword namespace">import</span> <span class="name">EnvironmentSettings</span><span class="whitespace">
+
+</span><span class="name">env_settings</span> <span class="operator">=</span> <span class="name">EnvironmentSettings</span><span class="operator">.</span><span class="name">in_streaming_mode</span><span class="punctuation">()</span></code></pre>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.table</span> <span class="keyword namespace">import</span> <span class="name">EnvironmentSettings</span><span class="whitespace">
+
+</span><span class="name">env_settings</span> <span class="operator">=</span> <span class="name">EnvironmentSettings</span><span class="operator">.</span><span class="name">in_batch_mode</span><span class="punctuation">()</span></code></pre>
+</section>
+<section id="zrodla-danych">
+<h3>Źródła danych</h3>
+<p>Najprostszym źródłem danych jest kolekcja. Tworzy ono źródło ztrumienia.
+Najprostsze przetwarzanie wypisze ten strumień na ekran, aby wywołać
+uruchomić przetwarzanie na środowisku musimy wykonać metodę
+<strong>execute()</strong>.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream</span> <span class="keyword namespace">import</span> <span class="name">StreamExecutionEnvironment</span><span class="punctuation">,</span> <span class="name">RuntimeExecutionMode</span><span class="whitespace">
+
+</span><span class="name">env</span> <span class="operator">=</span> <span class="name">StreamExecutionEnvironment</span><span class="operator">.</span><span class="name">get_execution_environment</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">env</span><span class="operator">.</span><span class="name">set_runtime_mode</span><span class="punctuation">(</span><span class="name">RuntimeExecutionMode</span><span class="operator">.</span><span class="name">BATCH</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">data_stream</span> <span class="operator">=</span> <span class="name">env</span><span class="operator">.</span><span class="name">from_collection</span><span class="punctuation">(</span><span class="name">collection</span><span class="operator">=</span><span class="punctuation">[</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">,</span> <span class="literal number integer">4</span><span class="punctuation">,</span> <span class="literal number integer">5</span><span class="punctuation">])</span><span class="operator">.</span><span class="name">print</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">env</span><span class="operator">.</span><span class="name">execute</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">3
+1
+2
+4
+5</pre>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream</span> <span class="keyword namespace">import</span> <span class="name">StreamExecutionEnvironment</span><span class="punctuation">,</span> <span class="name">RuntimeExecutionMode</span><span class="whitespace">
+
+</span><span class="name">env</span> <span class="operator">=</span> <span class="name">StreamExecutionEnvironment</span><span class="operator">.</span><span class="name">get_execution_environment</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">env</span><span class="operator">.</span><span class="name">set_runtime_mode</span><span class="punctuation">(</span><span class="name">RuntimeExecutionMode</span><span class="operator">.</span><span class="name">STREAMING</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">data_stream</span> <span class="operator">=</span> <span class="name">env</span><span class="operator">.</span><span class="name">from_collection</span><span class="punctuation">(</span><span class="name">collection</span><span class="operator">=</span><span class="punctuation">[</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">,</span> <span class="literal number integer">4</span><span class="punctuation">,</span> <span class="literal number integer">5</span><span class="punctuation">])</span><span class="operator">.</span><span class="name">print</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">env</span><span class="operator">.</span><span class="name">execute</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">2&gt; 4
+3&gt; 5
+12&gt; 2
+11&gt; 1
+1&gt; 3</pre>
+<p>Jak widać różnica w tm wypadku to sposób wypisywania danych w przypadku
+strumieniowego podejścia widzimy też na ekranie identyfikator jednostki
+przetwarzającej zadanie. Uwaga! w przypadku przetwarzania strumieni
+lokalnie w systemie czasem zadania sa zamykane za wcześnie i pokazuje
+się błąd komunikacji między węzłami Flink, ciężko jest powiedzieć jak
+temu zaradzić, i jedynym rozwiazaniem jest ignorowanie błędu lub próba
+uruchomienia programu raz jeszcze. Błąd ma postać:</p>
+<pre class="literal-block">grpc._channel._MultiThreadedRendezvous: &lt;_MultiThreadedRendezvous of RPC that terminated with:
+        status = StatusCode.CANCELLED
+        details = &quot;Multiplexer hanging up&quot;
+        debug_error_string = &quot;UNKNOWN:Error received from peer ipv6:%5B::1%5D:45267 {created_time:&quot;2023-06-04T21:26:24.200378935+02:00&quot;, grpc_status:1, grpc_message:&quot;Multiplexer hanging up&quot;}&quot;</pre>
+<p>Generycznym typem źródła danych jest obiekt <strong>Source</strong>:</p>
+<pre class="code python highlight literal-block"><code><span class="name">env</span> <span class="operator">=</span> <span class="name">StreamExecutionEnvironment</span><span class="operator">.</span><span class="name">get_execution_environment</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">my_source</span> <span class="operator">=</span> <span class="operator">...</span><span class="whitespace">
+
+</span><span class="name">env</span><span class="operator">.</span><span class="name">from_source</span><span class="punctuation">(</span><span class="whitespace">
+</span>    <span class="name">my_source</span><span class="punctuation">,</span><span class="whitespace">
+</span>    <span class="literal string double">&quot;my_source_name&quot;</span><span class="punctuation">)</span></code></pre>
+<p>Przykładem Source mogą być pliki, inne źródła danych jak Kafka itp.
+Poniżej plik a.csv :</p>
+<pre class="literal-block">1|Berlin
+2|San Francisco
+3|Beijing</pre>
+<p>Program czytający plik jako wejście dla przetwarzania. Definiujemy w
+obiekcie schemat danych które są odczytywane jako wiersze do strumienia
+wejściowego.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pathlib</span> <span class="keyword namespace">import</span> <span class="name">Path</span><span class="whitespace">
+
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.common</span> <span class="keyword namespace">import</span> <span class="name">WatermarkStrategy</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream</span> <span class="keyword namespace">import</span> <span class="name">StreamExecutionEnvironment</span><span class="punctuation">,</span> <span class="name">RuntimeExecutionMode</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream.connectors.file_system</span> <span class="keyword namespace">import</span> <span class="name">FileSource</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream.formats.csv</span> <span class="keyword namespace">import</span> <span class="name">CsvSchema</span><span class="punctuation">,</span> <span class="name">CsvReaderFormat</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.table</span> <span class="keyword namespace">import</span> <span class="name">DataTypes</span><span class="whitespace">
+
+</span><span class="name">env</span> <span class="operator">=</span> <span class="name">StreamExecutionEnvironment</span><span class="operator">.</span><span class="name">get_execution_environment</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">env</span><span class="operator">.</span><span class="name">set_runtime_mode</span><span class="punctuation">(</span><span class="name">RuntimeExecutionMode</span><span class="operator">.</span><span class="name">BATCH</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">schema</span> <span class="operator">=</span> <span class="name">CsvSchema</span><span class="operator">.</span><span class="name">builder</span><span class="punctuation">()</span> \
+    <span class="operator">.</span><span class="name">add_number_column</span><span class="punctuation">(</span><span class="literal string single">'id'</span><span class="punctuation">,</span> <span class="name">number_type</span><span class="operator">=</span><span class="name">DataTypes</span><span class="operator">.</span><span class="name">BIGINT</span><span class="punctuation">())</span> \
+    <span class="operator">.</span><span class="name">add_string_column</span><span class="punctuation">(</span><span class="literal string single">'name'</span><span class="punctuation">)</span> \
+    <span class="operator">.</span><span class="name">set_column_separator</span><span class="punctuation">(</span><span class="literal string single">'|'</span><span class="punctuation">)</span> \
+    <span class="operator">.</span><span class="name">build</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">FileSource</span><span class="operator">.</span><span class="name">for_record_stream_format</span><span class="punctuation">(</span><span class="whitespace">
+</span>    <span class="name">CsvReaderFormat</span><span class="operator">.</span><span class="name">for_schema</span><span class="punctuation">(</span><span class="name">schema</span><span class="punctuation">),</span> <span class="literal string single">'a.csv'</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">build</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="comment single"># the type of record will be Types.ROW_NAMED(['id', 'array'], [Types.LONG(), Types.LIST(Types.INT())])</span><span class="whitespace">
+</span><span class="name">ds</span> <span class="operator">=</span> <span class="name">env</span><span class="operator">.</span><span class="name">from_source</span><span class="punctuation">(</span><span class="name">source</span><span class="punctuation">,</span> <span class="name">WatermarkStrategy</span><span class="operator">.</span><span class="name">no_watermarks</span><span class="punctuation">(),</span> <span class="literal string single">'csv-source'</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">print</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">env</span><span class="operator">.</span><span class="name">execute</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">+I(1,Berlin)
++I(2,San Francisco)
++I(3,Beijing)</pre>
+<p>Ten sam plik czytany jako dane txt linijka po linijce:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.common</span> <span class="keyword namespace">import</span> <span class="name">WatermarkStrategy</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream</span> <span class="keyword namespace">import</span> <span class="name">StreamExecutionEnvironment</span><span class="punctuation">,</span> <span class="name">RuntimeExecutionMode</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream.connectors.file_system</span> <span class="keyword namespace">import</span> <span class="name">FileSource</span><span class="punctuation">,</span> <span class="name">StreamFormat</span><span class="whitespace">
+
+</span><span class="name">env</span> <span class="operator">=</span> <span class="name">StreamExecutionEnvironment</span><span class="operator">.</span><span class="name">get_execution_environment</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">env</span><span class="operator">.</span><span class="name">set_runtime_mode</span><span class="punctuation">(</span><span class="name">RuntimeExecutionMode</span><span class="operator">.</span><span class="name">BATCH</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">FileSource</span> \
+    <span class="operator">.</span><span class="name">for_record_stream_format</span><span class="punctuation">(</span><span class="name">StreamFormat</span><span class="operator">.</span><span class="name">text_line_format</span><span class="punctuation">(),</span> <span class="literal string single">'a.csv'</span><span class="punctuation">)</span> \
+    <span class="operator">.</span><span class="name">build</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">stream</span> <span class="operator">=</span> <span class="name">env</span><span class="operator">.</span><span class="name">from_source</span><span class="punctuation">(</span><span class="name">source</span><span class="punctuation">,</span> <span class="name">WatermarkStrategy</span><span class="operator">.</span><span class="name">no_watermarks</span><span class="punctuation">(),</span> <span class="literal string double">&quot;file-source&quot;</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">print</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">env</span><span class="operator">.</span><span class="name">execute</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">1|Berlin
+2|San Francisco
+3|Beijing</pre>
+</section>
+<section id="srodowisko-table-i-datastream">
+<h3>Środowisko Table i Datastream</h3>
+<p>TableEnvironment jest punktem wejścia dla integracji Table API i SQL i
+odpowiada za:</p>
+<pre class="literal-block">Rejestrację tabeli w katalogu wewnętrznym
+Wykonywanie zapytań SQL
+Rejestrowanie funkcji zdefiniowanych przez użytkownika
+Konwersję między DataStream a Table (w przypadku StreamTableEnvironment)</pre>
+<p>Tabela jest zawsze powiązana z określonym środowiskiem TableEnvironment.
+Stąd z naszym środowiskiem uruchomieniowym musimy połączyć obiekt
+środowiska tabelarycznego. Nie jest możliwe łączenie tabel różnych
+TableEnvironments w tym samym zapytaniu, np. join lub union.
+TableEnvironment jest tworzony przez wywołanie statycznej metody
+TableEnvironment.create().</p>
+<p>Poniżej podano dwa sposoby tworzenia takiego środowiska.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.table</span> <span class="keyword namespace">import</span> <span class="name">EnvironmentSettings</span><span class="punctuation">,</span> <span class="name">TableEnvironment</span><span class="whitespace">
+
+</span><span class="comment single"># create a streaming TableEnvironment</span><span class="whitespace">
+</span><span class="name">env_settings</span> <span class="operator">=</span> <span class="name">EnvironmentSettings</span><span class="operator">.</span><span class="name">in_streaming_mode</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">table_env</span> <span class="operator">=</span> <span class="name">TableEnvironment</span><span class="operator">.</span><span class="name">create</span><span class="punctuation">(</span><span class="name">env_settings</span><span class="punctuation">)</span></code></pre>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream</span> <span class="keyword namespace">import</span> <span class="name">StreamExecutionEnvironment</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.table</span> <span class="keyword namespace">import</span> <span class="name">StreamTableEnvironment</span><span class="whitespace">
+
+</span><span class="name">s_env</span> <span class="operator">=</span> <span class="name">StreamExecutionEnvironment</span><span class="operator">.</span><span class="name">get_execution_environment</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">t_env</span> <span class="operator">=</span> <span class="name">StreamTableEnvironment</span><span class="operator">.</span><span class="name">create</span><span class="punctuation">(</span><span class="name">s_env</span><span class="punctuation">)</span></code></pre>
+<p>TableEnvironment utrzymuje mapę katalogów tabel, które są tworzone z
+identyfikatorem. Każdy identyfikator składa się z 3 części: nazwy
+katalogu, nazwy bazy danych oraz nazwy obiektu.</p>
+<p>Tabele mogą być wirtualne (WIDOK) lub zwykłe (TABELA). WIDOKI można
+tworzyć z istniejącego obiektu tabeli, zazwyczaj w wyniku działania
+interfejsu API tabeli lub zapytania SQL. TABELE opisują dane zewnętrzne,
+takie jak plik, tabela bazy danych lub kolejka komunikatów.</p>
+<p>Tabele służą za źródła danych jak i jako obiekty pośrednie przy
+transformacji danych. Tabele możemy tworzyć zapisując obiekty na sztywno
+w kodzie jako kolekcje w Pythonie lub odczytując je ze źródeł takich jak
+pliki, tabele czy też zewnętrzne systemy (jak Kafka).</p>
+<p>Tworzenie tabel na postawie zapisanych na sztywno danych. Pyflink
+wspiera użytkowników w tworzeniu tabel źródłowych z podanej listy.
+Poniższy przykład definiuje tabelę zawierającą trzy wiersze danych:
+[(Hello, 1), ((world, 2), ((Flink, 3)]), która ma dwie kolumny z nazwami
+kolumn a i b oraz typami varchar i bigint.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream</span> <span class="keyword namespace">import</span> <span class="name">StreamExecutionEnvironment</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.table</span> <span class="keyword namespace">import</span> <span class="name">StreamTableEnvironment</span><span class="whitespace">
+
+</span><span class="name">s_env</span> <span class="operator">=</span> <span class="name">StreamExecutionEnvironment</span><span class="operator">.</span><span class="name">get_execution_environment</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">t_env</span> <span class="operator">=</span> <span class="name">StreamTableEnvironment</span><span class="operator">.</span><span class="name">create</span><span class="punctuation">(</span><span class="name">s_env</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">tab</span> <span class="operator">=</span> <span class="name">t_env</span><span class="operator">.</span><span class="name">from_elements</span><span class="punctuation">([(</span><span class="literal string double">&quot;hello&quot;</span><span class="punctuation">,</span> <span class="literal number integer">1</span><span class="punctuation">),</span> <span class="punctuation">(</span><span class="literal string double">&quot;world&quot;</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">),</span> <span class="punctuation">(</span><span class="literal string double">&quot;flink&quot;</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">)],</span> <span class="punctuation">[</span><span class="literal string single">'a'</span><span class="punctuation">,</span> <span class="literal string single">'b'</span><span class="punctuation">])</span><span class="operator">.</span><span class="name">print_schema</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">(
+  <cite>a</cite> STRING,
+  <cite>b</cite> BIGINT
+)</pre>
+<p>Ta metoda jest zwykle używana w fazie testowej, gdyż może szybko
+utworzyć tabelę źródła danych w celu weryfikacji logiki zadania.
+Pierwszy parametr służy do określenia listy danych. Każdy element na
+liście musi być typu krotki; Drugi parametr określa schemat tabeli.</p>
+<p>Tworzenie tabel za pomocą SQL API. Poniżej podano przykład różnego
+rodzaju tworzenia tabel i nazwania kolumn. Metoda to_pandas pozwala nam
+wypisać dane z tabeli na ekran.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.table</span> <span class="keyword namespace">import</span> <span class="name">EnvironmentSettings</span><span class="punctuation">,</span> <span class="name">TableEnvironment</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="whitespace">
+
+</span><span class="name">settings</span> <span class="operator">=</span> <span class="name">EnvironmentSettings</span><span class="operator">.</span><span class="name">in_batch_mode</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">tbl_env</span> <span class="operator">=</span> <span class="name">TableEnvironment</span><span class="operator">.</span><span class="name">create</span><span class="punctuation">(</span><span class="name">settings</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">products</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="whitespace">
+</span>    <span class="punctuation">(</span><span class="literal string single">'Mleko'</span><span class="punctuation">,</span> <span class="literal number float">3.99</span><span class="punctuation">),</span><span class="whitespace">
+</span>    <span class="punctuation">(</span><span class="literal string single">'Chleb'</span><span class="punctuation">,</span> <span class="literal number float">5.99</span><span class="punctuation">),</span><span class="whitespace">
+</span>    <span class="punctuation">(</span><span class="literal string single">'Mąka'</span><span class="punctuation">,</span> <span class="literal number float">4.99</span><span class="punctuation">),</span><span class="whitespace">
+</span>    <span class="punctuation">(</span><span class="literal string single">'Jajka'</span><span class="punctuation">,</span> <span class="literal number float">14.99</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="punctuation">]</span><span class="whitespace">
+
+</span><span class="comment single"># simple table</span><span class="whitespace">
+</span><span class="name">simple_data</span> <span class="operator">=</span> <span class="name">tbl_env</span><span class="operator">.</span><span class="name">from_elements</span><span class="punctuation">(</span><span class="name">products</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'</span><span class="literal string escape">\n</span><span class="literal string single">simple_data schema'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">simple_data</span><span class="operator">.</span><span class="name">print_schema</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'</span><span class="literal string escape">\n</span><span class="literal string single">simple_data data'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">simple_data</span><span class="operator">.</span><span class="name">to_pandas</span><span class="punctuation">())</span><span class="whitespace">
+
+</span><span class="comment single">#####################################################</span><span class="whitespace">
+</span><span class="name">col_names</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="literal string single">'product'</span><span class="punctuation">,</span> <span class="literal string single">'price'</span><span class="punctuation">]</span><span class="whitespace">
+</span><span class="name">simple_with_column_names</span> <span class="operator">=</span> <span class="name">tbl_env</span><span class="operator">.</span><span class="name">from_elements</span><span class="punctuation">(</span><span class="name">products</span><span class="punctuation">,</span> <span class="name">col_names</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'</span><span class="literal string escape">\n</span><span class="literal string single">simple_with_column_names schema'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">simple_with_column_names</span><span class="operator">.</span><span class="name">print_schema</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'</span><span class="literal string escape">\n</span><span class="literal string single">simple_with_column_names data'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">simple_with_column_names</span><span class="operator">.</span><span class="name">to_pandas</span><span class="punctuation">())</span><span class="whitespace">
+
+</span><span class="comment single">#####################################################</span><span class="whitespace">
+</span><span class="name">schema</span> <span class="operator">=</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">ROW</span><span class="punctuation">([</span><span class="whitespace">
+</span>    <span class="name">DataTypes</span><span class="operator">.</span><span class="name">FIELD</span><span class="punctuation">(</span><span class="literal string single">'product'</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">STRING</span><span class="punctuation">()),</span><span class="whitespace">
+</span>    <span class="name">DataTypes</span><span class="operator">.</span><span class="name">FIELD</span><span class="punctuation">(</span><span class="literal string single">'price'</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">DOUBLE</span><span class="punctuation">())</span><span class="whitespace">
+</span><span class="punctuation">])</span><span class="whitespace">
+</span><span class="name">table_with_schema</span> <span class="operator">=</span> <span class="name">tbl_env</span><span class="operator">.</span><span class="name">from_elements</span><span class="punctuation">(</span><span class="name">products</span><span class="punctuation">,</span> <span class="name">schema</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'</span><span class="literal string escape">\n</span><span class="literal string single">table_with_schema schema'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">table_with_schema</span><span class="operator">.</span><span class="name">print_schema</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'</span><span class="literal string escape">\n</span><span class="literal string single">table_with_schema data'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">table_with_schema</span><span class="operator">.</span><span class="name">to_pandas</span><span class="punctuation">())</span></code></pre>
+<pre class="literal-block">simple_data schema
+(
+<cite>_1</cite> STRING,
+<cite>_2</cite> DOUBLE
+)
+
+simple_data data
+        _1     _2
+0  Mleko   3.99
+1  Chleb   5.99
+2   Mąka   4.99
+3  Jajka  14.99
+
+simple_with_column_names schema
+(
+<cite>product</cite> STRING,
+<cite>price</cite> DOUBLE
+)
+
+simple_with_column_names data
+product  price
+0   Mleko   3.99
+1   Chleb   5.99
+2    Mąka   4.99
+3   Jajka  14.99
+
+table_with_schema schema
+(
+<cite>product</cite> STRING,
+<cite>price</cite> DOUBLE
+)
+
+table_with_schema data
+product  price
+0   Mleko   3.99
+1   Chleb   5.99
+2    Mąka   4.99
+3   Jajka  14.99</pre>
+</section>
+<section id="transformacje-danych-i-operatory">
+<h3>Transformacje danych i operatory</h3>
+</section>
+<section id="tabele">
+<h3>Tabele</h3>
+<p>Operatorzy przekształcają jeden lub więcej strumieni danych w nowy
+strumień danych. Łańcuchy wywołań mogą łączyć wiele transformacji w
+wyrafinowane topologie przepływu danych.</p>
+<p>Interfejs SQL (sql_query) pozwala nam na tworzenie zapytań typu SQL dla
+tabel i uruchamianiu ich na strumieniu danych.</p>
+<p>Uwaga! Żeby podejrzeć jak wygląda nasz strumień wywołujemy metodę
+to_pandas, która zrzucam nam tabelę do obiektu bibliotki pandas, który
+możemy poźniej łatwo wypisać poprzez print. Nie ma innej prostej metody
+podejrzenia zawartości tabeli.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.table</span> <span class="keyword namespace">import</span> <span class="punctuation">(</span><span class="whitespace">
+</span>    <span class="name">TableEnvironment</span><span class="punctuation">,</span> <span class="name">EnvironmentSettings</span><span class="whitespace">
+</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">env_settings</span> <span class="operator">=</span> <span class="name">EnvironmentSettings</span><span class="operator">.</span><span class="name">in_batch_mode</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">table</span> <span class="operator">=</span> <span class="name">TableEnvironment</span><span class="operator">.</span><span class="name">create</span><span class="punctuation">(</span><span class="name">env_settings</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">table</span><span class="operator">.</span><span class="name">execute_sql</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string double">&quot;&quot;&quot;
+    CREATE TABLE countries(
+        code STRING,
+        name STRING,
+        continent STRING,
+        wikipedia_link STRING
+        ) WITH (
+        'connector' = 'filesystem',
+        'path' = 'countries.csv',
+        'format' = 'csv')
+    &quot;&quot;&quot;</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="comment single"># important to note that operations will be parallelized over</span><span class="whitespace">
+</span><span class="comment single"># task slots across system cores so output will appear randomly</span><span class="whitespace">
+</span><span class="comment single"># ordered and differ from run to run</span><span class="whitespace">
+
+</span><span class="comment single"># SQL query is run on the env not table!</span><span class="whitespace">
+</span><span class="name">codes2</span> <span class="operator">=</span> <span class="name">table</span><span class="operator">.</span><span class="name">sql_query</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string double">&quot;&quot;&quot;
+        SELECT code, name AS nazwa, CHARACTER_LENGTH(name) as nameLength
+        FROM countries
+    &quot;&quot;&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'</span><span class="literal string escape">\n</span><span class="literal string single">Codes_2 table'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">codes2</span><span class="operator">.</span><span class="name">to_pandas</span><span class="punctuation">())</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'</span><span class="literal string escape">\n</span><span class="literal string single">Schema'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">codes2</span><span class="operator">.</span><span class="name">print_schema</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Codes_2 table
+        code                          nazwa  nameLength
+0     AD                        Andorra           7
+1     AE           United Arab Emirates          20
+2     AF                    Afghanistan          11
+3     AG            Antigua and Barbuda          19
+4     AI                       Anguilla           8
+..   ...                            ...         ...
+243   YT                        Mayotte           7
+244   ZA                   South Africa          12
+245   ZM                         Zambia           6
+246   ZW                       Zimbabwe           8
+247   ZZ  Unknown or unassigned country          29
+
+[248 rows x 3 columns]
+
+Schema
+(
+<cite>code</cite> STRING,
+<cite>nazwa</cite> STRING,
+<cite>nameLength</cite> INT
+)</pre>
+<p>Lista wspieranych typów danych dla TableAPI:</p>
+<pre class="literal-block">https://nightlies.apache.org/flink/flink-docs-release-1.17/docs/dev/python/table/python_types/</pre>
+<p>Table API to ujednolicony, relacyjny interfejs API do przetwarzania
+strumieniowego i wsadowego. Zapytania interfejsu API tabel można
+uruchamiać na danych wejściowych wsadowych lub przesyłanych strumieniowo
+bez modyfikacji.</p>
+<p>Table API jest superzbiorem języka SQL i jest specjalnie zaprojektowany
+do pracy z Apache Flink. Table API to zintegrowany język API dla Scali,
+Javy i Pythona. Poniżej znajdziemy przykłady wywołania tych metod.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.table</span> <span class="keyword namespace">import</span> <span class="punctuation">(</span><span class="whitespace">
+</span>    <span class="name">TableEnvironment</span><span class="punctuation">,</span> <span class="name">EnvironmentSettings</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="whitespace">
+</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">env_settings</span> <span class="operator">=</span> <span class="name">EnvironmentSettings</span><span class="operator">.</span><span class="name">in_batch_mode</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">t_env</span> <span class="operator">=</span> <span class="name">TableEnvironment</span><span class="operator">.</span><span class="name">create</span><span class="punctuation">(</span><span class="name">env_settings</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">table</span> <span class="operator">=</span> <span class="name">t_env</span><span class="operator">.</span><span class="name">from_elements</span><span class="punctuation">(</span><span class="whitespace">
+</span>  <span class="punctuation">[(</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal string single">'ABC'</span><span class="punctuation">),</span> <span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal string single">'ABCDE'</span><span class="punctuation">)],</span><span class="whitespace">
+</span>  <span class="name">schema</span><span class="operator">=</span><span class="name">DataTypes</span><span class="operator">.</span><span class="name">ROW</span><span class="punctuation">([</span><span class="name">DataTypes</span><span class="operator">.</span><span class="name">FIELD</span><span class="punctuation">(</span><span class="literal string single">'id'</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">INT</span><span class="punctuation">()),</span><span class="whitespace">
+</span>                        <span class="name">DataTypes</span><span class="operator">.</span><span class="name">FIELD</span><span class="punctuation">(</span><span class="literal string single">'name'</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">STRING</span><span class="punctuation">())]))</span><span class="whitespace">
+</span><span class="name">table</span><span class="operator">.</span><span class="name">print_schema</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="comment single"># select</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;SELECT&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">table</span><span class="operator">.</span><span class="name">select</span><span class="punctuation">(</span><span class="name">table</span><span class="operator">.</span><span class="name">id</span><span class="punctuation">,</span> <span class="name">table</span><span class="operator">.</span><span class="name">name</span><span class="operator">.</span><span class="name">alias</span><span class="punctuation">(</span><span class="literal string single">'nazwa'</span><span class="punctuation">))</span><span class="operator">.</span><span class="name">to_pandas</span><span class="punctuation">())</span><span class="whitespace">
+</span><span class="comment single"># where</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;WHERE&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">table</span><span class="operator">.</span><span class="name">where</span><span class="punctuation">(</span><span class="name">table</span><span class="operator">.</span><span class="name">id</span> <span class="operator">==</span> <span class="literal number integer">1</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">to_pandas</span><span class="punctuation">())</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">table</span><span class="operator">.</span><span class="name">filter</span><span class="punctuation">(</span><span class="name">table</span><span class="operator">.</span><span class="name">id</span> <span class="operator">==</span> <span class="literal number integer">2</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">to_pandas</span><span class="punctuation">())</span><span class="whitespace">
+
+</span><span class="name">table2</span> <span class="operator">=</span> <span class="name">t_env</span><span class="operator">.</span><span class="name">from_elements</span><span class="punctuation">(</span><span class="whitespace">
+</span>  <span class="punctuation">[(</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal string single">'ABC'</span><span class="punctuation">),(</span><span class="literal number integer">3</span><span class="punctuation">,</span> <span class="literal string single">'ABC'</span><span class="punctuation">),</span> <span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal string single">'ABCDE'</span><span class="punctuation">)],</span><span class="whitespace">
+</span>  <span class="name">schema</span><span class="operator">=</span><span class="name">DataTypes</span><span class="operator">.</span><span class="name">ROW</span><span class="punctuation">([</span><span class="name">DataTypes</span><span class="operator">.</span><span class="name">FIELD</span><span class="punctuation">(</span><span class="literal string single">'id'</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">INT</span><span class="punctuation">()),</span><span class="whitespace">
+</span>                        <span class="name">DataTypes</span><span class="operator">.</span><span class="name">FIELD</span><span class="punctuation">(</span><span class="literal string single">'name'</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">STRING</span><span class="punctuation">())]))</span><span class="whitespace">
+</span><span class="name">table</span> <span class="operator">=</span> <span class="name">table</span><span class="operator">.</span><span class="name">union_all</span><span class="punctuation">(</span><span class="name">table2</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;UNION&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">table</span><span class="operator">.</span><span class="name">to_pandas</span><span class="punctuation">())</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">table2</span><span class="operator">.</span><span class="name">to_pandas</span><span class="punctuation">())</span><span class="whitespace">
+</span><span class="comment single"># group_by</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;GROUP&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">table</span><span class="operator">.</span><span class="name">group_by</span><span class="punctuation">(</span><span class="name">table</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">select</span><span class="punctuation">(</span><span class="name">table</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">,</span> <span class="name">table</span><span class="operator">.</span><span class="name">id</span><span class="operator">.</span><span class="name">count</span><span class="operator">.</span><span class="name">alias</span><span class="punctuation">(</span><span class="literal string single">'sum'</span><span class="punctuation">))</span><span class="operator">.</span><span class="name">to_pandas</span><span class="punctuation">())</span><span class="whitespace">
+</span><span class="comment single"># dictinct</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;DISTINCT&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">table</span><span class="operator">.</span><span class="name">distinct</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">to_pandas</span><span class="punctuation">())</span></code></pre>
+<pre class="literal-block">(
+<cite>id</cite> INT,
+<cite>name</cite> STRING
+)
+SELECT
+id  nazwa
+0   1    ABC
+1   2  ABCDE
+WHERE
+id name
+0   1  ABC
+id   name
+0   2  ABCDE
+UNION
+id   name
+0   1    ABC
+1   2  ABCDE
+2   1    ABC
+3   3    ABC
+4   2  ABCDE
+id   name
+0   1    ABC
+1   3    ABC
+2   2  ABCDE
+GROUP
+        name  sum
+0  ABCDE    2
+1    ABC    3
+DISTINCT
+id   name
+0   2  ABCDE
+1   3    ABC
+2   1    ABC</pre>
+<p>Lista wszystkich metod dostępna jest tutaj:</p>
+<p><a class="reference external" href="https://nightlies.apache.org/flink/flink-docs-release-1.17/api/python/reference/pyflink.table/table.html">https://nightlies.apache.org/flink/flink-docs-release-1.17/api/python/reference/pyflink.table/table.html</a></p>
+</section>
+<section id="datastream-1">
+<h3>DataStream</h3>
+<p>DataStream jest podobny do zwykłych kolekcji Pythona pod względem
+użycia, ale różni się pod pewnymi kluczowymi względami. Datastream są
+niemutowalne (niezmienne), co oznacza, że po ich utworzeniu nie można
+dodawać ani usuwać elementów. Nie ma też dostępu do elementów
+środkowych, a operacje na nich można prowadzić tylko poprzez
+transformacjami.</p>
+<p>Tworzenie DataStream:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.common.typeinfo</span> <span class="keyword namespace">import</span> <span class="name">Types</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream</span> <span class="keyword namespace">import</span> <span class="name">StreamExecutionEnvironment</span><span class="whitespace">
+
+</span><span class="name">env</span> <span class="operator">=</span> <span class="name">StreamExecutionEnvironment</span><span class="operator">.</span><span class="name">get_execution_environment</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">ds</span> <span class="operator">=</span> <span class="name">env</span><span class="operator">.</span><span class="name">from_collection</span><span class="punctuation">(</span><span class="whitespace">
+</span>    <span class="name">collection</span><span class="operator">=</span><span class="punctuation">[(</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal string single">'aaa|bb'</span><span class="punctuation">),</span> <span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal string single">'bb|a'</span><span class="punctuation">),</span> <span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">,</span> <span class="literal string single">'aaa|a'</span><span class="punctuation">)],</span><span class="whitespace">
+</span>    <span class="name">type_info</span><span class="operator">=</span><span class="name">Types</span><span class="operator">.</span><span class="name">ROW</span><span class="punctuation">([</span><span class="name">Types</span><span class="operator">.</span><span class="name">INT</span><span class="punctuation">(),</span> <span class="name">Types</span><span class="operator">.</span><span class="name">STRING</span><span class="punctuation">()]))</span></code></pre>
+<p>Parametr type_info jest opcjonalny, jeśli nie zostanie określony, typem
+wyjściowym zwróconego strumienia danych będzie
+Types.PICKLED_BYTE_ARRAY().</p>
+<p>Możesz wywołać metodę print, aby wydrukować dane DataStream na
+standardowe wyjście, lub wykorzystac metodę executeAndCollect do
+pobrania kolekcji. Print wypisuje nam operacje na strumieniu +I oznacza
+w tym wypadku insert i jest to taka konwencja Flinka.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.common.typeinfo</span> <span class="keyword namespace">import</span> <span class="name">Types</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream</span> <span class="keyword namespace">import</span> <span class="name">StreamExecutionEnvironment</span><span class="whitespace">
+
+</span><span class="name">env</span> <span class="operator">=</span> <span class="name">StreamExecutionEnvironment</span><span class="operator">.</span><span class="name">get_execution_environment</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">ds</span> <span class="operator">=</span> <span class="name">env</span><span class="operator">.</span><span class="name">from_collection</span><span class="punctuation">(</span><span class="whitespace">
+</span>    <span class="name">collection</span><span class="operator">=</span><span class="punctuation">[(</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal string single">'aaa|bb'</span><span class="punctuation">),</span> <span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal string single">'bb|a'</span><span class="punctuation">),</span> <span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">,</span> <span class="literal string single">'aaa|a'</span><span class="punctuation">)],</span><span class="whitespace">
+</span>    <span class="name">type_info</span><span class="operator">=</span><span class="name">Types</span><span class="operator">.</span><span class="name">ROW</span><span class="punctuation">([</span><span class="name">Types</span><span class="operator">.</span><span class="name">INT</span><span class="punctuation">(),</span> <span class="name">Types</span><span class="operator">.</span><span class="name">STRING</span><span class="punctuation">()]))</span><span class="whitespace">
+
+</span><span class="name">ds</span><span class="operator">.</span><span class="name">print</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">env</span><span class="operator">.</span><span class="name">execute</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="keyword">with</span> <span class="name">ds</span><span class="operator">.</span><span class="name">execute_and_collect</span><span class="punctuation">()</span> <span class="keyword">as</span> <span class="name">results</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">result</span> <span class="operator word">in</span> <span class="name">results</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">result</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">6&gt; +I[3,aaa|a]
+5&gt; +I[2,bb|a]
+4&gt; +I[1,aaa|bb]
+&lt;Row(1, 'aaa|bb')&gt;
+&lt;Row(2, 'bb|a')&gt;
+&lt;Row(3, 'aaa|a')&gt;</pre>
+<p>Lista wspieranych typów danych dla DataStream:</p>
+<pre class="literal-block">https://nightlies.apache.org/flink/flink-docs-release-1.17/docs/dev/python/datastream/data_types/</pre>
+<p>Możemy sfobodnie przechodzić między tabelami a strumieniami i korzystać
+na zmianę z obi API. Przykład konwersji między DataStream &lt;-&gt; Table
+znajdziemy poniżej:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.common.typeinfo</span> <span class="keyword namespace">import</span> <span class="name">Types</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream</span> <span class="keyword namespace">import</span> <span class="name">StreamExecutionEnvironment</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.table</span> <span class="keyword namespace">import</span> <span class="name">StreamTableEnvironment</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="whitespace">
+
+</span><span class="name">env</span> <span class="operator">=</span> <span class="name">StreamExecutionEnvironment</span><span class="operator">.</span><span class="name">get_execution_environment</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">t_env</span> <span class="operator">=</span> <span class="name">StreamTableEnvironment</span><span class="operator">.</span><span class="name">create</span><span class="punctuation">(</span><span class="name">stream_execution_environment</span><span class="operator">=</span><span class="name">env</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">t_env</span><span class="operator">.</span><span class="name">execute_sql</span><span class="punctuation">(</span><span class="literal string double">&quot;&quot;&quot;
+        CREATE TABLE my_source (
+          a INT,
+          b VARCHAR
+        ) WITH (
+          'connector' = 'datagen',
+          'number-of-rows' = '10'
+        )
+    &quot;&quot;&quot;</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="comment single"># DS -&gt; TABLE</span><span class="whitespace">
+
+</span><span class="name">ds</span> <span class="operator">=</span> <span class="name">t_env</span><span class="operator">.</span><span class="name">to_append_stream</span><span class="punctuation">(</span><span class="whitespace">
+</span>    <span class="name">t_env</span><span class="operator">.</span><span class="name">from_path</span><span class="punctuation">(</span><span class="literal string single">'my_source'</span><span class="punctuation">),</span><span class="whitespace">
+</span>    <span class="name">Types</span><span class="operator">.</span><span class="name">ROW</span><span class="punctuation">([</span><span class="name">Types</span><span class="operator">.</span><span class="name">INT</span><span class="punctuation">(),</span> <span class="name">Types</span><span class="operator">.</span><span class="name">STRING</span><span class="punctuation">()]))</span><span class="whitespace">
+
+</span><span class="name">table</span> <span class="operator">=</span> <span class="name">t_env</span><span class="operator">.</span><span class="name">from_data_stream</span><span class="punctuation">(</span><span class="name">ds</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">table</span><span class="operator">.</span><span class="name">to_pandas</span><span class="punctuation">())</span><span class="whitespace">
+
+</span><span class="comment single"># TABLE -&gt; DS</span><span class="whitespace">
+
+</span><span class="name">s_env2</span> <span class="operator">=</span> <span class="name">StreamExecutionEnvironment</span><span class="operator">.</span><span class="name">get_execution_environment</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">t_env2</span> <span class="operator">=</span> <span class="name">StreamTableEnvironment</span><span class="operator">.</span><span class="name">create</span><span class="punctuation">(</span><span class="name">s_env2</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">schema</span> <span class="operator">=</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">ROW</span><span class="punctuation">([</span><span class="whitespace">
+</span>    <span class="name">DataTypes</span><span class="operator">.</span><span class="name">FIELD</span><span class="punctuation">(</span><span class="literal string single">'name'</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">STRING</span><span class="punctuation">()),</span><span class="whitespace">
+</span>    <span class="name">DataTypes</span><span class="operator">.</span><span class="name">FIELD</span><span class="punctuation">(</span><span class="literal string single">'nr'</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">INT</span><span class="punctuation">())</span><span class="whitespace">
+</span><span class="punctuation">])</span><span class="whitespace">
+</span><span class="name">table_with_schema</span> <span class="operator">=</span> <span class="name">t_env2</span><span class="operator">.</span><span class="name">from_elements</span><span class="punctuation">([(</span><span class="literal string double">&quot;hello&quot;</span><span class="punctuation">,</span> <span class="literal number integer">1</span><span class="punctuation">),</span> <span class="punctuation">(</span><span class="literal string double">&quot;world&quot;</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">),</span> <span class="punctuation">(</span><span class="literal string double">&quot;flink&quot;</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">)],</span> <span class="name">schema</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">ds</span> <span class="operator">=</span> <span class="name">t_env2</span><span class="operator">.</span><span class="name">to_append_stream</span><span class="punctuation">(</span><span class="name">table_with_schema</span><span class="punctuation">,</span> <span class="name">Types</span><span class="operator">.</span><span class="name">ROW</span><span class="punctuation">([</span><span class="name">Types</span><span class="operator">.</span><span class="name">STRING</span><span class="punctuation">(),</span> <span class="name">Types</span><span class="operator">.</span><span class="name">INT</span><span class="punctuation">()]))</span><span class="whitespace">
+
+</span><span class="name">ds</span><span class="operator">.</span><span class="name">print</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">s_env2</span><span class="operator">.</span><span class="name">execute</span><span class="punctuation">()</span></code></pre>
+</section>
+<section id="operatory">
+<h3>Operatory</h3>
+<p>Operatory przekształcają jeden lub więcej strumieni danych w nowy
+strumień danych. Są to znane nam funkcje map, filter, flatmap itp.</p>
+<p>Przykłady:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.common.typeinfo</span> <span class="keyword namespace">import</span> <span class="name">Types</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream</span> <span class="keyword namespace">import</span> <span class="name">StreamExecutionEnvironment</span><span class="whitespace">
+
+</span><span class="name">env</span> <span class="operator">=</span> <span class="name">StreamExecutionEnvironment</span><span class="operator">.</span><span class="name">get_execution_environment</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="comment single"># Map</span><span class="whitespace">
+
+</span><span class="name">data_stream</span> <span class="operator">=</span> <span class="name">env</span><span class="operator">.</span><span class="name">from_collection</span><span class="punctuation">(</span><span class="name">collection</span><span class="operator">=</span><span class="punctuation">[</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">,</span> <span class="literal number integer">4</span><span class="punctuation">,</span> <span class="literal number integer">5</span><span class="punctuation">])</span><span class="whitespace">
+</span><span class="name">data_stream</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="keyword">lambda</span> <span class="name">x</span><span class="punctuation">:</span> <span class="literal number integer">2</span> <span class="operator">*</span> <span class="name">x</span><span class="punctuation">,</span> <span class="name">output_type</span><span class="operator">=</span><span class="name">Types</span><span class="operator">.</span><span class="name">INT</span><span class="punctuation">())</span><span class="operator">.</span><span class="name">print</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">env</span><span class="operator">.</span><span class="name">execute</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'-----'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="comment single"># FlatMap</span><span class="whitespace">
+
+</span><span class="name">data_stream</span> <span class="operator">=</span> <span class="name">env</span><span class="operator">.</span><span class="name">from_collection</span><span class="punctuation">(</span><span class="name">collection</span><span class="operator">=</span><span class="punctuation">[</span><span class="literal string single">'hello apache flink'</span><span class="punctuation">,</span> <span class="literal string single">'streaming compute'</span><span class="punctuation">])</span><span class="whitespace">
+</span><span class="name">data_stream</span><span class="operator">.</span><span class="name">flat_map</span><span class="punctuation">(</span><span class="keyword">lambda</span> <span class="name">x</span><span class="punctuation">:</span> <span class="name">x</span><span class="operator">.</span><span class="name">split</span><span class="punctuation">(</span><span class="literal string single">' '</span><span class="punctuation">),</span> <span class="name">output_type</span><span class="operator">=</span><span class="name">Types</span><span class="operator">.</span><span class="name">STRING</span><span class="punctuation">())</span><span class="operator">.</span><span class="name">print</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">env</span><span class="operator">.</span><span class="name">execute</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'-----'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="comment single"># Filter</span><span class="whitespace">
+
+</span><span class="name">data_stream</span> <span class="operator">=</span> <span class="name">env</span><span class="operator">.</span><span class="name">from_collection</span><span class="punctuation">(</span><span class="name">collection</span><span class="operator">=</span><span class="punctuation">[</span><span class="literal number integer">0</span><span class="punctuation">,</span> <span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">,</span> <span class="literal number integer">4</span><span class="punctuation">,</span> <span class="literal number integer">5</span><span class="punctuation">])</span><span class="whitespace">
+</span><span class="name">data_stream</span><span class="operator">.</span><span class="name">filter</span><span class="punctuation">(</span><span class="keyword">lambda</span> <span class="name">x</span><span class="punctuation">:</span> <span class="name">x</span> <span class="operator">!=</span> <span class="literal number integer">0</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">print</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">env</span><span class="operator">.</span><span class="name">execute</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'-----'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="comment single"># Key_By</span><span class="whitespace">
+
+</span><span class="name">data_stream</span> <span class="operator">=</span> <span class="name">env</span><span class="operator">.</span><span class="name">from_collection</span><span class="punctuation">(</span><span class="name">collection</span><span class="operator">=</span><span class="punctuation">[(</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal string single">'a'</span><span class="punctuation">),</span> <span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal string single">'a'</span><span class="punctuation">),</span> <span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">,</span> <span class="literal string single">'b'</span><span class="punctuation">)])</span><span class="whitespace">
+</span><span class="name">data_stream</span><span class="operator">.</span><span class="name">key_by</span><span class="punctuation">(</span><span class="keyword">lambda</span> <span class="name">x</span><span class="punctuation">:</span> <span class="name">x</span><span class="punctuation">[</span><span class="literal number integer">1</span><span class="punctuation">],</span> <span class="name">key_type</span><span class="operator">=</span><span class="name">Types</span><span class="operator">.</span><span class="name">STRING</span><span class="punctuation">())</span><span class="operator">.</span><span class="name">print</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">env</span><span class="operator">.</span><span class="name">execute</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'-----'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="comment single"># Reduce</span><span class="whitespace">
+
+</span><span class="name">data_stream</span> <span class="operator">=</span> <span class="name">env</span><span class="operator">.</span><span class="name">from_collection</span><span class="punctuation">(</span><span class="name">collection</span><span class="operator">=</span><span class="punctuation">[(</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal string single">'a'</span><span class="punctuation">),</span> <span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal string single">'a'</span><span class="punctuation">),</span> <span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">,</span> <span class="literal string single">'a'</span><span class="punctuation">),</span> <span class="punctuation">(</span><span class="literal number integer">4</span><span class="punctuation">,</span> <span class="literal string single">'b'</span><span class="punctuation">)],</span> <span class="name">type_info</span><span class="operator">=</span><span class="name">Types</span><span class="operator">.</span><span class="name">TUPLE</span><span class="punctuation">([</span><span class="name">Types</span><span class="operator">.</span><span class="name">INT</span><span class="punctuation">(),</span> <span class="name">Types</span><span class="operator">.</span><span class="name">STRING</span><span class="punctuation">()]))</span><span class="whitespace">
+</span><span class="name">data_stream</span><span class="operator">.</span><span class="name">key_by</span><span class="punctuation">(</span><span class="keyword">lambda</span> <span class="name">x</span><span class="punctuation">:</span> <span class="name">x</span><span class="punctuation">[</span><span class="literal number integer">1</span><span class="punctuation">])</span><span class="operator">.</span><span class="name">reduce</span><span class="punctuation">(</span><span class="keyword">lambda</span> <span class="name">a</span><span class="punctuation">,</span> <span class="name">b</span><span class="punctuation">:</span> <span class="punctuation">(</span><span class="name">a</span><span class="punctuation">[</span><span class="literal number integer">0</span><span class="punctuation">]</span> <span class="operator">+</span> <span class="name">b</span><span class="punctuation">[</span><span class="literal number integer">0</span><span class="punctuation">],</span> <span class="name">b</span><span class="punctuation">[</span><span class="literal number integer">1</span><span class="punctuation">]))</span><span class="operator">.</span><span class="name">print</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">env</span><span class="operator">.</span><span class="name">execute</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'-----'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="comment single"># Partition</span><span class="whitespace">
+
+</span><span class="name">partition</span> <span class="operator">=</span> <span class="literal number integer">3</span><span class="whitespace">
+</span><span class="name">data_stream</span> <span class="operator">=</span> <span class="name">env</span><span class="operator">.</span><span class="name">from_collection</span><span class="punctuation">(</span><span class="name">collection</span><span class="operator">=</span><span class="punctuation">[(</span><span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal string single">'a'</span><span class="punctuation">),</span> <span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal string single">'a'</span><span class="punctuation">),</span> <span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">,</span> <span class="literal string single">'b'</span><span class="punctuation">)])</span><span class="whitespace">
+</span><span class="name">data_stream</span><span class="operator">.</span><span class="name">partition_custom</span><span class="punctuation">(</span><span class="keyword">lambda</span> <span class="name">key</span><span class="punctuation">,</span> <span class="name">num_partition</span><span class="punctuation">:</span> <span class="name">key</span> <span class="operator">%</span> <span class="name">partition</span><span class="punctuation">,</span> <span class="keyword">lambda</span> <span class="name">x</span><span class="punctuation">:</span> <span class="name">x</span><span class="punctuation">[</span><span class="literal number integer">0</span><span class="punctuation">])</span><span class="operator">.</span><span class="name">print</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">env</span><span class="operator">.</span><span class="name">execute</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'-----'</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">4&gt; 4
+7&gt; 10
+6&gt; 8
+3&gt; 2
+5&gt; 6
+-----
+3&gt; streaming
+3&gt; compute
+2&gt; hello
+2&gt; apache
+2&gt; flink
+-----
+8&gt; 2
+10&gt; 4
+9&gt; 3
+7&gt; 1
+11&gt; 5
+-----
+7&gt; (1, 'a')
+7&gt; (2, 'a')
+7&gt; (3, 'b')
+-----
+4&gt; (1,a)
+4&gt; (3,a)
+4&gt; (6,a)
+1&gt; (4,b)
+-----
+1&gt; (3, 'b')
+3&gt; (2, 'a')
+3&gt; (2, 'a')
+-----</pre>
+<p>Operatory możemy także definiować sami implementując odpowiednie clasy
+implementujące interfejsy, jako funkcje lub lambdy:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">time</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.common.typeinfo</span> <span class="keyword namespace">import</span> <span class="name">Types</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream</span> <span class="keyword namespace">import</span> <span class="name">StreamExecutionEnvironment</span><span class="punctuation">,</span> <span class="name">MapFunction</span><span class="whitespace">
+
+</span><span class="name">env</span> <span class="operator">=</span> <span class="name">StreamExecutionEnvironment</span><span class="operator">.</span><span class="name">get_execution_environment</span><span class="punctuation">()</span><span class="whitespace">
+
+
+</span><span class="comment single"># Implementing MapFunction</span><span class="whitespace">
+</span><span class="keyword">class</span> <span class="name class">MyMapFunction</span><span class="punctuation">(</span><span class="name">MapFunction</span><span class="punctuation">):</span><span class="whitespace">
+
+</span>    <span class="keyword">def</span> <span class="name function">map</span><span class="punctuation">(</span><span class="name builtin pseudo">self</span><span class="punctuation">,</span> <span class="name">value</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="keyword">return</span> <span class="name">value</span> <span class="operator">+</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span><span class="name">data_stream</span> <span class="operator">=</span> <span class="name">env</span><span class="operator">.</span><span class="name">from_collection</span><span class="punctuation">([</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">,</span> <span class="literal number integer">4</span><span class="punctuation">,</span> <span class="literal number integer">5</span><span class="punctuation">],</span> <span class="name">type_info</span><span class="operator">=</span><span class="name">Types</span><span class="operator">.</span><span class="name">INT</span><span class="punctuation">())</span><span class="whitespace">
+</span><span class="name">mapped_stream</span> <span class="operator">=</span> <span class="name">data_stream</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="name">MyMapFunction</span><span class="punctuation">(),</span> <span class="name">output_type</span><span class="operator">=</span><span class="name">Types</span><span class="operator">.</span><span class="name">INT</span><span class="punctuation">())</span><span class="operator">.</span><span class="name">print</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">env</span><span class="operator">.</span><span class="name">execute</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'-----'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">time</span><span class="operator">.</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number float">2.4</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">data_stream</span> <span class="operator">=</span> <span class="name">env</span><span class="operator">.</span><span class="name">from_collection</span><span class="punctuation">([</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">,</span> <span class="literal number integer">4</span><span class="punctuation">,</span> <span class="literal number integer">5</span><span class="punctuation">],</span> <span class="name">type_info</span><span class="operator">=</span><span class="name">Types</span><span class="operator">.</span><span class="name">INT</span><span class="punctuation">())</span><span class="whitespace">
+</span><span class="name">mapped_stream</span> <span class="operator">=</span> <span class="name">data_stream</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="keyword">lambda</span> <span class="name">x</span><span class="punctuation">:</span> <span class="name">x</span> <span class="operator">+</span> <span class="literal number integer">1</span><span class="punctuation">,</span> <span class="name">output_type</span><span class="operator">=</span><span class="name">Types</span><span class="operator">.</span><span class="name">INT</span><span class="punctuation">())</span><span class="operator">.</span><span class="name">print</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">env</span><span class="operator">.</span><span class="name">execute</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'-----'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">time</span><span class="operator">.</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number float">2.4</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">my_map_func</span><span class="punctuation">(</span><span class="name">value</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">value</span> <span class="operator">+</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span><span class="name">data_stream</span> <span class="operator">=</span> <span class="name">env</span><span class="operator">.</span><span class="name">from_collection</span><span class="punctuation">([</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">,</span> <span class="literal number integer">4</span><span class="punctuation">,</span> <span class="literal number integer">5</span><span class="punctuation">],</span> <span class="name">type_info</span><span class="operator">=</span><span class="name">Types</span><span class="operator">.</span><span class="name">INT</span><span class="punctuation">())</span><span class="whitespace">
+</span><span class="name">mapped_stream</span> <span class="operator">=</span> <span class="name">data_stream</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="name">my_map_func</span><span class="punctuation">,</span> <span class="name">output_type</span><span class="operator">=</span><span class="name">Types</span><span class="operator">.</span><span class="name">INT</span><span class="punctuation">())</span><span class="operator">.</span><span class="name">print</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">env</span><span class="operator">.</span><span class="name">execute</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'-----'</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">7&gt; 3
+9&gt; 5
+10&gt; 6
+6&gt; 2
+8&gt; 4
+-----
+1&gt; 3
+2&gt; 4
+12&gt; 2
+3&gt; 5
+4&gt; 6
+-----
+10&gt; 6
+8&gt; 4
+9&gt; 5
+6&gt; 2
+7&gt; 3</pre>
+<p>User defined function pozwalają nam na definiowanie różnych typów danych
+na wejściu i wyjściu metody, co jest przypadne w funkcji map.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">statistics</span> <span class="keyword namespace">import</span> <span class="name">stdev</span><span class="punctuation">,</span> <span class="name">mean</span><span class="whitespace">
+
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.common</span> <span class="keyword namespace">import</span> <span class="name">Row</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.table</span> <span class="keyword namespace">import</span> <span class="punctuation">(</span><span class="whitespace">
+</span>    <span class="name">DataTypes</span><span class="punctuation">,</span><span class="whitespace">
+</span>    <span class="name">TableEnvironment</span><span class="punctuation">,</span><span class="whitespace">
+</span>    <span class="name">EnvironmentSettings</span><span class="whitespace">
+</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.table.udf</span> <span class="keyword namespace">import</span> <span class="name">udf</span><span class="whitespace">
+
+
+</span><span class="name decorator">&#64;udf</span><span class="punctuation">(</span><span class="name">result_type</span><span class="operator">=</span><span class="name">DataTypes</span><span class="operator">.</span><span class="name">ROW</span><span class="punctuation">([</span><span class="name">DataTypes</span><span class="operator">.</span><span class="name">FIELD</span><span class="punctuation">(</span><span class="literal string single">'code'</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">STRING</span><span class="punctuation">()),</span><span class="whitespace">
+</span>                                <span class="name">DataTypes</span><span class="operator">.</span><span class="name">FIELD</span><span class="punctuation">(</span><span class="literal string single">'total_length'</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">INT</span><span class="punctuation">()),</span><span class="whitespace">
+</span>                                <span class="name">DataTypes</span><span class="operator">.</span><span class="name">FIELD</span><span class="punctuation">(</span><span class="literal string single">'qtr_avg'</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">DOUBLE</span><span class="punctuation">()),</span><span class="whitespace">
+</span>                                <span class="name">DataTypes</span><span class="operator">.</span><span class="name">FIELD</span><span class="punctuation">(</span><span class="literal string single">'qtr_stdev'</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">DOUBLE</span><span class="punctuation">())]))</span><span class="whitespace">
+</span><span class="keyword">def</span> <span class="name function">sales_summary_stats</span><span class="punctuation">(</span><span class="name">country</span><span class="punctuation">:</span> <span class="name">Row</span><span class="punctuation">)</span> <span class="operator">-&gt;</span> <span class="name">Row</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">code</span><span class="punctuation">,</span> <span class="name">name</span><span class="punctuation">,</span> <span class="name">continent</span><span class="punctuation">,</span> <span class="name">wiki</span> <span class="operator">=</span> <span class="name">country</span><span class="whitespace">
+</span>    <span class="name">country_stats</span> <span class="operator">=</span> <span class="punctuation">(</span><span class="name builtin">len</span><span class="punctuation">(</span><span class="name">code</span><span class="punctuation">),</span> <span class="name builtin">len</span><span class="punctuation">(</span><span class="name">name</span><span class="punctuation">),</span> <span class="name builtin">len</span><span class="punctuation">(</span><span class="name">continent</span><span class="punctuation">),</span> <span class="name builtin">len</span><span class="punctuation">(</span><span class="name">wiki</span><span class="punctuation">))</span><span class="whitespace">
+</span>    <span class="name">total_length</span> <span class="operator">=</span> <span class="name builtin">sum</span><span class="punctuation">(</span><span class="name">country_stats</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">qtr_avg</span> <span class="operator">=</span> <span class="name builtin">round</span><span class="punctuation">(</span><span class="name">mean</span><span class="punctuation">(</span><span class="name">country_stats</span><span class="punctuation">),</span> <span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">qtr_stdev</span> <span class="operator">=</span> <span class="name builtin">round</span><span class="punctuation">(</span><span class="name">stdev</span><span class="punctuation">(</span><span class="name">country_stats</span><span class="punctuation">),</span> <span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">Row</span><span class="punctuation">(</span><span class="name">code</span><span class="punctuation">,</span> <span class="name">total_length</span><span class="punctuation">,</span> <span class="name">qtr_avg</span><span class="punctuation">,</span> <span class="name">qtr_stdev</span><span class="punctuation">)</span><span class="whitespace">
+
+
+</span><span class="name">env_settings</span> <span class="operator">=</span> <span class="name">EnvironmentSettings</span><span class="operator">.</span><span class="name">in_batch_mode</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">table</span> <span class="operator">=</span> <span class="name">TableEnvironment</span><span class="operator">.</span><span class="name">create</span><span class="punctuation">(</span><span class="name">env_settings</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">table</span><span class="operator">.</span><span class="name">execute_sql</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string double">&quot;&quot;&quot;
+    CREATE TABLE countries(
+        code STRING,
+        name STRING,
+        continent STRING,
+        wikipedia_link STRING
+        ) WITH (
+        'connector' = 'filesystem',
+        'path' = 'countries.csv',
+        'format' = 'csv')
+    &quot;&quot;&quot;</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">tableInput</span> <span class="operator">=</span> <span class="name">table</span><span class="operator">.</span><span class="name">from_path</span><span class="punctuation">(</span><span class="literal string single">'countries'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'</span><span class="literal string escape">\n</span><span class="literal string single">Countries Schema'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">tableInput</span><span class="operator">.</span><span class="name">print_schema</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">country_stats</span> <span class="operator">=</span> <span class="name">tableInput</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="name">sales_summary_stats</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">alias</span><span class="punctuation">(</span><span class="literal string single">'code'</span><span class="punctuation">,</span><span class="whitespace">
+</span>                                                          <span class="literal string single">'total_length'</span><span class="punctuation">,</span><span class="whitespace">
+</span>                                                          <span class="literal string single">'quarter_avg'</span><span class="punctuation">,</span><span class="whitespace">
+</span>                                                          <span class="literal string single">'quarter_stdev'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'</span><span class="literal string escape">\n</span><span class="literal string single">Sales Summary Stats schema'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">country_stats</span><span class="operator">.</span><span class="name">print_schema</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'</span><span class="literal string escape">\n</span><span class="literal string single">Sales Summary Stats data'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="name">country_stats</span><span class="operator">.</span><span class="name">to_pandas</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">sort_values</span><span class="punctuation">(</span><span class="literal string single">'code'</span><span class="punctuation">))</span></code></pre>
+<pre class="literal-block">Countries Schema
+(
+<cite>code</cite> STRING,
+<cite>name</cite> STRING,
+<cite>continent</cite> STRING,
+<cite>wikipedia_link</cite> STRING
+)
+
+Sales Summary Stats schema
+(
+<cite>code</cite> STRING,
+<cite>total_length</cite> INT,
+<cite>quarter_avg</cite> DOUBLE,
+<cite>quarter_stdev</cite> DOUBLE
+)
+
+Sales Summary Stats data
+        code  total_length  quarter_avg  quarter_stdev
+0     AD            48         12.0          16.83
+1     AE            74         18.5          22.65
+2     AF            56         14.0          18.49
+3     AG            72         18.0          22.17
+4     AI            50         12.5          17.23
+..   ...           ...          ...            ...
+243   YT            48         12.0          16.83
+244   ZA            58         14.5          18.93
+245   ZM            46         11.5          16.44
+246   ZW            50         12.5          17.23
+247   ZZ            92         23.0          27.17
+
+[248 rows x 4 columns]</pre>
+</section>
+<section id="stany">
+<h3>Stany</h3>
+<p>Stan pomaga nam zapamiętać dodatkowe informacje związane z
+przychodzącymi danymi. Jest to niezbędne gdy chcemy np. wyliczyć średnią
+z przychodzących wartości.</p>
+<p>Jeśli chcesz użyć stanu, musisz najpierw określić klucz dla każdej danej
+w DataStream, który powinien być użyty do partycjonowania stanu (a także
+samych rekordów w strumieniu). Możesz określić klucz za pomocą
+keyBy(KeySelector) w Java/Scala API lub key_by(KeySelector) w Python API
+na DataStream. Spowoduje to wygenerowanie KeyedStream, który następnie
+zezwoli na operacje używające stanu klucza.</p>
+<p>Funkcja selektora klucza pobiera pojedynczy rekord jako dane wejściowe i
+zwraca klucz dla tego rekordu. Klucz może być dowolnego typu i musi
+pochodzić z obliczeń deterministycznych.</p>
+<p>Aby uzyskać uchwyt stanu, musisz utworzyć StateDescriptor. Zawiera on
+nazwę stanu (jak zobaczymy później, możesz utworzyć kilka stanów i muszą
+one mieć unikalne nazwy, aby można było się do nich odwoływać), typ
+wartości, które stan przechowuje i czasem funkcje użytkownika- określona
+funkcja, taka jak ReduceFunction. W zależności od typu stanu, który
+chcesz pobrać, tworzysz ValueStateDescriptor, ListStateDescriptor,
+AggregatingStateDescriptor, ReducingStateDescriptor lub
+MapStateDescriptor.</p>
+<p>W poniższym przykładzie definiujemy własną metodę map, która w metodzie
+open tworzy stan ValueState, będący liczbą typu long. W metodzie map
+wywołujemy funkcje value() i funkcje update() na ValueState żeby
+przechowywać licznik wczytanych danych. Dane są związane w stany kluczem
+definiowanym w linijce</p>
+<pre class="literal-block">.key_by(lambda a: a[0])</pre>
+<p>Dostęp do stanu uzyskuje się za pomocą RuntimeContext, poprzez
+implementacje tzw. rich functions. Rich functions zapewniają, oprócz
+funkcji zdefiniowanych przez użytkownika (map, reduce itp.), cztery
+metody: open, close, getRuntimeContext, and setRuntimeContext.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.common</span> <span class="keyword namespace">import</span> <span class="name">WatermarkStrategy</span><span class="punctuation">,</span> <span class="name">Row</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.common.typeinfo</span> <span class="keyword namespace">import</span> <span class="name">Types</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream</span> <span class="keyword namespace">import</span> <span class="name">StreamExecutionEnvironment</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream.connectors</span> <span class="keyword namespace">import</span> <span class="name">NumberSequenceSource</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream.functions</span> <span class="keyword namespace">import</span> <span class="name">RuntimeContext</span><span class="punctuation">,</span> <span class="name">MapFunction</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream.state</span> <span class="keyword namespace">import</span> <span class="name">ValueStateDescriptor</span><span class="whitespace">
+
+
+</span><span class="keyword">class</span> <span class="name class">MyMapFunction</span><span class="punctuation">(</span><span class="name">MapFunction</span><span class="punctuation">):</span><span class="whitespace">
+
+</span>    <span class="keyword">def</span> <span class="name function">open</span><span class="punctuation">(</span><span class="name builtin pseudo">self</span><span class="punctuation">,</span> <span class="name">runtime_context</span><span class="punctuation">:</span> <span class="name">RuntimeContext</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">state_desc</span> <span class="operator">=</span> <span class="name">ValueStateDescriptor</span><span class="punctuation">(</span><span class="literal string single">'cnt'</span><span class="punctuation">,</span> <span class="name">Types</span><span class="operator">.</span><span class="name">LONG</span><span class="punctuation">())</span><span class="whitespace">
+</span>        <span class="comment single"># Define value state</span><span class="whitespace">
+</span>        <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">cnt_state</span> <span class="operator">=</span> <span class="name">runtime_context</span><span class="operator">.</span><span class="name">get_state</span><span class="punctuation">(</span><span class="name">state_desc</span><span class="punctuation">)</span><span class="whitespace">
+
+</span>    <span class="keyword">def</span> <span class="name function">map</span><span class="punctuation">(</span><span class="name builtin pseudo">self</span><span class="punctuation">,</span> <span class="name">value</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">cnt</span> <span class="operator">=</span> <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">cnt_state</span><span class="operator">.</span><span class="name">value</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="keyword">if</span> <span class="name">cnt</span> <span class="operator word">is</span> <span class="keyword constant">None</span><span class="punctuation">:</span><span class="whitespace">
+</span>            <span class="name">cnt</span> <span class="operator">=</span> <span class="literal number integer">0</span><span class="whitespace">
+
+</span>        <span class="name">new_cnt</span> <span class="operator">=</span> <span class="name">cnt</span> <span class="operator">+</span> <span class="literal number integer">1</span><span class="whitespace">
+</span>        <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">cnt_state</span><span class="operator">.</span><span class="name">update</span><span class="punctuation">(</span><span class="name">new_cnt</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="keyword">return</span> <span class="name">value</span><span class="punctuation">[</span><span class="literal number integer">0</span><span class="punctuation">],</span> <span class="name">new_cnt</span><span class="whitespace">
+
+
+</span><span class="comment single"># 1. Create streamexecutionenvironment</span><span class="whitespace">
+</span><span class="name">env</span> <span class="operator">=</span> <span class="name">StreamExecutionEnvironment</span><span class="operator">.</span><span class="name">get_execution_environment</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="comment single"># 2. Create data source</span><span class="whitespace">
+</span><span class="name">seq_num_source</span> <span class="operator">=</span> <span class="name">NumberSequenceSource</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">10</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">ds</span> <span class="operator">=</span> <span class="name">env</span><span class="operator">.</span><span class="name">from_source</span><span class="punctuation">(</span><span class="whitespace">
+</span>    <span class="name">source</span><span class="operator">=</span><span class="name">seq_num_source</span><span class="punctuation">,</span><span class="whitespace">
+</span>    <span class="name">watermark_strategy</span><span class="operator">=</span><span class="name">WatermarkStrategy</span><span class="operator">.</span><span class="name">for_monotonous_timestamps</span><span class="punctuation">(),</span><span class="whitespace">
+</span>    <span class="name">source_name</span><span class="operator">=</span><span class="literal string single">'seq_num_source'</span><span class="punctuation">,</span><span class="whitespace">
+</span>    <span class="name">type_info</span><span class="operator">=</span><span class="name">Types</span><span class="operator">.</span><span class="name">LONG</span><span class="punctuation">())</span><span class="whitespace">
+
+</span><span class="comment single"># 3. Define execution logic</span><span class="whitespace">
+</span><span class="name">ds</span> <span class="operator">=</span> <span class="name">ds</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="keyword">lambda</span> <span class="name">a</span><span class="punctuation">:</span> <span class="name">Row</span><span class="punctuation">(</span><span class="name">a</span> <span class="operator">%</span> <span class="literal number integer">4</span><span class="punctuation">,</span> <span class="literal number integer">1</span><span class="punctuation">),</span> <span class="name">output_type</span><span class="operator">=</span><span class="name">Types</span><span class="operator">.</span><span class="name">ROW</span><span class="punctuation">([</span><span class="name">Types</span><span class="operator">.</span><span class="name">LONG</span><span class="punctuation">(),</span> <span class="name">Types</span><span class="operator">.</span><span class="name">LONG</span><span class="punctuation">()]))</span> \
+    <span class="operator">.</span><span class="name">key_by</span><span class="punctuation">(</span><span class="keyword">lambda</span> <span class="name">a</span><span class="punctuation">:</span> <span class="name">a</span><span class="punctuation">[</span><span class="literal number integer">0</span><span class="punctuation">])</span> \
+    <span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="name">MyMapFunction</span><span class="punctuation">(),</span> <span class="name">output_type</span><span class="operator">=</span><span class="name">Types</span><span class="operator">.</span><span class="name">TUPLE</span><span class="punctuation">([</span><span class="name">Types</span><span class="operator">.</span><span class="name">LONG</span><span class="punctuation">(),</span> <span class="name">Types</span><span class="operator">.</span><span class="name">LONG</span><span class="punctuation">()]))</span> \
+    <span class="operator">.</span><span class="name">print</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="comment single"># 4. Perform the operation</span><span class="whitespace">
+</span><span class="name">env</span><span class="operator">.</span><span class="name">execute</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">4&gt; (1,1)
+4&gt; (1,2)
+4&gt; (1,3)
+3&gt; (0,1)
+3&gt; (0,2)
+2&gt; (2,1)
+2&gt; (2,2)
+2&gt; (2,3)
+7&gt; (3,1)
+7&gt; (3,2)</pre>
+</section>
+<section id="ujscie-sink">
+<h3>Ujście (sink)</h3>
+<p>Ujścia danych zużywają strumienie danych i przesyłają je do plików,
+gniazd, systemów zewnętrznych lub drukują je. Flink ma wiele wbudowanych
+formatów wyjściowych, które są zamknięte w operacjach na strumieniach
+danych:</p>
+<pre class="literal-block">writeAsText() / TextOutputFormat — Zapisuje elementy liniowo jako łańcuchy. Łańcuchy są uzyskiwane przez wywołanie metody toString() każdego elementu.
+
+ writeAsCsv(...) / CsvOutputFormat — zapisuje krotki jako pliki wartości oddzielonych przecinkami. Ograniczniki wierszy i pól można konfigurować. Wartość dla każdego pola pochodzi z metody toString() obiektów.
+
+ print() / printToErr() — Drukuje wartość toString() każdego elementu w standardowym wyjściu / standardowym strumieniu błędów. Opcjonalnie można podać prefiks (msg), który jest dołączany do danych wyjściowych. Może to pomóc w rozróżnieniu różnych wezwań do drukowania. Jeśli równoległość jest większa niż 1, dane wyjściowe zostaną również poprzedzone identyfikatorem zadania, które wygenerowało dane wyjściowe.
+
+ writeUsingOutputFormat() / FileOutputFormat — metoda i klasa bazowa dla niestandardowych plików wyjściowych. Obsługuje niestandardową konwersję obiektów na bajty.
+
+ writeToSocket — zapisuje elementy do gniazda zgodnie ze schematem SerializationSchema
+
+ addSink — Wywołuje niestandardową funkcję ujścia. Flink jest dostarczany w pakiecie ze złączami do innych systemów (takich jak Apache Kafka), które są zaimplementowane jako funkcje ujścia.</pre>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.common</span> <span class="keyword namespace">import</span> <span class="name">Encoder</span><span class="punctuation">,</span> <span class="name">Types</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream</span> <span class="keyword namespace">import</span> <span class="name">StreamExecutionEnvironment</span><span class="punctuation">,</span> <span class="name">RuntimeExecutionMode</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">pyflink.datastream.connectors.file_system</span> <span class="keyword namespace">import</span> <span class="name">FileSink</span><span class="punctuation">,</span> <span class="name">OutputFileConfig</span><span class="punctuation">,</span> <span class="name">RollingPolicy</span><span class="whitespace">
+
+</span><span class="name">env</span> <span class="operator">=</span> <span class="name">StreamExecutionEnvironment</span><span class="operator">.</span><span class="name">get_execution_environment</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">env</span><span class="operator">.</span><span class="name">set_runtime_mode</span><span class="punctuation">(</span><span class="name">RuntimeExecutionMode</span><span class="operator">.</span><span class="name">BATCH</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">data_stream</span> <span class="operator">=</span> <span class="name">env</span><span class="operator">.</span><span class="name">from_collection</span><span class="punctuation">(</span><span class="name">collection</span><span class="operator">=</span><span class="punctuation">[</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">,</span> <span class="literal number integer">4</span><span class="punctuation">,</span> <span class="literal number integer">5</span><span class="punctuation">])</span><span class="operator">.</span><span class="name">print</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">env</span><span class="operator">.</span><span class="name">execute</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">data_stream</span> <span class="operator">=</span> <span class="name">env</span><span class="operator">.</span><span class="name">from_collection</span><span class="punctuation">(</span><span class="name">collection</span><span class="operator">=</span><span class="punctuation">[</span><span class="literal string single">'as'</span><span class="punctuation">,</span><span class="literal string single">'bb'</span><span class="punctuation">,</span><span class="literal string single">'cc'</span><span class="punctuation">,</span><span class="literal string single">'dd'</span><span class="punctuation">])</span>\
+    <span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="keyword">lambda</span> <span class="name">i</span><span class="punctuation">:</span> <span class="name">i</span><span class="punctuation">,</span> <span class="name">output_type</span><span class="operator">=</span><span class="name">Types</span><span class="operator">.</span><span class="name">STRING</span><span class="punctuation">())</span>\
+    <span class="operator">.</span><span class="name">sink_to</span><span class="punctuation">(</span><span class="whitespace">
+</span>    <span class="name">sink</span><span class="operator">=</span><span class="name">FileSink</span><span class="operator">.</span><span class="name">for_row_format</span><span class="punctuation">(</span><span class="whitespace">
+</span>        <span class="name">base_path</span><span class="operator">=</span><span class="literal string double">&quot;output&quot;</span><span class="punctuation">,</span><span class="whitespace">
+</span>        <span class="name">encoder</span><span class="operator">=</span><span class="name">Encoder</span><span class="operator">.</span><span class="name">simple_string_encoder</span><span class="punctuation">())</span><span class="whitespace">
+</span>    <span class="operator">.</span><span class="name">with_output_file_config</span><span class="punctuation">(</span><span class="whitespace">
+</span>        <span class="name">OutputFileConfig</span><span class="operator">.</span><span class="name">builder</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="operator">.</span><span class="name">build</span><span class="punctuation">())</span><span class="whitespace">
+</span>    <span class="operator">.</span><span class="name">build</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">env</span><span class="operator">.</span><span class="name">execute</span><span class="punctuation">()</span></code></pre>
+<p>Uwaga! Program zapisuje wyniki w częściowych plikach w katalogu output.
+Nie znane jest mi sposób zmuszenia flinka do wygenerowania pojedynczego
+pliku.</p>
+<p>Za pomocą Table API wynik zapisujemy do tabeli wynikowej.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.table</span> <span class="keyword namespace">import</span> <span class="punctuation">(</span><span class="whitespace">
+</span>    <span class="name">TableEnvironment</span><span class="punctuation">,</span> <span class="name">EnvironmentSettings</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="whitespace">
+</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">env_settings</span> <span class="operator">=</span> <span class="name">EnvironmentSettings</span><span class="operator">.</span><span class="name">in_batch_mode</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">t_env</span> <span class="operator">=</span> <span class="name">TableEnvironment</span><span class="operator">.</span><span class="name">create</span><span class="punctuation">(</span><span class="name">env_settings</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">table</span> <span class="operator">=</span> <span class="name">t_env</span><span class="operator">.</span><span class="name">from_elements</span><span class="punctuation">(</span><span class="whitespace">
+</span>  <span class="punctuation">[(</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal string single">'ABC'</span><span class="punctuation">),</span> <span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal string single">'ABCDE'</span><span class="punctuation">)],</span><span class="whitespace">
+</span>  <span class="name">schema</span><span class="operator">=</span><span class="name">DataTypes</span><span class="operator">.</span><span class="name">ROW</span><span class="punctuation">([</span><span class="name">DataTypes</span><span class="operator">.</span><span class="name">FIELD</span><span class="punctuation">(</span><span class="literal string single">'id'</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">INT</span><span class="punctuation">()),</span><span class="whitespace">
+</span>                        <span class="name">DataTypes</span><span class="operator">.</span><span class="name">FIELD</span><span class="punctuation">(</span><span class="literal string single">'name'</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">STRING</span><span class="punctuation">())]))</span><span class="whitespace">
+</span><span class="name">table</span><span class="operator">.</span><span class="name">print_schema</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">t_env</span><span class="operator">.</span><span class="name">execute_sql</span><span class="punctuation">(</span><span class="literal string double">&quot;&quot;&quot;
+    CREATE TABLE print (
+        id INT,
+        data STRING
+    ) WITH (
+        'connector' = 'print'
+    )
+&quot;&quot;&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">table</span><span class="operator">.</span><span class="name">select</span><span class="punctuation">(</span><span class="name">table</span><span class="operator">.</span><span class="name">id</span><span class="punctuation">,</span> <span class="name">table</span><span class="operator">.</span><span class="name">name</span><span class="operator">.</span><span class="name">alias</span><span class="punctuation">(</span><span class="literal string single">'nazwa'</span><span class="punctuation">))</span><span class="operator">.</span><span class="name">execute_insert</span><span class="punctuation">(</span><span class="literal string double">&quot;print&quot;</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">wait</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">(
+<cite>id</cite> INT,
+<cite>name</cite> STRING
+)
++I[1, ABC]
++I[2, ABCDE]</pre>
+<p>Poniższy program wykorzystuje plik <strong>countries.csv</strong> i zapisuje wynik do
+pliku.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">pyflink.table</span> <span class="keyword namespace">import</span> <span class="punctuation">(</span><span class="whitespace">
+</span>    <span class="name">DataTypes</span><span class="punctuation">,</span> <span class="name">TableEnvironment</span><span class="punctuation">,</span> <span class="name">EnvironmentSettings</span><span class="punctuation">,</span><span class="whitespace">
+</span>    <span class="name">TableDescriptor</span><span class="punctuation">,</span> <span class="name">Schema</span><span class="whitespace">
+</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">env_settings</span> <span class="operator">=</span> <span class="name">EnvironmentSettings</span><span class="operator">.</span><span class="name">new_instance</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">in_batch_mode</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">build</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">table</span> <span class="operator">=</span> <span class="name">TableEnvironment</span><span class="operator">.</span><span class="name">create</span><span class="punctuation">(</span><span class="name">env_settings</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="comment single"># all data to one output file</span><span class="whitespace">
+</span><span class="name">table</span><span class="operator">.</span><span class="name">get_config</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">get_configuration</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">set_string</span><span class="punctuation">(</span><span class="literal string double">&quot;parallelism.default&quot;</span><span class="punctuation">,</span> <span class="literal string double">&quot;1&quot;</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">table</span><span class="operator">.</span><span class="name">execute_sql</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string double">&quot;&quot;&quot;
+        CREATE TABLE countries(
+            code STRING,
+            name STRING,
+            continent STRING,
+            wikipedia_link STRING
+            ) WITH (
+            'connector' = 'filesystem',
+            'path' = 'countries.csv',
+            'format' = 'csv')
+        &quot;&quot;&quot;</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">tableInput</span> <span class="operator">=</span> <span class="name">table</span><span class="operator">.</span><span class="name">from_path</span><span class="punctuation">(</span><span class="literal string single">'countries'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'</span><span class="literal string escape">\n</span><span class="literal string single">Schema'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">tableInput</span><span class="operator">.</span><span class="name">print_schema</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">table</span><span class="operator">.</span><span class="name">create_temporary_table</span><span class="punctuation">(</span><span class="literal string single">'resultTable'</span><span class="punctuation">,</span> <span class="name">TableDescriptor</span><span class="operator">.</span><span class="name">for_connector</span><span class="punctuation">(</span><span class="literal string single">'filesystem'</span><span class="punctuation">)</span><span class="whitespace">
+</span>                             <span class="operator">.</span><span class="name">schema</span><span class="punctuation">(</span><span class="name">Schema</span><span class="operator">.</span><span class="name">new_builder</span><span class="punctuation">()</span><span class="whitespace">
+</span>                                     <span class="operator">.</span><span class="name">column</span><span class="punctuation">(</span><span class="literal string double">&quot;code&quot;</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">STRING</span><span class="punctuation">())</span><span class="whitespace">
+</span>                                     <span class="operator">.</span><span class="name">column</span><span class="punctuation">(</span><span class="literal string double">&quot;name&quot;</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">STRING</span><span class="punctuation">())</span><span class="whitespace">
+</span>                                     <span class="operator">.</span><span class="name">column</span><span class="punctuation">(</span><span class="literal string double">&quot;continent&quot;</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">STRING</span><span class="punctuation">())</span><span class="whitespace">
+</span>                                     <span class="operator">.</span><span class="name">column</span><span class="punctuation">(</span><span class="literal string double">&quot;wiki&quot;</span><span class="punctuation">,</span> <span class="name">DataTypes</span><span class="operator">.</span><span class="name">STRING</span><span class="punctuation">())</span><span class="whitespace">
+</span>                                     <span class="operator">.</span><span class="name">build</span><span class="punctuation">())</span><span class="whitespace">
+</span>                             <span class="operator">.</span><span class="name">option</span><span class="punctuation">(</span><span class="literal string single">'path'</span><span class="punctuation">,</span> <span class="literal string single">'result'</span><span class="punctuation">)</span><span class="whitespace">
+</span>                             <span class="operator">.</span><span class="name">option</span><span class="punctuation">(</span><span class="literal string single">'partition.default-name'</span><span class="punctuation">,</span> <span class="literal string single">'result'</span><span class="punctuation">)</span><span class="whitespace">
+</span>                             <span class="operator">.</span><span class="name">format</span><span class="punctuation">(</span><span class="literal string single">'csv'</span><span class="punctuation">)</span><span class="whitespace">
+</span>                             <span class="operator">.</span><span class="name">build</span><span class="punctuation">())</span><span class="whitespace">
+
+</span><span class="name">tableOutput</span> <span class="operator">=</span> <span class="name">table</span><span class="operator">.</span><span class="name">from_path</span><span class="punctuation">(</span><span class="literal string single">'resultTable'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">tableOutput</span><span class="operator">.</span><span class="name">print_schema</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">tableInput</span><span class="operator">.</span><span class="name">execute_insert</span><span class="punctuation">(</span><span class="literal string single">'resultTable'</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">wait</span><span class="punctuation">()</span></code></pre>
+</section>
+</section></body>
+</html>
+

@@ -1,0 +1,128 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<title>PRS12.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="przetwarzanie-rownolegle-i-strumieniowe">
+<h2>Przetwarzanie równoległe i strumieniowe</h2>
+<p class="important">Uwaga! Kod z którego będziemy korzystać na zajęciach jest dostępny na branchu <strong>ApacheFlinkStateStart</strong> w repozytorium <a class="reference external" href="https://github.com/WitMar/PRS2020">https://github.com/WitMar/PRS2020</a> .</p>
+<p>Jeżeli nie widzisz odpowiednich gałęzi na GitHubie wykonaj <strong>Ctr+T</strong>, a jak to nie pomoże to wybierz z menu <strong>Git-&gt;Fetch</strong>.</p>
+<section id="state">
+<h3>State</h3>
+<p>Podczas gdy wiele operacji w przepływie danych po prostu patrzy na jedno pojedyncze zdarzenie na raz (na przykład analizator zdarzeń), niektóre operacje zapamiętują informacje z wielu zdarzeń (na przykład operatory okien). Te operacje są nazywane stanowymi.</p>
+<p>Kilka przykładów operacji stanowych:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">Gdy aplikacja wyszukuje określone wzorce zdarzeń, stan przechowuje sekwencję zdarzeń, które wystąpiły do ​​tej pory.</div>
+<div class="line">Podczas agregowania zdarzeń na minutę / godzinę / dzień stan przechowuje oczekujące agregaty.</div>
+<div class="line">Podczas uczenia modelu uczenia maszynowego w strumieniu punktów danych stan przechowuje bieżącą wersję parametrów modelu.</div>
+<div class="line">Gdy trzeba zarządzać danymi historycznymi, państwo umożliwia sprawny dostęp do zdarzeń, które miały miejsce w przeszłości.</div>
+</div>
+</blockquote>
+<p>Flink zachowuje stany, aby móc być odpornym na błędy przy użyciu punktów kontrolnych (checkpoints) i punktów zapisu (savepoints).</p>
+<p>Wiedza o stanie pozwala również na przeskalowanie aplikacji Flink, gdyż ​​Flink zajmuje się redystrybucją stanu w równoległych instancjach.</p>
+</section>
+<section id="keystate">
+<h3>KeyState</h3>
+<p>Interfejsy stanu z kluczem (keyState) zapewniają dostęp do różnych typów stanu, które są objęte zakresem klucza bieżącego elementu wejściowego.</p>
+<p>Typ stanu może być używany tylko w KeyedStream, który można utworzyć za pomocą stream.keyBy(…) w Java/Scala API lub stream.key_by(…) w Python API.</p>
+</section>
+<section id="typy-stanow">
+<h3>Typy stanów</h3>
+<p>Dostępne stany to:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><strong>ValueState&lt;T&gt;</strong>: zachowuje wartość, którą można aktualizować i pobierać Wartość można ustawić za pomocą update(T) i pobrać za pomocą T value().</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>ListState&lt;T&gt;</strong>: przechowuje listę elementów. Możesz dołączać elementy i pobierać Iterable nad wszystkimi aktualnie przechowywanymi elementami. Elementy są dodawane za pomocą add(T) lub addAll(List&lt;T&gt;), Iterable można pobrać za pomocą Iterable&lt;T&gt; get(). Możesz również nadpisać istniejącą listę za pomocą update(List&lt;T&gt;)</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>ReducingState&lt;T&gt;</strong>: zachowuje pojedynczą wartość, która reprezentuje agregację wszystkich wartości dodanych do stanu. Interfejs jest podobny do ListState, ale elementy dodane za pomocą add(T) są redukowane do agregatu przy użyciu określonej funkcji ReduceFunction.</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>AggregingState&lt;IN, OUT&gt;</strong>: Zachowuje pojedynczą wartość, która reprezentuje agregację wszystkich wartości dodanych do stanu. W przeciwieństwie do ReducingState typ agregatu może różnić się od typu elementów dodawanych do stanu. Interfejs jest taki sam jak w przypadku ListState, ale elementy dodawane za pomocą add(IN) są agregowane przy użyciu określonej funkcji AggregateFunction.</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>MapState&lt;UK, UV&gt;</strong>: To przechowuje listę mapowań. Możesz umieścić pary klucz-wartość w stanie i pobrać Iterable dla wszystkich aktualnie przechowywanych mapowań. Mapowania są dodawane za pomocą put(UK, UV) lub putAll(Map&lt;UK, UV&gt;). Wartość skojarzoną z kluczem użytkownika można pobrać za pomocą get(UK). Iterowalne widoki mapowań, kluczy i wartości można pobrać za pomocą odpowiednio wpisów(), kluczy() i wartości(). Możesz również użyć isEmpty(), aby sprawdzić, czy ta mapa zawiera mapowania klucz-wartość.</div>
+</div>
+</blockquote>
+<p>Wszystkie typy stanów posiadają również metodę clear(), która czyści stan dla aktualnie aktywnego klucza, czyli klucza elementu input.</p>
+<p class="center"><img alt="col" src="stanyFlink.png" /></p>
+<p>Aby uzyskać uchwyt stanu, musisz utworzyć <strong>StateDescriptor</strong>. Zawiera on nazwę stanu (jak zobaczymy później, możesz utworzyć kilka stanów i muszą one mieć unikalne nazwy, aby można było się do nich odwoływać), typ wartości, które stan przechowuje i czasem funkcje użytkownika- określona funkcja, taka jak ReduceFunction. W zależności od typu stanu, który chcesz pobrać, tworzysz ValueStateDescriptor, ListStateDescriptor, AggregatingStateDescriptor, ReducingStateDescriptor lub MapStateDescriptor.</p>
+<p>Dostęp do stanu uzyskuje się za pomocą RuntimeContext, poprzez implementacje tzw. <strong>rich functions</strong>. Rich functions zapewniają, oprócz funkcji zdefiniowanych przez użytkownika (map, reduce itp.), cztery metody: open, close, getRuntimeContext, and setRuntimeContext.</p>
+</section>
+<section id="przyklad">
+<h3>Przykład</h3>
+<p>Spójrz na klasę <strong>counter.py</strong>. Definiuje ona funkcję <strong>map</strong> w pythonie interfejs map jest dostępny tutaj</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://nightlies.apache.org/flink/flink-docs-release-1.5/api/java/org/apache/flink/streaming/python/api/functions/AbstractPythonUDF.html">https://nightlies.apache.org/flink/flink-docs-release-1.5/api/java/org/apache/flink/streaming/python/api/functions/AbstractPythonUDF.html</a></div>
+</div>
+</blockquote>
+<p>Mamy metodę <strong>map</strong> która przyjmuje wartość ze strumienia. Ponadto w interfejsie nadrzędnym (rich function) zdefiniowano metodę <strong>open</strong> do inicjalizowania wartośći.</p>
+<p>Sposób inicjalizacji funkcji. Jest wywoływany przed rzeczywistymi metodami (takimi jak map lub filter) i dlatego nadaje się do jednorazowej konfiguracji wartości.</p>
+<p>Obiekt konfiguracyjny przekazany do funkcji może być użyty do konfiguracji i inicjalizacji. Konfiguracja zawiera wszystkie parametry, które zostały skonfigurowane na funkcji w kompozycji programu.</p>
+<p>Przykład dla open:</p>
+<pre class="code python highlight literal-block"><code><span class="name">public</span> <span class="keyword">class</span> <span class="name class">MyMapper</span> <span class="name">extends</span> <span class="name">FilterFunction</span><span class="operator">&lt;</span><span class="name">String</span><span class="operator">&gt;</span> <span class="punctuation">{</span>
+
+        <span class="name">private</span> <span class="name">String</span> <span class="name">searchString</span><span class="punctuation">;</span>
+
+        <span class="name">public</span> <span class="name">void</span> <span class="name builtin">open</span><span class="punctuation">(</span><span class="name">Configuration</span> <span class="name">parameters</span><span class="punctuation">)</span> <span class="punctuation">{</span>
+                <span class="name">this</span><span class="operator">.</span><span class="name">searchString</span> <span class="operator">=</span> <span class="name">parameters</span><span class="operator">.</span><span class="name">getString</span><span class="punctuation">(</span><span class="literal string double">&quot;foo&quot;</span><span class="punctuation">);</span>
+        <span class="punctuation">}</span>
+
+        <span class="name">public</span> <span class="name">boolean</span> <span class="name builtin">filter</span><span class="punctuation">(</span><span class="name">String</span> <span class="name">value</span><span class="punctuation">)</span> <span class="punctuation">{</span>
+                <span class="keyword">return</span> <span class="name">value</span><span class="operator">.</span><span class="name">equals</span><span class="punctuation">(</span><span class="name">searchString</span><span class="punctuation">);</span>
+        <span class="punctuation">}</span>
+<span class="punctuation">}</span></code></pre>
+<p>Stan pobieramy przez definicję nazwy i typu, oraz pobranie o z kontekstu</p>
+<pre class="code python highlight literal-block"><code><span class="name">state_desc</span> <span class="operator">=</span> <span class="name">ValueStateDescriptor</span><span class="punctuation">(</span><span class="literal string single">'cnt'</span><span class="punctuation">,</span> <span class="name">Types</span><span class="operator">.</span><span class="name">LONG</span><span class="punctuation">())</span>
+<span class="comment single">#assign value state to local argument</span>
+<span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">cnt_state</span> <span class="operator">=</span> <span class="name">runtime_context</span><span class="operator">.</span><span class="name">get_state</span><span class="punctuation">(</span><span class="name">state_desc</span><span class="punctuation">)</span></code></pre>
+<p>Następnie jak podano wyżej na obiekcie state.cnt_state możemy wykonywać operacje value() i update()</p>
+<pre class="code python highlight literal-block"><code>        <span class="name">cnt</span> <span class="operator">=</span> <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">cnt_state</span><span class="operator">.</span><span class="name">value</span><span class="punctuation">()</span>
+        <span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">cnt_state</span><span class="operator">.</span><span class="name">update</span><span class="punctuation">(</span><span class="name">new_cnt</span><span class="punctuation">)</span>
+
+<span class="operator">|</span> <span class="name">https</span><span class="punctuation">:</span><span class="operator">//</span><span class="name">nightlies</span><span class="operator">.</span><span class="name">apache</span><span class="operator">.</span><span class="name">org</span><span class="operator">/</span><span class="name">flink</span><span class="operator">/</span><span class="name">flink</span><span class="operator">-</span><span class="name">docs</span><span class="operator">-</span><span class="name">release</span><span class="operator">-</span><span class="literal number float">1.15</span><span class="operator">/</span><span class="name">api</span><span class="operator">/</span><span class="name">python</span><span class="operator">/</span><span class="name">_modules</span><span class="operator">/</span><span class="name">pyflink</span><span class="operator">/</span><span class="name">datastream</span><span class="operator">/</span><span class="name">state</span><span class="operator">.</span><span class="name">html</span></code></pre>
+<p>Spójrz na klasę <strong>aggregate.py</strong>.</p>
+<p>The following methods are mandatory for each AggregateFunction:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">createAccumulator()</div>
+<div class="line">accumulate()</div>
+<div class="line">getValue()</div>
+</div>
+</blockquote>
+<p>The following methods of AggregateFunction are required depending on the use case:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">retract() is required for aggregations on bounded OVER windows.</div>
+<div class="line">merge() is required for many batch aggregations and session window aggregations.</div>
+<div class="line">resetAccumulator() is required for many batch aggregations.</div>
+</div>
+</blockquote>
+<p>Musimy dodatkowo zmienić typo pobieranej z kontekstu zmiennej</p>
+<pre class="code python highlight literal-block"><code>    <span class="name">state_desc</span> <span class="operator">=</span> <span class="name">AggregatingStateDescriptor</span><span class="punctuation">(</span><span class="literal string single">'agg'</span><span class="punctuation">,</span> <span class="name">CountAggregateFunction</span><span class="punctuation">(),</span> <span class="name">Types</span><span class="operator">.</span><span class="name">LONG</span><span class="punctuation">())</span>
+<span class="comment single"># Define value state</span>
+<span class="name builtin pseudo">self</span><span class="operator">.</span><span class="name">cnt_state</span> <span class="operator">=</span> <span class="name">runtime_context</span><span class="operator">.</span><span class="name">get_aggregating_state</span><span class="punctuation">(</span><span class="name">state_desc</span><span class="punctuation">)</span></code></pre>
+<dl class="footnote brackets">
+<dt class="label" id="id1"><span class="brackets">*</span></dt>
+<dd><p>Wykorzystano materiały z:</p>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://nightlies.apache.org/flink/flink-docs-master/docs/concepts/flink-architecture/">https://nightlies.apache.org/flink/flink-docs-master/docs/concepts/flink-architecture/</a></div>
+<div class="line"><a class="reference external" href="https://ourairports.com/data/">https://ourairports.com/data/</a></div>
+</div>
+</dd>
+</dl>
+</section>
+</section></body>
+</html>
+

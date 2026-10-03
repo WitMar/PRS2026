@@ -1,0 +1,192 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<title>PRS05.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="przetwarzanie-rownolegle-i-strumieniowe">
+<h2>Przetwarzanie równoległe i strumieniowe</h2>
+<p class="important">Uwaga! Kod z którego będziemy korzystać na zajęciach jest dostępny na branchu <strong>projekt</strong> w repozytorium <a class="reference external" href="https://github.com/WitMar/PRS2020">https://github.com/WitMar/PRS2020</a> .</p>
+<p>Jeżeli nie widzisz odpowiednich gałęzi na GitHubie wykonaj <strong>Ctr+T</strong>, a jak to nie pomoże to wybierz z menu <strong>Git-&gt;Fetch</strong>.</p>
+<section id="projekt-opis">
+<h3>Projekt opis</h3>
+<p>W ramach projektu należy napisać rozwiązanie symulujące pracę magazynu.</p>
+<p>Każdy student otrzymuje losowe 4 warunki, które ma spełnić z zakresu scenariuszy dostępnych w systemie, a są to:</p>
+<p>Wycena</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><strong>CENA_BEZ_ZMIAN</strong> - program odpowiada na zapytania o cenę, ale ona jest zawsze niezmienna.</div>
+<div class="line"><strong>CENA_ZMIENNA</strong> - program odpowiada na zapytania o cenę, ale ceny mogą zmieniać się w czasie działania magazynu.</div>
+<div class="line"><strong>PROMO_CO_10_WYCEN</strong> - program odpowiada na zapytania o cenę, które się nie zmieniają, ale co 10 <em>przychodzące</em> zapytanie traktowane jest jako promocja i wyceniane jest na 0.</div>
+</div>
+</blockquote>
+<p>Zamówienie</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><strong>POJEDYNCZE</strong> - program przyjmuje zamówienia na pojedyncze produkty, zamówienia zawsze są na 1 sztukę</div>
+<div class="line"><strong>GRUPOWE</strong> - program przyjmuje zamówienia na pojedyncze sztuki jak i na grupy produktów (grupa może liczyć 1 produkt), zamówienia zawsze są na 1 sztukę każdego produktu</div>
+<div class="line"><strong>REZERWACJA</strong> - program przyjmuje rezerwacje, które są pobierane ze stanów magazynowych i odbierane przez zadanie odbiór zamówienia</div>
+</div>
+</blockquote>
+<p>Zaopatrzenie</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><strong>POJEDYNCZE</strong> - program przyjmuje do magazynu zaopatrzenie z pojedynczymi produktami, zaopatrzenie dodaje zawsze 1 sztukę</div>
+<div class="line"><strong>GRUPOWE</strong> - program przyjmuje do magazynu zaopatrzenie z pojedynczymi produktami jak i z grupami produktów, zaopatrzenie dodaje zawsze 1 sztukę kazdego produktu</div>
+</div>
+</blockquote>
+<p>Wydarzenie</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><strong>WYCOFANIE</strong> - program obsługuje wycofanie produktu ze sprzedaży, które ustala stan magazynowy na -9999999L oraz przywrócenie produktu które zeruje stan magazynu, gdy produkt jest wycofany ze sprzedaży nie obsługujemy jego zaopatrzenia</div>
+<div class="line"><strong>INWENTARYZACJA</strong> - program obsługuje zapytania o inwentaryzację, które musi wypisać stan magazynu na dokładny moment wystąpienia inwentaryzacji</div>
+<div class="line"><strong>RAPORT_SPRZEDAŻY</strong> - program obsługuje zapytania o raport sprzedaży, na które musi odpowiedzieć raportem ze sprzedaży (produkt, liczba sprzedanych sztuk) na dokładny moment wystąpienia prośby o raport</div>
+</div>
+</blockquote>
+<p>Każde z warunków obsługuje tylko wybrane typy akcji przychodzących na kolejkę zdarzeń, odpowiednio:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">CENY_BEZ_ZMIAN((WycenaAkcje.PODAJ_CENE)),</div>
+<div class="line">CENA_ZMIENNA((WycenaAkcje.PODAJ_CENE, WycenaAkcje.ZMIEN_CENE)),</div>
+<div class="line">PROMO_CO_10_WYCEN((WycenaAkcje.PODAJ_CENE));</div>
+<div class="line">WYCOFANIE((WydarzeniaAkcje.WYCOFANIE, WydarzeniaAkcje.PRZYWROCENIE)),</div>
+<div class="line">INWENTARYZACJA((WydarzeniaAkcje.INWENTARYZACJA)),</div>
+<div class="line">RAPORT_SPRZEDAŻY((WydarzeniaAkcje.RAPORT_SPRZEDAŻY));</div>
+<div class="line">POJEDYNCZE ((ZamowieniaAkcje.POJEDYNCZE_ZAMOWIENIE)),</div>
+<div class="line">GRUPOWE ((ZamowieniaAkcje.POJEDYNCZE_ZAMOWIENIE, ZamowieniaAkcje.GRUPOWE_ZAMOWIENIE)),</div>
+<div class="line">REZERWACJE ((ZamowieniaAkcje.POJEDYNCZE_ZAMOWIENIE, ZamowieniaAkcje.REZERWACJA, ZamowieniaAkcje.ODBIÓR_REZERWACJI));</div>
+<div class="line">POJEDYNCZE ((ZaopatrzenieAkcje.POJEDYNCZE_ZAOPATRZENIE)),</div>
+<div class="line">GRUPOWE ((ZaopatrzenieAkcje.POJEDYNCZE_ZAOPATRZENIE, ZaopatrzenieAkcje.GRUPOWE_ZAOPATRZENIE));</div>
+</div>
+</blockquote>
+<p>W ramach projektu istnieje Generator, który po uruchomieniu klasy <strong>SpringRedisApplication.java</strong> (i otrzymaniu logu o treści application started) umożliwia generowanie zadań. Zadania generowane są losowo, ich liczbę definiujemy w pliku application.yml. Tam też należy umieścić swój numer indeksu oraz wybrane - otrzymane scenariusze, które musimy spełnić. Program filtruje losowe zgłoszenia tak, by docierały do nas tylko te z naszego scenariusza.</p>
+<pre class="code java highlight literal-block"><code><span class="name label">ustawienia</span><span class="punctuation">:</span>
+  <span class="name">numerIndeksu</span><span class="punctuation">:</span> <span class="literal number integer">287046</span>
+  <span class="name">wycena</span><span class="punctuation">:</span> <span class="literal string">&quot;CENY_BEZ_ZMIAN&quot;</span>
+  <span class="name">zamowienia</span><span class="punctuation">:</span> <span class="literal string">&quot;POJEDYNCZE&quot;</span>
+  <span class="name">zaopatrzenie</span><span class="punctuation">:</span> <span class="literal string">&quot;POJEDYNCZE&quot;</span>
+  <span class="name">wydarzenia</span><span class="punctuation">:</span> <span class="literal string">&quot;WYCOFANIE&quot;</span>
+  <span class="name">liczbaZadan</span><span class="punctuation">:</span> <span class="literal number integer">200</span></code></pre>
+<p>Aby wygenerować zadania należy wejść przeglądarką na adres <a class="reference external" href="http://localhost:8080/action/generate">http://localhost:8080/action/generate</a> .</p>
+<p>Przedmiotem zainteresowania Państwa jest klasa <strong>ParallelExecutor</strong>. Odbiera ona zadania z rozproszonej kolejki, filtruje i przekazuje do lokalnej kolejki o nazwie kolejka (metoda process). Państwa celem jest napisanie metody threadProcess, która to przetwarza zadania z lokalnej kolejki, aktualizując stany magazynowe i przesyłając odpowiedzi na zadania.</p>
+<p>Dodatkowo w projekcie istnieje jednowątkowy process <strong>SequenceRunner.java</strong>, który przetwarza te same zadania sekwencyjnie na jednym wątku. Państwa zadaniem jest napisanie implementacji w <strong>ParallelExecutor</strong> tak, by działała szybciej niż SequenceRunner ale jednocześnie spełniała założenia, że wykonanie daje taki sam wynik jak SequenceRunner. Po zakończeniu przetwarzania SequenceRunner uruchamia zestaw testów sprawdzających poprawność wykonania Państwa implementacji.</p>
+<p>Uwaga! W momencie oddawania projektów mogą pojawić się dodatkowe metody sprawdzające poprawność.</p>
+<p>Uwaga! Czas działania programów będzie w 5% częścią finalnej oceny.</p>
+<p>Dla przykładu obecna implementacja <strong>ParallelExecutor</strong> uruchamia dwa wątki, które nie dbają o kwestie przetwarzania równoległego przychodzących zadąń co prowadzi do błędów wykonania (ale nie zawsze, im więcej zadań tym większa szansa na błąd). Kilkukrotne uruchomienie powinno dać przynajmniej raz jakiś błąd. W przypadku oceniania projektów, też planowana jest seria uruchomień projektów, gdzie za każde poprawne uruchomienie uzyskiwać będą Państwo punkty.</p>
+<p>Walidacja wyniku odbywa się w klasie Ledger.java w metodzie evaluate. Każda akcja ma przypisany numer id które rosną od zera do liczby zadań i mogą pomóc w przetwarzaniu.</p>
+<p>Walidacja warunki:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><strong>Czas</strong> działania (pomiędzy przesłaniem pierwszej a ostatniej odpowiedzi) jest niższy niż czas działania alorytmu jednowątkowego (SequenceRunner).</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Liczba zaakceptowanych</strong> oraz <strong>niezaakceptowanych</strong> zamówień (gdy nie ma dostatecznej liczby produktów) musi być taka sama przy obu uruchomieniach - co znaczy, że odebranie zaopatrzenia musi poczekać na wykonanie wszystkich zamówień, lub w inny sposób należy kontrolować ich odbieranie.</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Stan magazynu</strong> na koniec musi być taki jak w przypadku działania sekwencyjnego</div>
+</div>
+<div class="line-block">
+<div class="line"><strong>Ceny produktów</strong> na koniec muszą być takie jak w przypadku działania sekwencyjnego</div>
+</div>
+<div class="line-block">
+<div class="line">Odpowiedzi odnośnie <strong>cen produktów</strong> muszą być takie same jak w przypadku działania sekwencyjnego. Uwaga! Kolejność tych odpowiedzi nie ma znaczenia! Ma znaczenie jednak czy pytanie o cenę wystąpiło po zmianie ceny oraz akcja z którym id była promocyjnym zapytaniem.</div>
+</div>
+<div class="line-block">
+<div class="line">Odpowiedzi odnośnie <strong>inwentaryzacji</strong> muszą być takie same jak w przypadku działania sekwencyjnego. Inwentaryzacja musi odbywać się w tym samym czasie, jak w przypadku działania sekwencyjnego - innymi słowy nie powinniśmy obsługiwać zdarzeń zmieniających magazyn przychodzących po niej, zanim jej nie przeprowadzimy, jednocześnie musimy zaczekać na wykonanie zadań zmieniających stan magazynu zanim przeprocesujemy ją samą.</div>
+</div>
+<div class="line-block">
+<div class="line">Odpowiedzi odnośnie <strong>raportu</strong> sprzedaży muszą być takie same jak w przypadku działania sekwencyjnego. Działa podobnie jak inwentaryzacja, tylko dotyczy samych zamówień.</div>
+</div>
+</blockquote>
+<p>Podział:</p>
+<p>421831
+PROMO_CO_10_WYCEN POJEDYNCZE POJEDYNCZE WYCOFANIE</p>
+<p>426372
+CENY_BEZ_ZMIAN GRUPOWE POJEDYNCZE INWENTARYZACJA</p>
+<p>424322
+PROMO_CO_10_WYCEN REZERWACJE POJEDYNCZE RAPORT_SPRZEDAŻY</p>
+<p>394049
+CENY_BEZ_ZMIAN POJEDYNCZE GRUPOWE INWENTARYZACJA</p>
+<p>434881
+CENY_BEZ_ZMIAN GRUPOWE GRUPOWE WYCOFANIE</p>
+<p>444622
+PROMO_CO_10_WYCEN POJEDYNCZE GRUPOWE INWENTARYZACJA</p>
+<p>435466
+CENY_BEZ_ZMIAN GRUPOWE POJEDYNCZE RAPORT_SPRZEDAŻY</p>
+<p>424200
+CENY_BEZ_ZMIAN GRUPOWE GRUPOWE WYCOFANIE</p>
+<p>461015
+CENY_BEZ_ZMIAN GRUPOWE POJEDYNCZE RAPORT_SPRZEDAŻY</p>
+<p>424343
+CENA_ZMIENNA GRUPOWE POJEDYNCZE INWENTARYZACJA</p>
+<p>461013
+CENY_BEZ_ZMIAN REZERWACJE POJEDYNCZE RAPORT_SPRZEDAŻY</p>
+<p>461012
+CENA_ZMIENNA POJEDYNCZE POJEDYNCZE INWENTARYZACJA</p>
+<p>434901
+PROMO_CO_10_WYCEN POJEDYNCZE POJEDYNCZE INWENTARYZACJA</p>
+<p>461011
+CENY_BEZ_ZMIAN REZERWACJE POJEDYNCZE RAPORT_SPRZEDAŻY</p>
+<p>461010
+CENA_ZMIENNA REZERWACJE POJEDYNCZE RAPORT_SPRZEDAŻY</p>
+<p>461009
+CENY_BEZ_ZMIAN GRUPOWE POJEDYNCZE RAPORT_SPRZEDAŻY</p>
+<p>461008
+CENY_BEZ_ZMIAN REZERWACJE GRUPOWE INWENTARYZACJA</p>
+<p>426078
+PROMO_CO_10_WYCEN GRUPOWE POJEDYNCZE RAPORT_SPRZEDAŻY</p>
+<p>461021
+CENY_BEZ_ZMIAN POJEDYNCZE GRUPOWE INWENTARYZACJA</p>
+<p>461020
+CENY_BEZ_ZMIAN GRUPOWE GRUPOWE RAPORT_SPRZEDAŻY</p>
+<p>433245
+PROMO_CO_10_WYCEN POJEDYNCZE POJEDYNCZE INWENTARYZACJA</p>
+<p>461018
+PROMO_CO_10_WYCEN POJEDYNCZE GRUPOWE INWENTARYZACJA</p>
+<p>436440
+CENY_BEZ_ZMIAN GRUPOWE POJEDYNCZE INWENTARYZACJA</p>
+<p>460889
+PROMO_CO_10_WYCEN POJEDYNCZE GRUPOWE WYCOFANIE</p>
+<p>437862
+CENA_ZMIENNA POJEDYNCZE GRUPOWE INWENTARYZACJA</p>
+<p>436454
+CENA_ZMIENNA REZERWACJE POJEDYNCZE RAPORT_SPRZEDAŻY</p>
+<p>439655
+CENY_BEZ_ZMIAN GRUPOWE POJEDYNCZE INWENTARYZACJA</p>
+<p>434850
+CENA_ZMIENNA REZERWACJE POJEDYNCZE INWENTARYZACJA</p>
+<p>433250
+CENY_BEZ_ZMIAN REZERWACJE POJEDYNCZE WYCOFANIE</p>
+<p>433248
+CENY_BEZ_ZMIAN REZERWACJE POJEDYNCZE INWENTARYZACJA</p>
+<p>468655
+CENY_BEZ_ZMIAN GRUPOWE POJEDYNCZE WYCOFANIE</p>
+<p>468654
+PROMO_CO_10_WYCEN REZERWACJE POJEDYNCZE INWENTARYZACJA</p>
+<p>468653
+CENY_BEZ_ZMIAN GRUPOWE GRUPOWE WYCOFANIE</p>
+<p>426806
+PROMO_CO_10_WYCEN GRUPOWE POJEDYNCZE RAPORT_SPRZEDAŻY</p>
+<p>434999
+CENA_ZMIENNA POJEDYNCZE GRUPOWE WYCOFANIE</p>
+<p>434871
+CENY_BEZ_ZMIAN POJEDYNCZE GRUPOWE RAPORT_SPRZEDAŻY</p>
+<p>416244
+CENA_ZMIENNA POJEDYNCZE POJEDYNCZE INWENTARYZACJA</p>
+<p>406128
+PROMO_CO_10_WYCEN GRUPOWE POJEDYNCZE INWENTARYZACJA</p>
+<p>416381
+CENA_ZMIENNA REZERWACJE POJEDYNCZE WYCOFANIE</p>
+<p>424317
+CENY_BEZ_ZMIAN REZERWACJE POJEDYNCZE INWENTARYZACJA</p>
+<p><strong>Update</strong> 28.III.2022 dodano opis warunków walidacji</p>
+</section>
+</section></body>
+</html>
+

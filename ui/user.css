@@ -1,0 +1,133 @@
+
+
+.badimportant
+{
+border-style:solid;
+border-color:#000000;
+background-color: #FF6666;
+padding-left: 15px;
+}
+
+.veryimportant
+{
+border-style:dotted;
+border-color:#287EC7;
+background-color: #99FF99;
+padding-left: 15px;
+}
+
+.slide h1 {text-align: center; margin: 0 auto;}
+.slide h2 {text-align: center; margin: 0 auto;}
+
+.center
+{
+text-align: center;
+}
+
+.tag {
+  background-color: #073642;
+  color: #33a9f8;
+  padding: 0 0.2em;
+}
+.todo,
+.next,
+.done {
+  color: #002b36;
+  background-color: #dc322f;
+  padding: 0 0.2em;
+}
+
+.next {
+   text-align: center;
+  -webkit-border-radius: 0.35em;
+  -moz-border-radius: 0.35em;
+  border-radius: 0.35em;
+}
+
+.tag {
+   text-align: center;
+  -webkit-border-radius: 0.35em;
+  -moz-border-radius: 0.35em;
+  border-radius: 0.35em;
+}
+.TODO {
+  -webkit-border-radius: 0.2em;
+  -moz-border-radius: 0.2em;
+  border-radius: 0.2em;
+  background-color: #B8B8B8;
+}
+
+.BLUE {
+  -webkit-border-radius: 0.2em;
+  -moz-border-radius: 0.2em;
+  border-radius: 0.2em;
+  background-color: #268bd2;
+}
+.GREEN {
+  -webkit-border-radius: 0.2em;
+  -moz-border-radius: 0.2em;
+  border-radius: 0.2em;
+  background-color: #859900;
+}
+.ORANGE {
+  -webkit-border-radius: 0.2em;
+  -moz-border-radius: 0.2em;
+  border-radius: 0.2em;
+  background-color: #FFA500;
+}
+.PURPLE {
+  -webkit-border-radius: 0.2em;
+  -moz-border-radius: 0.2em;
+  border-radius: 0.2em;
+  background-color: #d33682;
+}
+.NOTE {
+  -webkit-border-radius: 0.2em;
+  -moz-border-radius: 0.2em;
+  border-radius: 0.2em;
+  background-color: #d33682;
+}
+.RED {
+  -webkit-border-radius: 0.2em;
+  -moz-border-radius: 0.2em;
+  border-radius: 0.2em;
+  color:#FF0000;
+  background-color: #FFFFFF;
+}
+
+body{ background:#f5f6f6; }
+#deck h1 { font-family: 'Merriweather', Georgia, 'Times New Roman', Times, serif;}
+#deck h2 { font-family: 'Merriweather', Georgia, 'Times New Roman', Times, serif; }
+#deck p, #deck li { 'Merriweather', Georgia, 'Times New Roman', Times, serif;}
+
+.line-block { font-size: 100% }
+.simple { font-size: 100% }
+
+img.align-left, .figure.align-left, object.align-left {
+    clear: left;
+    float: left;
+    margin-right: 1em;
+}
+img.align-right, .figure.align-right, object.align-right {
+    clear: right;
+    float: right;
+    margin-left: 1em;
+}
+img.align-center, .figure.align-center, object.align-center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+.align-left {
+    text-align: left;
+}
+.align-center {
+    clear: both;
+    text-align: center;
+}
+.align-right {
+    text-align: right;
+}
+div.align-right {
+    text-align: left;
+}

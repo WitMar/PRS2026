@@ -1,0 +1,187 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<title>PRS06.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="przetwarzanie-rownolegle-i-strumieniowe">
+<h2>Przetwarzanie równoległe i strumieniowe</h2>
+<p class="important">Uwaga! Kod z którego będziemy korzystać na zajęciach jest dostępny na branchu <strong>ExecutorsClassesStart</strong> w repozytorium <a class="reference external" href="https://github.com/WitMar/PRS2020">https://github.com/WitMar/PRS2020</a> . Kod końcowy można znaleźć na branchu <strong>ExecutorsClassesEnd</strong>.</p>
+<p>Jeżeli nie widzisz odpowiednich gałęzi na GitHubie wykonaj <strong>Ctr+T</strong>, a jak to nie pomoże to wybierz z menu <strong>Git-&gt;Fetch</strong>.</p>
+<section id="thread-pool">
+<h3>Thread Pool</h3>
+<p>Wątki wykonujące te same zadania możemy łączyć w grupy. Tak, że traktujemy je jako pojedynczy obiekt i mamy możliwość wspólnego nimi zarządzania. Grupa wątków może zawierać podgrupy.</p>
+<p>W Javie każda grupa wątków jest podgrupą grupy system:</p>
+<pre class="code java highlight literal-block"><code><span class="name">logger</span><span class="punctuation">.</span><span class="name attribute">info</span><span class="punctuation">(</span><span class="name">Runtime</span><span class="punctuation">.</span><span class="name attribute">getRuntime</span><span class="punctuation">().</span><span class="name attribute">availableProcessors</span><span class="punctuation">());</span>
+
+<span class="name">logger</span><span class="punctuation">.</span><span class="name attribute">info</span><span class="punctuation">(</span><span class="name">Thread</span><span class="punctuation">.</span><span class="name attribute">currentThread</span><span class="punctuation">().</span><span class="name attribute">getThreadGroup</span><span class="punctuation">().</span><span class="name attribute">getName</span><span class="punctuation">());</span>
+<span class="name">logger</span><span class="punctuation">.</span><span class="name attribute">info</span><span class="punctuation">(</span><span class="name">Thread</span><span class="punctuation">.</span><span class="name attribute">currentThread</span><span class="punctuation">().</span><span class="name attribute">getThreadGroup</span><span class="punctuation">().</span><span class="name attribute">getParent</span><span class="punctuation">().</span><span class="name attribute">getName</span><span class="punctuation">());</span></code></pre>
+<p>W ramach grupy main uruchomione są takie wątki maszyny wirtualnej Javy jak np, GarbageCollector. Musimy więc być świadomi, że maszyna wirtualna Javy uruchamia także dodatkowe wątki poza głównym wątkiem programu.</p>
+<p>Tworzenie grup wątków:</p>
+<pre class="code java highlight literal-block"><code><span class="name">ThreadGroup</span> <span class="name">group</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="name">ThreadGroup</span><span class="punctuation">(</span><span class="literal string">&quot;moja grupa&quot;</span><span class="punctuation">);</span></code></pre>
+<p>Zobacz przykład w klasie <strong>Groups.java</strong></p>
+<p>Programy serwerowe, takie jak serwery baz danych i serwery WWW, wielokrotnie wykonują żądania od wielu klientów i są zorientowane na przetwarzanie dużej liczby krótkich zadań. Podejście do budowania aplikacji serwera polegałoby na utworzeniu nowego wątku za każdym razem, gdy nadejdzie żądanie i obsłużeniu tego nowego żądania w nowo utworzonym wątku. Chociaż takie podejście wydaje się proste do wdrożenia, ma poważne wady. Serwer, który tworzy nowy wątek dla każdego żądania, spędzałby więcej czasu i zużywał więcej zasobów systemowych na tworzenie i niszczenie wątków niż przetwarzanie rzeczywistych żądań.</p>
+<p>Obiekty wątków używają znacznej ilości pamięci, a w przypadku aplikacji tworzenie i nieszczenie wielu obiektów wątków powoduje znaczne obciążenie związane z zarządzaniem pamięcią. Innym problemem jest także obsługa zadań w przypadku, gdy ich liczba przekracza dostępną liczbę wątków. Rozwiązaniem w tym wypadku jest stosowanie tzw. puli wątków.</p>
+<p>Thread pool - pula wątków dostępna do działania, które sa wykorzystywane a następnie zwracane do puli do ponownego użytku. Pozwala to na stałe obciążenie systemu bez konieczności tworzenia i usuwania wątków za każdym razem gdy zadanie zostanie zakończone.</p>
+<p>Jednym z popularnych typów puli wątków jest stała pula wątków (fixed thread pool). Pula tego typu zawsze ma określoną liczbę uruchomionych wątków; jeśli wątek zostanie w jakiś sposób zakończony, gdy jest nadal używany, zostanie automatycznie zastąpiony nowym wątkiem. Zadania są przesyłane do puli za pośrednictwem wewnętrznej kolejki, która przechowuje dodatkowe zadania, gdy jest więcej aktywnych zadań niż wątków.</p>
+</section>
+<section id="executory">
+<h3>Executory</h3>
+<p>Java udostępnia strukturę Executor, która jest skoncentrowana wokół interfejsu Executor, jego podinterfejsu – ExecutorService i klasy ThreadPoolExecutor, która implementuje oba te interfejsy. Używając executora, tworzymy pule wątków do której możemy przesyłać zadania do wykonania.</p>
+<p class="center"><img alt="col" src="pool.png" /></p>
+<p>Tworzenie Executora w javie :</p>
+<pre class="code java highlight literal-block"><code><span class="name">ExecutorService</span> <span class="name">service</span> <span class="operator">=</span> <span class="name">Executors</span><span class="punctuation">.</span><span class="name attribute">newFixedThreadPool</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">);</span></code></pre>
+<p>Następnie możemy dodawać zadania do wykonania przez tę pulę wątków, np:</p>
+<pre class="code java highlight literal-block"><code><span class="name">service</span><span class="punctuation">.</span><span class="name attribute">submit</span><span class="punctuation">(()</span> <span class="operator">-&gt;</span> <span class="punctuation">{</span>
+  <span class="name">logger</span><span class="punctuation">.</span><span class="name attribute">info</span><span class="punctuation">(</span><span class="literal string">&quot;Working &quot;</span> <span class="operator">+</span> <span class="name">Thread</span><span class="punctuation">.</span><span class="name attribute">currentThread</span><span class="punctuation">().</span><span class="name attribute">getName</span><span class="punctuation">());</span>
+<span class="punctuation">});</span></code></pre>
+<p>Zalety stosowania Executorów (thread pool):</p>
+<blockquote>
+<div class="line-block">
+<div class="line">biblioteka za nas obsługuje przychodzące zadania</div>
+<div class="line">możliwość reużywania wątków, nie musimy tworzyć i niszczyć wątków, co kosztuje czas i zasoby</div>
+<div class="line">możemy wygodnie ograniczyć liczbę wątków do tylu ile nasz komputer jest w stanie swobodnie obsłużyć.</div>
+</div>
+</blockquote>
+<p>Rodzaje Executorów:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">SingleThreadExecutor - wywołuje programy synchroniczne, każdy nowy process jest uruchamiany przez nowy wątek.</div>
+<div class="line">FixedThreadPool(n) - uruchamia n wątków, gdzie n to zwykle liczba procesorów w komputerze</div>
+<div class="line">CachedThreadPool - nie ogranicza liczby wątków, które są uruchamiane. W przypadku gdy wszystkie wątki są zajęte i przychodzi nowe zadanie, tworzony jest nowy wątek. Jeżeli wątek nie pracuje przez 60 sekund wtedy jest usuwany. Tego executora użyjemy, gdy mamy dużo małych zadań do wykonania.</div>
+<div class="line">ScheduledExecutor - wykonanie operacji w wybranych momentach czasu</div>
+</div>
+</blockquote>
+<p>Zobacz przykład w odpowiednich klasach o nazwie <strong>xxxExecutor.java</strong> .</p>
+<p>Executor musi zostać wyłączony, gdy skończysz z niego korzystać. Jeśli nie, maszyna JVM będzie działać, nawet jeśli wszystkie inne wątki zostaną zamknięte.</p>
+<p class="tag">Zadanie 1</p>
+<p>Sprawdź co stanie się jak nie wyłączysz puli wątków przez wywołanie shutdown();</p>
+<p>Executor.shutdown()     inicjalizuje zakonczeńczenie działania i blokuje możliwość dodawania nowych zadań do wykonania dla Executora.</p>
+<blockquote>
+<div class="line-block">
+<div class="line">shutdown() informuje usługę executora, że nie może zaakceptować nowych zadań, ale już przesłane zadania nadal zadziałają</div>
+<div class="line">shutdownNow() zrobi to samo oraz spróbuje anulować już przesłane zadania, przerywając odpowiednie wątki. Zauważ, że jeśli twoje zadania ignorują przerwanie (interrupt), shutdownNow będzie zachowywać się dokładnie tak samo, jak shutdown.</div>
+</div>
+</blockquote>
+<p>Zagrożenia związane z używaniem pul wątków:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">Zakleszczenie : podczas gdy zakleszczenie może wystąpić w dowolnym programie wielowątkowym, pule wątków wprowadzają inny przypadek zakleszczenia, w którym wszystkie wykonujące wątki czekają na wyniki z zablokowanych wątków oczekujących w kolejce z powodu niedostępności wątków do wykonania.</div>
+<div class="line">Przeciek wątku (leakage): Przeciek wątku występuje, gdy wątek zostanie usunięty z puli w celu wykonania zadania, ale nie zostanie do niego zwrócony po zakończeniu zadania. Na przykład, jeśli wątek zgłosi wyjątek, a klasa puli nie przechwyci tego wyjątku, wątek po prostu zakończy działanie, zmniejszając rozmiar puli wątków o jeden. Jeśli powtórzy się to wiele razy, pula w końcu stanie się pusta i żadne wątki nie będą dostępne do wykonania innych żądań.</div>
+<div class="line">Przerzucanie zasobów : Jeśli rozmiar puli wątków jest bardzo duży, czas marnuje się na przełączanie kontekstu między wątkami. Posiadanie większej liczby wątków niż optymalna liczba może spowodować problem z głodem, prowadzący do marnowania zasobów.</div>
+</div>
+</blockquote>
+<p>Optymalny rozmiar puli wątków zależy od liczby dostępnych procesorów i charakteru zadań. W systemie z procesorem N dla kolejki procesów tylko typu obliczeniowego maksymalny rozmiar puli wątków N lub N+1 osiągnie maksymalną wydajność. Jednak zadania mogą czekać na I/O i w takim przypadku bierzemy pod uwagę stosunek czasu oczekiwania (W) i czasu obsługi (S) na żądanie; co skutkuje maksymalnym rozmiarem puli N*(1+ W/S) dla maksymalnej wydajności.</p>
+</section>
+<section id="synchronizowane-kolekcje">
+<h3>Synchronizowane kolekcje</h3>
+<section id="synchronized-collections">
+<h4>Synchronized collections</h4>
+<p>Wszystkie kolekcje w Javie możemy synchronizować opakowując ich definicję w metodę Collections.synchronizedXXX().</p>
+<p>Jak sama nazwa wskazuje, synchronizedMap() zwraca zsynchronizowaną mapę na podstawie podanej w nawiasie implementacji. Aby zapewnić bezpieczeństwo wątków, synchronizedMap() chroni dostępy do mapy bazowej za pośrednictwem blokady (lock).</p>
+<pre class="code java highlight literal-block"><code><span class="name">Map</span><span class="operator">&lt;</span><span class="name">String</span><span class="punctuation">,</span> <span class="name">Integer</span><span class="operator">&gt;</span> <span class="name">map</span> <span class="operator">=</span> <span class="name">Collections</span><span class="punctuation">.</span><span class="name attribute">synchronizedMap</span><span class="punctuation">(</span><span class="keyword">new</span> <span class="name">HashMap</span><span class="operator">&lt;</span><span class="name">String</span><span class="punctuation">,</span> <span class="name">Integer</span><span class="operator">&gt;</span><span class="punctuation">());</span></code></pre>
+<p>Synchronizowane kolekcje nie są wydajne gdyż stosują zamek (lock) na całym obiekcie i każdej jego metodzie, stąd nawet metody, które mogą być wykonywane niezależnie blokują się nawzajem. Odpowiedzią są kolekcje Concurrent.</p>
+</section>
+<section id="concurrenthashmap">
+<h4>ConcurrentHashMap</h4>
+<p>Mapa obsługująca pełną współbieżność pobierania i wysoką oczekiwaną współbieżność aktualizacji. Ta klasa podlega tej samej specyfikacji funkcjonalnej co HashMapa i zawiera wersje metod odpowiadające każdej metodzie HashMapy. Wszystkie operacje są bezpieczne wielowątkowo, operacje pobierania nie pociągają za sobą blokowania i nie ma obsługi blokowania całej tabeli w sposób uniemożliwiający wszelki dostęp. Mapa concurrent nie blokuje operacji odczytu a w przypadku zapisu blokuje tylko segment hash mapy (blok kluczy), co pozwala osiągnać lepszą wydajność.</p>
+<p>Tabela jest dynamicznie rozszerzana, gdy występuje zbyt wiele kolizji (tj. klucze, które mają różne kody skrótu, ale mieszczą się w tym samym bloku), z oczekiwanym średnim efektem utrzymania około dwóch pojemników na mapowanie. Zmiana rozmiaru tej lub dowolnego innego rodzaju tablicy mieszającej może być stosunkowo powolną operacją. Jeśli to możliwe, dobrym pomysłem jest podanie oszacowania rozmiaru jako opcjonalnego argumentu konstruktora InitialCapacity.</p>
+<pre class="code java highlight literal-block"><code><span class="name">ConcurrentHashMap</span><span class="operator">&lt;</span><span class="name">Integer</span><span class="punctuation">,</span><span class="name">String</span><span class="operator">&gt;</span> <span class="name">map</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="name">ConcurrentHashMap</span><span class="operator">&lt;</span><span class="name">Integer</span><span class="punctuation">,</span><span class="name">String</span><span class="operator">&gt;</span><span class="punctuation">();</span>
+
+<span class="name">map</span><span class="punctuation">.</span><span class="name attribute">put</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="literal string">&quot;value&quot;</span><span class="punctuation">);</span>
+<span class="name">map</span><span class="punctuation">.</span><span class="name attribute">remove</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="literal string">&quot;valueNew&quot;</span><span class="punctuation">);</span>
+<span class="name">logger</span><span class="punctuation">.</span><span class="name attribute">info</span><span class="punctuation">(</span><span class="name">map</span><span class="punctuation">.</span><span class="name attribute">size</span><span class="punctuation">());</span>
+<span class="name">map</span><span class="punctuation">.</span><span class="name attribute">remove</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span><span class="literal string">&quot;value&quot;</span><span class="punctuation">);</span></code></pre>
+<p>Zwróć uwagę na dodatkowe metody niedostępne w HashMapie takie jak usuwanie specyficznej wartośći dla klucza.</p>
+<p>Zobacz działanie concurrent map na przykładzie w klasie <strong>ConcurrentMaps.java</strong> oraz porównanie szybkości działania synchronizowanych i concurrent map w klasie <strong>Maps.java</strong>.</p>
+</section>
+</section>
+<section id="dodatkowe-narzedzia-synchronizacji">
+<h3>Dodatkowe narzędzia synchronizacji</h3>
+<section id="count-down-latch">
+<h4>Count down latch</h4>
+<p>Pomoc w synchronizacji, która umożliwia jednemu lub większej liczbie wątków oczekiwanie na zakończenie zestawu operacji wykonywanych w innych wątkach.</p>
+<p>CountDownLatch jest inicjowany z podaną liczbą. Blokowanie następuje poprzez wykonanie metody await do momentu, gdy bieżąca liczba licznika osiągnie zero z powodu wywołań metody countDown() przez inne wątki, po czym wszystkie oczekujące wątki są zwalniane, a wszystkie kolejne wywołania await nie blokują już wywołania. Jest to jednorazowy obiekt — licznika nie można zresetować.</p>
+<p>CountDownLatch to wszechstronne narzędzie do synchronizacji, które może być używane do wielu celów. CountDownLatch zainicjowany z liczbą jeden służy jako prosty zatrzask włączania/wyłączania lub brama: wszystkie wątki wywołujące czekają w bramie, aż zostaną otwarte przez wątek wywołujący countDown(). CountDownLatch zainicjowany do N może służyć do tego, aby jeden wątek czekał, aż N wątków zakończy jakąś akcję lub jakaś akcja zostanie zakończona N razy.</p>
+<p>Przydatną właściwością CountDownLatch jest to, że nie wymaga, aby wątki wywołujące CountDown czekały, aż licznik osiągnie zero przed kontynuowaniem, po prostu zapobiega przejściu wybranych wątków poza await, aż wszystkie wątki będą mogły przejść.</p>
+<pre class="code java highlight literal-block"><code><span class="name">CountDownLatch</span> <span class="name">latch</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="name">CountDownLatch</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">);</span></code></pre>
+<p>Blokowanie (metoda await()) będzie polegało na tym, iż praca nie zostanie odpalona, dopóki wartość licznika CountDownLatch nie będzie równa zero.</p>
+<pre class="code java highlight literal-block"><code><span class="name">latch</span><span class="punctuation">.</span><span class="name attribute">await</span><span class="punctuation">();</span></code></pre>
+<p>Natomiast wątek serwis po wykonaniu swojej pracy ma za zadanie zmniejszyć ten licznik (metoda countDown()):</p>
+<pre class="code java highlight literal-block"><code><span class="name">latch</span><span class="punctuation">.</span><span class="name attribute">countDown</span><span class="punctuation">();</span></code></pre>
+<p>Zobacz przykłady w klasach <strong>CountDown.java</strong> i <strong>CountDownAllWaits.java</strong>.</p>
+<p class="tag">Zadanie 2</p>
+<p>Napisz program, który czeka na zakończenie wątków a później wyłącza Executora w klasie <strong>CountDownZadanie.java</strong>.</p>
+<p>Klasycznym przykładem użycia CountDownLatch w Javie jest aplikacja Java po stronie serwera, która wykorzystuje architekturę mikroservisów, w której wiele usług jest dostarczanych przez wiele serwisów, a aplikacja nie może rozpocząć przetwarzania, dopóki wszystkie usługi nie zostaną pomyślnie uruchomione.</p>
+</section>
+<section id="cyclic-barrier">
+<h4>Cyclic barrier</h4>
+<p>CyclicBarrier jest przydatny w scenariuszach, w których zestaw wątków ma czekać na siebie nawzajem w celu osiągnięcia wspólnego punktu bariery. Kiedy wątek osiąga barierę wywołuje metodę await() na obiekcie CyclicBarrier. Powoduje to zawieszenie wątku, dopóki inne wątki nie wywołają również metody await() na tym samym obiekcie CyclicBarrier. Gdy wszystkie określone wątki wywołają metodę await(), bariera jest zwalniana i wszystkie wątki będą mogły wznowić działanie.</p>
+<p>Bariera nazywana jest cykliczną, ponieważ może być ponownie użyta po zwolnieniu oczekujących wątków.</p>
+<p>Bariera działa podobnie jak licznik countDownLatch, z tą różnicą że blokuje więcej niż jeden wątek na barierze. Dodatkowo w przeciwieństwie do zatrzasku bariera może być reużywana wiele razy.</p>
+<pre class="code java highlight literal-block"><code><span class="name">CyclicBarrier</span> <span class="name">barrier</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="name">CyclicBarrier</span><span class="punctuation">(</span><span class="literal number integer">4</span><span class="punctuation">);</span>
+<span class="name">barrier</span><span class="punctuation">.</span><span class="name attribute">await</span><span class="punctuation">();</span></code></pre>
+<p>Bariery Cykliczne są używane w programach, w których mamy ustaloną liczbę wątków, które muszą czekać, aż osiągną wspólny punkt przed kontynuowaniem wykonywania.</p>
+<p>Zobacz przykłady w klasach <strong>Barrier.java</strong> i <strong>BarrierRunOnBarrierReached.java</strong>.</p>
+<p class="tag">Zadanie 3</p>
+<p>Napisz program, który wstrzyma wszystkie wątki w przypadku wystąpienia zadania synchronizacji (klasa <strong>BarrierZadanie.java</strong>).</p>
+<p>Zobacz na rozwiązanie prowadzącego, w jakim scenariuszu ono nie zadziała?</p>
+</section>
+<section id="blockingqueue">
+<h4>BlockingQueue</h4>
+<p>Kolejka blokująca to kolejka, która blokuje się, gdy próbujesz usunąć z niej element, a kolejka jest pusta, lub jeśli próbujesz dodać do niej elementy, a kolejka jest już pełna. Wątek, który próbuje usunąć element z pustej kolejki, jest blokowany, dopóki inny wątek nie wstawi elementu do kolejki. Wątek próbujący umieścić element w pełnej kolejce jest blokowany, dopóki jakiś inny wątek nie zrobi miejsca w kolejce, usuwając jeden lub więcej elementów lub całkowicie usuwając kolejkę.</p>
+<p>BlockingQueue udostępnia metodę put() do przechowywania elementu oraz metodę take() do pobierania elementu. Obie są metodami blokującymi, co oznacza, że metoda put() zablokuje się, jeśli kolejka osiągnie swoją pojemność i nie ma miejsca na dodanie nowego elementu. Podobnie metoda take() będzie blokować, jeśli kolejka blokująca jest pusta.</p>
+<p>Implementacje BlockingQueue są bezpieczne wielowątkowo. Wszystkie metody kolejkowania osiągają swoje efekty atomowo przy użyciu wewnętrznych blokad lub innych form kontroli współbieżności. Jednak operacje zbierania zbiorczego addAll, IncludesAll, keepAll i removeAll niekoniecznie są wykonywane niepodzielnie, chyba że określono inaczej w implementacji. Tak więc możliwe jest, że np. addAll(c) nie powiedzie się (zgłosi wyjątek) po dodaniu tylko niektórych elementów w c.</p>
+<pre class="code java highlight literal-block"><code><span class="name">BlockingQueue</span><span class="operator">&lt;</span><span class="name">Integer</span><span class="operator">&gt;</span> <span class="name">sharedQ</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="name">LinkedBlockingQueue</span><span class="operator">&lt;</span><span class="name">Integer</span><span class="operator">&gt;</span><span class="punctuation">();</span>
+<span class="name">queue</span><span class="punctuation">.</span><span class="name attribute">put</span><span class="punctuation">(</span><span class="name">produce</span><span class="punctuation">());</span>
+<span class="name">consume</span><span class="punctuation">(</span><span class="name">queue</span><span class="punctuation">.</span><span class="name attribute">take</span><span class="punctuation">());</span></code></pre>
+<p>Zobacz przykład w klasie <strong>BlockingQueue.java</strong>.</p>
+<p class="tag">Zadanie 4</p>
+<p>Zmień przykłąd w klasie <strong>BlockingQueue.java</strong> tak by za pomocą bariery kończyć przetwarzanie consumera jak wszyscy consumenci skończą przetwarzanie.</p>
+</section>
+<section id="exchangers">
+<h4>Exchangers</h4>
+<p>Klasa Exchanger w Javie może służyć do współdzielenia obiektów między dwoma wątkami. Klasa udostępnia tylko jedną przeciążoną metodę exchange(T t). Po wywołaniu wymiana czeka, aż drugi wątek w parze również ją wywoła. W tym momencie drugi wątek odnajduje, że pierwszy wątek czeka ze swoim obiektem. Wątek wymienia przedmioty, które trzyma i sygnalizuje wymianę.</p>
+<pre class="code java highlight literal-block"><code><span class="name">Exchanger</span><span class="operator">&lt;</span><span class="name">String</span><span class="operator">&gt;</span> <span class="name">exchanger</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="name">Exchanger</span><span class="operator">&lt;&gt;</span><span class="punctuation">();</span>
+<span class="name">exchanger</span><span class="punctuation">.</span><span class="name attribute">exchange</span><span class="punctuation">(</span><span class="literal string">&quot;from&quot;</span><span class="punctuation">);</span>
+<span class="name">exchanger</span><span class="punctuation">.</span><span class="name attribute">exchange</span><span class="punctuation">(</span><span class="literal string">&quot;to&quot;</span><span class="punctuation">);</span></code></pre>
+<p>Zobacz przykład w klasie <strong>Exchangers.java</strong>.</p>
+</section>
+<section id="phaser">
+<h4>Phaser</h4>
+<p>Phaser pozwala nam budować logikę, w której wątki muszą czekać na barierę przed przejściem do następnej fazy wykonania. Możemy koordynować wiele faz wykonania, ponownie wykorzystując instancję Phasera dla każdej fazy programu. Każda faza może mieć inną liczbę wątków oczekujących na przejście do kolejnej fazy.</p>
+<p>Aby uczestniczyć w koordynacji, wątek musi sam zarejestrować() w instancji Phaser. Wątek sygnalizuje, że dotarł do bariery, wywołując <em>arriveAndAwaitAdvance(</em>), która jest metodą blokującą. Gdy liczba przybyłych wątków będzie równa liczbie zarejestrowanych wątków, realizacja programu będzie kontynuowana, a numer fazy wzrośnie. Aktualny numer fazy możemy uzyskać, wywołując metodę getPhase().</p>
+<p>Gdy wątek zakończy swoje zadanie, powinniśmy wywołać metodę arriveAndDeregister(), aby zasygnalizować, że bieżący wątek nie powinien już być uwzględniany w tej konkretnej fazie.</p>
+<pre class="code java highlight literal-block"><code><span class="name">ph</span><span class="punctuation">.</span><span class="name attribute">arriveAndAwaitAdvance</span><span class="punctuation">();</span>
+<span class="keyword">try</span> <span class="punctuation">{</span>
+  <span class="name">Thread</span><span class="punctuation">.</span><span class="name attribute">sleep</span><span class="punctuation">(</span><span class="literal number integer">20</span><span class="punctuation">);</span>
+<span class="punctuation">}</span> <span class="keyword">catch</span> <span class="punctuation">(</span><span class="name">InterruptedException</span> <span class="name">e</span><span class="punctuation">)</span> <span class="punctuation">{</span>
+  <span class="name">e</span><span class="punctuation">.</span><span class="name attribute">printStackTrace</span><span class="punctuation">();</span>
+<span class="punctuation">}</span>
+<span class="name">ph</span><span class="punctuation">.</span><span class="name attribute">arriveAndDeregister</span><span class="punctuation">();</span></code></pre>
+<p>Zabacz przykład w klasie <strong>PhaserExample.java</strong>.</p>
+<p class="tag">Zadanie 5</p>
+<p>Zamień przykład na taki, który zrealizuje wyścig wątków na zasadzie, że najwolniejszy wątek danej fazy odpada (np ostatni który doda się do listy) i tylko jeden kończy przetwarzanie.</p>
+<dl class="footnote brackets">
+<dt class="label" id="id1"><span class="brackets">*</span></dt>
+<dd><p>Wykorzystano materiały z:</p>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://www.baeldung.com/java-phaser">https://www.baeldung.com/java-phaser</a></div>
+<div class="line"><a class="reference external" href="https://www.geeksforgeeks.org/thread-pools-java/">https://www.geeksforgeeks.org/thread-pools-java/</a></div>
+<div class="line"><a class="reference external" href="https://www.baeldung.com/java-synchronizedmap-vs-concurrenthashmap">https://www.baeldung.com/java-synchronizedmap-vs-concurrenthashmap</a></div>
+<div class="line"><a class="reference external" href="https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/CountDownLatch.html">https://docs.oracle.com/javase/7/docs/api/java/util/concurrent/CountDownLatch.html</a></div>
+<div class="line"><a class="reference external" href="https://jenkov.com/tutorials/java-concurrency/blocking-queues.html">https://jenkov.com/tutorials/java-concurrency/blocking-queues.html</a></div>
+</div>
+</dd>
+</dl>
+</section>
+</section>
+</section></body>
+</html>
+
