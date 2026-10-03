@@ -6,9 +6,12 @@ Użycie:
     python ipynb2html.py Zajecia1Jupyter.ipynb [--title "Laboratorium 1 - ..."]
 
 Wymaga: nbconvert, docutils, pandoc.
-Obrazki (załączniki z komórek markdown i wykresy z wyników) trafiają do images/<nazwa notatnika>/.
+Obrazki (załączniki z komórek markdown i wykresy z wyników) są wbudowywane w plik HTML (data URI),
+więc wynikowa strona jest jednym samodzielnym plikiem.
 """
 import argparse
+import base64
+import mimetypes
 import os
 import re
 
@@ -55,7 +58,6 @@ def main():
     args = parser.parse_args()
 
     nazwa = os.path.splitext(os.path.basename(args.notebook))[0]
-    katalog_obrazkow = os.path.join("images", nazwa)
 
     nb = nbformat.read(args.notebook, as_version=4)
     przygotuj_markdown(nb)
@@ -64,13 +66,13 @@ def main():
     cfg.ExtractAttachmentsPreprocessor.enabled = True
     rst, zasoby = RSTExporter(config=cfg).from_notebook_node(nb)
 
-    os.makedirs(katalog_obrazkow, exist_ok=True)
-    obrazki = {}
+    # docutils potrzebuje nazw plików - podstawiamy znaczniki, które po konwersji zamienimy na data URI
+    obrazki, dane_obrazkow = {}, {}
     for nr, (plik, dane) in enumerate(zasoby["outputs"].items(), start=1):
-        nowa_nazwa = f"{katalog_obrazkow}/{nr:02d}{os.path.splitext(plik)[1]}"
-        with open(nowa_nazwa, "wb") as f:
-            f.write(dane)
-        obrazki[plik] = nowa_nazwa
+        znacznik = f"obrazek-{nr:02d}{os.path.splitext(plik)[1]}"
+        obrazki[plik] = znacznik
+        typ = mimetypes.guess_type(plik)[0] or "image/png"
+        dane_obrazkow[znacznik] = f"data:{typ};base64,{base64.b64encode(dane).decode('ascii')}"
 
     rst = popraw_rst(rst, obrazki)
     if args.title:
@@ -93,7 +95,15 @@ def main():
                      "output_encoding": "utf-8",
                  })
     os.remove(plik_rst)
-    print(f"Zapisano {nazwa}.html, obrazki w {katalog_obrazkow}/")
+
+    with open(f"{nazwa}.html", encoding="utf-8") as f:
+        html = f.read()
+    html = re.sub(r'alt="obrazek-\d+\.\w+"', 'alt="wykres"', html)
+    for znacznik, uri in dane_obrazkow.items():
+        html = html.replace(f'src="{znacznik}"', f'src="{uri}"')
+    with open(f"{nazwa}.html", "w", encoding="utf-8") as f:
+        f.write(html)
+    print(f"Zapisano {nazwa}.html ({len(dane_obrazkow)} obrazków wbudowanych w plik)")
 
 
 if __name__ == "__main__":
