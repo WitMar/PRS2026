@@ -1,0 +1,885 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>Laboratorium 1 - Narzędzia i wątki w Pythonie</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="laboratorium-1-narzedzia-i-watki-w-pythonie">
+<h2>Laboratorium 1 - Narzędzia i wątki w Pythonie</h2>
+</section>
+<section id="narzedzia-i-organizacja-zajec">
+<h2>Narzędzia i organizacja zajęć</h2>
+<p>Wykłady w postaci HTML będą pojawiać się na serwisie <strong>Moodle</strong>
+<a class="reference external" href="https://lms.amu.edu.pl/sci/course/view.php?id=333">https://lms.amu.edu.pl/sci/course/view.php?id=333</a></p>
+<p>W tym samym miejscu obecne będą materiały na laboratoria. Na samym dole
+materiałów na laboratoria publikowany będzie plik notatnika <strong>Jupyter</strong>,
+który można otworzyć w serwisie <a class="reference external" href="https://jupyter.wmi.amu.edu.pl">https://jupyter.wmi.amu.edu.pl</a> by móc
+skorzystać z interaktywnych opcji uruchamiania kodów.</p>
+<p>W ramach uruchamiania programów oraz debuggowania pomocne może być także
+bardziej złożone <strong>IDE</strong> (ang. Integrated Development Environment) o
+nazwie <strong>PyCharm</strong>, opisane poniżej.</p>
+<p>W ramach wykładu na serwisie <strong>Moodle</strong> znajdziecie Państwo pytania
+testowe na które macie <strong>2</strong> tygodnie na odpowiedź. Tam też pod nazwą
+<strong>Zadania</strong> znajdować się będa zadania do wykonania na zajęciach
+laboratoryjnych (także dostępne przez <strong>2</strong> tygodnie do czasu zajęć).
+Korzystają one z pluginu <strong>CodeRunner</strong> systemu <strong>Moodle</strong>.</p>
+<section id="edytor">
+<h3>Edytor</h3>
+<p>Implementując programy w języku Python, rekomendowanym (i aktualnie
+jednym z najpopularniejszych) rodzin IDE jest zespół oprogramowania
+dostarczany przez firmę <strong>JetBrains</strong>. Oprogramowanie to jest dostępne
+za darmo w wersji Community (link poniżej). Jako studenci możecie
+Państwo prosić o darmowy dostęp do wersji Ultimate -
+<a class="reference external" href="https://www.jetbrains.com/community/education/#students">https://www.jetbrains.com/community/education/#students</a>):</p>
+<blockquote>
+<p><a class="reference external" href="https://www.jetbrains.com/pycharm">https://www.jetbrains.com/pycharm</a></p>
+</blockquote>
+<p>Otwórz program PyCharm. Powinieneś zobaczyć następujący ekran:</p>
+<img alt="Screenshot from 2023-02-26 17-45-27.png" class="align-center" src="images/Zajecia1Jupyter/02.png" />
+<p>Utwórz <strong>New Project -&gt; Pure Python</strong>.</p>
+<p>W pierwszej lini przy location możesz zmienić nazwę projektu na własną i
+wybrać <strong>create</strong>.</p>
+<img alt="Screenshot from 2023-02-26 17-46-24.png" class="align-center" src="images/Zajecia1Jupyter/04.png" />
+<p>Powinieneś zobaczyć ekran edytora. Otwórz plik <strong>main.py</strong> wybierając z
+go z lewej strony w menu projektu. Tak wygląda menu:</p>
+<img alt="Screenshot from 2023-02-26 17-49-02.png" class="align-center" src="images/Zajecia1Jupyter/05.png" />
+<p>Dokładniej działania edytora i elementy skrótów klawiszowych poznamy na
+kolejnych zajęciach. Na ten moment istotne będą dwa elementy. Pierwszy
+to uruchomienie programu za pomocą zielonego trójkąta w górnym prawym
+rogu ekranu lub po wyborze prawym klawiszem myszy na ekranie z kodem lub
+pliku i wybór opcji <span class="docutils literal">Run 'main'</span>.</p>
+<img alt="Screenshot from 2023-02-26 17-51-12.png" class="align-center" src="images/Zajecia1Jupyter/03.png" />
+<p>Wiedząc jak uruchamiać programy pozostaje nam poznać sposób dodawania
+zależności do projektu.</p>
+</section>
+<section id="zaleznosci">
+<h3>Zależności</h3>
+<p>W przypadku gdy wykorzystujemy zewnętrzne moduły przez <span class="docutils literal">import</span> może
+okazać się, że nasze lokalne środowisko nie ma zainstalowanego jakiegoś
+pakietu lub program nie działa z posiadaną przez nas wersją pakietu,
+tylko oczekuje konkretnej innej wersji. W takim wypadku z reguły
+programiści udostępniają plik w którym opisane są zależności projektu.</p>
+<p>Standardem dla języka Python jest definiowanie zależności w pliku o
+nazwie <em>requirements.txt</em>.</p>
+<p>Dodaj do projektu w <strong>PyCharm</strong> plik <em>requirements.txt</em> (prawy klawiszem
+myszy na folder i <strong>New -&gt; File</strong>).</p>
+<p>W treści pliku umieść.</p>
+<p>multithreading==0.2.0
+loguru==0.6.0
+requests==2.28.2</p>
+<p>Multithreading jest biblioteką napisaną przez do kolejkowania i
+wykonywania zadań wielowątkowo, opiera się ona na module threading który
+zostanie omówiony w kolejnym rozdziale. Dla nas jest tylko przykładem
+dla pokazania jak działają zależności i plik requirements w Python.
+Wybierz w IDE opcję <strong>install requirements</strong>.</p>
+<img alt="Screenshot from 2023-02-26 19-26-01.png" class="align-center" src="images/Zajecia1Jupyter/06.png" />
+<p>Następnie zamień implementację <strong>main.py</strong> na poniższą i sprawdź czy
+możesz o uruchomić.</p>
+<pre class="code python literal-block"><code><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">multithreading</span><span class="whitespace">
+
+</span><span class="keyword">class</span><span class="whitespace"> </span><span class="name class">Demo</span><span class="punctuation">(</span><span class="name">multithreading</span><span class="operator">.</span><span class="name">MultiThread</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">def</span><span class="whitespace"> </span><span class="name function">task</span><span class="punctuation">(</span><span class="name builtin pseudo">self</span><span class="punctuation">,</span> <span class="name">task</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">task</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">demo</span> <span class="operator">=</span> <span class="name">Demo</span><span class="punctuation">(</span><span class="name">threads</span><span class="operator">=</span><span class="literal number integer">3</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="comment single"># Start threads</span><span class="whitespace">
+</span><span class="name">demo</span><span class="operator">.</span><span class="name">start_threads</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="comment single"># Adding task to queue</span><span class="whitespace">
+</span><span class="name">demo</span><span class="operator">.</span><span class="name">add_task</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">demo</span><span class="operator">.</span><span class="name">add_task</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">demo</span><span class="operator">.</span><span class="name">add_task</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="comment single"># Wait until queue is empty</span><span class="whitespace">
+</span><span class="name">demo</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">---------------------------------------------------------------------------
+
+ModuleNotFoundError                       Traceback (most recent call last)
+
+Cell In [1], line 1
+----&gt; 1 import multithreading
+      3 class Demo(multithreading.MultiThread):
+      4     def task(self, task):
+
+
+ModuleNotFoundError: No module named 'multithreading'</pre>
+<p>Uwaga! W ramach programów uruchamianych przez <strong>Moodle</strong> oraz
+<strong>Jupyter</strong> nie są dostępne wszystkie zależności i biblioteki a
+instalacja ich jest możliwa tylko przez administratora systemu (powyżej
+mamy taki przyklad). W związku z tym w przypadku korzystania z
+niestandardowych pakietów proszę wykorzystywać <strong>PyCharm</strong>.</p>
+</section>
+</section>
+<section id="watki-i-synchronizacja">
+<h2>Wątki i synchronizacja</h2>
+<p>W tym rozdziale dowiemy się jak tworzyć wątki w języku Python
+korzystając ze standardowej biblioteki.</p>
+<section id="thread">
+<h3>Thread</h3>
+<p>Standardowa biblioteka Pythona udostępnia moduł <em>threading</em>, który
+zawieraja większość operacji związanych z wielowątkowością. Klasa
+<strong>Thread</strong> w tym module zapewnia przejrzysty interfejs do pracy z
+wątkami.</p>
+<pre class="code python literal-block"><code><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">threading</span><span class="whitespace">
+
+</span><span class="keyword namespace">from</span><span class="whitespace"> </span><span class="name namespace">time</span><span class="whitespace"> </span><span class="keyword namespace">import</span> <span class="name">gmtime</span><span class="punctuation">,</span> <span class="name">strftime</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span><span class="whitespace"> </span><span class="name function">thread_function</span><span class="punctuation">(</span><span class="name">name</span><span class="punctuation">):</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: starting&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">,</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: finishing&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before creating thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">thread_function</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before running thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : wait for the thread to finish&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : all done&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span></code></pre>
+<pre class="literal-block">Time 2023-02-26 18:32:16 | Name : MainThread
+Time 2023-02-26 18:32:16 | Main Thread : before creating thread
+Time 2023-02-26 18:32:16 | Main Thread : before running thread
+Time 2023-02-26 18:32:16 | Thread 1: starting
+Time 2023-02-26 18:32:16 | Thread 1: Name : Thread-13
+Time 2023-02-26 18:32:16 | Thread 1: finishing
+Time 2023-02-26 18:32:16 | Main Thread : wait for the thread to finish
+Time 2023-02-26 18:32:16 | Main Thread : all done</pre>
+<p>Jak widać sam wątek definiujemy w najprostszym scenariuszu poprzez
+wykonanie</p>
+<blockquote>
+<p><span class="docutils literal">threading.Thread(target=thread_function, <span class="pre">args=(1,))</span></span></p>
+</blockquote>
+<p>Czyli definicję obiektu klasy Thread jako argument podając funkcję,
+którą wykona nasz wątek oraz parametry tej funkcji. W naszym wypadku
+przekazujemy tam liczbę, która ma być dla nas naszą <em>nazwą</em> aktualnie
+tworzonego wątku. Aby wątek uruchomić musimy wykonać na tym obiekcie
+metodę <span class="docutils literal">start()</span>.</p>
+<p>Powyższy kod zawiera też wywołanie funkcji systemowej <span class="docutils literal">gmtime()</span> w
+celu wypisania czasu wykonania komend.</p>
+<p>Kolejna obserwacją którą możemy dokonać jest taka, że w powyższym
+wykonaniu możemy zaobserwować, że nasz program działa już na dwóch
+wątkach, pierwszy to tak zwany główny wątek programu, który uruchamiamy
+startując wykonanie programu. Od niego tworzony jest dopiero drugi
+wątek. Żeby odczytać nazwę systemową wątku korzystamy z funkcji:</p>
+<blockquote>
+<p><span class="docutils literal"><span class="pre">threading.current_thread().name</span></span></p>
+</blockquote>
+<p>Zobaczmy co stanie się gdy zdefiniujemy w kodzie dwa dodatkowe wątki :</p>
+<pre class="code python literal-block"><code><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">threading</span><span class="whitespace">
+
+</span><span class="keyword namespace">from</span><span class="whitespace"> </span><span class="name namespace">time</span><span class="whitespace"> </span><span class="keyword namespace">import</span> <span class="name">gmtime</span><span class="punctuation">,</span> <span class="name">strftime</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span><span class="whitespace"> </span><span class="name function">thread_function</span><span class="punctuation">(</span><span class="name">name</span><span class="punctuation">):</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: starting&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">,</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: finishing&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before creating thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">thread_function</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,))</span><span class="whitespace">
+</span><span class="name">x2</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">thread_function</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before running thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">x2</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : wait for the thread to finish&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : all done&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span></code></pre>
+<pre class="literal-block">Time 2023-02-26 18:32:18 | Name : MainThread
+Time 2023-02-26 18:32:18 | Main Thread : before creating thread
+Time 2023-02-26 18:32:18 | Main Thread : before running thread
+Time 2023-02-26 18:32:18 | Thread 1: starting
+Time 2023-02-26 18:32:18 | Thread 1: Name : Thread-14
+Time 2023-02-26 18:32:18 | Thread 1: finishing
+Time 2023-02-26 18:32:18 | Thread 2: starting
+Time 2023-02-26 18:32:18 | Thread 2: Name : Thread-15
+Time 2023-02-26 18:32:18 | Thread 2: finishing
+Time 2023-02-26 18:32:18 | Main Thread : wait for the thread to finish
+Time 2023-02-26 18:32:18 | Main Thread : all done</pre>
+<p>W powyższym przypadku dołożyliśmy dodatkowy wątek i uruchomiliśmy go
+razem z pierwszym. Bardzo prawdopodobne, że przetwarzanie pierwszego
+wątku zakończyło się zanim drugi rozpoczął swoje działanie (uruchom
+komórkę kilka razy - kolejność nie jest zagwarantowana). Nie jest to
+zapewne oczekiwany efekt. W celu opóźnienia wykonania wątku możemy
+wykorzystać metodę modułu time o nazwie <span class="docutils literal">sleep()</span>.</p>
+<blockquote>
+<p><span class="docutils literal">time.sleep(2)</span></p>
+</blockquote>
+<p>Powoduje uśpienie wątku na 2 sec. To znaczy zatrzymanie jego wykonywania
+i oddanie sterowania do innych wątków w systemie. Zobaczmy na efekty
+zmiany.</p>
+<pre class="code python literal-block"><code><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">threading</span><span class="whitespace">
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">time</span><span class="whitespace">
+
+</span><span class="keyword namespace">from</span><span class="whitespace"> </span><span class="name namespace">time</span><span class="whitespace"> </span><span class="keyword namespace">import</span> <span class="name">gmtime</span><span class="punctuation">,</span> <span class="name">strftime</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span><span class="whitespace"> </span><span class="name function">thread_function</span><span class="punctuation">(</span><span class="name">name</span><span class="punctuation">):</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: starting&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">,</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name">time</span><span class="operator">.</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: finishing&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before creating thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">thread_function</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,))</span><span class="whitespace">
+</span><span class="name">x2</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">thread_function</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before running thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">x2</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : wait for the thread to finish&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : all done&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span></code></pre>
+<pre class="literal-block"> Time 2023-02-26 18:32:37 | Name : MainThread
+ Time 2023-02-26 18:32:37 | Main Thread : before creating thread
+ Time 2023-02-26 18:32:37 | Main Thread : before running thread
+ Time 2023-02-26 18:32:37 | Thread 1: starting
+ Time 2023-02-26 18:32:37 | Thread 1: Name : Thread-20
+ Time 2023-02-26 18:32:37 | Thread 2: starting
+ Time 2023-02-26 18:32:37 | Thread 2: Name : Thread-21
+ Time 2023-02-26 18:32:37 | Main Thread : wait for the thread to finish
+ Time 2023-02-26 18:32:37 | Main Thread : all done
+ Time 2023-02-26 18:32:39 | Thread 1: finishing
+ Time 2023-02-26 18:32:39 | Thread 2: finishing
+
+
+<strong>Zrób to sam!</strong>
+
+Sprawdź co stanie się gdy zamiast <span class="docutils literal">time.sleep(2)</span> zrobisz
+<span class="docutils literal">time.sleep(0)</span>. Czy jak wykonasz tę operację w pętli, powiedzmy
+100 razy, to wynik będzie inny ?</pre>
+</section>
+<section id="daemon">
+<h3>Daemon</h3>
+<p>Co może dziwić w naszym ostatnim przykładzie to to, że nasze wątki
+kończą się już po tym gdy wątek główny się zakończył. W takim wypadku
+czy wątek główny nie powinien zamykać całego procesu i tym samym kończyć
+wykonanie całego programu i potomnych wątków ?</p>
+<p>W informatyce <strong>daemon</strong> (demon) to proces działający w tle. W przypadku
+wątków będących <strong>demonami</strong> zostaną one zamknięte natychmiast po
+zamknięciu programu. Jednym ze sposobów myślenia o tych definicjach jest
+rozważenie wątku demona jako wątku działającego w tle bez martwienia się
+o jego zamknięcie.</p>
+<p>Jeśli program uruchamia <strong>wątki</strong>, które <strong>nie są demonami</strong>, program
+będzie czekał na zakończenie tych wątków przed zakończeniem działania.
+Jednak wątki, które są demonami, są po prostu zabijane, gdziekolwiek się
+znajdują, gdy program jest zamykany.</p>
+<p>Po zakończeniu programu w Pythonie częścią procesu zamykania jest
+wyczyszczenie / zamknięcie wątków. Jeśli spojrzysz na źródło
+implementacji <em>threading</em>, zobaczysz, że <span class="docutils literal">threading._shutdown()</span>
+przechodzi przez wszystkie uruchomione wątki i wywołuje <span class="docutils literal">.join()</span> na
+każdym, który nie ma ustawionej flagi <strong>demona</strong>.</p>
+<p>Co robi więc funkcja</p>
+<blockquote>
+<p><span class="docutils literal">join()</span></p>
+</blockquote>
+<p>Czeka aż wykonanie danego wątku się zakończy, aby przejść dalej.</p>
+<p>Najpierw spójrzmy jak będzie wyglądać wykonanie programu w przypadku,
+gdy nasze wątki będą zdefiniowane jako demony.</p>
+<pre class="code python literal-block"><code><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">threading</span><span class="whitespace">
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">time</span><span class="whitespace">
+
+</span><span class="keyword namespace">from</span><span class="whitespace"> </span><span class="name namespace">time</span><span class="whitespace"> </span><span class="keyword namespace">import</span> <span class="name">gmtime</span><span class="punctuation">,</span> <span class="name">strftime</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span><span class="whitespace"> </span><span class="name function">thread_function</span><span class="punctuation">(</span><span class="name">name</span><span class="punctuation">):</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: starting&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">,</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name">time</span><span class="operator">.</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: finishing&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before creating thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">thread_function</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,),</span> <span class="name">daemon</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">x2</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">thread_function</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,),</span> <span class="name">daemon</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before running thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">x2</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : wait for the thread to finish&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : all done&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span></code></pre>
+<pre class="literal-block">Time 2023-02-26 18:32:59 | Name : MainThread
+Time 2023-02-26 18:32:59 | Main Thread : before creating thread
+Time 2023-02-26 18:32:59 | Main Thread : before running thread
+Time 2023-02-26 18:32:59 | Thread 1: starting
+Time 2023-02-26 18:32:59 | Thread 1: Name : Thread-24
+Time 2023-02-26 18:32:59 | Thread 2: starting
+Time 2023-02-26 18:32:59 | Thread 2: Name : Thread-25
+Time 2023-02-26 18:32:59 | Main Thread : wait for the thread to finish
+Time 2023-02-26 18:32:59 | Main Thread : all done
+Time 2023-02-26 18:33:01 | Thread 1: finishing
+Time 2023-02-26 18:33:01 | Thread 2: finishing</pre>
+<p class="important"><strong>Uwaga!</strong> W Jupyterze nie zobaczysz tu różnicy - wątki-demony wypiszą
+komunikat <em>finishing</em> tak jak zwykłe wątki. Nie dlatego, że Jupyter
+blokuje demony, ale dlatego, że <strong>proces</strong> w którym wykonywany jest kod
+(tzw. <em>kernel</em>) nie kończy się razem z wykonaniem komórki. Wątek główny
+skończył wykonywać komórkę, ale program działa dalej, więc nic nie
+zabija naszych wątków i spokojnie kończą one pracę. Uruchom powyższy
+przykład w PyCharm - tam po wypisaniu <em>all done</em> proces się zakończy, a
+komunikaty <em>finishing</em> się nie pojawią. W dalszej części (sekcja <strong>Wątek
+w tle</strong>) zobaczymy też jak ten efekt pokazać w Jupyterze, uruchamiając
+kod w osobnym procesie.</p>
+<p>Teraz zobaczmy co stanie się w przypadku dodania opcji <span class="docutils literal">join()</span> przed
+zakończeniem głównego wątku.</p>
+<pre class="code python literal-block"><code><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">threading</span><span class="whitespace">
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">time</span><span class="whitespace">
+
+</span><span class="keyword namespace">from</span><span class="whitespace"> </span><span class="name namespace">time</span><span class="whitespace"> </span><span class="keyword namespace">import</span> <span class="name">gmtime</span><span class="punctuation">,</span> <span class="name">strftime</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span><span class="whitespace"> </span><span class="name function">thread_function</span><span class="punctuation">(</span><span class="name">name</span><span class="punctuation">):</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: starting&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">,</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name">time</span><span class="operator">.</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: finishing&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before creating thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">thread_function</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,),</span> <span class="name">daemon</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">x2</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">thread_function</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,),</span> <span class="name">daemon</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before running thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">x2</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : wait for the thread to finish&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">x2</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : all done&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span></code></pre>
+<pre class="literal-block">Time 2023-02-26 18:32:56 | Name : MainThread
+Time 2023-02-26 18:32:56 | Main Thread : before creating thread
+Time 2023-02-26 18:32:56 | Main Thread : before running thread
+Time 2023-02-26 18:32:56 | Thread 1: starting
+Time 2023-02-26 18:32:56 | Thread 1: Name : Thread-22
+Time 2023-02-26 18:32:56 | Thread 2: starting
+Time 2023-02-26 18:32:56 | Thread 2: Name : Thread-23
+Time 2023-02-26 18:32:56 | Main Thread : wait for the thread to finish
+Time 2023-02-26 18:32:58 | Thread 1: finishing
+Time 2023-02-26 18:32:58 | Thread 2: finishing
+Time 2023-02-26 18:32:58 | Main Thread : all done</pre>
+</section>
+<section id="watek-w-tle">
+<h3>Wątek w tle</h3>
+<p>Do czego w praktyce przydają się demony? Typowy przykład to wątek, który
+działa w nieskończonej pętli “w tle” - np. co pewien czas zapisuje stan
+programu, sprawdza połączenie z serwerem albo wysyła sygnał “żyję” (ang.
+<em>heartbeat</em>). Taki wątek nigdy sam się nie skończy, więc nie chcemy,
+żeby program na niego czekał.</p>
+<p>Żeby zobaczyć efekt w Jupyterze, uruchomimy nasz program jako <strong>osobny
+proces</strong> Pythona (moduł <span class="docutils literal">subprocess</span>), dokładnie tak jakbyśmy
+uruchomili go z PyCharm lub z terminala. Program uruchomimy dwa razy:
+raz z wątkiem będącym demonem, raz ze zwykłym wątkiem. Na wszelki
+wypadek dajemy procesowi maksymalnie 5 sekund na zakończenie.</p>
+<pre class="code python literal-block"><code><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">subprocess</span><span class="whitespace">
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">sys</span><span class="whitespace">
+
+</span><span class="name">program</span> <span class="operator">=</span> <span class="literal string double">&quot;&quot;&quot;
+import threading, time, sys
+
+def heartbeat():
+    while True:                      # nieskończona pętla!
+        print(&quot;.&quot;, end=&quot;&quot;, flush=True)
+        time.sleep(0.5)
+
+demon = sys.argv[1] == &quot;daemon&quot;
+threading.Thread(target=heartbeat, daemon=demon).start()
+
+time.sleep(2)                        # wątek główny &quot;pracuje&quot; 2 sekundy
+print(&quot;</span><span class="literal string escape">\\</span><span class="literal string double">nMain Thread : all done&quot;, flush=True)
+&quot;&quot;&quot;</span><span class="whitespace">
+
+</span><span class="keyword">for</span> <span class="name">tryb</span> <span class="operator word">in</span> <span class="punctuation">(</span><span class="literal string double">&quot;daemon&quot;</span><span class="punctuation">,</span> <span class="literal string double">&quot;zwykly&quot;</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string double">&quot;--- wątek </span><span class="literal string interpol">{</span><span class="name">tryb</span><span class="literal string interpol">}</span><span class="literal string double"> ---&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="keyword">try</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="name">wynik</span> <span class="operator">=</span> <span class="name">subprocess</span><span class="operator">.</span><span class="name">run</span><span class="punctuation">([</span><span class="name">sys</span><span class="operator">.</span><span class="name">executable</span><span class="punctuation">,</span> <span class="literal string double">&quot;-c&quot;</span><span class="punctuation">,</span> <span class="name">program</span><span class="punctuation">,</span> <span class="name">tryb</span><span class="punctuation">],</span><span class="whitespace">
+</span>                               <span class="name">capture_output</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">,</span> <span class="name">text</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">,</span> <span class="name">timeout</span><span class="operator">=</span><span class="literal number integer">5</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">wynik</span><span class="operator">.</span><span class="name">stdout</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string double">&quot;Proces zakończył się sam (kod wyjścia </span><span class="literal string interpol">{</span><span class="name">wynik</span><span class="operator">.</span><span class="name">returncode</span><span class="literal string interpol">}</span><span class="literal string double">)</span><span class="literal string escape">\n</span><span class="literal string double">&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="keyword">except</span> <span class="name">subprocess</span><span class="operator">.</span><span class="name">TimeoutExpired</span> <span class="keyword">as</span> <span class="name">e</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="name">wyjscie</span> <span class="operator">=</span> <span class="name">e</span><span class="operator">.</span><span class="name">stdout</span> <span class="operator word">or</span> <span class="literal string affix">b</span><span class="literal string double">&quot;&quot;</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">wyjscie</span><span class="operator">.</span><span class="name">decode</span><span class="punctuation">()</span> <span class="keyword">if</span> <span class="name builtin">isinstance</span><span class="punctuation">(</span><span class="name">wyjscie</span><span class="punctuation">,</span> <span class="name builtin">bytes</span><span class="punctuation">)</span> <span class="keyword">else</span> <span class="name">wyjscie</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Proces NIE zakończył się sam - został zabity po 5 sekundach!</span><span class="literal string escape">\n</span><span class="literal string double">&quot;</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block"> --- wątek daemon ---
+ ....
+ Main Thread : all done
+
+ Proces zakończył się sam (kod wyjścia 0)
+
+ --- wątek zwykly ---
+ ....
+ Main Thread : all done
+ ......
+ Proces NIE zakończył się sam - został zabity po 5 sekundach!
+
+
+
+<strong>Zrób to sam!</strong>
+
+Wyjaśnij, dlaczego w drugim przypadku po komunikacie <em>all done</em>
+pojawiają się kolejne kropki. Co by się stało, gdybyśmy uruchomili
+ten program w PyCharm bez parametru <span class="docutils literal">timeout</span>? (Sprawdź! Program
+zatrzymasz czerwonym kwadratem w IDE.)
+
+Zmień program tak, by wątek główny przed zakończeniem wywoływał
+<span class="docutils literal">join()</span> na wątku-demonie. Czy flaga <span class="docutils literal">daemon=True</span> nadal pomaga?</pre>
+</section>
+</section>
+<section id="czy-watki-przyspieszaja-program">
+<h2>Czy wątki przyspieszają program?</h2>
+<p>Skoro możemy uruchomić kilka wątków jednocześnie, to czy program z 4
+wątkami wykona się 4 razy szybciej? Sprawdźmy to na dwóch rodzajach
+zadań:</p>
+<ul class="simple">
+<li><p>zadaniu typu <strong>I/O</strong> (ang. <em>input/output</em>) - wątek większość czasu
+<strong>czeka</strong>: na odpowiedź serwera, odczyt z dysku, dane z sensora.
+Czekanie zasymulujemy funkcją <span class="docutils literal">time.sleep()</span>,</p></li>
+<li><p>zadaniu typu <strong>CPU</strong> - wątek cały czas <strong>liczy</strong>, tutaj sumę
+kwadratów kolejnych liczb.</p></li>
+</ul>
+<p>Zamiast ręcznie tworzyć obiekty <span class="docutils literal">Thread</span> skorzystamy z wygodniejszej
+klasy <span class="docutils literal">ThreadPoolExecutor</span> z modułu <span class="docutils literal">concurrent.futures</span>. Tworzy ona
+pulę (ang. <em>pool</em>) zadanej liczby wątków i rozdziela między nie zadania.
+Metoda <span class="docutils literal">map</span> działa jak wbudowana funkcja <span class="docutils literal">map</span> - wywołuje funkcję
+dla każdego elementu listy, tylko że w wątkach z puli. Konstrukcja
+<span class="docutils literal">with</span> sprawia, że na końcu bloku czekamy na zakończenie wszystkich
+wątków (coś jak <span class="docutils literal">join()</span>).</p>
+<pre class="code python literal-block"><code><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">time</span><span class="whitespace">
+</span><span class="keyword namespace">from</span><span class="whitespace"> </span><span class="name namespace">concurrent.futures</span><span class="whitespace"> </span><span class="keyword namespace">import</span> <span class="name">ThreadPoolExecutor</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span><span class="whitespace"> </span><span class="name function">zadanie_io</span><span class="punctuation">(</span><span class="name">_</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">time</span><span class="operator">.</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span>                              <span class="comment single"># czekamy, np. na odpowiedź serwera</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span><span class="whitespace"> </span><span class="name function">zadanie_cpu</span><span class="punctuation">(</span><span class="name">_</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name builtin">sum</span><span class="punctuation">(</span><span class="name">i</span> <span class="operator">*</span> <span class="name">i</span> <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">3_000_000</span><span class="punctuation">))</span>       <span class="comment single"># liczymy</span><span class="whitespace">
+
+
+</span><span class="keyword">for</span> <span class="name">zadanie</span> <span class="operator word">in</span> <span class="punctuation">(</span><span class="name">zadanie_io</span><span class="punctuation">,</span> <span class="name">zadanie_cpu</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">liczba_watkow</span> <span class="operator word">in</span> <span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">4</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">start</span> <span class="operator">=</span> <span class="name">time</span><span class="operator">.</span><span class="name">perf_counter</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="keyword">with</span> <span class="name">ThreadPoolExecutor</span><span class="punctuation">(</span><span class="name">max_workers</span><span class="operator">=</span><span class="name">liczba_watkow</span><span class="punctuation">)</span> <span class="keyword">as</span> <span class="name">pula</span><span class="punctuation">:</span><span class="whitespace">
+</span>            <span class="name builtin">list</span><span class="punctuation">(</span><span class="name">pula</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="name">zadanie</span><span class="punctuation">,</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">4</span><span class="punctuation">)))</span>  <span class="comment single"># 4 takie same zadania</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string double">&quot;</span><span class="literal string interpol">{</span><span class="name">zadanie</span><span class="operator">.</span><span class="name variable magic">__name__</span><span class="literal string interpol">:</span><span class="literal string double">12</span><span class="literal string interpol">}</span><span class="literal string double"> | wątków: </span><span class="literal string interpol">{</span><span class="name">liczba_watkow</span><span class="literal string interpol">}</span><span class="literal string double"> | czas: </span><span class="literal string interpol">{</span><span class="name">time</span><span class="operator">.</span><span class="name">perf_counter</span><span class="punctuation">()</span><span class="whitespace"> </span><span class="operator">-</span><span class="whitespace"> </span><span class="name">start</span><span class="literal string interpol">:</span><span class="literal string double">.2f</span><span class="literal string interpol">}</span><span class="literal string double"> s&quot;</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">zadanie_io   | wątków: 1 | czas: 4.00 s
+zadanie_io   | wątków: 4 | czas: 1.00 s
+zadanie_cpu  | wątków: 1 | czas: 0.45 s
+zadanie_cpu  | wątków: 4 | czas: 0.43 s</pre>
+<p>Zadania typu I/O przyspieszyły mniej więcej 4 razy, ale zadania
+obliczeniowe… wcale! Dlaczego?</p>
+<p>Winny jest <strong>GIL</strong> (ang. <em>Global Interpreter Lock</em>). W standardowej
+implementacji Pythona (CPython) w danej chwili <strong>tylko jeden wątek może
+wykonywać kod Pythona</strong>, nawet jeśli komputer ma wiele rdzeni. Wątki co
+chwilę przekazują sobie “pałeczkę” - w efekcie z punktu widzenia
+programisty działają współbieżnie (na przemian), ale nie równolegle.
+Wątek, który czeka (<span class="docutils literal">sleep</span>, odczyt z sieci, z pliku), oddaje pałeczkę
+i nie przeszkadza innym - dlatego zadania I/O przyspieszają.</p>
+<p>Wniosek: w Pythonie wątki świetnie nadają się do programów, które dużo
+<strong>czekają</strong> (pobieranie danych z sieci, obsługa wielu klientów, odczyt z
+sensorów), natomiast do równoległych <strong>obliczeń</strong> wykorzystuje się
+procesy (moduł <span class="docutils literal">multiprocessing</span>) lub biblioteki, które liczą poza
+interpreterem Pythona (np. NumPy).</p>
+<p><strong>Ciekawostka:</strong> od wersji 3.13 dostępna jest eksperymentalna wersja
+Pythona bez GIL (tzw. <em>free-threaded</em>, uruchamiana jako
+<span class="docutils literal">python3.13t</span>), a od wersji 3.14 jest ona oficjalnie wspierana. W niej
+powyższe zadania CPU faktycznie przyspieszają. Warto jednak pamiętać, że
+to, czy w danym miejscu kodu nastąpi przełączenie między wątkami, zależy
+od wersji interpretera - dlatego programy wielowątkowe muszą być
+poprawne niezależnie od tego, czy GIL istnieje.</p>
+<section id="os-czasu-watkow">
+<h3>Oś czasu wątków</h3>
+<p>Zobaczmy jak to wygląda na wykresie. Dla każdego wątku zapiszemy moment
+rozpoczęcia i zakończenia jego zadania, a następnie narysujemy je jako
+poziome paski (tzw. wykres Gantta). Porównamy wykonanie <strong>sekwencyjne</strong>
+(zadania jedno po drugim w wątku głównym) z wykonaniem w <strong>4 wątkach</strong>.</p>
+<pre class="code python literal-block"><code><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">threading</span><span class="whitespace">
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">time</span><span class="whitespace">
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">matplotlib.pyplot</span><span class="whitespace"> </span><span class="keyword">as</span><span class="whitespace"> </span><span class="name namespace">plt</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span><span class="whitespace"> </span><span class="name function">zadanie_io</span><span class="punctuation">():</span><span class="whitespace">
+</span>    <span class="name">time</span><span class="operator">.</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span><span class="whitespace"> </span><span class="name function">zadanie_cpu</span><span class="punctuation">():</span><span class="whitespace">
+</span>    <span class="name builtin">sum</span><span class="punctuation">(</span><span class="name">i</span> <span class="operator">*</span> <span class="name">i</span> <span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">3_000_000</span><span class="punctuation">))</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span><span class="whitespace"> </span><span class="name function">zmierz</span><span class="punctuation">(</span><span class="name">zadanie</span><span class="punctuation">,</span> <span class="name">liczba_zadan</span><span class="operator">=</span><span class="literal number integer">4</span><span class="punctuation">,</span> <span class="name">w_watkach</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">przebiegi</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="keyword constant">None</span><span class="punctuation">]</span> <span class="operator">*</span> <span class="name">liczba_zadan</span>          <span class="comment single"># każdy wątek zapisuje tylko swoje pole</span><span class="whitespace">
+</span>    <span class="name">start0</span> <span class="operator">=</span> <span class="name">time</span><span class="operator">.</span><span class="name">perf_counter</span><span class="punctuation">()</span><span class="whitespace">
+
+</span>    <span class="keyword">def</span><span class="whitespace"> </span><span class="name function">opakowanie</span><span class="punctuation">(</span><span class="name">nr</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">start</span> <span class="operator">=</span> <span class="name">time</span><span class="operator">.</span><span class="name">perf_counter</span><span class="punctuation">()</span> <span class="operator">-</span> <span class="name">start0</span><span class="whitespace">
+</span>        <span class="name">zadanie</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="name">przebiegi</span><span class="punctuation">[</span><span class="name">nr</span><span class="punctuation">]</span> <span class="operator">=</span> <span class="punctuation">(</span><span class="name">start</span><span class="punctuation">,</span> <span class="name">time</span><span class="operator">.</span><span class="name">perf_counter</span><span class="punctuation">()</span> <span class="operator">-</span> <span class="name">start0</span><span class="punctuation">)</span><span class="whitespace">
+
+</span>    <span class="keyword">if</span> <span class="name">w_watkach</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="name">watki</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">opakowanie</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">nr</span><span class="punctuation">,))</span> <span class="keyword">for</span> <span class="name">nr</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="name">liczba_zadan</span><span class="punctuation">)]</span><span class="whitespace">
+</span>        <span class="keyword">for</span> <span class="name">w</span> <span class="operator word">in</span> <span class="name">watki</span><span class="punctuation">:</span><span class="whitespace">
+</span>            <span class="name">w</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span>        <span class="keyword">for</span> <span class="name">w</span> <span class="operator word">in</span> <span class="name">watki</span><span class="punctuation">:</span><span class="whitespace">
+</span>            <span class="name">w</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="keyword">else</span><span class="punctuation">:</span><span class="whitespace">
+</span>        <span class="keyword">for</span> <span class="name">nr</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="name">liczba_zadan</span><span class="punctuation">):</span><span class="whitespace">
+</span>            <span class="name">opakowanie</span><span class="punctuation">(</span><span class="name">nr</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">przebiegi</span><span class="whitespace">
+
+
+</span><span class="name">fig</span><span class="punctuation">,</span> <span class="name">osie</span> <span class="operator">=</span> <span class="name">plt</span><span class="operator">.</span><span class="name">subplots</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="name">figsize</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">11</span><span class="punctuation">,</span> <span class="literal number integer">5</span><span class="punctuation">),</span> <span class="name">sharex</span><span class="operator">=</span><span class="literal string double">&quot;row&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">wiersz</span><span class="punctuation">,</span> <span class="name">zadanie</span> <span class="operator word">in</span> <span class="name builtin">enumerate</span><span class="punctuation">((</span><span class="name">zadanie_io</span><span class="punctuation">,</span> <span class="name">zadanie_cpu</span><span class="punctuation">)):</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">kolumna</span><span class="punctuation">,</span> <span class="name">w_watkach</span> <span class="operator word">in</span> <span class="name builtin">enumerate</span><span class="punctuation">((</span><span class="keyword constant">False</span><span class="punctuation">,</span> <span class="keyword constant">True</span><span class="punctuation">)):</span><span class="whitespace">
+</span>        <span class="name">przebiegi</span> <span class="operator">=</span> <span class="name">zmierz</span><span class="punctuation">(</span><span class="name">zadanie</span><span class="punctuation">,</span> <span class="name">w_watkach</span><span class="operator">=</span><span class="name">w_watkach</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">os_</span> <span class="operator">=</span> <span class="name">osie</span><span class="punctuation">[</span><span class="name">wiersz</span><span class="punctuation">][</span><span class="name">kolumna</span><span class="punctuation">]</span><span class="whitespace">
+</span>        <span class="keyword">for</span> <span class="name">nr</span><span class="punctuation">,</span> <span class="punctuation">(</span><span class="name">start</span><span class="punctuation">,</span> <span class="name">koniec</span><span class="punctuation">)</span> <span class="operator word">in</span> <span class="name builtin">enumerate</span><span class="punctuation">(</span><span class="name">przebiegi</span><span class="punctuation">):</span><span class="whitespace">
+</span>            <span class="name">os_</span><span class="operator">.</span><span class="name">barh</span><span class="punctuation">(</span><span class="name">nr</span><span class="punctuation">,</span> <span class="name">koniec</span> <span class="operator">-</span> <span class="name">start</span><span class="punctuation">,</span> <span class="name">left</span><span class="operator">=</span><span class="name">start</span><span class="punctuation">,</span> <span class="name">color</span><span class="operator">=</span><span class="literal string affix">f</span><span class="literal string double">&quot;C</span><span class="literal string interpol">{</span><span class="name">nr</span><span class="literal string interpol">}</span><span class="literal string double">&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">calosc</span> <span class="operator">=</span> <span class="name builtin">max</span><span class="punctuation">(</span><span class="name">koniec</span> <span class="keyword">for</span> <span class="name">_</span><span class="punctuation">,</span> <span class="name">koniec</span> <span class="operator word">in</span> <span class="name">przebiegi</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">tryb</span> <span class="operator">=</span> <span class="literal string double">&quot;4 wątki&quot;</span> <span class="keyword">if</span> <span class="name">w_watkach</span> <span class="keyword">else</span> <span class="literal string double">&quot;sekwencyjnie&quot;</span><span class="whitespace">
+</span>        <span class="name">os_</span><span class="operator">.</span><span class="name">set_title</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string double">&quot;</span><span class="literal string interpol">{</span><span class="name">zadanie</span><span class="operator">.</span><span class="name variable magic">__name__</span><span class="literal string interpol">}</span><span class="literal string double"> - </span><span class="literal string interpol">{</span><span class="name">tryb</span><span class="literal string interpol">}</span><span class="literal string double"> - razem </span><span class="literal string interpol">{</span><span class="name">calosc</span><span class="literal string interpol">:</span><span class="literal string double">.2f</span><span class="literal string interpol">}</span><span class="literal string double"> s&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">os_</span><span class="operator">.</span><span class="name">set_yticks</span><span class="punctuation">(</span><span class="name builtin">range</span><span class="punctuation">(</span><span class="name builtin">len</span><span class="punctuation">(</span><span class="name">przebiegi</span><span class="punctuation">)),</span> <span class="punctuation">[</span><span class="literal string affix">f</span><span class="literal string double">&quot;zadanie </span><span class="literal string interpol">{</span><span class="name">nr</span><span class="literal string interpol">}</span><span class="literal string double">&quot;</span> <span class="keyword">for</span> <span class="name">nr</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="name builtin">len</span><span class="punctuation">(</span><span class="name">przebiegi</span><span class="punctuation">))])</span><span class="whitespace">
+</span>        <span class="name">os_</span><span class="operator">.</span><span class="name">set_xlabel</span><span class="punctuation">(</span><span class="literal string double">&quot;czas [s]&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span>        <span class="name">os_</span><span class="operator">.</span><span class="name">set_xlim</span><span class="punctuation">(</span><span class="name">left</span><span class="operator">=</span><span class="literal number integer">0</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">fig</span><span class="operator">.</span><span class="name">tight_layout</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">plt</span><span class="operator">.</span><span class="name">show</span><span class="punctuation">()</span></code></pre>
+<img alt="images/Zajecia1Jupyter/01.png" class="align-center" src="images/Zajecia1Jupyter/01.png" />
+<p>Na wykresie widać, że przy zadaniach I/O paski wątków nakładają się na
+siebie i całość trwa tyle co jedno zadanie. Przy zadaniach CPU paski
+również się nakładają - wątki działają “jednocześnie” - ale każdy z nich
+jest wielokrotnie dłuższy niż przy wykonaniu sekwencyjnym, bo wątki
+wykonują się na zmianę i dzielą między siebie jeden “procesor Pythona”.
+Całkowity czas się nie zmienia.</p>
+<blockquote>
+<p><strong>Zrób to sam!</strong></p>
+<p>Zwiększ liczbę zadań do 8 (parametr <span class="docutils literal">liczba_zadan</span>). Jak zmienia
+się czas dla zadań I/O, a jak dla CPU?</p>
+<p>Zmień <span class="docutils literal">zadanie_io</span> tak, by wykonywało
+<span class="docutils literal">time.sleep(random.uniform(0.2, 1.5))</span> (pamiętaj o
+<span class="docutils literal">import random</span>). Czym teraz jest całkowity czas wykonania w
+wątkach?</p>
+<p>Z wykorzystaniem biblioteki <span class="docutils literal">requests</span> (z pliku <em>requirements.txt</em>)
+pobierz w PyCharm 10 dowolnych stron internetowych najpierw
+sekwencyjnie, a potem w <span class="docutils literal">ThreadPoolExecutor</span>. Do którego rodzaju
+zadań należy pobieranie stron?</p>
+</blockquote>
+</section>
+<section id="bledy-jednoczesnego-dostepu">
+<h3>Błędy jednoczesnego dostępu</h3>
+<p>Głównym problemem w przetwarzaniu równoległym jest sytuacja w której
+wiele wątków wykonuje operacje na tym samym obiekcie. Żeby było to
+możliwe obiekt ten musi być oczywiście globalny i mutowalny.</p>
+<p>W przypadku, gdy mamy licznik zliczający wykonanie operacji i wątek
+<strong>A</strong> wykonuje operację <span class="docutils literal"><span class="pre">licznik+=1</span></span> oraz wątek <strong>B</strong> wykonuje tę samą
+operację, to może dojść do błędu. Wynika on z tego, że operacje odczytu
+wartości, zwiększenia wartości i zapisania wartości w zmiennej nie są
+wykonywane <strong>atomowo</strong>. Oznacza to, że wykonanie operacji może zostać
+przerwane w każdym z tych momentów.</p>
+<p>Załóżmy, że zmienna licznik miała wartość <strong>0</strong>. Wątek <strong>A</strong> odczyta
+wartość <strong>0</strong> i zostanie przerwany, wtedy w miedzyczasie wątek <strong>B</strong>
+zwiększy wartość <span class="docutils literal">licznik</span> do <strong>1</strong> i wznowi się wątek <strong>A</strong> nie jest
+on świadomy zmiany wartości, gdyż odczytał już wcześniej <strong>0</strong> i
+przejdzie do operacji zwiększenia wartości o jeden. W efekcie na koniec
+przetwarzania wartość <span class="docutils literal">licznik</span> będzie równa <strong>1</strong>, a nie <strong>2</strong>
+jakbyśmy się spodziewali.</p>
+<p>Zmienne utworzone poza funkcjami nazywane są <strong>zmiennymi globalnymi</strong>.
+Zmienne globalne mogą być używane przez wszystkich, zarówno wewnątrz
+funkcji, jak i na zewnątrz.</p>
+<pre class="code python literal-block"><code><span class="name">licznik</span> <span class="operator">=</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span><span class="keyword">def</span><span class="whitespace"> </span><span class="name function">myfunc</span><span class="punctuation">():</span><span class="whitespace">
+</span>  <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Licznik wynosi </span><span class="literal string interpol">%d</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="name">licznik</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">myfunc</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Licznik wynosi 1</pre>
+<p>Tutaj widzimy, że uzyskaliśmy dostęp do zmiennej globalnej z wnętrza
+funkcji.</p>
+<p>Jeśli jednak spróbujemy zmodyfikować zmienną globalną z wnętrza funkcji,
+to otrzymamy błąd:</p>
+<pre class="code python literal-block"><code><span class="comment single"># global variable</span><span class="whitespace">
+</span><span class="name">licznik</span> <span class="operator">=</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span><span class="keyword">def</span><span class="whitespace"> </span><span class="name function">add</span><span class="punctuation">():</span><span class="whitespace">
+
+</span>     <span class="comment single"># increment licznik by 1</span><span class="whitespace">
+</span>    <span class="name">licznik</span> <span class="operator">+=</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">licznik</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">add</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">---------------------------------------------------------------------------
+
+UnboundLocalError                         Traceback (most recent call last)
+
+Cell In [6], line 11
+      7     licznik += 1
+      9     print(licznik)
+---&gt; 11 add()
+
+
+Cell In [6], line 7, in add()
+      4 def add():
+      5
+      6      # increment licznik by 1
+----&gt; 7     licznik += 1
+      9     print(licznik)
+
+
+UnboundLocalError: local variable 'licznik' referenced before assignment</pre>
+<p>Dzieje się tak, ponieważ możemy uzyskać dostęp tylko do zmiennej
+globalnej, ale nie możemy jej modyfikować z poziomu funkcji.</p>
+<p>Rozwiązaniem tego problemu jest użycie słowa kluczowego <span class="docutils literal">global</span>.</p>
+<pre class="code python literal-block"><code><span class="comment single"># global variable</span><span class="whitespace">
+</span><span class="name">licznik</span> <span class="operator">=</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span><span class="keyword">def</span><span class="whitespace"> </span><span class="name function">add</span><span class="punctuation">():</span><span class="whitespace">
+
+</span>    <span class="comment single"># use of global keyword</span><span class="whitespace">
+</span>    <span class="keyword">global</span> <span class="name">licznik</span><span class="whitespace">
+
+</span>    <span class="comment single"># increment c by 2</span><span class="whitespace">
+</span>    <span class="name">licznik</span> <span class="operator">+=</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">licznik</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">add</span><span class="punctuation">()</span></code></pre>
+</section>
+<section id="wyscig-w-praktyce">
+<h3>Wyścig w praktyce</h3>
+<p>Spróbujmy wywołać błąd równoczesnego dostępu: 4 wątki zwiększają wspólny
+licznik po 1 000 000 razy, więc oczekujemy wyniku 4 000 000.</p>
+<pre class="code python literal-block"><code><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">threading</span><span class="whitespace">
+
+</span><span class="name">licznik</span> <span class="operator">=</span> <span class="literal number integer">0</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span><span class="whitespace"> </span><span class="name function">zwiekszaj</span><span class="punctuation">():</span><span class="whitespace">
+</span>    <span class="keyword">global</span> <span class="name">licznik</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">_</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">1_000_000</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">licznik</span> <span class="operator">+=</span> <span class="literal number integer">1</span><span class="whitespace">
+
+
+</span><span class="name">watki</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">zwiekszaj</span><span class="punctuation">)</span> <span class="keyword">for</span> <span class="name">_</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">4</span><span class="punctuation">)]</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">w</span> <span class="operator word">in</span> <span class="name">watki</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">w</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">w</span> <span class="operator word">in</span> <span class="name">watki</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">w</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string double">&quot;Oczekiwano: 4000000, otrzymano: </span><span class="literal string interpol">{</span><span class="name">licznik</span><span class="literal string interpol">}</span><span class="literal string double">&quot;</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">Oczekiwano: 4000000, otrzymano: 4000000</pre>
+<p>Najprawdopodobniej wynik jest… poprawny. Czy to znaczy, że problemu nie
+ma? Nie! Operacja <span class="docutils literal">licznik += 1</span> nadal nie jest atomowa, ale w
+nowszych wersjach Pythona (od 3.10) interpreter przełącza wątki rzadziej
+i tylko w określonych miejscach kodu, więc przerwanie wątku akurat
+pomiędzy odczytem a zapisem licznika zdarza się bardzo rzadko. Błąd,
+który pojawia się raz na milion uruchomień, jest jednak <strong>dużo
+groźniejszy</strong> od takiego, który pojawia się zawsze - przejdzie wszystkie
+testy, a ujawni się dopiero u klienta (lub na innej wersji Pythona, np.
+bez GIL).</p>
+<p>Żeby zobaczyć problem na własne oczy, rozbijmy operację <span class="docutils literal">licznik += 1</span>
+na trzy kroki opisane wcześniej: odczyt, zwiększenie i zapis. Pomiędzy
+odczytem a zapisem wywołamy <span class="docutils literal">time.sleep(0)</span>, czyli poprosimy system,
+by w tym miejscu oddał sterowanie innemu wątkowi - dokładnie tak jak w
+scenariuszu z wątkami <strong>A</strong> i <strong>B</strong> opisanym na początku rozdziału.</p>
+<pre class="code python literal-block"><code><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">threading</span><span class="whitespace">
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">time</span><span class="whitespace">
+
+</span><span class="name">licznik</span> <span class="operator">=</span> <span class="literal number integer">0</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span><span class="whitespace"> </span><span class="name function">zwiekszaj</span><span class="punctuation">():</span><span class="whitespace">
+</span>    <span class="keyword">global</span> <span class="name">licznik</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">_</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">1000</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name">odczyt</span> <span class="operator">=</span> <span class="name">licznik</span>         <span class="comment single"># 1. odczyt wartości</span><span class="whitespace">
+</span>        <span class="name">time</span><span class="operator">.</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">0</span><span class="punctuation">)</span>            <span class="comment single">#    ... tu inny wątek może nas wyprzedzić</span><span class="whitespace">
+</span>        <span class="name">licznik</span> <span class="operator">=</span> <span class="name">odczyt</span> <span class="operator">+</span> <span class="literal number integer">1</span>     <span class="comment single"># 2. zwiększenie i 3. zapis</span><span class="whitespace">
+
+
+</span><span class="name">watki</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">zwiekszaj</span><span class="punctuation">)</span> <span class="keyword">for</span> <span class="name">_</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">4</span><span class="punctuation">)]</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">w</span> <span class="operator word">in</span> <span class="name">watki</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">w</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">w</span> <span class="operator word">in</span> <span class="name">watki</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">w</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string double">&quot;Oczekiwano: 4000, otrzymano: </span><span class="literal string interpol">{</span><span class="name">licznik</span><span class="literal string interpol">}</span><span class="literal string double">&quot;</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">Oczekiwano: 4000, otrzymano: 1000</pre>
+<p>Tym razem wynik jest bliski 1000 zamiast 4000 - prawie wszystkie
+zwiększenia licznika zostały “zgubione”, bo wątki nadpisywały sobie
+nawzajem wyniki. Taką sytuację, w której wynik programu zależy od tego,
+w jakiej kolejności wykonają się wątki, nazywamy <strong>wyścigiem</strong> (ang.
+<em>race condition</em>). Jak się przed nim bronić, dowiemy się na kolejnych
+zajęciach.</p>
+<blockquote>
+<p><strong>Zrób to sam!</strong></p>
+<p>Uruchom komórkę kilka razy. Czy wynik jest za każdym razem taki sam?</p>
+<p>Zmień liczbę wątków na 1. Czy błąd nadal występuje? A gdy usuniesz
+linię <span class="docutils literal">time.sleep(0)</span>?</p>
+</blockquote>
+<p>Wykonaj zadanie na <strong>moodle</strong> by zaobserwować w praktyce błąd
+równoczesnego dostępu do zmiennej.</p>
+<p class="important"><strong>Uwaga!</strong> to czy wywołanie błędu się powiedzie zależy od stanu systemu
+w danej chwili i wersji Pythona. Jeśli mimo kilku uruchomień błąd się
+nie pojawia, wykorzystaj trik z <span class="docutils literal">time.sleep(0)</span> pokazany powyżej, by
+zwiększyć szansę na przełączenie wątku w “złym” momencie.</p>
+</section>
+<section id="print">
+<h3>Print</h3>
+<p>Czy funkcja <span class="docutils literal">print</span> wywoływana z wielu wątków jednocześnie zawsze
+wypisze nasze komunikaty w całości? Niestety nie. Wywołanie
+<span class="docutils literal"><span class="pre">print(&quot;Wątek&quot;,</span> n, &quot;krok&quot;, i)</span> nie jest jedną operacją - <span class="docutils literal">print</span>
+zapisuje na wyjście po kolei każdy argument, separator (spację) i na
+końcu znak nowej linii. Pomiędzy tymi zapisami inny wątek może wypisać
+swój tekst.</p>
+<p>Sprawdźmy to - 4 wątki wypisują po 1000 linii, a my policzymy ile z nich
+zostało “zepsutych”. Jupyter przechwytuje wyjście programu na swój
+sposób, dlatego - podobnie jak w sekcji <strong>Wątek w tle</strong> - uruchomimy
+program jako osobny proces, tak jak zrobiłby to PyCharm.</p>
+<pre class="code python literal-block"><code><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">re</span><span class="whitespace">
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">subprocess</span><span class="whitespace">
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">sys</span><span class="whitespace">
+
+</span><span class="name">program</span> <span class="operator">=</span> <span class="literal string double">&quot;&quot;&quot;
+import threading, sys
+
+jeden_zapis = sys.argv[1] == &quot;tak&quot;
+
+def wypisuj(n):
+    for i in range(1000):
+        if jeden_zapis:
+            print(f&quot;Wątek </span><span class="literal string interpol">{n}</span><span class="literal string double"> krok </span><span class="literal string interpol">{i}</span><span class="literal string escape">\\</span><span class="literal string double">n&quot;, end=&quot;&quot;)   # cała linia jednym zapisem
+        else:
+            print(&quot;Wątek&quot;, n, &quot;krok&quot;, i)
+
+watki = [threading.Thread(target=wypisuj, args=(n,)) for n in range(4)]
+for w in watki:
+    w.start()
+for w in watki:
+    w.join()
+&quot;&quot;&quot;</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span><span class="whitespace"> </span><span class="name function">uruchom</span><span class="punctuation">(</span><span class="name">jeden_zapis</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">wyjscie</span> <span class="operator">=</span> <span class="name">subprocess</span><span class="operator">.</span><span class="name">run</span><span class="punctuation">([</span><span class="name">sys</span><span class="operator">.</span><span class="name">executable</span><span class="punctuation">,</span> <span class="literal string double">&quot;-c&quot;</span><span class="punctuation">,</span> <span class="name">program</span><span class="punctuation">,</span> <span class="literal string double">&quot;tak&quot;</span> <span class="keyword">if</span> <span class="name">jeden_zapis</span> <span class="keyword">else</span> <span class="literal string double">&quot;nie&quot;</span><span class="punctuation">],</span><span class="whitespace">
+</span>                             <span class="name">capture_output</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">,</span> <span class="name">text</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">stdout</span><span class="whitespace">
+</span>    <span class="name">linie</span> <span class="operator">=</span> <span class="name">wyjscie</span><span class="operator">.</span><span class="name">splitlines</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">zepsute</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="name">l</span> <span class="keyword">for</span> <span class="name">l</span> <span class="operator word">in</span> <span class="name">linie</span> <span class="keyword">if</span> <span class="operator word">not</span> <span class="name">re</span><span class="operator">.</span><span class="name">fullmatch</span><span class="punctuation">(</span><span class="literal string affix">r</span><span class="literal string double">&quot;Wątek \d krok \d+&quot;</span><span class="punctuation">,</span> <span class="name">l</span><span class="punctuation">)]</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string double">&quot;Wszystkich linii: </span><span class="literal string interpol">{</span><span class="name builtin">len</span><span class="punctuation">(</span><span class="name">linie</span><span class="punctuation">)</span><span class="literal string interpol">}</span><span class="literal string double">, w tym zepsutych: </span><span class="literal string interpol">{</span><span class="name builtin">len</span><span class="punctuation">(</span><span class="name">zepsute</span><span class="punctuation">)</span><span class="literal string interpol">}</span><span class="literal string double">&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="keyword">for</span> <span class="name">linia</span> <span class="operator word">in</span> <span class="name">zepsute</span><span class="punctuation">[:</span><span class="literal number integer">5</span><span class="punctuation">]:</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string affix">f</span><span class="literal string double">&quot;   </span><span class="literal string interpol">{</span><span class="name">linia</span><span class="literal string interpol">!r}</span><span class="literal string double">&quot;</span><span class="punctuation">)</span><span class="whitespace">
+
+
+</span><span class="name">uruchom</span><span class="punctuation">(</span><span class="name">jeden_zapis</span><span class="operator">=</span><span class="keyword constant">False</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">Wszystkich linii: 4000, w tym zepsutych: 3795
+   'Wątek 0WątekWątek krok  2Wątek4   '
+   '13Wątek krok  krok0'
+   '  Wątek0 '
+   'Wątekkrok3  0krok   1krok0  '
+   'krok15'</pre>
+<p>Liczba zepsutych linii zależy od systemu i od uruchomienia, ale zwykle
+jest ich bardzo dużo - fragmenty komunikatów różnych wątków są ze sobą
+przemieszane, np. <span class="docutils literal">'Wątek 1 krok 0Wątek'</span>.</p>
+<p>Dodatkowo nie ma gwarancji, że komunikaty pojawią się na ekranie w
+kolejności, w jakiej zostały wykonane operacje w różnych wątkach (czyli
+np. w przypadku wyjątku możemy otrzymać informację o błędzie przed
+otrzymaniem wszystkich oczekiwanych komunikatów na ekranie).</p>
+<p>Jak sobie z tym radzić bez wprowadzania mechanizmów synchronizacji?
+Najprościej zadbać, by każdy komunikat był wypisywany <strong>jednym
+zapisem</strong>: najpierw zbudować cały tekst razem ze znakiem nowej linii, a
+potem przekazać go do <span class="docutils literal">print</span> jako jeden argument z <span class="docutils literal"><span class="pre">end=&quot;&quot;</span></span> (gałąź
+<span class="docutils literal">jeden_zapis</span> w programie powyżej). Komunikaty różnych wątków nadal
+mogą pojawiać się w dowolnej kolejności, ale każda linia będzie cała.</p>
+<pre class="code python literal-block"><code><span class="name">uruchom</span><span class="punctuation">(</span><span class="name">jeden_zapis</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">Wszystkich linii: 4000, w tym zepsutych: 0</pre>
+<p>W większych programach zamiast <span class="docutils literal">print</span> warto korzystać z modułu
+<span class="docutils literal">logging</span> (lub biblioteki <span class="docutils literal">loguru</span> z naszego pliku
+<em>requirements.txt</em>). Biblioteki do logowania są przygotowane do pracy z
+wieloma wątkami, a dodatkowo potrafią automatycznie dopisać do
+komunikatu czas i nazwę wątku - nie musimy więc za każdym razem ręcznie
+wywoływać <span class="docutils literal">strftime</span> i <span class="docutils literal"><span class="pre">threading.current_thread().name</span></span> jak w
+przykładach powyżej.</p>
+<pre class="code python literal-block"><code><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">logging</span><span class="whitespace">
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">threading</span><span class="whitespace">
+</span><span class="keyword namespace">import</span><span class="whitespace"> </span><span class="name namespace">time</span><span class="whitespace">
+
+</span><span class="name">logging</span><span class="operator">.</span><span class="name">basicConfig</span><span class="punctuation">(</span><span class="name builtin">format</span><span class="operator">=</span><span class="literal string double">&quot;</span><span class="literal string interpol">%(asctime)s</span><span class="literal string double"> | </span><span class="literal string interpol">%(threadName)-10s</span><span class="literal string double"> | </span><span class="literal string interpol">%(message)s</span><span class="literal string double">&quot;</span><span class="punctuation">,</span><span class="whitespace">
+</span>                    <span class="name">level</span><span class="operator">=</span><span class="name">logging</span><span class="operator">.</span><span class="name">INFO</span><span class="punctuation">,</span> <span class="name">force</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">)</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span><span class="whitespace"> </span><span class="name function">thread_function</span><span class="punctuation">(</span><span class="name">name</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">logging</span><span class="operator">.</span><span class="name">info</span><span class="punctuation">(</span><span class="literal string double">&quot;Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: starting&quot;</span><span class="punctuation">,</span> <span class="name">name</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">time</span><span class="operator">.</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">logging</span><span class="operator">.</span><span class="name">info</span><span class="punctuation">(</span><span class="literal string double">&quot;Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: finishing&quot;</span><span class="punctuation">,</span> <span class="name">name</span><span class="punctuation">)</span><span class="whitespace">
+
+
+</span><span class="name">logging</span><span class="operator">.</span><span class="name">info</span><span class="punctuation">(</span><span class="literal string double">&quot;Main Thread : before creating thread&quot;</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">watki</span> <span class="operator">=</span> <span class="punctuation">[</span><span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">thread_function</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="name">n</span><span class="punctuation">,),</span> <span class="name">name</span><span class="operator">=</span><span class="literal string affix">f</span><span class="literal string double">&quot;Watek-</span><span class="literal string interpol">{</span><span class="name">n</span><span class="literal string interpol">}</span><span class="literal string double">&quot;</span><span class="punctuation">)</span> <span class="keyword">for</span> <span class="name">n</span> <span class="operator word">in</span> <span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">)]</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">w</span> <span class="operator word">in</span> <span class="name">watki</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">w</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">w</span> <span class="operator word">in</span> <span class="name">watki</span><span class="punctuation">:</span><span class="whitespace">
+</span>    <span class="name">w</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">logging</span><span class="operator">.</span><span class="name">info</span><span class="punctuation">(</span><span class="literal string double">&quot;Main Thread : all done&quot;</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">2026-10-03 16:48:57,905 | MainThread | Main Thread : before creating thread
+2026-10-03 16:48:57,906 | Watek-1    | Thread 1: starting
+2026-10-03 16:48:57,907 | Watek-2    | Thread 2: starting
+2026-10-03 16:48:59,907 | Watek-1    | Thread 1: finishing
+2026-10-03 16:48:59,909 | Watek-2    | Thread 2: finishing
+2026-10-03 16:48:59,910 | MainThread | Main Thread : all done</pre>
+</section>
+</section></body>
+</html>
+

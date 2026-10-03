@@ -5,3 +5,4 @@ rst2html5.py --link-stylesheet --template=template.html --stylesheet=style.css -
 .. math::
 
    \frac{1}{2}
+python ipynb2html.py Zajecia1Jupyter.ipynb --title "Laboratorium 1 - Narzędzia i wątki w Pythonie"
