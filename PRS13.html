@@ -1,0 +1,55 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<title>PRS13.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="przetwarzanie-rownolegle-i-strumieniowe">
+<h2>Przetwarzanie równoległe i strumieniowe</h2>
+<section id="projekt-ii-opis">
+<h3>Projekt II opis</h3>
+<p>W ramach projektu należy napisać proste przetwarzanie danych.</p>
+<p>W zależności od wykonania zadań student otrzymuje punkty wg listy na końcu opisu.</p>
+<p>Student ma za zadanie przetwarzać dane zapisane na serwerze Kafka (w przypadku, gdy student nie chce skorzystać z Kafki może korzystać z danych z pliku lub kolekcji w Pythonie, dane jednak mają być sensowne i realne).</p>
+<p>Kafka serwer adres : 150.254.78.69:29092 (IP : port)</p>
+<p>Dostępne na Kafce są na bieżąco uzupełniane dane w topicach:</p>
+<p><strong>air_poznan</strong> - informacje o jakości powietrza w Poznaniu ze stacji Poznań - Dąbrowskiego</p>
+<p>źródło danych: <a class="reference external" href="https://powietrze.gios.gov.pl/pjp/content/api">https://powietrze.gios.gov.pl/pjp/content/api</a>
+częstotliwość odświeżania: 1h</p>
+<p>format danych :</p>
+<pre class="code python highlight literal-block"><code><span class="punctuation">{</span><span class="literal string double">&quot;SO2&quot;</span><span class="punctuation">:</span> <span class="literal number float">9.2681</span><span class="punctuation">,</span> <span class="literal string double">&quot;date&quot;</span><span class="punctuation">:</span> <span class="literal string double">&quot;2022-06-04 18:00:00&quot;</span><span class="punctuation">,</span> <span class="literal string double">&quot;PM10&quot;</span><span class="punctuation">:</span> <span class="literal number float">18.4511</span><span class="punctuation">,</span> <span class="literal string double">&quot;C6H6&quot;</span><span class="punctuation">:</span> <span class="literal number float">0.1978</span><span class="punctuation">,</span> <span class="literal string double">&quot;CO&quot;</span><span class="punctuation">:</span> <span class="literal number float">320.62</span><span class="punctuation">,</span> <span class="literal string double">&quot;NO2&quot;</span><span class="punctuation">:</span> <span class="literal number float">17.3031</span><span class="punctuation">,</span> <span class="literal string double">&quot;O3&quot;</span><span class="punctuation">:</span> <span class="literal number float">116.843</span><span class="punctuation">,</span> <span class="literal string double">&quot;PM2.5&quot;</span><span class="punctuation">:</span> <span class="literal number float">10.6337</span><span class="punctuation">}</span></code></pre>
+<p><strong>temp_poznan</strong> - dane meteorologiczne z Poznania</p>
+<p>źródło danych: <a class="reference external" href="https://openweathermap.org/current">https://openweathermap.org/current</a>
+częstotliwość odświeżania: 5 min</p>
+<pre class="code python highlight literal-block"><code><span class="punctuation">{</span><span class="literal string single">'temp'</span><span class="punctuation">:</span> <span class="literal number float">21.78</span><span class="punctuation">,</span> <span class="literal string single">'temp_feel'</span><span class="punctuation">:</span> <span class="literal number float">21.78</span><span class="punctuation">,</span> <span class="literal string single">'temp_min'</span><span class="punctuation">:</span> <span class="literal number float">21.32</span><span class="punctuation">,</span> <span class="literal string single">'temp_max'</span><span class="punctuation">:</span> <span class="literal number float">22.53</span><span class="punctuation">,</span> <span class="literal string single">'pressure'</span><span class="punctuation">:</span> <span class="literal number integer">1019</span><span class="punctuation">,</span> <span class="literal string single">'humidity'</span><span class="punctuation">:</span> <span class="literal number integer">52</span><span class="punctuation">,</span> <span class="literal string single">'visibility'</span><span class="punctuation">:</span> <span class="literal number integer">10000</span><span class="punctuation">,</span> <span class="literal string single">'wind_speed'</span><span class="punctuation">:</span> <span class="literal number float">1.03</span><span class="punctuation">,</span> <span class="literal string single">'sunrise'</span><span class="punctuation">:</span> <span class="literal string single">'06-04-2022 04:34:03'</span><span class="punctuation">,</span> <span class="literal string single">'sunset'</span><span class="punctuation">:</span> <span class="literal string single">'06-04-2022 21:07:22'</span><span class="punctuation">}</span></code></pre>
+<p><strong>bitcoin</strong> - kurs waluty bitcoin w stosunku do wybranych walut światowych i dwóch wybranych walut internetowych</p>
+<p>źródło danych: <a class="reference external" href="https://www.coingecko.com/en/api">https://www.coingecko.com/en/api</a>/documentation#
+częstotliwość odświeżania: 5 min</p>
+<pre class="code python highlight literal-block"><code><span class="punctuation">{</span><span class="literal string double">&quot;Bitcoin&quot;</span><span class="punctuation">:</span> <span class="literal number float">1.0</span><span class="punctuation">,</span> <span class="literal string double">&quot;eth&quot;</span><span class="punctuation">:</span> <span class="literal number float">16.739</span><span class="punctuation">,</span> <span class="literal string double">&quot;ltc&quot;</span><span class="punctuation">:</span> <span class="literal number float">470.6</span><span class="punctuation">,</span> <span class="literal string double">&quot;usd&quot;</span><span class="punctuation">:</span> <span class="literal number float">29730.174</span><span class="punctuation">,</span> <span class="literal string double">&quot;aud&quot;</span><span class="punctuation">:</span> <span class="literal number float">41249.576</span><span class="punctuation">,</span> <span class="literal string double">&quot;cad&quot;</span><span class="punctuation">:</span> <span class="literal number float">37447.235</span><span class="punctuation">,</span> <span class="literal string double">&quot;chf&quot;</span><span class="punctuation">:</span> <span class="literal number float">28593.203</span><span class="punctuation">,</span> <span class="literal string double">&quot;eur&quot;</span><span class="punctuation">:</span> <span class="literal number float">27735.963</span><span class="punctuation">,</span> <span class="literal string double">&quot;gbp&quot;</span><span class="punctuation">:</span> <span class="literal number float">23806.05</span><span class="punctuation">,</span> <span class="literal string double">&quot;pln&quot;</span><span class="punctuation">:</span> <span class="literal number float">127312.038</span><span class="punctuation">}</span></code></pre>
+<p>Dane na serwerze Kafka proszę zapisywać w topicu o nazwie będący numerem Państwa indeksu (jeżeli nie chcemy zapisywać możemy też dane wypisywać na ekran lub do pliku).</p>
+<p>Na ocenę końcową składać się będą procenty w zależności od wykonania poniższych elementów, wszystkie są traktowane <strong>niezależnie</strong> czyli jak wczytam dane z Kafki przetworzę i wypiszę do Kafki to wykonuje tym samym trzy niezależne punkty, jak wczytam dane z Kafki, przetworzę i wypiszę na ekran to wykonam dwa itd.</p>
+<blockquote>
+<div class="line-block">
+<div class="line">Stworzenie źródła danych i pobranie danych z serwera Kafka - 20%</div>
+<div class="line">Przetwarzanie danych za pomoca TABLE API (dowolne, w miare sensowne podsumowanie) 10%</div>
+<div class="line">Przetwarzanie danych za pomoca SQL API (dowolne w miare sensowne podsumowane) 10%</div>
+<div class="line">Przetwarzanie danych za pomoca SQL API wykorzystując podzapytanie (dowolne w miare sensowne podsumowane) 10% *</div>
+<div class="line">Stworzenie ujścia danych jako topic w Kafce i zapisanie tam wyniku 10% *</div>
+<div class="line">Przetwarzanie danych za pomoca <strong>okna</strong> danych w TABLE API (dowolne w miare sensowne podsumowane) 10%</div>
+<div class="line">Przetwarzanie danych za pomoca <strong>okna</strong> danych w SQL API (dowolne w miare sensowne podsumowane) 10%</div>
+<div class="line">Przetwarzanie danych za pomocą fukcji stanu, własna zaawansowana funkcja przetwarzania 20%</div>
+</div>
+</blockquote>
+<ul class="simple">
+<li><p>zadania wychodzące poza zakres przedstawiony na zajęciach, ale łatwo znajdywalne w dokumentacji lub w sieci.</p></li>
+</ul>
+</section>
+</section></body>
+</html>
+

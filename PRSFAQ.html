@@ -1,0 +1,38 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<title>PRSFAQ.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="przetwarzanie-rownolegle-i-strumieniowe">
+<h2>Przetwarzanie równoległe i strumieniowe</h2>
+<section id="faq">
+<h3>FAQ</h3>
+<p class="important">Klasy nie są nie niebieskie (zielone) nie można ich uruchomić.</p>
+<p>Projekt nie jest zdefiniowany jako project Mavenowy. Kliknij lupkę i wpisz maven, wybierz opcję <strong>+ Add maven project</strong>. Odnajdź swój projekt i wybierz w nim plik o rozszerzeniu <strong>.pom</strong>.</p>
+<p class="important">Nie widzę wszystkich gałęzi z repozytorium.</p>
+<p>Wykonaj <strong>Ctrl + T</strong>. Jeżeli nie pomoże wykonaj <strong>Git-&gt;Fetch</strong>.</p>
+<p class="important">Ctrl+T powoduje błędy repozytorium (nie mogę nadpisać pliku, jestem niezsynchronizowany).</p>
+<p>Spróbuj zamiast tego wykonać <strong>Git-&gt;Pull</strong>. Jeżeli masz w opisie błędów napisane conflicts wybierz <strong>Git-&gt;Megre Changes</strong> i wskaż gałąź z której chcesz ściągnąć kod.</p>
+<p class="important">Klasy z bibliotek (logera, hibernate, jsona) świecą się na czerwono.</p>
+<p>Najpewniej nie ściągnięte są zależności Mavenowe. Kliknij na dwie strzałeczki w kółeczku z okienka Mavena poczekaj aż się skończą ładować.</p>
+<p class="important">Klasy Javy jak String świecą się na czerwono.</p>
+<p>Nie jest zdefiniowane JDK, wejdź w <strong>File-&gt;Project Structure-&gt;Project</strong> i zobacz czy dobrze wybrane jest JDK oraz czy poziom Javy ustawiony jest na <strong>8</strong>.</p>
+<p class="important">Inne rzeczy świecą się na czerwono.</p>
+<p>Najedź na nie kursorem kliknij i wybierz <strong>Alt+Enter</strong> zobacz czy środowisko umie pomóc Ci rozwiązać problem.</p>
+<p class="important">Uruchamia się inna klasa niż bym chciał.</p>
+<p>Sprawdź czy uruchamiasz odpowiednią klasę (test). Nazwa aktualnie uruchamianej klasy znajduje się obok zielonego trójkącika na górze na pasku. Środowisko <strong>NIE</strong> uruchamia klasy aktualnie edytowaj, tylko najczęściej ostatnio uruchamianą. Dla pewności uruchamiaj poprzez wybór prawym klawiszem myszy na nazwie klasy i <strong>run</strong>.</p>
+<p class="important">Nie mogę uruchomić klasy.</p>
+<p>Uruchamiać można tylko klasy zawierające metodę main.</p>
+<p class="important">Nie mogę zapisać zmian na repo.</p>
+<p>Wybierz <strong>Ctrl+k</strong> by zapisać zmiany na dysku. Wybierz <strong>Ctrl+Shift+k</strong> by przesłać zmiany do repo.</p>
+</section>
+</section></body>
+</html>
+

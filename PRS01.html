@@ -1,0 +1,261 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>PRS01.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="przetwarzanie-rownolegle-i-strumieniowe">
+<h2>Przetwarzanie równoległe i strumieniowe</h2>
+<p class="important">Uwaga! Kod z którego będziemy korzystać na zajęciach jest dostępny na branchu <strong>IntroductionClassesStart</strong> w repozytorium <a class="reference external" href="https://github.com/WitMar/PRS2020">https://github.com/WitMar/PRS2020</a> . Kod końcowy można znaleźć na branchu <strong>IntroductionClassesEnd</strong>.</p>
+<section id="przetwarzanie-rownolegle">
+<h3>Przetwarzanie równoległe</h3>
+<p>Procesy to zasadniczo programy, które są wykonywane na procesorze. Proces może tworzyć inne procesy, które są znane jako procesy potomne (child processes). Procesy są odizolowane, co oznacza, że ​​nie współdzielą pamięci z żadnym innym procesem.</p>
+<p>Wątek to indywidualny segment procesu, co oznacza, że ​​proces może mieć wiele wątków. Wątek ma trzy stany: uruchomiony, gotowy i zablokowany. Wątki współdzielą zasoby (procesor, pamięć, kod) w ramach jednego procesu.</p>
+<p>Wątek jest również znany jako lekki proces. Kiedy wiele wątków jest wykonywanych w procesie w tym samym czasie, otrzymujemy termin „wielowątkowość&quot;. Na przykład w przeglądarce wiele kart może być różnymi wątkami. MS Word wykorzystuje wiele wątków: jeden wątek do formatowania tekstu, inny wątek do przetwarzania danych wejściowych itp.</p>
+<p>Wielowątkowość to model wykonywania programu, który pozwala na tworzenie wielu wykonywanych niezależnie wątków w ramach jednego procesu, które jednocześnie współdzielą zasoby procesu. W zależności od sprzętu wątki mogą działać w pełni równolegle, jeśli są dystrybuowane do osobnych rdzeni procesora lub wirtualnie równolegle gdy to system operacyjny steruje przydziałem zasobów do wątków.</p>
+<p>Pomimo wielu zalet przetwarzania wielowątkoweo (równoległego) związane jest z nimi zarówno zwiększenie złożoności przetwarzania jak i pare trudnych do rozwiązania błędów. Istnieje kilka typowych scenariuszy, które możesz napotkać w aplikacjach wielowątkowych. Obejmują one:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">Problemy z dostępem do danych, w których dwa wątki odczytują i modyfikują te same dane. Bez odpowiedniego wykorzystania mechanizmów blokujących może dojść do niespójności danych.</div>
+<div class="line"><br /></div>
+<div class="line">Problemy z brakiem wątków i rywalizacją o zasoby pojawiają się, gdy wiele wątków próbuje uzyskać dostęp do pojedynczego chronionego zasobu.</div>
+<div class="line"><br /></div>
+<div class="line">Problemy rożnych ścieżek wywołań w zależności od przydziału zasobów procesora.</div>
+</div>
+</blockquote>
+<p>Elementy te będą tematem pierwszej części zajęć.</p>
+</section>
+<section id="przetwarzanie-strumieniowe">
+<h3>Przetwarzanie strumieniowe</h3>
+<p>W przeszłości dane były zazwyczaj przetwarzane w partiach na podstawie harmonogramu lub określonego wcześniej progu (np. co noc o 1 w nocy, co sto wierszy lub za każdym razem, gdy wolumen osiąga dwa megabajty). Jednak wraz ze wzrostem liczby danych do przetworzenia okazało się, że przetwarzanie wsadowe (ang. batch processing) nie jest w stanie wydajnie przetwarzać danych.</p>
+<p>Przetwarzanie strumieniowe stało się koniecznością w nowoczesnych aplikacjach. Przedsiębiorstwa zwróciły się w stronę technologii, które reagują na dane w czasie ich tworzenia. Przetwarzanie strumieniowe umożliwia aplikacjom reagowanie na nowe zdarzenia w danych (np. przekroczenie zakresu alarmowego) w momencie ich wystąpienia. Zamiast grupować dane i zbierać je w określonych odstępach czasu, aplikacje przetwarzania strumieniowego gromadzą i przetwarzają dane natychmiast po ich wygenerowaniu.</p>
+<p>Działania, które przetwarzanie strumieniowe wykonuje na danych, obejmują agregacje (np. obliczenia, takie jak suma, średnia, odchylenie standardowe), analizy (np. przewidywanie przyszłego zdarzenia na podstawie wzorców danych), przekształcenia (np. zmiana liczby na format daty ), wzbogacanie (np. łączenie punktu danych z innymi źródłami danych w celu stworzenia większego kontekstu i znaczenia) oraz przetwarzanie (np. wstawianie danych do bazy danych).</p>
+<p class="center"><img alt="ss" src="stream.png" /></p>
+<p>Przetwarzanie strumieni jest najczęściej stosowane do danych generowanych jako seria zdarzeń, takich jak dane z sensorów, systemów przetwarzania płatności oraz logów aplikacji. Typową architekturą wykorzystywaną w tym podejściu jest strategia publisher/subscriber (powszechnie określanego jako pub/sub) lub sink/source. Dane i zdarzenia są generowane przez publishera lub źródło (sink) i dostarczane do aplikacji przetwarzającej strumień będącej subscriberem. Od strony technicznej typowym publisherem jest np. Apache Kafka® a bibliotekami przetwarzającymi dane Apache Spark, Hadoop czy też Apache Flink.</p>
+<p>Elementy te będą tematem drugiej części zajęć.</p>
+</section>
+<section id="projekty">
+<h3>Projekty</h3>
+<p>Sprawdzane &quot;wspólnie&quot; na zajęciach lub indywidualnie ze studentami.</p>
+<p>Projekt I - implementacja prostego przetwarzania równoległego (sumowanie liczb, zerowanie, sprawdzanie wyniku) przychodzących danych na podstawie implementacji od prowadzącego, 20% oceny końcowej.</p>
+<p>Projekt II - implementacja złożonego przetwarzania równoległego na bazie projektu I (synchronizacja źródeł, zamykanie i otwieranie kolejek), 40% oceny końcowej.</p>
+<p>Projekt III - implementacja przetwarzania zadań w Apache Flink, 40% oceny końcowej.</p>
+</section>
+<section id="srodowisko-develperskie-java">
+<h3>Środowisko develperskie - Java</h3>
+<section id="edytor">
+<h4>Edytor</h4>
+<p>Implementując programy w języku Java, rekomendowanym (i aktualnie jednym z najpopularniejszych) IDE jest IntelliJ IDEA dostępny za darmo w wersji Community (link poniżej) (jako studenci możecie Państwo prosić o darmowy dostęp do wersji Ultimate - <a class="reference external" href="https://www.jetbrains.com/community/education/#students">https://www.jetbrains.com/community/education/#students</a>):</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://www.jetbrains.com/idea/download/">https://www.jetbrains.com/idea/download/</a></div>
+</div>
+</blockquote>
+</section>
+<section id="git">
+<h4>GIT</h4>
+<p>GIT to system kontroli wersji oprogramowania.</p>
+<p>Git posiada trzy stany, w których mogą znajdować się pliki: commited, modified i staged.</p>
+<p>Podstawowy sposób pracy z Git wygląda mniej więcej tak:</p>
+<blockquote>
+<div class="line-block">
+<div class="line">* Dokonujesz modyfikacji plików w katalogu roboczym (zmiana stanu na zmodyfikowany).</div>
+<div class="line"><br /></div>
+<div class="line">* Dokonujesz zatwierdzenia (commit), podczas którego zawartość plików zapisywana jest w stan staged i przygotowana do przesłania na serwer.</div>
+<div class="line"><br /></div>
+<div class="line">* Dokonujesz przesłania commita (push) i dane zapisywane są do repozytorium.</div>
+</div>
+</blockquote>
+<p>Z praktycznego punktu widzenia oznacza to, że musimy wykonać dwa kroki zanim zmiany w kodzie zostaną z sukcesem przesłane na serwer.</p>
+<p class="tag">Zadanie 1</p>
+<p>Załóż konto na GitHub</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://github.com/">https://github.com/</a></div>
+</div>
+</blockquote>
+<p>Otwórz repozytorium</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://github.com/WitMar/PRS2020">https://github.com/WitMar/PRS2020</a></div>
+</div>
+</blockquote>
+<p>Wybierz <strong>Fork</strong> by ściągnąć repozytorium na własne konto (W ten sposób na koniec zajęć będziesz mógł przesłać kod do własnego repozytorium).</p>
+<p>Otwórz Idea intellij na komputerze.</p>
+<p>W przypadku, gdy uruchamiasz edytor poraz pierwszy zobaczysz wyskakujące okno i wybierz z niego <strong>Project from version control</strong>, w przypadku, gdy nie jest to Twoje pierwsze uruchomienie wejdź na <strong>File-&gt; New -&gt; Project From Version Control -&gt; Git</strong>.</p>
+<p>Skopiuj w pokazującym się nowym oknie adres dostępny po wybraniu na stronie GitHub opcji <strong>CloneOrDownload</strong> (uwaga wybierz adres z opcja HTTPS, adres w opcji SSH nie zadziała!!).</p>
+<p class="center"><img alt="1" src="clone.png" /></p>
+<p>Domyślnie po uruchomieniu znajdujesz się na branchu <strong>Master</strong>, który u nas jest pusty.
+Wybierz w prawym dolnym rogu aplikacji nazwę brancha i przenieś się na branch <strong>IntroductionClassesStart</strong>.</p>
+<p class="center"><img alt="a2" src="develop.png" /></p>
+<p>Powinieneś uzyskać następujący efekt - z dokładnością do nazwy klasy. Uwaga jeśli kod nie jest pokolorowany tak jak oczekujesz znaczy to, że środowisko nie rozpoznało automatycznie twojego pliku Mavena:</p>
+<p>Wybierz ikonkę lupki i wpisz maven, wybierz opcję <strong>Add Maven Project</strong>.</p>
+<p class="center"><img alt="aMV" src="mavenAdd.png" /></p>
+<p>Następnie znajdź katalog do którego ściągnąłeś kod i wybierz plik <strong>pom.xml</strong>. Powinieneś otrzymać poniższy wynik (spójrz na ikonki przy plikach!).</p>
+<p class="center"><img alt="a3" src="screen.png" /></p>
+<p>Jeżeli nadal kod nie jest dobrze pokolorowany wejdź w opcje <strong>File -&gt; Project Structure</strong>, ustaw wersje Javy na 11 w zakładce <strong>Project</strong> oraz składni w zakładce <strong>Module</strong> też na java 11.</p>
+<p class="center"><img alt="a33" src="projectsettings.png" /></p>
+<p>Sprawdź wersje kompilatora używanego przez IDE <strong>File -&gt; settings -&gt; compiler</strong>, też wybierz wersję Java 11.</p>
+<p class="center"><img alt="a113" src="java10.png" /></p>
+</section>
+<section id="maven">
+<h4>Maven</h4>
+<p>Maven to system budowania aplikacji, który pomaga nam zautomatyzować proces kompilacji i generowania plików uruchomieniowych <strong>jar-ów, war-ów</strong> itp. Narzuca on specyficzną strukturę projektu.</p>
+<blockquote>
+<div class="line-block">
+<div class="line">* <strong>pom.xml</strong> – główny plik konfiguracji Maven</div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="line-block">
+<div class="line">* <strong>/src/main</strong> – katalog, gdzie znajdziemy pliki naszego programu, są tam dwa podkatalogi: java – tutaj trafiają wszystkie klasy (cały kod naszego modułu)</div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="line-block">
+<div class="line">* <strong>resources</strong> – tutaj będą wszystkie pliki, które nie są kodem, np. grafiki, pliki XML, konfiguracje w przypadku projektów webowych będziemy mieli także katalog webapp, który jest używany do umieszczania wszystkich treści webowych</div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="line-block">
+<div class="line">* <strong>/src/test</strong> - ma podobną strukturę jak katalog <em>main</em> z tą różnicą, że jest on wykorzystywany tylko w trakcie automatycznych testów</div>
+</div>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<div class="line-block">
+<div class="line">* <strong>/target</strong> – tutaj trafia skompilowany projekt (czyli np. w postaci wykonywalnego pliku JAR lub aplikacji webowej WAR)</div>
+</div>
+</blockquote>
+<p>Po rozwinięciu powinniśmy widzieć listę instrukcji (jeżeli nie wybieramy odśwież - dwie zielone strzałki, jak nie pomoże klikamy plusik i wskazujemy na plik <strong>pom.xml</strong> w naszym projekcie i ok).</p>
+<p>Po tym etapie plik Main.java powinien mieć obok nazwy klasy zielone kółeczko z &quot;c&quot; w środku, jeżeli tak nie jest najlepiej powtórz wszystkie operacje od początku.</p>
+<p>Więcej o Mavenie można znaleźć np tutaj:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://kobietydokodu.pl/7-maven-i-tajemnice-pliku-pom-xml/">https://kobietydokodu.pl/7-maven-i-tajemnice-pliku-pom-xml/</a></div>
+</div>
+<div class="line-block">
+<div class="line"><a class="reference external" href="http://tutorials.jenkov.com/maven/maven-tutorial.html">http://tutorials.jenkov.com/maven/maven-tutorial.html</a></div>
+</div>
+</blockquote>
+<p>Maven dokumentacja:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://maven.apache.org/guides/getting-started/index.html">https://maven.apache.org/guides/getting-started/index.html</a></div>
+</div>
+</blockquote>
+</section>
+<section id="thread">
+<h4>Thread</h4>
+<p>W języku Java klasy posiadające statyczną metodę main() mogą być uruchamiane. Domyślnie uruchomienie metody main tworzy wątek, który uruchamia kod się w niej znajdujący.</p>
+<p>Wejdź do klasy <strong>SingleThread</strong> i uruchom ją. Wywołanie wątku możemy zastopować stosując metodę sleep i podając w nawiasie liczbę milisekund na którą chcemy zatrzymać wątek.</p>
+<pre class="code XML literal-block"><code>Thread.sleep(500);</code></pre>
+<p>W momencie zastopowania wątek może przekazać swoje zasoby, takie jak procesor do innego wątku.</p>
+<p>W przypadku, gdy wątek jest w stanie nie pozwalającym mu na wykonanie metody sleep może zwrócić wyjątek (exception). Stąd kompilator wymusza na nas otoczenie tej operacji poprzez operacje <strong>try catch</strong> obsługujące pojawiające się wyjątki.</p>
+<p>W przypadku gdy chcemy uruchomić więcej niż jeden wątek w kodzie Javy najprosciej jest wyłączyć implementację wątku do osobnej klasy. Dokonaliśmy tego w klasie <strong>SeparateThread</strong> poprzez dodanie podklasy, która dziedziczy z klasy Thread. Klasa Thread posiada wiele metod do zarządzania wątkami o których powiemy sobie później. Teraz interesuje nas metoda run() w której umieszczamy kod do wywołania przez wątek. W celu wykonania własnego kodu nadpiszemy tę metodę nadklasy w naszej klasie poprzez definicję metody o tej samej nazwie i wskazując adnotacją <strong>&#64;Override</strong>, że jest to nadpisanie metody.</p>
+<pre class="code XML literal-block"><code>class<span class="whitespace"> </span>Concurrency<span class="whitespace"> </span>extends<span class="whitespace"> </span>Thread<span class="whitespace"> </span>{<span class="whitespace">
+
+    </span>&#64;Override<span class="whitespace"> </span>//<span class="whitespace"> </span>override<span class="whitespace"> </span>method<span class="whitespace"> </span>from<span class="whitespace"> </span>superclass<span class="whitespace">
+    </span>public<span class="whitespace"> </span>void<span class="whitespace"> </span>run()<span class="whitespace"> </span>{}<span class="whitespace">
+</span>}</code></pre>
+<p>Możemy teraz w głównej metodzie utworzyć obiekt klasy Concurrency, każdy taki obiekt jest wątkiem, który możemy uruchomić poprzez wykonanie metody <strong>start()</strong>.</p>
+<p class="tag">Zadanie 2</p>
+<p>Uruchom klasę <strong>SeparateThread.java</strong>, zaobserwuj jak działają dwa wątki, główny i wywołany przez nasz program. Dodaj operacje wypisania czegoś na ekran do głównego wątku, kiedy się ona wywoła?</p>
+<p>Przypadek, gdy chcielibyśmy utworzyć więcej wątków z klasy Concurrency pokazany jest w klasie <strong>TwoThreads</strong>.</p>
+<p class="tag">Zadanie 3</p>
+<p>Uruchom klasę <strong>TwoThreads.java</strong>, zaobserwuj jak działają dwa wątki operujące na osobnych danych. Zobacz jak będzie to wyglądało w przypadku usunięcia thread.sleep w kodzie wątku.</p>
+</section>
+<section id="logger">
+<h4>Logger</h4>
+<p>Metoda System.out.printl jest <strong>synchronizowana</strong> to znaczy, że dostęp do niej ma tylko jeden wątek na raz. W przypadku dużego obciążenia systemu i dużej liczby wywołań może to bardzo spowalniać i obciążać aplikację. Jednocześnie wiemy jak ważnym i pomocnym elementem projektu informatycznego jest logowanie komunikatów / śledzenie wywołań. Z pomocą przychodzą nam specjalne biblioteki zwane logerami. Szczególnie użyteczne właściwości logerów to: dzielenia logów na poziomy, zapisywanie automatyczne do pliku, a także asynchroniczne wywołanie.</p>
+<p>Przykładem biblioteki do logowania jest <strong>log4j</strong>.</p>
+<p>Aby używać w naszym projekcie biblioteki <strong>log4j</strong> dodaliśmy do naszego projektu (do pliku mavena <strong>pom.xml</strong>) zależność do biblioteki logowania log4j wklejając tam:</p>
+<pre class="code XML highlight literal-block"><code><span class="name tag">&lt;dependencies&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;dependency&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;groupId&gt;</span>log4j<span class="name tag">&lt;/groupId&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;artifactId&gt;</span>log4j<span class="name tag">&lt;/artifactId&gt;</span><span class="whitespace">
+        </span><span class="name tag">&lt;version&gt;</span>1.2.17<span class="name tag">&lt;/version&gt;</span><span class="whitespace">
+    </span><span class="name tag">&lt;/dependency&gt;</span><span class="whitespace">
+</span><span class="name tag">&lt;/dependencies&gt;</span></code></pre>
+<p>W ogólności jeżeli chcemy dodać bibliotekę log4j do projektu, aby znaleźć odpowiedni wpis wystarczy w google wpisać <em>maven log4j</em>. Pierwszy link powinien zaprowadzić nas na stronę:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://mvnrepository.com/artifact/log4j/log4j">https://mvnrepository.com/artifact/log4j/log4j</a></div>
+</div>
+</blockquote>
+<p>Po wyborze wersji zobaczymy wpis:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://mvnrepository.com/artifact/log4j/log4j/1.2.17">https://mvnrepository.com/artifact/log4j/log4j/1.2.17</a></div>
+</div>
+</blockquote>
+<p class="important">Uwaga! Na każdych zajęciach potrzebne zależności będą już dodane do ustawień mavena.</p>
+<p>Dodaliśmy do klasy TwoThreads.java wywołanie loggera poprzez dodanie zmiennej globalnej:</p>
+<pre class="code XML literal-block"><code>public<span class="whitespace"> </span>static<span class="whitespace"> </span>Logger<span class="whitespace"> </span>log<span class="whitespace"> </span>=<span class="whitespace"> </span>Logger.getLogger(TwoThreads.class);</code></pre>
+<p>Uwaga! Dodając nowy obiekt zwróć uwagę, że korzystać z biblioteki <strong>log4j</strong>, gdyż w Javie jest wiele bibliotek o nazwie Logger, i wykorzystanie innej nie zadziała tak jak chcemy. Innymi słowy spójrz czy w powstałym imporcie w nazwie klasy jest <strong>log4j</strong>.</p>
+<p>Zwróć uwage na zmianę wywołań System.out.printl na log o poziomie info (poziomy logów w log4j to <em>debug, info, warn, error</em>, którym odpowiadają metody o takich samych nazwach) :</p>
+<pre class="code XML literal-block"><code>log.info(&quot;Loop<span class="whitespace"> </span>&quot;<span class="whitespace"> </span>+<span class="whitespace"> </span>this.loopNum<span class="whitespace"> </span>+<span class="whitespace"> </span>&quot;,<span class="whitespace"> </span>Read:<span class="whitespace"> </span>&quot;<span class="whitespace"> </span>+<span class="whitespace"> </span>i);</code></pre>
+<p>Więcej informacji o log4j można doczytać tutaj:</p>
+<blockquote>
+<div class="line-block">
+<div class="line"><a class="reference external" href="https://www.mkyong.com/logging/log4j-hello-world-example/">https://www.mkyong.com/logging/log4j-hello-world-example/</a></div>
+</div>
+</blockquote>
+<p class="tag">Zadanie 4</p>
+<p>Uruchom klasę <strong>TwoThreadsLogs.java</strong>, powinieneś zobaczyć na ekranie logi. W katalogu projektu powinnien też zostać stworzony plik o nazwie <strong>log.log</strong>. Zwróć uwagę na to jak zbudowany jest pojedynczy log.</p>
+</section>
+<section id="wspoldzielenie-zasobow">
+<h4>Współdzielenie zasobów</h4>
+<p>W klasie <strong>TwoThreadsLogs.java</strong> mamy też przykład programu, w którym dwa wątki współdzielą zasób jakim jest zmienna <strong>i</strong>. Zobacz jakie anomalie możesz zaobserwować w działaniu takiego programu.</p>
+<p>Jeżeli chcielibyśmy połączyć dwie operacje np. inkrementację wartości zmiennej <strong>i</strong> oraz wypisanie drugiego logu możemy to wykonać poprzed dodanie synchronizowanego bloku kodu.</p>
+<p>Dodaj do klasy zmienną globalną</p>
+<pre class="code XML highlight literal-block"><code>public<span class="whitespace"> </span>static<span class="whitespace"> </span>Long<span class="whitespace"> </span>synchronizer<span class="whitespace"> </span>=<span class="whitespace"> </span>0L;</code></pre>
+<p>oraz synchronizowany blok</p>
+<pre class="code XML highlight literal-block"><code>synchronized<span class="whitespace"> </span>(synchronizer)<span class="whitespace"> </span>{<span class="whitespace">
+    </span>i<span class="whitespace"> </span>=<span class="whitespace"> </span>i<span class="whitespace"> </span>+<span class="whitespace"> </span>1;<span class="whitespace">
+    </span>log.info(&quot;Loop<span class="whitespace"> </span>&quot;<span class="whitespace"> </span>+<span class="whitespace"> </span>this.loopNum<span class="whitespace"> </span>+<span class="whitespace"> </span>&quot;,<span class="whitespace"> </span>Write:<span class="whitespace"> </span>&quot;<span class="whitespace"> </span>+<span class="whitespace"> </span>i);<span class="whitespace">
+</span>}</code></pre>
+<p class="tag">Zadanie 5</p>
+<p>Uruchom ponownie klasę <strong>TwoThreadsLogs.java</strong>. Jakie różnice w działaniu zaobserowałeś/łaś.</p>
+<section id="commit">
+<h5>Commit</h5>
+<p class="tag">Zadanie 6</p>
+<p>Zakommituj swój kod do repozytorium pod nowy branch o nazwie IntroductionClassesWithLogger.</p>
+</section>
+<section id="commit-w-intellij">
+<h5>Commit w IntelliJ</h5>
+<blockquote>
+<p><span class="todo">Ctrl + k</span> służy do commitowania kodu lokalnie do repozytorium</p>
+<p><span class="todo">Ctrl + Shift + k</span> służy do commitowania kodu do zewnętrznego repozytorium, aby wybrać nową nazwę brancha kliknij na nazwę brancha w okienku komitowania.</p>
+<p><span class="todo">Ctrl + t</span> służy do odświeżania projektu - ściągania zmian z serwera</p>
+</blockquote>
+<p>Przy pierwszym połączeniu powinniśmy być zapytani o użytkownika i hasło. Można też połączyć &quot;na stałe&quot; intellij z kontem na github przez ustawienia <strong>Settings-&gt;Version Control-&gt;GitHub</strong>.</p>
+</section>
+<section id="finalny-kod">
+<h5>Finalny kod</h5>
+<p>W przypadku problemów (zgubiłeś się lub byłeś nieobecny) finalny kod powstały na zajęciach możesz znaleźć na gałęzi <strong>IntroductionClassesEnd</strong>.</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="footnote-1" role="note">
+<span class="label"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></span>
+<p>Wykorzystano materiały z:</p>
+</aside>
+</aside>
+<p><a class="reference external" href="https://www.koderhq.com/tutorial/java/concurrency/">https://www.koderhq.com/tutorial/java/concurrency/</a></p>
+<p><a class="reference external" href="https://www.geeksforgeeks.org/introduction-of-process-management/?ref=lbp">https://www.geeksforgeeks.org/introduction-of-process-management/?ref=lbp</a></p>
+<p><a class="reference external" href="https://totalview.io/blog/multithreading-multithreaded-applications">https://totalview.io/blog/multithreading-multithreaded-applications</a></p>
+<p><a class="reference external" href="https://hazelcast.com/glossary/stream-processing/">https://hazelcast.com/glossary/stream-processing/</a></p>
+</section>
+</section>
+</section>
+</section></body>
+</html>
+

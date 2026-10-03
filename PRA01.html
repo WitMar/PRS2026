@@ -3,314 +3,509 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
-<title>PRA01.rst</title>
+<title>Zajecia1.rst</title>
     <link rel="stylesheet" href="style.css" type="text/css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
     <script>hljs.initHighlightingOnLoad();</script>
 	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
 </head>
-<body><section id="programming-laboratory">
-<h2>Programming Laboratory</h2>
-<section id="srodowisko-developerskie">
-<h3>Środowisko developerskie</h3>
-<p class="important">Uwaga! Kod z którego będziemy korzystać na zajęciach jest dostępny na branchu <strong>IntroductionClassesStart</strong> w repozytorium <a class="reference external" href="https://github.com/WitMar/PRA2025.git">https://github.com/WitMar/PRA2025.git</a> . Kod końcowy można znaleźć na branchu <strong>IntroductionClassesEnd</strong>.</p>
+<body><section id="narzedzia-i-organizacja-zajec">
+<h2>Narzędzia i organizacja zajęć</h2>
+<p>Wykłady w postaci HTML będą pojawiać się na serwisie <strong>Moodle</strong>
+<a class="reference external" href="https://lms.amu.edu.pl/sci/course/view.php?id=333">https://lms.amu.edu.pl/sci/course/view.php?id=333</a></p>
+<p>W tym samym miejscu obecne będą materiały na laboratoria. Na samym dole
+materiałów na laboratoria publikowany będzie plik notatnika <strong>Jupyter</strong>,
+który można otworzyć w serwisie <a class="reference external" href="https://jupyter.wmi.amu.edu.pl">https://jupyter.wmi.amu.edu.pl</a> by móc
+skorzystać z interaktywnych opcji uruchamiania kodów.</p>
+<p>W ramach uruchamiania programów oraz debuggowania pomocne może być także
+bardziej złożone <strong>IDE</strong> (ang. Integrated Development Environment) o
+nazwie <strong>PyCharm</strong>, opisane poniżej.</p>
+<p>W ramach wykładu na serwisie <strong>Moodle</strong> znajdziecie Państwo pytania
+testowe na które macie <strong>2</strong> tygodnie na odpowiedź. Tam też pod nazwą
+<strong>Zadania</strong> znajdować się będa zadania do wykonania na zajęciach
+laboratoryjnych (także dostępne przez <strong>2</strong> tygodnie do czasu zajęć).
+Korzystają one z pluginu <strong>CodeRunner</strong> systemu <strong>Moodle</strong>.</p>
 <section id="edytor">
-<h4>Edytor</h4>
-<p>Implementując programy w języku Java, rekomendowanym (i aktualnie jednym z najpopularniejszych) IDE jest IntelliJ IDEA dostępny za darmo w wersji Community (link poniżej) (jako studenci możecie Państwo prosić o darmowy dostęp do wersji Ultimate - <a class="reference external" href="https://www.jetbrains.com/community/education/#students">https://www.jetbrains.com/community/education/#students</a>):</p>
+<h3>Edytor</h3>
+<p>Implementując programy w języku Python, rekomendowanym (i aktualnie
+jednym z najpopularniejszych) rodzin IDE jest zespół oprogramowania
+dostarczany przez firmę <strong>JetBrains</strong>. Oprogramowanie to jest dostępne
+za darmo w wersji Community (link poniżej). Jako studenci możecie
+Państwo prosić o darmowy dostęp do wersji Ultimate -
+<a class="reference external" href="https://www.jetbrains.com/community/education/#students">https://www.jetbrains.com/community/education/#students</a>):</p>
 <blockquote>
-<div class="line-block">
-<div class="line"><a class="reference external" href="https://www.jetbrains.com/idea/download/">https://www.jetbrains.com/idea/download/</a></div>
-</div>
+<p><a class="reference external" href="https://www.jetbrains.com/pycharm">https://www.jetbrains.com/pycharm</a></p>
 </blockquote>
+<p>Otwórz program PyCharm. Powinieneś zobaczyć następujący ekran:</p>
+<p class="center"><img alt="a" src="a.png" /></p>
+<p>Utwórz <strong>New Project -&gt; Pure Python</strong>.</p>
+<p>W pierwszej lini przy location możesz zmienić nazwę projektu na własną i
+wybrać <strong>create</strong>.</p>
+<p class="center"><img alt="b" src="b.png" /></p>
+<p>Powinieneś zobaczyć ekran edytora. Otwórz plik <strong>main.py</strong> wybierając z
+go z lewej strony w menu projektu. Tak wygląda menu:</p>
+<p class="center"><img alt="c" src="c.png" /></p>
+<p>Dokładniej działania edytora i elementy skrótów klawiszowych poznamy na
+kolejnych zajęciach. Na ten moment istotne będą da elementy. Pierwszy to
+uruchomienie programu za pomocą zielonego trójkąta w górnym prawym rogu
+ekranu lub po wyborze prawym klawiszem myszy na ekranie z kodem lub
+pliku i wybór opcji Run ‘main’.</p>
+<p class="center"><img alt="d" src="d.png" /></p>
+<p>Wiedząc jak uruchamiać programy pozostaje nam poznać sposób dodawania
+zależności do projektu.</p>
 </section>
-<section id="git">
-<h4>GIT</h4>
-<p>Git:
-Git to rozproszony system kontroli wersji, który pozwala na przechowywanie wersji kodu źródłowego w różnych gałęziach. Dzięki Gitowi możesz pracować nad nowymi funkcjami w oddzielnych gałęziach, a potem łączyć je z główną wersją (gałąź main lub master). Git daje ci dużą elastyczność w zarządzaniu wersjami kodu, ale nie narzuca określonego sposobu pracy z gałęziami.</p>
-<p>Git posiada trzy stany, w których mogą znajdować się pliki: zatwierdzony, zmodyfikowany i śledzony. Zatwierdzony oznacza, że dane zostały bezpiecznie zachowane w Twojej lokalnej bazie danych.
-Zmodyfikowany oznacza, że plik został zmieniony, ale zmiany nie zostały wprowadzone do bazy danych. Śledzony - oznacza, że zmodyfikowany plik został przeznaczony do zatwierdzenia w bieżącej postaci w następnej operacji commit.</p>
-<p>Podstawowy sposób pracy z Git wygląda mniej więcej tak:</p>
-<blockquote>
-<div class="line-block">
-<div class="line">* Dokonujesz modyfikacji plików w katalogu roboczym.</div>
-<div class="line"><br /></div>
-<div class="line">* Oznaczasz zmodyfikowane pliki jako śledzone, dodając ich bieżący stan (migawkę) do przechowalni.</div>
-<div class="line"><br /></div>
-<div class="line">* Dokonujesz zatwierdzenia (commit), podczas którego zawartość plików z przechowalni zapisywana jest jako migawka projektu w katalogu Git.</div>
-</div>
-</blockquote>
-<section id="gitflow">
-<h5>Gitflow</h5>
-<p>Gitflow to konkretna metodologia rozwoju oprogramowania, która wprowadza szereg wytycznych dotyczących tworzenia i zarządzania gałęziami w projekcie. Gitflow organizuje cykl życia projektu na gałęzie przeznaczone do różnych celów, takich jak rozwój funkcji, poprawki błędów, wydania, etc. Jest to przydatne szczególnie w dużych zespołach, gdzie potrzebna jest większa kontrola nad procesem wytwarzania oprogramowania.</p>
-</section>
-<section id="podstawowe-galezie-w-gitflow">
-<h5>Podstawowe gałęzie w Gitflow:</h5>
-<ol class="arabic simple">
-<li><p><strong>`main`</strong> - gałąź zawierająca stabilną wersję aplikacji, gotową do wdrożenia.</p></li>
-<li><p><strong>`develop`</strong> - gałąź, na której zbierane są wszystkie nowe funkcje i zmiany. To główna gałąź do pracy w trakcie cyklu życia projektu.</p></li>
-<li><p><strong>`feature/`</strong> - gałęzie wykorzystywane do pracy nad nowymi funkcjami. Są one tworzone na podstawie gałęzi <cite>develop</cite>.</p></li>
-<li><p><strong>`release/`</strong> - gałęzie przeznaczone do przygotowania nowego wydania. Pozwalają na testowanie i przygotowanie stabilnej wersji przed wdrożeniem.</p></li>
-<li><p><strong>`hotfix/`</strong> - gałęzie do szybkich poprawek błędów w wersji produkcyjnej.</p></li>
-</ol>
-</section>
-<section id="przyklad-roznic">
-<h5>Przykład różnic:</h5>
-<ul class="simple">
-<li><p><strong>W Git</strong> nie masz narzuconych zasad dotyczących gałęzi. Możesz pracować na jednej gałęzi lub tworzyć własne.</p></li>
-<li><p><strong>W Gitflow</strong> masz określoną strukturę gałęzi, która wspomaga organizację pracy zespołowej. Zawsze pracujesz na gałęzi <cite>develop</cite> do tworzenia funkcji, a potem tworzysz gałęzie <cite>release</cite> i <cite>hotfix</cite>, jeśli jest to konieczne.</p></li>
-</ul>
-<p class="center"><img alt="a10" src="git.png" /></p>
-<p class="tag">Zadanie 1</p>
-<p>Jeżeli nie posiadasz konta na platformie GitHub to załóż na nim konto</p>
-<blockquote>
-<div class="line-block">
-<div class="line"><a class="reference external" href="https://github.com/">https://github.com/</a></div>
-</div>
-</blockquote>
-<p>Otwórz repozytorium</p>
-<blockquote>
-<div class="line-block">
-<div class="line"><a class="reference external" href="https://github.com/WitMar/PRA2025.git">https://github.com/WitMar/PRA2025.git</a></div>
-</div>
-</blockquote>
-<p>Skopiuj adres http repozytorium do tego by otworzyć je w IntelliJ. Otwórz <strong>Idea intellij</strong> na swoim komputerze.</p>
-<p>W przypadku, gdy uruchamiasz edytor poraz pierwszy zobaczysz wyskakujące okno i wybierz z niego <strong>Project from version control</strong>, w przypadku, gdy nie jest to Twoje pierwsze uruchomienie wejdź na <strong>File-&gt; New -&gt; Project From Version Control</strong> i następnie jako opcję wybierz (powinna być domyślnie wybrana) <strong>Git</strong>.</p>
-<p>Skopiuj w pokazującym się nowym oknie adres dostępny po wybraniu na stronie GitHub opcji <strong>CloneOrDownload</strong> (uwaga wybierz adres z opcja HTTPS, adres w opcji SSH nie zadziała!!).</p>
-<p class="center"><img alt="1" src="cloneGit.png" /></p>
-<p>Domyślnie po uruchomieniu znajdujesz się na branchu <strong>Main</strong>, który u nas zawiera tylko plik Readme.
-Wybierz w lewym dolnym rogu aplikacji nazwę brancha i przenieś się na branch <strong>IntroductionClassesStart</strong> (kliknij prawym przyciskiem myszy i checkout).</p>
-<p class="center"><img alt="a2" src="develop.png" /></p>
-<p>Powinieneś uzyskać następujący efekt - z dokładnością do nazwy klasy. Uwaga jeśli kod nie jest pokolorowany tak jak oczekujesz (jak w przykładzie na dole) znaczy to, że środowisko nie rozpoznało automatycznie twojego pliku Mavena:</p>
-<p class="center"><img alt="kod" src="kod.png" /></p>
-<p>W przypadku gdy środowisko nie wykrylo ustawień Maven (nie ma z prawej strpny na pasku kategorii z &quot;m&quot;) wybierz ikonkę lupki i wpisz maven, wybierz opcję <strong>Add Maven Project</strong>.</p>
-<p class="center"><img alt="amm" src="mmaven.png" /></p>
-<p class="center"><img alt="aMV" src="mavenAdd.png" /></p>
-<p>Następnie znajdź katalog do którego ściągnąłeś kod i wybierz plik <strong>pom.xml</strong>. Powinieneś otrzymać poniższy wynik (spójrz na ikonki przy plikach!). Z prawej strony ekranu pojawiła się zakładka <strong>Maven</strong>, wybierz w niej opcję <strong>COMPILE</strong> i uruchom (zielony trójkąt w zakładce lub kliknij dwa razy napis compile).</p>
-<p class="center"><img alt="a3" src="kod.png" /></p>
-<p>Jeżeli nadal kod nie jest dobrze pokolorowany wejdź w opcje <strong>File -&gt; Project Structure</strong>, ustaw wersje Javy na 17 w zakładce <strong>Project</strong> oraz składni w zakładce <strong>Module</strong> też na java 17.</p>
-<p class="center"><img alt="a33" src="projectsettings.png" /></p>
-<p>Sprawdź wersje kompilatora używanego przez IDE <strong>File -&gt; settings -&gt; compiler</strong>, też wybierz wersję Java 17.</p>
-<p class="center"><img alt="a113" src="java10.png" /></p>
-</section>
-</section>
-<section id="maven">
-<h4>MAVEN</h4>
-<p>Maven to system budowania aplikacji, który pomaga nam zautomatyzować proces kompilacji i generowania plików uruchomieniowych <strong>jar-ów, war-ów</strong> itp. Narzuca on specyficzną strukturę projektu.</p>
-<blockquote>
-<div class="line-block">
-<div class="line">* <strong>pom.xml</strong> – główny plik konfiguracji Maven</div>
-</div>
-<div class="line-block">
-<div class="line"><br /></div>
-</div>
-<div class="line-block">
-<div class="line">* <strong>/src/main</strong> – katalog, gdzie znajdziemy pliki naszego programu, są tam dwa podkatalogi: java – tutaj trafiają wszystkie klasy (cały kod naszego modułu)</div>
-</div>
-<div class="line-block">
-<div class="line"><br /></div>
-</div>
-<div class="line-block">
-<div class="line">* <strong>resources</strong> – tutaj będą wszystkie pliki, które nie są kodem, np. grafiki, pliki XML, konfiguracje w przypadku projektów webowych będziemy mieli także katalog webapp, który jest używany do umieszczania wszystkich treści webowych</div>
-</div>
-<div class="line-block">
-<div class="line"><br /></div>
-</div>
-<div class="line-block">
-<div class="line">* <strong>/src/test</strong> - ma podobną strukturę jak katalog <em>main</em> z tą różnicą, że jest on wykorzystywany tylko w trakcie automatycznych testów (będzie to tematem kolejnych zajęć)</div>
-</div>
-<div class="line-block">
-<div class="line"><br /></div>
-</div>
-<div class="line-block">
-<div class="line">* <strong>/target</strong> – tutaj trafia skompilowany projekt (czyli np. w postaci wykonywalnego pliku JAR lub aplikacji webowej WAR)</div>
-</div>
-</blockquote>
-<p>W prawym górnym rogu znajdziemy zakładkę &quot;Maven&quot;. Jeżeli nie masz takiej zakładki włączysz ją poprzez wybranie
-<strong>View -&gt; Tool Windows -&gt; Maven</strong>.</p>
-<p>Po rozwinięciu powinniśmy widzieć listę instrukcji (jeżeli nie wybieramy odśwież - dwie zielone strzałki, jak nie pomoże klikamy plusik i wskazujemy na plik <strong>pom.xml</strong> w naszym projekcie i ok).</p>
-<p class="tag">Zadanie 2</p>
-<p>Wykonaj w zakładce Mavena <strong>Clean + Install</strong>, powinieneś otrzymać komunikat BUILD SUCCESS</p>
-<p class="center"><img alt="a22" src="cleanInstall.png" /></p>
-<p>Po tym etapie plik Main.java powinien mieć obok nazwy klasy kółeczko, jeżeli tak nie jest najlepiej powtórz wszystkie operacje od początku.</p>
-<p>Więcej o Mavenie można znaleźć np tutaj:</p>
-<blockquote>
-<div class="line-block">
-<div class="line"><a class="reference external" href="https://kobietydokodu.pl/7-maven-i-tajemnice-pliku-pom-xml/">https://kobietydokodu.pl/7-maven-i-tajemnice-pliku-pom-xml/</a></div>
-</div>
-<div class="line-block">
-<div class="line"><a class="reference external" href="http://tutorials.jenkov.com/maven/maven-tutorial.html">http://tutorials.jenkov.com/maven/maven-tutorial.html</a></div>
-</div>
-</blockquote>
-<p>Maven dokumentacja:</p>
-<blockquote>
-<div class="line-block">
-<div class="line"><a class="reference external" href="https://maven.apache.org/guides/getting-started/index.html">https://maven.apache.org/guides/getting-started/index.html</a></div>
-</div>
-</blockquote>
-<p>Tworzenie pliku Jar w Maven:</p>
-<blockquote>
-<div class="line-block">
-<div class="line"><a class="reference external" href="http://www.baeldung.com/executable-jar-with-maven">http://www.baeldung.com/executable-jar-with-maven</a></div>
-</div>
-</blockquote>
-<p class="tag">Zadanie 3</p>
-<p>Spróbuj uruchomić klasę Main.java (pracy klik myszki i wybór opcji <strong>Run</strong>). Wykonaj to samo na pliku z rozszerzeniem .jar (<em>java -jar nazwa_pliku</em>) z katalogu o nazwie target. Zobacz jaki będzie efekt.</p>
-<p>Dodaj do pliku Maven definicje manifestu dla pliku Jar. Aby to zrobić skorzystamy z dostępnego tzw. pluginu do Mavena.</p>
-<pre class="code XML literal-block"><code><span class="name tag">&lt;build&gt;</span><span class="whitespace">
-    </span><span class="name tag">&lt;plugins&gt;</span><span class="whitespace">
-        </span><span class="name tag">&lt;plugin&gt;</span><span class="whitespace">
-            </span><span class="name tag">&lt;groupId&gt;</span>org.apache.maven.plugins<span class="name tag">&lt;/groupId&gt;</span><span class="whitespace">
-            </span><span class="name tag">&lt;artifactId&gt;</span>maven-jar-plugin<span class="name tag">&lt;/artifactId&gt;</span><span class="whitespace">
-            </span><span class="name tag">&lt;version&gt;</span>2.4<span class="name tag">&lt;/version&gt;</span><span class="whitespace">
-            </span><span class="name tag">&lt;configuration&gt;</span><span class="whitespace">
-                </span><span class="name tag">&lt;archive&gt;</span><span class="whitespace">
-                    </span><span class="name tag">&lt;manifest&gt;</span><span class="whitespace">
-                        </span><span class="name tag">&lt;mainClass&gt;</span>introduction.HelloWorld<span class="name tag">&lt;/mainClass&gt;</span>&gt;<span class="whitespace">
-                    </span><span class="name tag">&lt;/manifest&gt;</span><span class="whitespace">
-                </span><span class="name tag">&lt;/archive&gt;</span><span class="whitespace">
-            </span><span class="name tag">&lt;/configuration&gt;</span><span class="whitespace">
-        </span><span class="name tag">&lt;/plugin&gt;</span><span class="whitespace">
-    </span><span class="name tag">&lt;/plugins&gt;</span><span class="whitespace">
-</span><span class="name tag">&lt;/build&gt;</span></code></pre>
-<p><strong>Main class</strong> jest ścieżką do uruchamianej klasy.
-Uruchom plik jar raz jeszcze i zobacz wynik.</p>
-</section>
-<section id="logger">
-<h4>Logger</h4>
-<p>Bardzo ważnym i pomocnym elementem projektu informatycznego jest logowanie komunikatów / błędów. Szczególnie użyteczne są możliwości dzielenia logów na poziomy, zapisywanie automatyczne do pliku, a także możliwość analizy aplikacji wielowątkowych. Przykładem biblioteki do logowania jest <strong>log4j</strong>.</p>
-<p>Aby używać w naszym projekcie biblioteki <strong>log4j</strong> dodajmy do naszego projektu (do pliku mavena <strong>pom.xml</strong>) zależność do biblioteki logowania log4j wklejając tam:</p>
-<pre class="code XML highlight literal-block"><code><span class="name tag">&lt;dependencies&gt;</span><span class="whitespace">
-    </span><span class="name tag">&lt;dependency&gt;</span><span class="whitespace">
-        </span><span class="name tag">&lt;groupId&gt;</span>log4j<span class="name tag">&lt;/groupId&gt;</span><span class="whitespace">
-        </span><span class="name tag">&lt;artifactId&gt;</span>log4j<span class="name tag">&lt;/artifactId&gt;</span><span class="whitespace">
-        </span><span class="name tag">&lt;version&gt;</span>1.2.17<span class="name tag">&lt;/version&gt;</span><span class="whitespace">
-    </span><span class="name tag">&lt;/dependency&gt;</span><span class="whitespace">
-</span><span class="name tag">&lt;/dependencies&gt;</span></code></pre>
-<p>W ogólności jeżeli chcemy dodać bibliotekę log4j do projektu, aby znaleźć odpowiedni wpis wystarczy w google wpisać <em>maven log4j</em>. Pierwszy link powinien zaprowadzić nas na stronę:</p>
-<blockquote>
-<div class="line-block">
-<div class="line"><a class="reference external" href="https://mvnrepository.com/artifact/log4j/log4j">https://mvnrepository.com/artifact/log4j/log4j</a></div>
-</div>
-</blockquote>
-<p>Po wyborze wersji zobaczymy wpis:</p>
-<blockquote>
-<div class="line-block">
-<div class="line"><a class="reference external" href="https://mvnrepository.com/artifact/log4j/log4j/1.2.17">https://mvnrepository.com/artifact/log4j/log4j/1.2.17</a></div>
-</div>
-</blockquote>
-<p>Uwaga! Za pierwszym razem dodaliśmy tag <strong>dependencies</strong> w przyszłości będziemy tylko wklejać odpowiednie dependencje pomiędzy ten tag.</p>
-<p>Odśwież zakładkę Mavena powieneś widzieć na niej nową kategorię o nazwie <strong>Dependencies</strong> a w niej jeden wpis na temat log4j.</p>
-<p>Teraz dodamy do klasy Main.java wywołanie loggera. Dodaj do klasy zmienną globalną:</p>
-<pre class="code python literal-block"><code><span class="name">Logger</span> <span class="name">log</span> <span class="operator">=</span> <span class="name">Logger</span><span class="operator">.</span><span class="name">getLogger</span><span class="punctuation">(</span><span class="literal string double">&quot;name&quot;</span><span class="punctuation">);</span></code></pre>
-<p>Uwaga! Dodając nowy obiekt zwróć uwagę, że korzystać z biblioteki <strong>log4j</strong>, gdyż w Javie jest wiele bibliotek o nazwie Logger, i wykorzystanie innej nie zadziała tak jak chcemy. Innymi słowy spójrz czy w powstałym imporcie w nazwie klasy jest <strong>log4j</strong>.</p>
-<p>Dodaj w metodzie main() wywołanie:</p>
-<pre class="code python literal-block"><code><span class="name">log</span><span class="operator">.</span><span class="name">info</span><span class="punctuation">(</span><span class="literal string double">&quot;message&quot;</span><span class="punctuation">);</span></code></pre>
-<p class="tag">Zadanie 4</p>
-<p>Uruchom klasę Main.java zobacz czy widzisz wiadomość &quot;message&quot;.</p>
-<section id="log4j">
-<h5>Log4j</h5>
-<p>Powód dla którego nie widzisz wiadomości jest to, że nie zdefiniowaliśmy ustawień loggera, w związku z czym informacje na nim zapisywane nie są nigdzie przekazywane.</p>
-<p>Aby stworzyć pliku ustawień musimy utworzyć w katalogu <strong>Resources</strong> plik o nazwie <strong>log4j.properties</strong>;</p>
-<p>Wklej do pliku następujące ustawienia:</p>
-<pre class="code python literal-block"><code><span class="comment single"># Root logger option</span><span class="whitespace">
-</span><span class="name">log4j</span><span class="operator">.</span><span class="name">rootLogger</span><span class="operator">=</span><span class="name">DEBUG</span><span class="punctuation">,</span> <span class="name">stdout</span><span class="punctuation">,</span> <span class="name">file</span><span class="whitespace">
+<section id="zaleznosci">
+<h3>Zależności</h3>
+<p>W przypadku gdy wykorzystujemy zewnętrzne moduły przez import może
+okazać się, że nasze lokalne środowisko nie ma zainstalowanego jakiegoś
+pakietu lub program nie działa z posiadaną przez nas wersją pakietu,
+tylko oczekuje konkretnej innej wersji. W takim wypadku z reguły
+programiści udostępniają plik w którym opisane są zależności projektu.</p>
+<p>Standardem dla języka Python jest definiowanie zależności w pliku o
+nazwie <em>requirements.txt</em>.</p>
+<p>Dodaj do projektu w <strong>PyCharm</strong> plik <em>requirements.txt</em> (prawy klawiszem
+myszy na folder i <strong>New -&gt; File</strong>).</p>
+<p>W treści pliku umieść.</p>
+<pre class="code json highlight literal-block"><code><span class="error">mul</span><span class="keyword constant">t</span><span class="error">i</span><span class="keyword constant">t</span><span class="error">hreadi</span><span class="keyword constant">n</span><span class="error">g==</span><span class="literal number float">0.2.0</span><span class="whitespace">
+</span><span class="error">loguru==</span><span class="literal number float">0.6.0</span><span class="whitespace">
+</span><span class="error">reques</span><span class="keyword constant">ts</span><span class="error">==</span><span class="literal number float">2.28.2</span></code></pre>
+<p>Multithreading jest biblioteką napisaną przez do kolejkowania i
+wykonywania zadań wielowątkowo, opiera się ona na module threading który
+zostanie omówiony w kolejnym rozdziale. Dla nas jest tylko przykładem
+dla pokazania jak działają zależności i plik requirements w Python.
+Wybierz w IDE opcję <strong>install requirements</strong>.</p>
+<p class="center"><img alt="e" src="e.png" /></p>
+<p>Następnie zamień implementację <strong>main.py</strong> na poniższą i sprawdź czy
+możesz o uruchomić.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">multithreading</span><span class="whitespace">
 
-</span><span class="comment single"># Redirect log messages to console</span><span class="whitespace">
-</span><span class="name">log4j</span><span class="operator">.</span><span class="name">appender</span><span class="operator">.</span><span class="name">stdout</span><span class="operator">=</span><span class="name">org</span><span class="operator">.</span><span class="name">apache</span><span class="operator">.</span><span class="name">log4j</span><span class="operator">.</span><span class="name">ConsoleAppender</span><span class="whitespace">
-</span><span class="name">log4j</span><span class="operator">.</span><span class="name">appender</span><span class="operator">.</span><span class="name">stdout</span><span class="operator">.</span><span class="name">Target</span><span class="operator">=</span><span class="name">System</span><span class="operator">.</span><span class="name">out</span><span class="whitespace">
-</span><span class="name">log4j</span><span class="operator">.</span><span class="name">appender</span><span class="operator">.</span><span class="name">stdout</span><span class="operator">.</span><span class="name">layout</span><span class="operator">=</span><span class="name">org</span><span class="operator">.</span><span class="name">apache</span><span class="operator">.</span><span class="name">log4j</span><span class="operator">.</span><span class="name">PatternLayout</span><span class="whitespace">
-</span><span class="name">log4j</span><span class="operator">.</span><span class="name">appender</span><span class="operator">.</span><span class="name">stdout</span><span class="operator">.</span><span class="name">layout</span><span class="operator">.</span><span class="name">ConversionPattern</span><span class="operator">=%</span><span class="name">d</span><span class="punctuation">{</span><span class="name">yyyy</span><span class="operator">-</span><span class="name">MM</span><span class="operator">-</span><span class="name">dd</span> <span class="name">HH</span><span class="punctuation">:</span><span class="name">mm</span><span class="punctuation">:</span><span class="name">ss</span><span class="punctuation">}</span> <span class="operator">%-</span><span class="literal number integer">5</span><span class="name">p</span> <span class="operator">%</span><span class="name">c</span><span class="punctuation">{</span><span class="literal number integer">1</span><span class="punctuation">}:</span><span class="operator">%</span><span class="name">L</span> <span class="operator">-</span> <span class="operator">%</span><span class="name">m</span><span class="operator">%</span><span class="name">n</span><span class="whitespace">
+</span><span class="keyword">class</span> <span class="name class">Demo</span><span class="punctuation">(</span><span class="name">multithreading</span><span class="operator">.</span><span class="name">MultiThread</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">def</span> <span class="name function">task</span><span class="punctuation">(</span><span class="name builtin pseudo">self</span><span class="punctuation">,</span> <span class="name">task</span><span class="punctuation">):</span><span class="whitespace">
+</span>        <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">task</span><span class="punctuation">)</span><span class="whitespace">
 
-</span><span class="comment single"># Redirect log messages to a log file, support file rolling.</span><span class="whitespace">
-</span><span class="name">log4j</span><span class="operator">.</span><span class="name">appender</span><span class="operator">.</span><span class="name">file</span><span class="operator">=</span><span class="name">org</span><span class="operator">.</span><span class="name">apache</span><span class="operator">.</span><span class="name">log4j</span><span class="operator">.</span><span class="name">RollingFileAppender</span><span class="whitespace">
-</span><span class="name">log4j</span><span class="operator">.</span><span class="name">appender</span><span class="operator">.</span><span class="name">file</span><span class="operator">.</span><span class="name">File</span><span class="operator">=</span><span class="name">log</span><span class="operator">.</span><span class="name">log</span><span class="whitespace">
-</span><span class="name">log4j</span><span class="operator">.</span><span class="name">appender</span><span class="operator">.</span><span class="name">file</span><span class="operator">.</span><span class="name">MaxFileSize</span><span class="operator">=</span><span class="literal number integer">5</span><span class="name">MB</span><span class="whitespace">
-</span><span class="name">log4j</span><span class="operator">.</span><span class="name">appender</span><span class="operator">.</span><span class="name">file</span><span class="operator">.</span><span class="name">MaxBackupIndex</span><span class="operator">=</span><span class="literal number integer">10</span><span class="whitespace">
-</span><span class="name">log4j</span><span class="operator">.</span><span class="name">appender</span><span class="operator">.</span><span class="name">file</span><span class="operator">.</span><span class="name">layout</span><span class="operator">=</span><span class="name">org</span><span class="operator">.</span><span class="name">apache</span><span class="operator">.</span><span class="name">log4j</span><span class="operator">.</span><span class="name">PatternLayout</span><span class="whitespace">
-</span><span class="name">log4j</span><span class="operator">.</span><span class="name">appender</span><span class="operator">.</span><span class="name">file</span><span class="operator">.</span><span class="name">layout</span><span class="operator">.</span><span class="name">ConversionPattern</span><span class="operator">=%</span><span class="name">d</span><span class="punctuation">{</span><span class="name">yyyy</span><span class="operator">-</span><span class="name">MM</span><span class="operator">-</span><span class="name">dd</span> <span class="name">HH</span><span class="punctuation">:</span><span class="name">mm</span><span class="punctuation">:</span><span class="name">ss</span><span class="punctuation">}</span> <span class="operator">%-</span><span class="literal number integer">5</span><span class="name">p</span> <span class="operator">%</span><span class="name">c</span><span class="punctuation">{</span><span class="literal number integer">1</span><span class="punctuation">}:</span><span class="operator">%</span><span class="name">L</span> <span class="operator">-</span> <span class="operator">%</span><span class="name">m</span><span class="operator">%</span><span class="name">n</span></code></pre>
-<p>Ustawienia mówią o tym by wszystkie logi o statusie ponad DEBUG były wypisywane na ekran i zapisywane w pliku log.log.</p>
-<p>Więcej informacji o log4j można doczytać tutaj:</p>
+</span><span class="name">demo</span> <span class="operator">=</span> <span class="name">Demo</span><span class="punctuation">(</span><span class="name">threads</span><span class="operator">=</span><span class="literal number integer">3</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="comment single"># Start threads</span><span class="whitespace">
+</span><span class="name">demo</span><span class="operator">.</span><span class="name">start_threads</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="comment single"># Adding task to queue</span><span class="whitespace">
+</span><span class="name">demo</span><span class="operator">.</span><span class="name">add_task</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">demo</span><span class="operator">.</span><span class="name">add_task</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">demo</span><span class="operator">.</span><span class="name">add_task</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="comment single"># Wait until queue is empty</span><span class="whitespace">
+</span><span class="name">demo</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">---------------------------------------------------------------------------
+
+ModuleNotFoundError                       Traceback (most recent call last)
+
+Cell In [8], line 1
+----&gt; 1 import multithreading
+      3 class Demo(multithreading.MultiThread):
+      4     def task(self, task):
+
+
+ModuleNotFoundError: No module named 'multithreading'</pre>
+<p>Uwaga! W ramach programów uruchamianych przez <strong>Moodle</strong> oraz
+<strong>Jupyter</strong> nie są dostępne wszystkie zależności i biblioteki a
+instalacja ich jest możliwa tylko przez administratora systemu (powyżej
+mamy taki przyklad). W związku z tym w przypadku korzystania z
+niestandardowych pakietów proszę wykorzystywać <strong>PyCharm</strong>.</p>
+</section>
+</section>
+<section id="watki-i-synchronizacja">
+<h2>Wątki i synchronizacja</h2>
+<p>W tym rozdziale dowiemy się jak tworzyć wątki w języku Python
+korzystając ze standardowej biblioteki.</p>
+<section id="thread">
+<h3>Thread</h3>
+<p>Standardowa biblioteka Pythona udostępnia moduł <em>threading</em>, który
+zawieraja większość operacji związanych z wielowątkowością. Klasa
+<strong>Thread</strong> w tym module zapewnia przejrzysty interfejs do pracy z
+wątkami.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">threading</span><span class="whitespace">
+
+</span><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">gmtime</span><span class="punctuation">,</span> <span class="name">strftime</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span> <span class="name function">thread_function</span><span class="punctuation">(</span><span class="name">name</span><span class="punctuation">):</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: starting&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">,</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: finishing&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before creating thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">thread_function</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before running thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : wait for the thread to finish&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : all done&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span></code></pre>
+<pre class="literal-block">Time 2023-02-26 18:32:16 | Name : MainThread
+Time 2023-02-26 18:32:16 | Main Thread : before creating thread
+Time 2023-02-26 18:32:16 | Main Thread : before running thread
+Time 2023-02-26 18:32:16 | Thread 1: starting
+Time 2023-02-26 18:32:16 | Thread 1: Name : Thread-13
+Time 2023-02-26 18:32:16 | Thread 1: finishing
+Time 2023-02-26 18:32:16 | Main Thread : wait for the thread to finish
+Time 2023-02-26 18:32:16 | Main Thread : all done</pre>
+<p>Jak widać sam wątek definiujemy w najprostszym scenariuszu poprzez
+wykonanie</p>
 <blockquote>
-<div class="line-block">
-<div class="line"><a class="reference external" href="https://www.mkyong.com/logging/log4j-hello-world-example/">https://www.mkyong.com/logging/log4j-hello-world-example/</a></div>
-</div>
+<p><span class="todo">threading.Thread(target=thread_function, args=(1,))</span></p>
 </blockquote>
-<p class="tag">Zadanie 5</p>
-<p>Uruchom klasę Main.java, powinieneś zobaczyć na ekranie komunikat &quot;message&quot;. W katalogu projektu powinnien też zostać stworzony plik o nazwie <strong>log.log</strong>.</p>
-</section>
-<section id="jar">
-<h5>JAR</h5>
-<p>JAR jest skompilowanym uruchamialnym plikiem javy. Możesz go uruchomić z IDE lub z konsoli wpisując komendę <em>java -jar filename</em>.</p>
-<p>Spróbujmy uruchomić nasz skompilowany plik jar ponownie. Jak widać nie pojawia się w nim linijka z loggera. Jest to wynikiem tego, że domyślnie jar nie zawiera bibliotek i zależności w sobie oczekują że będą dostępne w katalogu uruchomieniowym.
-Standardową opcją jest jednak &quot;pakowanie&quot; ich w pliku jar tak by był on samodzielnie uruchamialnym się programem. W tym celu musimy użyć innego pluginu Mavena.</p>
-<p>Dodaj do pliku pom.xml (w odpowiednie miejsce!!) następujący kod:</p>
-<pre class="code XML highlight literal-block"><code><span class="name tag">&lt;build&gt;</span><span class="whitespace">
-        </span><span class="name tag">&lt;plugins&gt;</span><span class="whitespace">
-        </span><span class="name tag">&lt;plugin&gt;</span><span class="whitespace">
-                </span><span class="name tag">&lt;groupId&gt;</span>org.apache.maven.plugins<span class="name tag">&lt;/groupId&gt;</span><span class="whitespace">
-                </span><span class="name tag">&lt;artifactId&gt;</span>maven-assembly-plugin<span class="name tag">&lt;/artifactId&gt;</span><span class="whitespace">
-                </span><span class="name tag">&lt;configuration&gt;</span><span class="whitespace">
-                </span><span class="name tag">&lt;descriptorRefs&gt;</span><span class="whitespace">
-                        </span><span class="name tag">&lt;descriptorRef&gt;</span>jar-with-dependencies<span class="name tag">&lt;/descriptorRef&gt;</span><span class="whitespace">
-                </span><span class="name tag">&lt;/descriptorRefs&gt;</span><span class="whitespace">
-                </span><span class="name tag">&lt;archive&gt;</span><span class="whitespace">
-                        </span><span class="name tag">&lt;manifest&gt;</span><span class="whitespace">
-                                </span><span class="name tag">&lt;mainClass&gt;</span>com.howtodoinjava.app.MainClass<span class="name tag">&lt;/mainClass&gt;</span><span class="whitespace">
-                        </span><span class="name tag">&lt;/manifest&gt;</span><span class="whitespace">
-                </span><span class="name tag">&lt;/archive&gt;</span><span class="whitespace">
-                </span><span class="name tag">&lt;/configuration&gt;</span><span class="whitespace">
-        </span><span class="name tag">&lt;executions&gt;</span><span class="whitespace">
-                </span><span class="name tag">&lt;execution&gt;</span><span class="whitespace">
-                        </span><span class="name tag">&lt;id&gt;</span>make-assembly<span class="name tag">&lt;/id&gt;</span><span class="whitespace">
-                        </span><span class="name tag">&lt;phase&gt;</span>package<span class="name tag">&lt;/phase&gt;</span><span class="whitespace">
-                        </span><span class="name tag">&lt;goals&gt;</span><span class="whitespace">
-                        </span><span class="name tag">&lt;goal&gt;</span>single<span class="name tag">&lt;/goal&gt;</span><span class="whitespace">
-                        </span><span class="name tag">&lt;/goals&gt;</span><span class="whitespace">
-                </span><span class="name tag">&lt;/execution&gt;</span><span class="whitespace">
-        </span><span class="name tag">&lt;/executions&gt;</span><span class="whitespace">
-        </span><span class="name tag">&lt;/plugin&gt;</span><span class="whitespace">
-        </span><span class="name tag">&lt;/plugins&gt;</span><span class="whitespace">
-</span><span class="name tag">&lt;/build&gt;</span></code></pre>
-<p class="tag">Zadanie 6</p>
-<p>Skompiluj projekt używając <strong>Clean + Install</strong> w Maven i uruchom plik .jar z katalogu target, powinien zadziałać.</p>
-</section>
-<section id="commit">
-<h5>Commit</h5>
-<p class="tag">Zadanie 7</p>
-<p>Zakommituj swój kod do repozytorium pod nowy branch o nazwie IntroductionClassesWithLogger.</p>
-</section>
-<section id="commit-w-intellij">
-<h5>Commit w IntelliJ</h5>
+<p>Czyli definicję obiektu klasy Thread jako argument podając funkcję,
+którą wykona nasz wątek oraz parametry tej funkcji. W naszym wypadku
+przekazujemy tam liczbę, która ma być dla nas naszą <em>nazwą</em> aktualnie
+tworzonego wątku. Aby wątek uruchomić musimy wykonać na tym obiekcie
+metodę start().</p>
+<p>Powyższy kod zawiera też wywołanie funkcji systemowej gmtime() w celu
+wypisania czasu wykonania komend.</p>
+<p>Kolejna obserwacją którą możemy dokonać jest taka, że w powyższym
+wykonaniu możemy zaobserwować, że nasz program działa już na dwóch
+wątkach, pierwszy to tak zwany główny wątek programu, który uruchamiamy
+startując wykonanie programu. Od niego tworzony jest dopiero drugi
+wątek. Żeby odczytać nazwę systemową wątku korzystamy z funkcji:</p>
 <blockquote>
-<p><span class="todo">Ctrl + k</span> służy do commitowania kodu lokalnie do repozytorium</p>
-<p><span class="todo">Ctrl + Shift + k</span> służy do commitowania kodu do zewnętrznego repozytorium, aby wybrać nową nazwę brancha kliknij na nazwę brancha w okienku komitowania.</p>
-<p><span class="todo">Ctrl + t</span> służy do odświeżania projektu - ściągania zmian z serwera</p>
+<p><span class="todo">threading.current_thread().name</span></p>
 </blockquote>
-<p>Przy pierwszym połączeniu powinniśmy być zapytani o użytkownika i hasło. Można też połączyć &quot;na stałe&quot; intellij z kontem na github przez ustawienia <strong>Settings-&gt;Version Control-&gt;GitHub</strong>.</p>
-<p>Inne:</p>
-<p>By rozwiązać konflikty należy zmergować się z kodem do którego commitujemy i rozwiązać konflikty w nowo otwartym oknie.</p>
-<p>Aby ściągnąć kod danego commita do siebie bez merga gałęzi możemy wykonać operację <strong>Cherry Pick</strong></p>
-</section>
-<section id="git-large-files">
-<h5>GIT large files</h5>
-<p>Czasem chcemy zapisać w repozytorium duże pliki (po kilkadziesiąt lub więcen megabajtów). Z reguły pliki takie nie zmieniają swojej postaci - są to media lub np modele sztucznej inteligencji. GIT przechowuje każdą wersję kodu jako kopię wszystkich plików, w takim
-wypadku nasze repozytorium gwałtownie zwiększałoby swój rozmiar. Rozwiązaniem jest stosowanie tzw GLS czyli przechowywania w osobnym miejscu tylko zmieniających się wersji tych plików.</p>
+<p>Zobaczmy co stanie się gdy zdefiniujemy w kodzie dwa dodatkowe wątki :</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">threading</span><span class="whitespace">
+
+</span><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">gmtime</span><span class="punctuation">,</span> <span class="name">strftime</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span> <span class="name function">thread_function</span><span class="punctuation">(</span><span class="name">name</span><span class="punctuation">):</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: starting&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">,</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: finishing&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before creating thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">thread_function</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,))</span><span class="whitespace">
+</span><span class="name">x2</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">thread_function</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before running thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">x2</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : wait for the thread to finish&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : all done&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span></code></pre>
+<pre class="literal-block">Time 2023-02-26 18:32:18 | Name : MainThread
+Time 2023-02-26 18:32:18 | Main Thread : before creating thread
+Time 2023-02-26 18:32:18 | Main Thread : before running thread
+Time 2023-02-26 18:32:18 | Thread 1: starting
+Time 2023-02-26 18:32:18 | Thread 1: Name : Thread-14
+Time 2023-02-26 18:32:18 | Thread 1: finishing
+Time 2023-02-26 18:32:18 | Thread 2: starting
+Time 2023-02-26 18:32:18 | Thread 2: Name : Thread-15
+Time 2023-02-26 18:32:18 | Thread 2: finishing
+Time 2023-02-26 18:32:18 | Main Thread : wait for the thread to finish
+Time 2023-02-26 18:32:18 | Main Thread : all done</pre>
+<p>W powyższym przypadku dołożyliśmy dodatkowy wątek i uruchomiliśmy go
+razem z pierwszym. Jak widać przetwarzanie pierwszego wątku zakończyło
+się zanim drugi rozpoczął swoje działanie. Nie jest to zapewne
+oczekiwany efekt. W celu opóźnienia wykonania wątku możemy wykorzystać
+metodę modułu time o nazwie sleep().</p>
 <blockquote>
-<div class="line-block">
-<div class="line"><a class="reference external" href="https://docs.github.com/en/repositories/working-with-files/managing-large-files/configuring-git-large-file-storage">https://docs.github.com/en/repositories/working-with-files/managing-large-files/configuring-git-large-file-storage</a></div>
-</div>
-<div class="line-block">
-<div class="line"><a class="reference external" href="https://git-lfs.github.com/">https://git-lfs.github.com/</a></div>
-</div>
+<p><span class="todo">time(sleep(2))</span></p>
 </blockquote>
+<p>Powoduje uśpienie wątku na 2 sec. To znaczy zatrzymanie jego wykonywania
+i oddanie sterowania do innych wątków w systemie. Zobaczmy na efekty
+zmiany.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">threading</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">time</span><span class="whitespace">
+
+</span><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">gmtime</span><span class="punctuation">,</span> <span class="name">strftime</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span> <span class="name function">thread_function</span><span class="punctuation">(</span><span class="name">name</span><span class="punctuation">):</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: starting&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">,</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name">time</span><span class="operator">.</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: finishing&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before creating thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">thread_function</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,))</span><span class="whitespace">
+</span><span class="name">x2</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">thread_function</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before running thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">x2</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : wait for the thread to finish&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : all done&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span></code></pre>
+<pre class="literal-block"> Time 2023-02-26 18:32:37 | Name : MainThread
+ Time 2023-02-26 18:32:37 | Main Thread : before creating thread
+ Time 2023-02-26 18:32:37 | Main Thread : before running thread
+ Time 2023-02-26 18:32:37 | Thread 1: starting
+ Time 2023-02-26 18:32:37 | Thread 1: Name : Thread-20
+ Time 2023-02-26 18:32:37 | Thread 2: starting
+ Time 2023-02-26 18:32:37 | Thread 2: Name : Thread-21
+ Time 2023-02-26 18:32:37 | Main Thread : wait for the thread to finish
+ Time 2023-02-26 18:32:37 | Main Thread : all done
+ Time 2023-02-26 18:32:39 | Thread 1: finishing
+ Time 2023-02-26 18:32:39 | Thread 2: finishing
+
+
+Zrób to sam! &gt; Sprawdź co stanie się gdy zamiast time.sleep(2)
+zrobisz time.sleep(0). Czy jak wykonasz tę operację w pętli,
+powiedzmy 100 razy, to wynik będzie inny ?</pre>
 </section>
-<section id="finalny-kod">
-<h5>Finalny kod</h5>
-<p>W przypadku problemów (zgubiłeś się lub byłeś nieobecny) finalny kod powstały na zajęciach możesz znaleźć na gałęzi <strong>IntroductionClassesEnd</strong>.</p>
+<section id="deamon">
+<h3>Deamon</h3>
+<p>Co może dziwić w naszym ostatnim przykładzie to to, że nasze wątki
+kończą się już po tym gdy wątek główny się zakończył. W takim wypadku
+czy wątek główny nie powinien zamykać całego procesu i tym samym kończyć
+wykonanie całego programu i potomnych wątków ?</p>
+<p>W informatyce <strong>deamon</strong> to proces działający w tle. W przypadku wątków
+będących <strong>deamonami</strong> zostaną one zamknięte natychmiast po zamknięciu
+programu. Jednym ze sposobów myślenia o tych definicjach jest rozważenie
+wątku demona jako wątku działającego w tle bez martwienia się o jego
+zamknięcie.</p>
+<p>Jeśli program uruchamia <strong>wątki</strong>, które <strong>nie są demonami</strong>, program
+będzie czekał na zakończenie tych wątków przed zakończeniem działania.
+Jednak wątki, które są demonami, są po prostu zabijane, gdziekolwiek się
+znajdują, gdy program jest zamykany.</p>
+<p>Po zakończeniu programu w Pythonie częścią procesu zamykania jest
+wyczyszczenie / zamknięcie wątków. Jeśli spojrzysz na źródło
+implementacji <em>threading</em>, zobaczysz, że threading._shutdown()
+przechodzi przez wszystkie uruchomione wątki i wywołuje .join() na
+każdym, który nie ma ustawionej flagi <strong>demona</strong>.</p>
+<p>Co robi więc funkcja</p>
+<blockquote>
+<p><span class="todo">join()</span></p>
+</blockquote>
+<p>Czeka aż wykonanie danego wątku się zakończy, aby przejść dalej.</p>
+<p>Najpierw spójrzmy jak będzie wyglądać wykonanie programu w przypadku,
+gdy nasze wątki będą zdefiniowane jako deamony.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">threading</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">time</span><span class="whitespace">
+
+</span><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">gmtime</span><span class="punctuation">,</span> <span class="name">strftime</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span> <span class="name function">thread_function</span><span class="punctuation">(</span><span class="name">name</span><span class="punctuation">):</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: starting&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">,</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name">time</span><span class="operator">.</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: finishing&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before creating thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">thread_function</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,),</span> <span class="name">daemon</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">x2</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">thread_function</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,),</span> <span class="name">daemon</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before running thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">x2</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : wait for the thread to finish&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : all done&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span></code></pre>
+<pre class="literal-block">Time 2023-02-26 18:32:59 | Name : MainThread
+Time 2023-02-26 18:32:59 | Main Thread : before creating thread
+Time 2023-02-26 18:32:59 | Main Thread : before running thread
+Time 2023-02-26 18:32:59 | Thread 1: starting
+Time 2023-02-26 18:32:59 | Thread 1: Name : Thread-24
+Time 2023-02-26 18:32:59 | Thread 2: starting
+Time 2023-02-26 18:32:59 | Thread 2: Name : Thread-25
+Time 2023-02-26 18:32:59 | Main Thread : wait for the thread to finish
+Time 2023-02-26 18:32:59 | Main Thread : all done
+Time 2023-02-26 18:33:01 | Thread 1: finishing
+Time 2023-02-26 18:33:01 | Thread 2: finishing</pre>
+<p><strong>Uwaga!</strong> Jupyter nie pozwala nam uruchamiać deamon threadów, dlatego
+nie zobaczysz tu efektu, polecam uruchomić powyższy przykład w IDE
+PyCharm.</p>
+<p>Teraz zobaczmy co stanie się w przypadku dodania opcji join() przed
+zakończeniem głównego wątku.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">import</span> <span class="name namespace">threading</span><span class="whitespace">
+</span><span class="keyword namespace">import</span> <span class="name namespace">time</span><span class="whitespace">
+
+</span><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">gmtime</span><span class="punctuation">,</span> <span class="name">strftime</span><span class="whitespace">
+
+
+</span><span class="keyword">def</span> <span class="name function">thread_function</span><span class="punctuation">(</span><span class="name">name</span><span class="punctuation">):</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: starting&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">,</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span>    <span class="name">time</span><span class="operator">.</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Thread </span><span class="literal string interpol">%s</span><span class="literal string double">: finishing&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Name : </span><span class="literal string interpol">%s</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="punctuation">(</span><span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()),</span><span class="name">threading</span><span class="operator">.</span><span class="name">current_thread</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">name</span><span class="punctuation">))</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before creating thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">thread_function</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">,),</span> <span class="name">daemon</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">x2</span> <span class="operator">=</span> <span class="name">threading</span><span class="operator">.</span><span class="name">Thread</span><span class="punctuation">(</span><span class="name">target</span><span class="operator">=</span><span class="name">thread_function</span><span class="punctuation">,</span> <span class="name">args</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,),</span> <span class="name">daemon</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : before running thread&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">x2</span><span class="operator">.</span><span class="name">start</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : wait for the thread to finish&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span><span class="whitespace">
+
+</span><span class="name">x</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">x2</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Time </span><span class="literal string interpol">%s</span><span class="literal string double"> | Main Thread : all done&quot;</span> <span class="operator">%</span> <span class="name">strftime</span><span class="punctuation">(</span><span class="literal string double">&quot;%Y-%m-</span><span class="literal string interpol">%d</span><span class="literal string double"> %H:%M:%S&quot;</span><span class="punctuation">,</span> <span class="name">gmtime</span><span class="punctuation">()))</span></code></pre>
+<pre class="literal-block">Time 2023-02-26 18:32:56 | Name : MainThread
+Time 2023-02-26 18:32:56 | Main Thread : before creating thread
+Time 2023-02-26 18:32:56 | Main Thread : before running thread
+Time 2023-02-26 18:32:56 | Thread 1: starting
+Time 2023-02-26 18:32:56 | Thread 1: Name : Thread-22
+Time 2023-02-26 18:32:56 | Thread 2: starting
+Time 2023-02-26 18:32:56 | Thread 2: Name : Thread-23
+Time 2023-02-26 18:32:56 | Main Thread : wait for the thread to finish
+Time 2023-02-26 18:32:58 | Thread 1: finishing
+Time 2023-02-26 18:32:58 | Thread 2: finishing
+Time 2023-02-26 18:32:58 | Main Thread : all done</pre>
+</section>
+<section id="bledy-jednoczesnego-dostepu">
+<h3>Błędy jednoczesnego dostępu</h3>
+<p>Głównym problemem w przetwarzaniu równoległym jest sytuacja w której
+wiele wątków wykonuje operacje na tym samym obiekcie. Żeby było to
+możliwe obiekt ten musi być oczywiście globalny i mutowalny.</p>
+<p>W przypadku, gdy mamy licznik zliczający wykonanie operacji i wątek
+<strong>A</strong> wykonuje operację licznik+=1 oraz wątek <strong>B</strong> wykonuje tę samą
+operację, to może dojść do błędu. Wynika on z tego, że operacje odczytu
+wartości, zwiększenia wartości i zapisania wartości w zmiennej nie są
+wykonywane <strong>atomowo</strong>. Oznacza to, że wykonanie operacji może zostać
+przerwane w każdym z tych momentów.</p>
+<p>Załóżmy, że zmienna licznik miała wartość <strong>0</strong>. Wątek <strong>A</strong> odczyta
+wartość <strong>0</strong> i zostanie przerwany, wtedy w miedzyczasie wątek <strong>B</strong>
+zwiększy wartość licznik do <strong>1</strong> i wznowi się wątek <strong>A</strong> nie jest on
+świadomy zmiany wartości, gdyż odczytał już wcześniej <strong>0</strong> i przejdzie
+do operacji zwiększenia wartości o jeden. W efekcie na koniec
+przetwarzania wartość licznik będzie równa <strong>1</strong>, a nie <strong>2</strong> jakbyśmy
+się spodziewali.</p>
+<p>Zmienne utworzone poza funkcjami nazywane są <strong>zmiennymi globalnymi</strong>.
+Zmienne globalne mogą być używane przez wszystkich, zarówno wewnątrz
+funkcji, jak i na zewnątrz.</p>
+<pre class="code python highlight literal-block"><code><span class="name">licznik</span> <span class="operator">=</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">myfunc</span><span class="punctuation">():</span><span class="whitespace">
+</span>  <span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string double">&quot;Licznik wynosi </span><span class="literal string interpol">%d</span><span class="literal string double">&quot;</span> <span class="operator">%</span> <span class="name">licznik</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">myfunc</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">Licznik wynosi 1</pre>
+<p>Tutaj widzimy, że uzyskaliśmy dostęp do zmiennej globalnej z wnętrza
+funkcji.</p>
+<p>Jeśli jednak spróbujemy zmodyfikować zmienną globalną z wnętrza funkcji,
+to otrzymamy błąd:</p>
+<pre class="code python highlight literal-block"><code><span class="comment single"># global variable</span><span class="whitespace">
+</span><span class="name">licznik</span> <span class="operator">=</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">add</span><span class="punctuation">():</span><span class="whitespace">
+
+</span>     <span class="comment single"># increment licznik by 1</span><span class="whitespace">
+</span>    <span class="name">licznik</span> <span class="operator">+=</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">licznik</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">add</span><span class="punctuation">()</span></code></pre>
+<pre class="literal-block">---------------------------------------------------------------------------
+
+UnboundLocalError                         Traceback (most recent call last)
+
+Cell In [6], line 11
+      7     licznik += 1
+      9     print(licznik)
+---&gt; 11 add()
+
+
+Cell In [6], line 7, in add()
+      4 def add():
+      5
+      6      # increment licznik by 1
+----&gt; 7     licznik += 1
+      9     print(licznik)
+
+
+UnboundLocalError: local variable 'licznik' referenced before assignment</pre>
+<p>Dzieje się tak, ponieważ możemy uzyskać dostęp tylko do zmiennej
+globalnej, ale nie możemy jej modyfikować z poziomu funkcji.</p>
+<p>Rozwiązaniem tego problemu jest użycie słowa kluczowego global.</p>
+<pre class="code python highlight literal-block"><code><span class="comment single"># global variable</span><span class="whitespace">
+</span><span class="name">licznik</span> <span class="operator">=</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">add</span><span class="punctuation">():</span><span class="whitespace">
+
+</span>    <span class="comment single"># use of global keyword</span><span class="whitespace">
+</span>    <span class="keyword">global</span> <span class="name">licznik</span><span class="whitespace">
+
+</span>    <span class="comment single"># increment c by 2</span><span class="whitespace">
+</span>    <span class="name">licznik</span> <span class="operator">+=</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">licznik</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">add</span><span class="punctuation">()</span></code></pre>
+<p>Wykonaj zadanie na <strong>moodle</strong> by zaobserwować w praktyce błąd
+równoczesnego dostępu do zmiennej.</p>
+<p><strong>Uwaga!</strong> to czy wywołanie błędu się powiedzie zależy od stanu systemu
+w danej chwili więc możesz być zmuszony uruchomić program pare razy
+zanim uda się osiąnąć cel.</p>
+</section>
+<section id="print">
+<h3>Print</h3>
+<p>Metoda print w języku python nie jest synchronizowana. Zaletą jest więc
+to, że jest szybka i nie zwalnia działania programu. Wadą jest to, że
+nie ma gwarancji, że operacje zostaną wypisane na ekran w kolejności ich
+wykonania (czyli np. w przypadku wyjątku możemy otrzymać informacje o
+błędzie przed otrzymaniem wszystkich oczekiwanych komunikatów na
+ekranie).</p>
+<p>Nie musimy się jednak obawiać, że wypisywane komunikaty nałożą się na
+siebie, gdyż print jest tzw operacją monolityczną więc wykonywana jest
+zawsze nieprzerwanie w całości. Normalnym jest więc, że niekiedy możemy
+otrzymać dwa printy “sklejone” razem, jednak nigdy nie nałożą się one na
+siebie w sposób który nie pozwoliłby nam na odczyt zapisywanego
+komunikatu.</p>
 </section>
 </section>
-</section>
+<section id="jupyter-plik">
+<h2>Jupyter plik</h2>
+<p><a class="reference external" href="http://mw.home.amu.edu.pl/zajecia/PRS2023/Zajecia1Jupyter.ipynb">http://mw.home.amu.edu.pl/zajecia/PRS2023/Zajecia1Jupyter.ipynb</a></p>
 </section></body>
 </html>
 
