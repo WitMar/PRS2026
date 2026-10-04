@@ -5,6 +5,8 @@
 <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 <title>Laboratorium 1 - Narzędzia i wątki w Pythonie</title>
     <link rel="stylesheet" href="style.css" type="text/css" />
+    <link rel="stylesheet" href="code-tools.css" type="text/css" />
+    <script src="code-tools.js" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
     <script>hljs.initHighlightingOnLoad();</script>
@@ -273,14 +275,13 @@ zmiany.</p>
  Time 2023-02-26 18:32:37 | Main Thread : wait for the thread to finish
  Time 2023-02-26 18:32:37 | Main Thread : all done
  Time 2023-02-26 18:32:39 | Thread 1: finishing
- Time 2023-02-26 18:32:39 | Thread 2: finishing
-
-
-<strong>Zrób to sam!</strong>
-
-Sprawdź co stanie się gdy zamiast <span class="docutils literal">time.sleep(2)</span> zrobisz
+ Time 2023-02-26 18:32:39 | Thread 2: finishing</pre>
+<blockquote class="exercise">
+<p class="exercise-title"><strong>Zrób to sam!</strong></p>
+<p>Sprawdź co stanie się gdy zamiast <span class="docutils literal">time.sleep(2)</span> zrobisz
 <span class="docutils literal">time.sleep(0)</span>. Czy jak wykonasz tę operację w pętli, powiedzmy
-100 razy, to wynik będzie inny ?</pre>
+100 razy, to wynik będzie inny ?</p>
+</blockquote>
 </section>
 <section id="daemon">
 <h3>Daemon</h3>
@@ -462,19 +463,16 @@ print(&quot;</span><span class="literal string escape">\\</span><span class="lit
  ....
  Main Thread : all done
  ......
- Proces NIE zakończył się sam - został zabity po 5 sekundach!
-
-
-
-<strong>Zrób to sam!</strong>
-
-Wyjaśnij, dlaczego w drugim przypadku po komunikacie <em>all done</em>
+ Proces NIE zakończył się sam - został zabity po 5 sekundach!</pre>
+<blockquote class="exercise">
+<p class="exercise-title"><strong>Zrób to sam!</strong></p>
+<p>Wyjaśnij, dlaczego w drugim przypadku po komunikacie <em>all done</em>
 pojawiają się kolejne kropki. Co by się stało, gdybyśmy uruchomili
 ten program w PyCharm bez parametru <span class="docutils literal">timeout</span>? (Sprawdź! Program
-zatrzymasz czerwonym kwadratem w IDE.)
-
-Zmień program tak, by wątek główny przed zakończeniem wywoływał
-<span class="docutils literal">join()</span> na wątku-demonie. Czy flaga <span class="docutils literal">daemon=True</span> nadal pomaga?</pre>
+zatrzymasz czerwonym kwadratem w IDE.)</p>
+<p>Zmień program tak, by wątek główny przed zakończeniem wywoływał
+<span class="docutils literal">join()</span> na wątku-demonie. Czy flaga <span class="docutils literal">daemon=True</span> nadal pomaga?</p>
+</blockquote>
 </section>
 </section>
 <section id="czy-watki-przyspieszaja-program">
@@ -601,8 +599,8 @@ również się nakładają - wątki działają “jednocześnie” - ale każdy 
 jest wielokrotnie dłuższy niż przy wykonaniu sekwencyjnym, bo wątki
 wykonują się na zmianę i dzielą między siebie jeden “procesor Pythona”.
 Całkowity czas się nie zmienia.</p>
-<blockquote>
-<p><strong>Zrób to sam!</strong></p>
+<blockquote class="exercise">
+<p class="exercise-title"><strong>Zrób to sam!</strong></p>
 <p>Zwiększ liczbę zadań do 8 (parametr <span class="docutils literal">liczba_zadan</span>). Jak zmienia
 się czas dla zadań I/O, a jak dla CPU?</p>
 <p>Zmień <span class="docutils literal">zadanie_io</span> tak, by wykonywało
@@ -750,8 +748,8 @@ nawzajem wyniki. Taką sytuację, w której wynik programu zależy od tego,
 w jakiej kolejności wykonają się wątki, nazywamy <strong>wyścigiem</strong> (ang.
 <em>race condition</em>). Jak się przed nim bronić, dowiemy się na kolejnych
 zajęciach.</p>
-<blockquote>
-<p><strong>Zrób to sam!</strong></p>
+<blockquote class="exercise">
+<p class="exercise-title"><strong>Zrób to sam!</strong></p>
 <p>Uruchom komórkę kilka razy. Czy wynik jest za każdym razem taki sam?</p>
 <p>Zmień liczbę wątków na 1. Czy błąd nadal występuje? A gdy usuniesz
 linię <span class="docutils literal">time.sleep(0)</span>?</p>
