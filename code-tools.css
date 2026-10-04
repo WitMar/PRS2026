@@ -1,0 +1,141 @@
+/* Listingi kodu, wyniki programów i zadania "Zrób to sam!" */
+
+/* --- czcionka o stałej szerokości dla kodu --- */
+.listing pre,
+.listing pre code,
+.docutils.literal {
+  font-family: 'Inconsolata', 'JetBrains Mono', Consolas, 'DejaVu Sans Mono', monospace;
+}
+
+/* --- wspólna ramka listingu --- */
+.listing {
+  position: relative;
+  margin: 1.2em 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+.listing > pre {
+  margin: 0;
+  padding: 0.9em 1em;
+  overflow-x: auto;
+  font-size: 0.95em;
+  line-height: 1.45;
+}
+.listing-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5em;
+  padding: 0.3em 0.6em 0.3em 1em;
+  font-family: 'PT Sans', sans-serif;
+  font-size: 0.8em;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* --- kod --- */
+.listing-code {
+  background: #23241f;
+  border: 1px solid #1b1c18;
+}
+.listing-code .listing-header {
+  background: #1b1c18;
+  color: #a6e22e;
+}
+.listing-code > pre,
+.listing-code > pre code {
+  background: #23241f;
+  color: #f8f8f2;
+}
+
+/* --- wynik programu --- */
+.listing-output {
+  background: #f4f6f8;
+  border: 1px solid #c9d1d9;
+  border-left: 5px solid #586e75;
+}
+.listing-output .listing-header {
+  background: #e3e8ed;
+  color: #3b4a52;
+}
+.listing-output > pre {
+  background: #f4f6f8;
+  color: #1f2a30;
+}
+.listing-code + .listing-output {
+  margin-top: -0.6em;
+}
+
+/* --- przycisk kopiowania --- */
+.copy-btn {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8f8f2;
+  font: inherit;
+  font-size: 0.95em;
+  text-transform: none;
+  letter-spacing: 0;
+  padding: 0.2em 0.7em;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.copy-btn:hover,
+.copy-btn:focus-visible {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  outline: none;
+}
+.copy-btn.copied {
+  background: #a6e22e;
+  border-color: #a6e22e;
+  color: #1b1c18;
+}
+.listing-output .copy-btn {
+  border-color: #b4bec7;
+  background: #ffffff;
+  color: #3b4a52;
+}
+.listing-output .copy-btn:hover,
+.listing-output .copy-btn:focus-visible {
+  background: #d7dee4;
+  border-color: #8a99a6;
+}
+
+/* --- Zrób to sam! --- */
+blockquote.exercise {
+  position: relative;
+  margin: 1.5em 0;
+  padding: 0.6em 1.2em 0.8em 1.2em;
+  background: #fff8e1;
+  border: 1px solid #f2d27a;
+  border-left: 6px solid #e0a800;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+blockquote.exercise .exercise-title {
+  margin: 0 0 0.4em 0;
+  font-family: 'Roboto Slab', serif;
+  font-size: 1.1em;
+  color: #8a5a00;
+}
+blockquote.exercise .exercise-title::before {
+  content: "\270E";
+  display: inline-block;
+  margin-right: 0.45em;
+}
+blockquote.exercise p {
+  margin: 0.45em 0;
+}
+blockquote.exercise .docutils.literal {
+  background: #ffeeba;
+  border-radius: 3px;
+  padding: 0 0.25em;
+}
+
+@media print {
+  .copy-btn { display: none; }
+  .listing, blockquote.exercise { box-shadow: none; }
+}
