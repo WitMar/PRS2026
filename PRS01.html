@@ -16,7 +16,7 @@
 <section id="narzedzia-i-organizacja-zajec">
 <h2>Narzędzia i organizacja zajęć</h2>
 <p>Wykłady w postaci HTML będą pojawiać się na serwisie <strong>Moodle</strong>
-<a class="reference external" href="https://lms.amu.edu.pl/sci/course/view.php?id=333">https://lms.amu.edu.pl/sci/course/view.php?id=333</a></p>
+<a class="reference external" href="https://lms.amu.edu.pl/sci/course/view.php?id=333">https://lms.amu.edu.pl/sci/course/view.php?id=333</a></p> oraz na stronie www.
 <p>W tym samym miejscu obecne będą materiały na laboratoria. Na samym dole
 materiałów na laboratoria publikowany będzie plik notatnika <strong>Jupyter</strong>,
 który można otworzyć w serwisie <a class="reference external" href="https://jupyter.wmi.amu.edu.pl">https://jupyter.wmi.amu.edu.pl</a> by móc
@@ -29,6 +29,7 @@ testowe na które macie <strong>2</strong> tygodnie na odpowiedź. Tam też pod 
 <strong>Zadania</strong> znajdować się będa zadania do wykonania na zajęciach
 laboratoryjnych (także dostępne przez <strong>2</strong> tygodnie do czasu zajęć).
 Korzystają one z pluginu <strong>CodeRunner</strong> systemu <strong>Moodle</strong>.</p>
+    <p>Uwaga! Z racji tego, że Moodle wykorzystuje wersje Pythona 3.13 będziemy na zajęciach opierać się na tej wersji Pythona</p>
 <section id="edytor">
 <h3>Edytor</h3>
 <p>Implementując programy w języku Python, rekomendowanym (i aktualnie
@@ -73,6 +74,7 @@ myszy na folder i <strong>New -&gt; File</strong>).</p>
 <p>multithreading==0.2.0
 loguru==0.6.0
 requests==2.28.2</p>
+    <p>Uruchom w terminalu pip install -r requirements.txt</p>
 <p>Multithreading jest biblioteką napisaną przez do kolejkowania i
 wykonywania zadań wielowątkowo, opiera się ona na module threading który
 zostanie omówiony w kolejnym rozdziale. Dla nas jest tylko przykładem
@@ -99,17 +101,11 @@ możesz o uruchomić.</p>
 
 </span><span class="comment single"># Wait until queue is empty</span><span class="whitespace">
 </span><span class="name">demo</span><span class="operator">.</span><span class="name">join</span><span class="punctuation">()</span></code></pre>
-<pre class="literal-block">---------------------------------------------------------------------------
-
-ModuleNotFoundError                       Traceback (most recent call last)
-
-Cell In [1], line 1
-----&gt; 1 import multithreading
-      3 class Demo(multithreading.MultiThread):
-      4     def task(self, task):
-
-
-ModuleNotFoundError: No module named 'multithreading'</pre>
+<pre class="literal-block">
+    1
+    2
+    3
+</pre>
 <p>Uwaga! W ramach programów uruchamianych przez <strong>Moodle</strong> oraz
 <strong>Jupyter</strong> nie są dostępne wszystkie zależności i biblioteki a
 instalacja ich jest możliwa tylko przez administratora systemu (powyżej
@@ -658,25 +654,19 @@ to otrzymamy błąd:</p>
 </span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">licznik</span><span class="punctuation">)</span><span class="whitespace">
 
 </span><span class="name">add</span><span class="punctuation">()</span></code></pre>
-<pre class="literal-block">---------------------------------------------------------------------------
+<pre class="literal-block">
+--- wątek daemon ---
+....
+Main Thread : all done
 
-UnboundLocalError                         Traceback (most recent call last)
+Proces zakończył się sam (kod wyjścia 0)
 
-Cell In [6], line 11
-      7     licznik += 1
-      9     print(licznik)
----&gt; 11 add()
-
-
-Cell In [6], line 7, in add()
-      4 def add():
-      5
-      6      # increment licznik by 1
-----&gt; 7     licznik += 1
-      9     print(licznik)
-
-
-UnboundLocalError: local variable 'licznik' referenced before assignment</pre>
+--- wątek zwykly ---
+....
+Main Thread : all done
+......
+Proces NIE zakończył się sam - został zabity po 5 sekundach!
+</pre>
 <p>Dzieje się tak, ponieważ możemy uzyskać dostęp tylko do zmiennej
 globalnej, ale nie możemy jej modyfikować z poziomu funkcji.</p>
 <p>Rozwiązaniem tego problemu jest użycie słowa kluczowego <span class="docutils literal">global</span>.</p>
