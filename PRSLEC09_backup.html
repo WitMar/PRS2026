@@ -1,0 +1,1874 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Przetwarzanie równoległe i strumieniowe - Wykład 9</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+<style>
+  /* Slide = 1280x720; base font scaled to match H5P text metrics */
+  .reveal { font-size: 24px; font-family: "Open Sans", Arial, sans-serif; color: #000; }
+  .reveal .slides section { position: absolute; width: 100%; height: 100%; padding: 0; text-align: left; }
+  .reveal .el { position: absolute; box-sizing: border-box; overflow: visible; }
+  .reveal .el.text { padding: .375em .5em; line-height: 1.25; }
+  .reveal .el.text p, .reveal .el.text li { margin: 0 0 .5em 0; line-height: 1.25; }
+  .reveal .el.text ul { display: block; margin: 0 0 .5em 1.25em; padding: 0; }
+  .reveal .el.text h3 { font-size: 1em; text-transform: none; margin: 0 0 .5em; color: #000; font-family: inherit; }
+  .reveal .el.img img { width: 100%; height: 100%; object-fit: contain; margin: 0; max-width: none; max-height: none; }
+  .reveal .el.shape { display: flex; flex-direction: column; justify-content: center; }
+  .reveal .el.link { display: flex; align-items: center; justify-content: center; font-size: 1.5em; }
+  .reveal a { color: #1a73d9; }
+  /* ---------- interactive slides (as in lecture 1) ---------- */
+  :root { --green: rgb(83, 174, 18); --blue: #1a73d9; --red: #d93025; --orange: #e8710a; --muted: #666; --line: #ccc; }
+  .reveal .el.box { padding: 0 .5em; line-height: 1.3; }
+  .reveal .el.box p { margin: 0 0 .5em; }
+  .reveal .small, .reveal .hint { font-size: .7em; color: var(--muted); }
+  .reveal .btn, .reveal .opt {
+    font: inherit; font-size: .75em; padding: .3em .8em; margin: 0 .3em .3em 0; cursor: pointer;
+    border: 2px solid var(--green); background: var(--green); color: #fff; border-radius: .3em;
+  }
+  .reveal .btn.ghost { background: #fff; color: var(--green); }
+  .reveal .btn:disabled { opacity: .4; cursor: default; }
+  .reveal .simctl { display: flex; flex-wrap: wrap; align-items: center; gap: .3em .8em; font-size: .8em; margin-bottom: .5em; }
+  .reveal .simctl .btn { font-size: .9em; margin: 0; }
+  .reveal .simctl select, .reveal .simctl input[type=text] { font: inherit; padding: .1em .3em; }
+  .reveal .stat { font-size: .8em; }
+  .reveal h4 { font-size: .8em; margin: 0 0 .3em; text-transform: none; color: #000; font-family: inherit; }
+  .reveal code { font-family: Consolas, Menlo, monospace; }
+  @keyframes pop { from { transform: scale(.3); opacity: 0; } }
+
+  /* quiz */
+  .reveal .quiz .q { font-size: 1.1em; margin-bottom: .8em; }
+  .reveal .quiz .opts { display: flex; flex-wrap: wrap; gap: .5em; margin-bottom: .6em; }
+  .reveal .quiz .opt { background: #fff; color: #000; border-color: var(--line); font-size: .9em; margin: 0; }
+  .reveal .quiz .opt.sel { border-color: var(--blue); background: #e8f0fe; }
+  .reveal .quiz .opt.good { border-color: var(--green); background: #e6f4da; }
+  .reveal .quiz .opt.bad { border-color: var(--red); background: #fce8e6; }
+  .reveal .quiz .explain { visibility: hidden; font-size: .85em; border-left: 4px solid var(--green); padding-left: .6em; margin-top: .6em; }
+  .reveal .quiz.done .explain { visibility: visible; }
+  .reveal .quiz.compact .q { font-size: .9em; margin-bottom: .5em; }
+  .reveal .quiz.compact .opt { font-size: .75em; }
+  .reveal .quiz.compact .explain { font-size: .7em; margin-top: .3em; }
+  .reveal .quiz + .quiz { margin-top: .8em; }
+
+  /* ---------- lecture 2: layout, code listings, output ---------- */
+  .reveal .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.2em; align-items: start; }
+  .reveal .cols.wl { grid-template-columns: 1.35fr 1fr; }
+  .reveal .cols.wr { grid-template-columns: 1fr 1.35fr; }
+  /* type scale: .lead / ul.points = body text, .note = callouts, .small = captions, code .78em */
+  .reveal .lead { font-size: 1.1em; margin: 0 0 .5em; line-height: 1.35; }
+  .reveal ul.points { font-size: 1.1em; line-height: 1.35; margin: 0 0 .5em 1.1em; padding: 0; }
+  .reveal ul.points li { margin: 0 0 .45em; }
+  .reveal ul.points.side { font-size: .9em; }
+  .reveal ul.points.icons { list-style: none; margin-left: 0; }
+  .reveal ul.points.icons li { padding-left: 1.5em; text-indent: -1.5em; }
+  .reveal ul.points.icons i { width: 1.5em; text-indent: 0; color: var(--green); }
+  .reveal ul.points.icons.cons i { color: var(--red); }
+  .reveal img.pic { display: block; width: 100%; max-height: 20em; object-fit: contain; margin: 0 auto; }
+  .reveal svg.diagram { display: block; width: 100%; height: auto; margin: .2em 0 .6em; font-family: "Open Sans", Arial, sans-serif; }
+  .reveal svg.diagram text { font-size: 18px; }
+  .reveal svg.diagram .mono { font-family: Consolas, Menlo, monospace; }
+  .reveal .chain { display: flex; flex-wrap: wrap; align-items: center; gap: .3em; font-size: .8em; margin: .3em 0 .6em; }
+  .reveal .chain .op { color: var(--muted); font-family: Consolas, Menlo, monospace; font-size: .85em; }
+  .reveal .zipviz { font: .75em Consolas, Menlo, monospace; margin: 0 0 .6em; }
+  .reveal .zipviz > div { display: flex; gap: .4em; margin: .25em 0; align-items: center; }
+  .reveal .zipviz .lbl { width: 4.5em; color: var(--muted); font-family: "Open Sans", Arial, sans-serif; }
+  .reveal .chip.alt { background: #fef3c7; }
+  .reveal .chip.pair { background: #e6f4da; }
+  .reveal .lanes { font-size: .75em; }
+  .reveal .lanes .lane { display: flex; align-items: center; gap: 3px; height: 1.5em; margin: .15em 0; }
+  .reveal .lanes .lane span { width: 2.2em; color: var(--muted); }
+  .reveal .lanes .lane i { display: block; width: 10.5%; height: 1.1em; border-radius: 3px; background: var(--blue); }
+  .reveal .lanes .lane i.p { background: var(--green); }
+  .reveal .lanes h4 { margin: .5em 0 .1em; }
+  .reveal p code, .reveal li code, .reveal td code, .reveal .note code { background: #f1f3f4; padding: 0 .2em; border-radius: .2em; font-size: .9em; }
+  .reveal pre.code-wrap { position: relative; width: 100%; margin: 0 0 .5em; box-shadow: none; font-size: .78em; }
+  .reveal pre.code-wrap code { max-height: none; padding: .6em .8em; border-radius: .3em; }
+  .reveal pre.code-wrap.sm { font-size: .66em; }
+  .reveal pre.out { position: relative; width: 100%; box-sizing: border-box; margin: 0 0 .6em; padding: .45em .8em; font-size: .78em; line-height: 1.35;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #f4f6f8; color: #1f2a30; border: 1px solid #c9d1d9; border-left: 5px solid #586e75; border-radius: .3em; box-shadow: none; }
+  .reveal pre.out::before { content: "Wynik"; position: absolute; top: .3em; right: .6em; font: bold .7em "Open Sans", Arial, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #8a99a6; }
+  .reveal pre.code-wrap + pre.out { margin-top: -.5em; border-top: none; border-radius: 0 0 .3em .3em; }
+  .reveal pre.out.sm, .reveal pre.code-wrap.sm + pre.out { font-size: .66em; }
+  .reveal .copy-btn { position: absolute; top: .4em; right: .4em; z-index: 2; font: .8em "Open Sans", Arial, sans-serif; padding: .1em .6em; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, .3); border-radius: .3em; background: rgba(255, 255, 255, .1); color: #f8f8f2; opacity: 0; transition: opacity .15s; }
+  .reveal pre.code-wrap:hover .copy-btn, .reveal .copy-btn:focus-visible { opacity: 1; }
+  .reveal .copy-btn.copied { background: var(--green); border-color: var(--green); opacity: 1; }
+  .reveal .note { font-size: .75em; line-height: 1.35; border-left: 4px solid var(--green); background: #f3faee; padding: .35em .7em; margin: .2em 0 .6em; }
+  .reveal .note.warn { border-left-color: var(--orange); background: #fff4e5; }
+  .reveal .note.bad { border-left-color: var(--red); background: #fce8e6; }
+  .reveal .note p { margin: 0 0 .3em; }
+  .reveal .note p:last-child { margin: 0; }
+  .reveal table.simple { border-collapse: collapse; font-size: .75em; margin: .2em 0 .8em; width: 100%; }
+  .reveal table.simple th, .reveal table.simple td { border: 1px solid var(--line); padding: .3em .5em; vertical-align: top; text-align: left; }
+  .reveal table.simple th { background: #eef7e6; }
+  .reveal .textflow ul { margin: 0 0 .5em 1.2em; }
+  .reveal .textflow li { margin-bottom: .4em; }
+
+  /* agenda */
+  .reveal .agenda { display: grid; grid-template-columns: 1fr 1fr; gap: .7em; margin-bottom: .8em; }
+  .reveal .agenda .ag { border: 2px solid var(--line); border-radius: .4em; padding: .4em .7em; }
+  .reveal .agenda .ag b { display: inline-block; width: 1.6em; height: 1.6em; line-height: 1.6em; text-align: center; border-radius: 50%; background: var(--green); color: #fff; margin-right: .4em; }
+  .reveal .agenda .ag p { font-size: .75em; margin: .3em 0 0; color: #333; }
+
+  /* fill in the blanks */
+  .reveal pre.exo { width: 100%; box-sizing: border-box; margin: 0 0 .5em; padding: .6em .8em; font-size: .78em; line-height: 1.6; box-shadow: none;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #272822; color: #f8f8f2; border-radius: .3em; }
+  .reveal pre.exo .c { color: #75715e; }
+  .reveal pre.exo .k { color: #f92672; }
+  .reveal input.blank { font: inherit; color: #e6db74; background: #3e3d32; border: none; border-bottom: 2px dashed #e6db74; padding: 0 .3em; outline: none; }
+  .reveal input.blank:focus { background: #49483e; }
+  .reveal input.blank.good { color: #a6e22e; border-bottom: 2px solid #a6e22e; }
+  .reveal input.blank.bad { color: #f92672; border-bottom: 2px solid #f92672; }
+  .reveal .blanks .fb { font-size: .7em; min-height: 1.2em; margin: .2em 0; color: var(--red); }
+  .reveal .blanks .explain { visibility: hidden; font-size: .75em; border-left: 4px solid var(--green); padding-left: .6em; margin-top: .3em; }
+  .reveal .blanks.done .explain { visibility: visible; }
+
+  /* pure / impure cards */
+  .reveal .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8em; }
+  .reveal .quiz.card { border: 2px solid var(--line); border-radius: .4em; padding: .5em .6em; }
+  .reveal .quiz.card pre.code-wrap { font-size: .7em; margin-bottom: .6em; }
+  .reveal .quiz.card .opts { margin-bottom: 0; }
+  .reveal .quiz.card .opt { font-size: .75em; }
+  .reveal .quiz.card .explain { font-size: .7em; }
+
+  /* console (as in lecture 2) */
+  .reveal pre.console { width: 100%; box-sizing: border-box; height: 15em; overflow: auto; margin: 0 0 .5em; padding: .5em .8em; font-size: .72em; line-height: 1.4;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #1e1e1e; color: #e0e0e0; border-radius: .3em; box-shadow: none; }
+  /* chips and pipeline (as in lecture 2) */
+  .reveal .chip { display: inline-block; min-width: 1.6em; text-align: center; padding: .1em .45em; border-radius: .3em; background: #e8f0fe; animation: pop .25s; }
+  .reveal .chip.drop { background: #f1f3f4; color: #aaa; text-decoration: line-through; }
+  .reveal .chip.acc { background: #fef3c7; }
+  .reveal .chip.fin { background: var(--green); color: #fff; font-weight: bold; }
+  .reveal .chip.err { background: #fce8e6; color: var(--red); font-family: Consolas, Menlo, monospace; }
+  .reveal .pipe { display: flex; align-items: center; gap: .35em; font-size: .62em; margin: 0 0 .6em; }
+  .reveal .pipe .st { border: 2px solid var(--blue); border-radius: .4em; padding: .3em .5em; text-align: center; background: #e8f0fe; }
+  .reveal .pipe .st small { display: block; color: var(--muted); font-size: .8em; }
+  .reveal .pipe .ar { color: var(--muted); font-size: 1.4em; }
+
+  /* ---------- lecture 9: streams ---------- */
+  .reveal .cols > * { min-width: 0; }
+  .reveal .cols.three { grid-template-columns: 1fr 1fr 1fr; }
+  .reveal img.pic.wide { max-height: 6em; }
+  .reveal .cap { font-size: .7em; color: var(--muted); margin: .2em 0 .8em; }
+  .reveal .el.box h4 { font-size: .8em; }
+
+  /* stream graph simulation */
+  .reveal #flowsim .graph { display: grid; grid-template-columns: 6.5em 1.6em 1fr 1.6em 1fr 1.6em 1fr 1.6em 1fr; grid-template-rows: auto auto; gap: .5em 0; align-items: center; font-size: .62em; margin: .2em 0 .6em; }
+  .reveal .nd { border: 2px solid var(--blue); border-radius: .4em; background: #e8f0fe; padding: .25em .4em; text-align: center; min-height: 4.6em; transition: box-shadow .2s, background .2s; }
+  .reveal .nd b { display: block; font: bold 1em Consolas, Menlo, monospace; }
+  .reveal .nd .st { display: block; color: var(--muted); font-size: .85em; min-height: 1.3em; font-family: Consolas, Menlo, monospace; }
+  .reveal .nd .v { display: inline-block; min-width: 2em; min-height: 1.3em; margin-top: .15em; }
+  .reveal .nd.src { grid-row: 1 / span 2; background: #fff; border-color: #999; }
+  .reveal .nd.snk { background: #e6f4da; border-color: var(--green); }
+  .reveal .nd.hot { box-shadow: 0 0 0 4px var(--orange); }
+  .reveal .nd.drop { background: #fce8e6; }
+  .reveal .graph .ar { text-align: center; color: var(--muted); font-size: 1.4em; }
+  .reveal .chip.no { background: #fce8e6; color: var(--red); }
+  .reveal .chip.wait { background: #f1f3f4; color: #888; }
+  .reveal #flowsim pre.console { height: 11.5em; }
+  .reveal #joinsim pre.console { height: 8.6em; }
+
+  /* windows */
+  .reveal #winsim .wgrid { display: grid; grid-template-columns: 9.5em repeat(10, 1fr); gap: .2em .15em; font-size: .62em; align-items: center; margin: .3em 0 .5em; }
+  .reveal #winsim .wgrid .lbl { font-family: Consolas, Menlo, monospace; color: var(--muted); white-space: nowrap; }
+  .reveal #winsim .cell { text-align: center; border-radius: .3em; background: #e8f0fe; padding: .1em 0; animation: pop .25s; }
+  .reveal #winsim .bar { border-radius: .3em; height: 1.1em; animation: pop .25s; }
+  .reveal #winsim .bar.t { background: var(--blue); }
+  .reveal #winsim .bar.s { background: var(--green); }
+  .reveal #winsim .bar.p { background: #b7dd9c; }
+  .reveal #winsim .emitted { font: .7em/1.45 Consolas, Menlo, monospace; min-height: 4.4em; }
+  .reveal #winsim .emitted i, .reveal #joinsim .outs i { color: var(--muted); font-style: normal; }
+
+  /* joins */
+  .reveal #joinsim .jc { border: 2px solid var(--line); border-radius: .4em; padding: .3em .5em; font-size: .68em; }
+  .reveal #joinsim .jc h4 { font-size: 1.1em; margin: 0 0 .2em; font-family: Consolas, Menlo, monospace; }
+  .reveal #joinsim .jc .stt { font-family: Consolas, Menlo, monospace; color: var(--muted); min-height: 2.6em; white-space: pre; }
+  .reveal #joinsim .jc .outs { min-height: 7.5em; }
+  .reveal #joinsim .jc .chip { margin: .1em; font-family: Consolas, Menlo, monospace; }
+  .reveal #joinsim .jc.flash { border-color: var(--orange); }
+
+  /* back pressure */
+  .reveal #bpsim .bp { display: flex; align-items: center; gap: .5em; font-size: .75em; margin: .6em 0; }
+  .reveal #bpsim .actor { border: 2px solid var(--blue); background: #e8f0fe; border-radius: .4em; padding: .3em .6em; text-align: center; width: 8em; min-height: 3.6em; }
+  .reveal #bpsim .actor.blocked { border-color: var(--red); background: #fce8e6; }
+  .reveal #bpsim .actor.busy { border-color: var(--green); background: #e6f4da; }
+  .reveal #bpsim .actor small { display: block; color: var(--muted); font-size: .8em; }
+  .reveal #bpsim .queue { display: flex; gap: .2em; flex: 1; flex-wrap: wrap; min-height: 2em; border: 2px dashed var(--line); border-radius: .4em; padding: .3em; align-content: center; }
+  .reveal #bpsim .queue .slot { width: 1.9em; height: 1.6em; border: 1px solid var(--line); border-radius: .25em; text-align: center; font: .85em/1.6em Consolas, Menlo, monospace; }
+  .reveal #bpsim .queue .slot.full { background: #fef3c7; border-color: var(--orange); }
+  .reveal #bpsim .stats { font-size: .75em; display: grid; grid-template-columns: repeat(4, 1fr); gap: .5em; }
+  .reveal #bpsim .stats div { border-left: 4px solid var(--blue); padding-left: .4em; }
+  .reveal #bpsim .stats b { display: block; font-size: 1.3em; }
+  .reveal #bpsim .stats .bad b { color: var(--red); }
+
+  /* Flink: submission stepper, job states */
+  .reveal svg.diagram .arr { opacity: .12; transition: opacity .3s; }
+  .reveal svg.diagram .arr.past { opacity: .45; }
+  .reveal svg.diagram .arr.cur { opacity: 1; }
+  .reveal svg.diagram .arr.cur path, .reveal svg.diagram .arr.cur line, .reveal svg.diagram .arr.cur circle { stroke: #e8710a; }
+  .reveal svg.diagram .arr.cur text { fill: #e8710a; font-weight: bold; }
+  .reveal .stepdesc { font-size: .75em; border-left: 4px solid var(--orange); padding-left: .6em; min-height: 3.2em; margin: 0 0 .4em; }
+  .reveal #jobsim .stn rect { fill: #fff; stroke: #999; stroke-width: 2; }
+  .reveal #jobsim .stn.seen rect { fill: #e8f0fe; stroke: #1a73d9; }
+  .reveal #jobsim .stn.cur rect { fill: #53ae12; stroke: #3d8a0c; }
+  .reveal #jobsim .stn.cur text { fill: #fff; font-weight: bold; }
+  .reveal #jobsim .stn.term rect { stroke-width: 4; }
+  .reveal #jobsim .tr { opacity: .35; }
+  .reveal #jobsim .tr.used { opacity: 1; }
+  .reveal #jobsim .tr.used path { stroke: #e8710a; }
+  .reveal #jobsim .simctl .btn { font-size: .85em; }
+
+  /* Flink: slots */
+  .reveal #slotsim .tms { display: flex; gap: .6em; flex-wrap: wrap; font-size: .7em; margin: .4em 0 .5em; }
+  .reveal #slotsim .tm { border: 2px solid #c26d00; background: #f7a33a; border-radius: .3em; padding: .3em; }
+  .reveal #slotsim .tm > b { display: block; color: #fff; margin-bottom: .2em; }
+  .reveal #slotsim .slots { display: flex; gap: .3em; }
+  .reveal #slotsim .slot { background: #e8edf5; border: 1px solid #8a99a6; border-radius: .2em; width: 7.6em; min-height: 6.5em; padding: .2em; }
+  .reveal #slotsim .slot > small { display: block; color: var(--muted); text-align: center; }
+  .reveal #slotsim .sub { display: block; margin: .15em 0; padding: .05em .2em; border-radius: .6em; text-align: center; color: #fff; font-family: Consolas, Menlo, monospace; white-space: nowrap; animation: pop .25s; }
+  .reveal #slotsim .sub.a { background: #9b59b6; }
+  .reveal #slotsim .sub.b { background: var(--blue); }
+  .reveal #slotsim .sub.c { background: var(--green); }
+  .reveal #slotsim .verdict { font-size: .75em; min-height: 2.6em; }
+  .reveal #slotsim .verdict.bad { color: var(--red); }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section data-background-color="#ffffff" data-keywords="PRS">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie równoległe i strumieniowe</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:23.733%;width:61.002%;height:40%;"><p><span style="font-size:1.5em"><strong>Wykład 9</strong></span></p>
+
+<p><span style="font-size:1.5em"><strong>Aplikacje do przetwarzania danych: strumienie w Streamz, architektura Apache Flink</strong></span></p>
+</div>
+<div class="el img" style="left:64.270%;top:21.576%;width:23.125%;height:40.000%;"><img src="images/image-CjtUUtTA.jpg" alt="UAM"></div>
+<div class="el img" style="left:47.930%;top:66.885%;width:19.608%;height:25.820%;"><img src="images/image-TbBRY920.png" alt=""></div>
+<div class="el img" style="left:82.438%;top:71.200%;width:17.564%;height:18.215%;"><img src="images/image-UhbZ9gWx.png" alt=""></div>
+<div class="el img" style="left:67.538%;top:73.357%;width:16.340%;height:16.944%;"><img src="images/image-utcHYa21.png" alt=""></div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Plan">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Plan wykładu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="agenda">
+  <div class="ag"><b>1</b>Dlaczego osobna biblioteka?<p>dane bez końca, stan pośredni, model pull i push</p></div>
+  <div class="ag"><b>2</b>Streamz: podstawy<p>Stream, emit, map, filter, sink, accumulate, rozgałęzienia</p></div>
+  <div class="ag"><b>3</b>Streamz: okna, łączenie, czas<p>partition, sliding_window, zip, combine_latest, timed_window, back pressure, Dask</p></div>
+  <div class="ag"><b>4</b>Apache Flink: architektura<p>JobManager, TaskManager, sloty, wdrożenie, cykl życia zadania, PyFlink</p></div>
+</div>
+<div class="note"><p><strong>Gdzie jesteśmy?</strong></p>
+<p class="fragment">Wykład 2: potok generatorów (źródło → map → filter → ujście). Dziś ten sam model, ale dane <strong>wpychamy</strong> do potoku w chwili, gdy nadejdą.</p>
+<p class="fragment">Wykład 7: executory. Streamz potrafi oddać kosztowne kroki do puli procesów (Dask).</p>
+<p class="fragment">Za tydzień: korutyny i async, czyli pętla zdarzeń, na której Streamz realizuje operacje zależne od czasu.</p></div>
+</div>
+<aside class="notes">Wykład zdalny: pytania ze slajdów "Sprawdź się" i quizy zadawaj na czacie Teams, zanim klikniesz odpowiedź. Symulacje warto uruchamiać na udostępnionym ekranie i pytać, co się stanie w następnym kroku.</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="Strumienie">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Dane bez końca: stan pośredni</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead">NumPy i Pandas zakładają, że <strong>znają wszystkie dane z góry</strong>: <code>df.mean()</code> przegląda całą kolumnę. Strumień nie ma końca, więc po każdej nowej porcji danych aktualizujemy wynik <strong>przyrostowo</strong>, pamiętając tylko <strong>stan pośredni</strong>.</p>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+def srednie(paczki):        # strumień list pomiarów
+    total = count = 0       # stan pośredni: dwie liczby
+    for paczka in paczki:
+        total += sum(paczka)
+        count += len(paczka)
+        yield total / count
+
+for m in srednie([[10, 20], [30], [40, 50, 60]]):
+    print(m)
+</code></pre>
+<pre class="out">15.0
+20.0
+35.0</pre>
+</div>
+<div>
+<div class="note"><p>NumPy i Pandas nadal się przydają: <strong>wewnątrz</strong> kroku potoku, na pojedynczej paczce danych (np. <code>sum(paczka)</code> → <code>paczka.sum()</code>).</p></div>
+<div class="quiz compact"><p class="q">Której statystyki <b>nie</b> da się dokładnie liczyć przyrostowo ze stanem o stałym rozmiarze?</p><div class="opts"><button class="opt" data-ok="0">średnia</button><button class="opt" data-ok="0">maksimum</button><button class="opt" data-ok="0">liczba elementów</button><button class="opt" data-ok="1">mediana</button></div><p class="explain">Mediana wymaga pamiętania wszystkich elementów. W strumieniach liczy się ją w oknie albo w przybliżeniu (np. t-digest). Wariancję da się liczyć dokładnie: algorytm Welforda pamięta tylko (n, średnia, M2).</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Streamz">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Streamz</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<ul class="points side">
+<li>Biblioteka do budowania <strong>potoków dla ciągłych strumieni danych</strong>: od prostych łańcuchów po grafy z rozgałęzieniami, łączeniem, kontrolą przepływu i sprzężeniem zwrotnym.</li>
+<li>Autor: Matthew Rocklin (twórca Dask), 2017. Kod: <a href="https://github.com/python-streamz/streamz">github.com/python-streamz/streamz</a>, dokumentacja: <a href="https://streamz.readthedocs.io/">streamz.readthedocs.io</a>.</li>
+<li><strong>Stan w 2026:</strong> wersja 0.6.6 (kwiecień 2026), Python ≥ 3.10. Po przerwie w latach 2022-2025 projekt utrzymuje niewielka grupa osób: poprawki i drobne nowości (np. <code>map_async</code>), bez dużego rozwoju.</li>
+<li>Instalacja: <code>pip install streamz</code>. Zależności: tornado, toolz. Opcjonalnie: dask (równoległość), pandas (<code>streamz.dataframe</code>), confluent-kafka, graphviz (wizualizacja).</li>
+</ul>
+</div>
+<div>
+<img class="pic wide" src="images/image-hFOjeBbg.png" alt="Strumień danych wpływa do procesora i trafia na wykresy">
+<p class="lead" style="margin-top:.6em"><strong>Zastosowania</strong></p>
+<ul class="points side">
+<li>logi serwerów WWW,</li>
+<li>telemetria, instrumenty naukowe, potoki przetwarzania obrazu,</li>
+<li>finansowe szeregi czasowe,</li>
+<li>uczenie maszynowe online (model uczy się na bieżąco).</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Potok liniowy a graf przetwarzania</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<img class="pic wide" src="images/image-7Z0hR3sJ.png" alt="Potok liniowy: TextFile, map parse, filter select, map process, sink save" style="max-height:3em">
+<p class="cap">Potok liniowy: wystarczy pętla <code>for</code> albo potok generatorów z wykładu 2.</p>
+<img class="pic" src="images/image-KlanTCJT.png" alt="Graf: z parse wychodzą trzy gałęzie: sliding_window 100, sliding_window 10 z delay, accumulate count; gałęzie łączy zip i predict" style="max-height:9em">
+<p class="cap">Graf: trzy gałęzie z jednego źródła, okna, opóźnienie, złączenie <code>zip</code> i model uczony na bieżąco. Ręczna pętla staje się tu nieczytelna, a Streamz opisuje graf deklaratywnie. Źródło: streamz.readthedocs.io</p>
+<div class="cols">
+<div class="quiz compact"><p class="q">Do ilu gałęzi trafia każdy element wychodzący z <code>map; parse</code>?</p><div class="opts"><button class="opt" data-ok="0">do 1, losowej</button><button class="opt" data-ok="0">do 1, po kolei (round-robin)</button><button class="opt" data-ok="1">do wszystkich 3</button></div><p class="explain">Węzeł przekazuje każdy element wszystkim węzłom podłączonym za nim. Podział pracy między wykonawców to osobna operacja (np. <code>scatter</code> w Dask albo <code>keyBy</code> we Flinku).</p></div>
+<div class="quiz compact"><p class="q">Kiedy <code>zip</code> przekaże krotkę do <code>map; predict</code>?</p><div class="opts"><button class="opt" data-ok="0">po każdym elemencie z dowolnej gałęzi</button><button class="opt" data-ok="1">gdy obie gałęzie dostarczą nowy element</button></div><p class="explain"><code>zip</code> czeka na element z każdego wejścia. Gałąź z <code>delay</code> spowalnia więc cały dalszy potok.</p></div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Pull czy push? Generator a Streamz</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<h4>Generator (wykład 2): <span style="color:var(--blue)">pull</span></h4>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+def podwoj(xs):
+    for x in xs:
+        yield x * 2
+
+for y in podwoj(range(3)):  # pull: konsument ciągnie
+    print(y)
+</code></pre>
+<pre class="out">0
+2
+4</pre>
+</div>
+<div>
+<h4>Streamz: <span style="color:var(--green)">push</span></h4>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+s = Stream()
+s.map(lambda x: x * 2).sink(print)
+
+for x in range(3):
+    s.emit(x)       # push: producent pcha
+</code></pre>
+<pre class="out">0
+2
+4</pre>
+</div>
+</div>
+<div class="cols">
+<ul class="points side">
+<li><strong>Pull:</strong> konsument wywołuje <code>next()</code>, a źródło czeka, aż ktoś poprosi. Naturalne, gdy dane już są (plik, lista).</li>
+<li><strong>Push:</strong> źródło wywołuje <code>emit()</code>, gdy dane nadejdą (czujnik, sieć, Kafka), a potok reaguje na zdarzenie. Tak działają też Flink i Kafka Streams.</li>
+</ul>
+<div class="quiz compact"><p class="q">Odczyty z czujnika przychodzą przez sieć w nieprzewidywalnych chwilach. Który model jest naturalny?</p><div class="opts"><button class="opt" data-ok="0">pull</button><button class="opt" data-ok="1">push</button></div><p class="explain">Push: to nadejście danych wyzwala obliczenia. W modelu pull konsument musiałby co chwilę pytać (polling).</p></div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Streamz podstawy">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Pierwszy strumień: Stream, emit, sink</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+source = Stream()
+source.sink(print)
+
+source.emit(1)
+source.emit(2)
+source.emit(10)
+</code></pre>
+<pre class="out">1
+2
+10</pre>
+</div>
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+def increment(x):
+    return x + 1
+
+source = Stream()
+source.map(increment).sink(print)
+
+source.emit(1)
+source.emit(2)
+source.emit(10)
+</code></pre>
+<pre class="out">2
+3
+11</pre>
+</div>
+</div>
+<ul class="points side">
+<li class="fragment"><code>Stream()</code> tworzy źródło. Każda metoda (<code>map</code>, <code>sink</code>, …) tworzy <strong>nowy węzeł</strong> podłączony do poprzedniego i go zwraca: wywołania łączymy w łańcuch.</li>
+<li class="fragment"><code>emit(x)</code> wpycha element do grafu i wraca, gdy przejdzie on przez cały graf (<strong>synchronicznie</strong>).</li>
+<li class="fragment"><code>sink(f)</code> to ujście: wywołuje <code>f</code> dla każdego elementu (np. <code>print</code>, zapis do pliku).</li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>map, filter i rozgałęzienia</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+source = Stream()
+(source.filter(str.islower)  # tylko małe litery
+       .map(str.upper)
+       .sink(print))
+
+for ch in "aBcD":
+    source.emit(ch)
+</code></pre>
+<pre class="out">A
+C</pre>
+<p class="small">Metody można przekazywać jak zwykłe funkcje: <code>str.islower("a")</code> to to samo, co <code>"a".islower()</code>.</p>
+</div>
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+source = Stream()
+a = source.map(lambda x: x + 1)
+b = source.map(lambda x: x - 1)
+a.sink(lambda x: print("gałąź A:", x))
+b.sink(lambda x: print("gałąź B:", x))
+
+source.emit(1)
+source.emit(2)
+</code></pre>
+<pre class="out">gałąź A: 2
+gałąź B: 0
+gałąź A: 3
+gałąź B: 1</pre>
+</div>
+</div>
+<div class="note"><p>Węzeł przekazuje element <strong>wszystkim</strong> węzłom podłączonym za nim, w kolejności podłączenia. Element przechodzi najpierw całą gałąź A, potem całą gałąź B (w głąb), i dopiero wtedy <code>emit()</code> wraca.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Symulacja: element płynie przez graf</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="flowsim">
+  <div class="simctl">
+    <label>temperatura: <input type="text" class="val" value="31" size="4"></label>
+    <button class="btn" data-act="emit">source.emit(t)</button>
+    <button class="btn" data-act="rand">losowy odczyt</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+  </div>
+  <div class="graph">
+    <div class="nd src" data-n="src"><b>source</b><span class="st">Stream()</span><span class="v"></span></div>
+    <span class="ar">→</span>
+    <div class="nd" data-n="win"><b>sliding_window(3)</b><span class="st"></span><span class="v"></span></div>
+    <span class="ar">→</span>
+    <div class="nd" data-n="avg"><b>map(fmean)</b><span class="st">bezstanowy</span><span class="v"></span></div>
+    <span class="ar">→</span>
+    <div class="nd" data-n="fil"><b>filter(m &gt; 30)</b><span class="st">bezstanowy</span><span class="v"></span></div>
+    <span class="ar">→</span>
+    <div class="nd snk" data-n="al"><b>sink(alarm)</b><span class="st"></span><span class="v"></span></div>
+    <span class="ar">→</span>
+    <div class="nd" data-n="acc"><b>accumulate(max)</b><span class="st"></span><span class="v"></span></div>
+    <span class="ar">→</span>
+    <div class="nd snk" data-n="rec"><b>sink(rekord)</b><span class="st"></span><span class="v"></span></div>
+  </div>
+  <div class="cols">
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from statistics import fmean
+from streamz import Stream
+
+source = Stream()
+(source.sliding_window(3, return_partial=False)
+       .map(fmean)
+       .filter(lambda m: m &gt; 30)
+       .sink(lambda m: print("ALARM", round(m, 1))))
+source.accumulate(max).sink(lambda t: print("rekord", t))
+
+for t in [28, 31, 35]:          # albo przyciski powyżej
+    source.emit(t)
+</code></pre>
+    <pre class="console"></pre>
+  </div>
+</div>
+</div>
+<aside class="notes">Zapytaj przed kliknięciem: który węzeł wypisze coś po pierwszym emit? (tylko gałąź accumulate; okno czeka na 3 elementy). Potem podaj 35, 20, 20: okno nadal ma średnią > 30?</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="accumulate">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>accumulate: stan w potoku</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead"><code>map</code>, <code>filter</code>, <code>sink</code> są <strong>bezstanowe</strong>. <code>accumulate(func, start)</code> pamięta <strong>stan</strong>: <code>stan = func(stan, x)</code> i emituje nowy stan.</p>
+<div class="cols">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+def add(acc, x):
+    return acc + x
+
+source = Stream()
+# bez start: pierwszy element staje się stanem
+source.accumulate(add).sink(print)
+# druga gałąź z tego samego źródła, stan od 100
+source.accumulate(add, start=100).sink(print)
+
+for x in [1, 2, 3, 4]:
+    source.emit(x)
+</code></pre>
+<pre class="out sm">1
+101
+3
+103
+6
+106
+10
+110</pre>
+</div>
+<div class="blanks">
+<p class="small" style="margin-bottom:.3em">Co wypiszą dwa ostatnie <code>print</code>?</p>
+<pre class="exo">source = Stream()
+maks = source.accumulate(max).sink_to_list()
+licz = source.accumulate(<span class="k">lambda</span> n, _: n + 1, start=0)
+ile = licz.sink_to_list()
+<span class="k">for</span> x <span class="k">in</span> [3, 1, 4, 1, 5]:
+    source.emit(x)
+print(maks)   <span class="c"># </span><input class="blank" size="16" data-re="^\[3,3,4,4,5\]$" data-sol="[3, 3, 4, 4, 5]" aria-label="wynik maks">
+print(ile)    <span class="c"># </span><input class="blank" size="16" data-re="^\[1,2,3,4,5\]$" data-sol="[1, 2, 3, 4, 5]" aria-label="wynik ile"></pre>
+<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
+<p class="fb"></p>
+<p class="explain"><code>max(acc, x)</code> daje maksimum bieżące (running max). Licznik ignoruje sam element (<code>_</code>). To <code>itertools.accumulate</code> z wykładu 2, tylko w wersji push.</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>accumulate z returns_state=True</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Czasem stan to coś innego niż wynik. Z <code>returns_state=True</code> funkcja zwraca parę <code>(nowy_stan, wynik_do_wyemitowania)</code>.</p>
+<div class="cols">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+def num_distinct(state, new):
+    state.add(new)
+    return state, len(state)   # (stan, wynik)
+
+source = Stream()
+(source.accumulate(num_distinct,
+                   returns_state=True, start=set())
+       .sink(print))
+
+for animal in ["cat", "dog", "cat", "mouse"]:
+    source.emit(animal)
+</code></pre>
+<pre class="out sm">1
+2
+2
+3</pre>
+</div>
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+def update(state, x):
+    total, count = state
+    total, count = total + x, count + 1
+    return (total, count), total / count
+
+source = Stream()
+means = source.accumulate(update, returns_state=True,
+                          start=(0, 0))
+L = means.sink_to_list()
+
+for x in [10, 20, 30, 40]:
+    source.emit(x)
+print(L)
+</code></pre>
+<pre class="out sm">[10.0, 15.0, 20.0, 25.0]</pre>
+</div>
+</div>
+<div class="cols">
+<p class="small">Prawa strona to średnia przyrostowa ze slajdu 3 w wersji Streamz. <code>sink_to_list()</code> zbiera wyniki do listy: wygodne w testach i w Jupyterze.</p>
+<div class="note warn"><p>Zbiór w <code>num_distinct</code> rośnie bez końca. W strumieniu nieskończonym stan trzeba ograniczać (okno, <code>maxsize</code>).</p></div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Flow control">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kontrola przepływu (flow control)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th>Operacja</th><th>Co robi</th><th>Przykład: wejście → wyjście</th></tr>
+<tr><td><code>flatten()</code></td><td>rozpakowuje listy (iterable) na pojedyncze elementy</td><td><code>[1, 2]</code>, <code>[3]</code> → <code>1</code>, <code>2</code>, <code>3</code></td></tr>
+<tr><td><code>partition(n)</code></td><td>rozłączne krotki po <code>n</code> elementów (okno „skaczące”); z <code>timeout=t</code> niepełna paczka wychodzi po <code>t</code> s, z <code>key=f</code> osobne paczki dla każdego klucza</td><td><code>1 … 5</code>, n = 2 → <code>(1, 2)</code>, <code>(3, 4)</code>, a 5 czeka</td></tr>
+<tr><td><code>sliding_window(n)</code></td><td>nakładające się okna <code>n</code> ostatnich elementów; domyślnie także niepełne okna na początku (<code>return_partial=True</code>)</td><td><code>1, 2, 3</code>, n = 2 → <code>(1,)</code>, <code>(1, 2)</code>, <code>(2, 3)</code></td></tr>
+<tr><td><code>unique(maxsize=None)</code></td><td>odrzuca powtórzenia; <code>maxsize</code> ogranicza pamiętaną historię</td><td><code>1, 1, 2, 1</code>, maxsize = 1 → <code>1</code>, <code>2</code>, <code>1</code></td></tr>
+<tr><td><code>pluck(k)</code></td><td>wybiera pole <code>x[k]</code></td><td><code>{"t": 21}</code> → <code>21</code></td></tr>
+<tr><td><code>collect()</code></td><td>gromadzi elementy aż do wywołania <code>flush()</code></td><td><code>1</code>, <code>2</code>, flush → <code>(1, 2)</code></td></tr>
+<tr><td><code>buffer(n)</code></td><td>kolejka o pojemności <code>n</code> między szybkim i wolnym fragmentem potoku (back pressure, dalej w wykładzie)</td><td>bez zmiany elementów</td></tr>
+<tr><td><code>union(*s)</code></td><td>scala kilka strumieni w jeden: każdy element przechodzi dalej od razu</td><td>dalej w wykładzie</td></tr>
+</table>
+<p class="small">Wszystkie przykłady sprawdzone w Streamz 0.6.6. Pełna lista operacji: <a href="https://streamz.readthedocs.io/en/latest/api.html">streamz.readthedocs.io → API</a>.</p>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Okna">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Okna: partition a sliding_window</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wr">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+source = Stream()
+source.partition(3).sink(
+    lambda w: print("partition     ", w))
+source.sliding_window(3, return_partial=False).sink(
+    lambda w: print("sliding_window", w))
+
+for i in range(1, 7):
+    source.emit(i)
+</code></pre>
+<pre class="out sm">partition      (1, 2, 3)
+sliding_window (1, 2, 3)
+sliding_window (2, 3, 4)
+sliding_window (3, 4, 5)
+partition      (4, 5, 6)
+sliding_window (4, 5, 6)</pre>
+<p class="small">Okno <strong>skaczące</strong> (tumbling): każdy element trafia do jednego okna. Okno <strong>przesuwne</strong> (sliding): element należy do <code>n</code> okien.</p>
+</div>
+<div class="sim" id="winsim">
+  <div class="simctl">
+    <button class="btn" data-act="emit">emit</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+    <label><input type="checkbox" class="partial"> return_partial=True</label>
+  </div>
+  <div class="wgrid"></div>
+  <div class="emitted"></div>
+</div>
+</div>
+</div>
+<aside class="notes">Pytanie na czat przed kliknięciem: ile okien wyemituje każda operacja po 6 elementach? Potem włącz return_partial=True.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Okno przesuwne w praktyce: alarm</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+from statistics import fmean
+from streamz import Stream
+
+odczyty = Stream()
+(odczyty.sliding_window(3, return_partial=False)
+        .map(lambda okno: (okno, round(fmean(okno), 1)))
+        .filter(lambda para: para[1] &gt; 30)
+        .sink(lambda para: print("ALARM", *para)))
+
+for t in [28, 29, 31, 32, 33, 30, 27, 26]:
+    odczyty.emit(t)
+</code></pre>
+<pre class="out">ALARM (29, 31, 32) 30.7
+ALARM (31, 32, 33) 32.0
+ALARM (32, 33, 30) 31.7</pre>
+<p class="small">Alarm powyżej 30 °C to czujnik z wykładów 1 i 2. Średnia z okna wygładza szum: pojedynczy skok temperatury nie wywoła alarmu.</p>
+</div>
+<div>
+<div class="quiz compact"><p class="q">Ile krotek wyemituje <code>sliding_window(3, return_partial=False)</code> dla 8 odczytów?</p><div class="opts"><button class="opt" data-ok="0">2</button><button class="opt" data-ok="1">6</button><button class="opt" data-ok="0">8</button></div><p class="explain">Pierwsza pełna krotka po 3. elemencie, potem po każdym kolejnym: 8 − 3 + 1 = 6.</p></div>
+<div class="quiz compact"><p class="q">A ile przy domyślnym <code>return_partial=True</code>?</p><div class="opts"><button class="opt" data-ok="0">6</button><button class="opt" data-ok="1">8</button><button class="opt" data-ok="0">9</button></div><p class="explain">Po jednej krotce na każdy element: <code>(28,)</code>, <code>(28, 29)</code>, a potem już pełne okna. Na niepełnym oknie średnia może dać fałszywy alarm!</p></div>
+<div class="quiz compact"><p class="q">A <code>partition(3)</code> dla tych 8 odczytów?</p><div class="opts"><button class="opt" data-ok="1">2</button><button class="opt" data-ok="0">3</button><button class="opt" data-ok="0">6</button></div><p class="explain">Dwie pełne paczki; ostatnie dwa odczyty czekają na trzeci (chyba że ustawimy <code>timeout</code>).</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Branching and joining">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Łączenie strumieni (joining)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+temp, wilg = Stream(), Stream()
+temp.zip(wilg).sink(lambda t: print("zip           ", t))
+temp.combine_latest(wilg).sink(lambda t: print("combine_latest", t))
+
+temp.emit(21)
+temp.emit(22)
+wilg.emit(40)
+wilg.emit(45)
+temp.emit(23)
+</code></pre>
+<pre class="out sm">zip            (21, 40)
+combine_latest (22, 40)
+zip            (22, 45)
+combine_latest (22, 45)
+combine_latest (23, 45)</pre>
+</div>
+<table class="simple">
+<tr><th>Operacja</th><th>Kiedy emituje</th></tr>
+<tr><td><code>a.union(b)</code></td><td>każdy element z dowolnego wejścia, bez łączenia w krotki</td></tr>
+<tr><td><code>a.zip(b)</code></td><td>gdy <strong>każde</strong> wejście dostarczy nowy element; czekające elementy są buforowane (para „pierwszy z pierwszym”)</td></tr>
+<tr><td><code>a.combine_latest(b)</code></td><td>przy <strong>każdym</strong> nowym elemencie, z ostatnimi wartościami pozostałych wejść (gdy już wszystkie coś wysłały)</td></tr>
+<tr><td><code>a.zip_latest(b)</code></td><td>przy każdym elemencie z <code>a</code> (wejście „bezstratne”, buforowane), z ostatnią wartością <code>b</code></td></tr>
+</table>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Symulacja: zip, combine_latest, zip_latest</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="joinsim">
+  <div class="simctl">
+    <button class="btn" data-act="a">temp.emit(…)</button>
+    <button class="btn" data-act="b" style="background:var(--blue);border-color:var(--blue)">wilg.emit(…)</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+    <span class="hint">temp = 21, 22, 23, …&nbsp; wilg = 40, 45, 50, …</span>
+  </div>
+  <div class="cols three">
+    <div class="jc" data-k="zip"><h4>temp.zip(wilg)</h4><div class="stt"></div><div class="outs"></div></div>
+    <div class="jc" data-k="cl"><h4>temp.combine_latest(wilg)</h4><div class="stt"></div><div class="outs"></div></div>
+    <div class="jc" data-k="zl"><h4>temp.zip_latest(wilg)</h4><div class="stt"></div><div class="outs"></div></div>
+  </div>
+  <p class="hint" style="margin-top:.5em">Spróbuj: kilka razy temp, potem raz wilg. Który operator zgubi pomiary, a który je zbuforuje? Co się stanie z buforem <code>zip</code>, gdy wilgotność przestanie przychodzić?</p>
+  <pre class="console" style="height:6.2em"></pre>
+</div>
+</div>
+<aside class="notes">zip: temperatura bez pary czeka w buforze bez końca (w Streamz bufor zip ma limit i potem blokuje emit: back pressure). combine_latest: gubi pośrednie wartości, ale zawsze daje najświeższy stan. zip_latest: każdy element temp dokładnie raz, z ostatnią wilgotnością.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wizualizacja grafu: visualize()</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+def increment(x):
+    return x + 1
+
+def decrement(x):
+    return x - 1
+
+a, b = Stream(), Stream()
+wynik = (a.map(increment)
+          .combine_latest(b.map(decrement))
+          .map(sum)
+          .sink(print))
+
+a.emit(10)          # brak wartości z b: nic
+b.emit(20)          # 11 + 19
+a.emit(30)          # 31 + 19
+b.emit(30)          # 31 + 29
+wynik.visualize("graf.png", rankdir="LR")
+</code></pre>
+<pre class="out sm">30
+50
+60</pre>
+<img class="pic wide" src="images/image-ZRayyMFm.png" alt="Graf: dwa strumienie, map increment i map decrement, combine_latest, map sum, sink print" style="max-height:3.2em">
+</div>
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+s1, s2 = Stream(), Stream()
+(s1.map(lambda x: x - 1)
+   .union(s2)
+   .map(lambda x: x * 10)
+   .sink(print))
+
+s1.emit(1)
+s2.emit(1)
+s1.emit(5)
+s1.visualize("union.png", rankdir="LR")
+</code></pre>
+<pre class="out sm">0
+10
+40</pre>
+<img class="pic wide" src="images/image-Gn7UhUG4.png" alt="Graf: Stream, map lambda, union z drugim Stream, map lambda, sink print" style="max-height:3.2em">
+<div class="note"><p><code>visualize()</code> wymaga pakietów <code>graphviz</code> i <code>networkx</code> oraz programu Graphviz (<code>dot</code>). W Jupyterze wystarczy <code>wynik.visualize()</code>: graf pojawi się w komórce.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Czas">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Okna czasowe: timed_window</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+import time
+from streamz import Stream
+
+source = Stream()
+(source.timed_window(1.0)   # lista elementów z 1 s
+       .filter(len)         # pomiń puste okna
+       .sink(print))
+
+for i in range(10):
+    source.emit(i)
+    time.sleep(0.25)
+time.sleep(1.5)
+</code></pre>
+<pre class="out">[0, 1, 2, 3]
+[4, 5, 6, 7]
+[8, 9]</pre>
+<p class="small">Granice okien wyznacza zegar, więc na obciążonej maszynie podział może wyjść inaczej, np. <code>[0, 1, 2]</code>, <code>[3, 4, 5, 6]</code>, …</p>
+</div>
+<ul class="points side">
+<li><code>timed_window(t)</code> co <code>t</code> sekund emituje <strong>listę</strong> elementów zebranych w tym czasie (także pustą, stąd <code>filter(len)</code>). To okno skaczące, ale wyznaczane przez czas, a nie liczbę elementów.</li>
+<li class="fragment">Operacje czasowe działają na <strong>pętli zdarzeń</strong> (Tornado/asyncio), którą Streamz sam uruchamia w wątku w tle. W programie asynchronicznym: <code>Stream(asynchronous=True)</code> i <code>await source.emit(x)</code> (korutyny: za tydzień).</li>
+<li class="fragment">To <strong>czas przetwarzania</strong> (processing time), czyli zegar maszyny w chwili przetwarzania, a nie <strong>czas zdarzenia</strong> (event time) zapisany w danych. Odczyt spóźniony o 2 s trafi do złego okna. Czas zdarzeń i watermarki: Apache Flink.</li>
+</ul>
+</div>
+</div>
+<aside class="notes">Starsza wersja materiałów (i laboratorium) opisuje timed_window jako emitujące krotki: w Streamz 0.6.6 emituje listy.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Tempo przepływu: rate_limit i delay</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import time
+from streamz import Stream
+
+start = time.perf_counter()
+def log(x):
+    print(f"{time.perf_counter() - start:4.1f} s  {x}")
+
+source = Stream(asynchronous=False)
+source.rate_limit(0.5).sink(log)  # max 1 element / 0,5 s
+
+for i in range(4):
+    source.emit(i)        # czeka, gdy potok "zatkany"
+log("koniec pętli")
+</code></pre>
+<pre class="out sm"> 0.0 s  0
+ 0.5 s  1
+ 1.0 s  2
+ 1.5 s  3
+ 1.5 s  koniec pętli</pre>
+</div>
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import time
+from streamz import Stream
+
+start = time.perf_counter()
+def log(x):
+    print(f"{time.perf_counter() - start:4.1f} s  {x}")
+
+source = Stream()
+source.delay(1.0).sink(log)   # kolejka, 1 element / 1 s
+
+for i in range(3):
+    source.emit(i)            # wraca od razu
+log("koniec pętli")
+time.sleep(2.5)
+</code></pre>
+<pre class="out sm"> 0.0 s  0
+ 0.0 s  koniec pętli
+ 1.0 s  1
+ 2.0 s  2</pre>
+</div>
+</div>
+<div class="cols">
+<div class="note"><p><code>rate_limit(t)</code> zatrzymuje <code>emit()</code> u producenta, aż minie <code>t</code>: to <strong>back pressure</strong>. Pętla kończy się po 1,5 s.</p></div>
+<div class="note warn"><p><code>delay(t)</code> wkłada elementy do kolejki <strong>bez limitu</strong> i wypuszcza je co <code>t</code> s (pierwszy od razu). <code>emit()</code> wraca natychmiast, więc kolejka może rosnąć bez końca.</p></div>
+</div>
+</div>
+<aside class="notes">Nazwa delay jest myląca: w Streamz 0.6.6 to nie jest stałe opóźnienie każdego elementu, tylko rozrzedzanie (pacing) przez kolejkę bez limitu. Czasy w wynikach są rzeczywiste, ale mogą się różnić o kilka setnych sekundy.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Back pressure (przeciwciśnienie)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Gdy producent jest szybszy niż konsument, dane muszą gdzieś czekać. <code>buffer(n)</code> to kolejka o pojemności <code>n</code>: gdy jest pełna, <code>emit()</code> czeka, jak <code>queue.Queue(maxsize=n)</code> w problemie producent-konsument (wykład 3).</p>
+<div class="sim" id="bpsim">
+  <div class="simctl">
+    <label>potok: <select class="mode"><option value="buf">buffer(n): kolejka ograniczona</option><option value="inf">delay: kolejka bez limitu</option></select></label>
+    <label>n = <select class="cap"><option>2</option><option selected>4</option><option>8</option></select></label>
+    <label>konsument: 1 element na <select class="cons"><option value="1">1 takt</option><option value="2">2 takty</option><option value="3" selected>3 takty</option></select></label>
+    <button class="btn" data-act="step">Takt</button>
+    <button class="btn" data-act="play">Odtwarzaj / pauza</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+  </div>
+  <div class="bp">
+    <div class="actor prod"><b>producent</b><small class="ps">emit co takt</small></div>
+    <span class="ar">→</span>
+    <div class="queue"></div>
+    <span class="ar">→</span>
+    <div class="actor cons"><b>konsument</b><small class="cs">czeka</small></div>
+  </div>
+  <div class="stats">
+    <div><span class="small">takt</span><b class="s-t">0</b></div>
+    <div><span class="small">wyemitowane / przetworzone</span><b class="s-io">0 / 0</b></div>
+    <div><span class="small">długość kolejki (max)</span><b class="s-q">0</b></div>
+    <div><span class="small">takty, w których producent czekał</span><b class="s-w">0</b></div>
+  </div>
+  <p class="hint verdict" style="margin-top:.5em"></p>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Źródła i ujścia danych</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<table class="simple">
+<tr><th>Źródła (<code>Stream.from_…</code>)</th><th>Ujścia</th></tr>
+<tr><td><code>from_iterable</code>, <code>from_textfile</code> (jak <code>tail -f</code>), <code>filenames</code> (nowe pliki w katalogu), <code>from_periodic</code> (funkcja wywoływana co <code>t</code> s)</td><td><code>sink(f)</code>, <code>sink_to_list()</code>, <code>sink_to_textfile(path)</code></td></tr>
+<tr><td><code>from_tcp</code>, <code>from_http_server</code>, <code>from_websocket</code>, <code>from_process</code> (wyjście programu)</td><td><code>to_websocket</code></td></tr>
+<tr><td><code>from_kafka</code>, <code>from_kafka_batched</code> (confluent-kafka), <code>from_mqtt</code></td><td><code>to_kafka</code>, <code>to_mqtt</code></td></tr>
+</table>
+<div class="note"><p>Źródła działają w pętli zdarzeń i trzeba je uruchomić: <code>source.start()</code> (albo <code>Stream.from_…(…, start=True)</code>).</p></div>
+</div>
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+import time
+from streamz import Stream
+
+source = Stream.from_iterable(range(10))
+wynik = (source.filter(lambda x: x % 2 == 0)
+               .map(lambda x: x * x)
+               .sink_to_list())
+
+source.start()      # pompuje dane w pętli zdarzeń
+time.sleep(0.5)     # dajmy mu chwilę
+print(wynik)
+</code></pre>
+<pre class="out">[0, 4, 16, 36, 64]</pre>
+<p class="small">Kafka, MQTT i serwery danych to temat wykładu 8 (dane sensoryczne, brokery) i 12 (Kafka).</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Dask">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Równolegle: Streamz i Dask</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|10|13-16">
+import time
+from dask.distributed import Client
+from streamz import Stream
+
+def slow_square(x):     # czysta funkcja: można ją wysłać
+    time.sleep(1)
+    return x * x
+
+if __name__ == "__main__":
+    client = Client(n_workers=4, threads_per_worker=1)
+
+    source = Stream(asynchronous=False)
+    wyniki = (source.scatter()         # element do klastra
+                    .map(slow_square)  # na workerach
+                    .buffer(8)         # do 8 zadań w locie
+                    .gather()          # wyniki z powrotem
+                    .sink_to_list())
+
+    start = time.perf_counter()
+    for x in range(8):
+        source.emit(x)
+    while len(wyniki) &lt; 8:
+        time.sleep(0.05)
+    print(wyniki, f"{time.perf_counter() - start:.1f} s")
+    client.close()
+</code></pre>
+<pre class="out sm">[0, 1, 4, 9, 16, 25, 36, 49] 2.1 s</pre>
+</div>
+<div>
+<div class="pipe">
+  <div class="st">scatter<small>do klastra</small></div><span class="ar">→</span>
+  <div class="st">map<small>na workerach</small></div><span class="ar">→</span>
+  <div class="st">buffer(8)<small>w locie</small></div><span class="ar">→</span>
+  <div class="st">gather<small>z powrotem</small></div>
+</div>
+<ul class="points side">
+<li class="fragment">8 zadań po 1 s na 4 procesach: ok. 2 s zamiast 8 s (czas zależy od maszyny). Kolejność wyników jest zachowana.</li>
+<li class="fragment">To ten sam pomysł co <code>ex.map</code> z wykładu 7: czyste funkcje CPU-bound wysyłamy do procesów (GIL, wykład 1).</li>
+<li class="fragment"><code>buffer(8)</code> pozwala wysłać kolejne elementy, zanim wrócą wyniki poprzednich. Bez niego każdy <code>emit</code> czekałby na wynik.</li>
+<li class="fragment">Wymaga <code>pip install "dask[distributed]"</code>.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Ograniczenia Streamz</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<ul class="points side icons cons">
+<li><i class="fa-solid fa-xmark"></i><strong>Jeden proces Pythona.</strong> Równoległość tylko przez Dask (<code>scatter</code>/<code>gather</code>); stan (<code>accumulate</code>, okna) nie jest rozpraszany.</li>
+<li><i class="fa-solid fa-xmark"></i><strong>Tylko czas przetwarzania.</strong> Brak czasu zdarzeń, watermarków i obsługi danych spóźnionych lub przychodzących poza kolejnością.</li>
+<li><i class="fa-solid fa-xmark"></i><strong>Brak odporności na awarie.</strong> Nie ma checkpointów: po awarii procesu stan przepada; brak gwarancji exactly-once.</li>
+<li><i class="fa-solid fa-xmark"></i><strong>Wydajność.</strong> Narzut Pythona na każdy element, kopiowanie danych w dużych oknach. <code>streamz.dataframe</code> opiera się na Pandas, które nie były projektowane z myślą o szybko zmieniających się danych.</li>
+<li><i class="fa-solid fa-xmark"></i><strong>Mała aktywność projektu</strong>: kilka wydań na kilka lat, nieliczni opiekunowie.</li>
+</ul>
+</div>
+<div>
+<div class="note"><p><strong>Co się zmieniło od 2017 r.?</strong> Pierwotna lista braków (wpis M. Rocklina) wymieniała przetwarzanie równoległe i Kafkę. Dziś Streamz ma integrację z Dask oraz <code>from_kafka</code> / <code>to_kafka</code>.</p></div>
+<div class="note"><p><strong>Dobre do:</strong> prototypów, notatników Jupyter, monitoringu i małych strumieni w jednym procesie.</p></div>
+<div class="note warn"><p><strong>Produkcja, duża skala, stan odporny na awarie:</strong> Apache Flink, Kafka Streams (wykłady 10-12).</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Python i strumienie w 2026: inne biblioteki</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th>Biblioteka</th><th>Model</th><th>Uwagi (stan: październik 2026)</th></tr>
+<tr><td><strong>Streamz</strong></td><td>graf operatorów w jednym procesie, push</td><td>prosty, dobry do nauki; wersja 0.6.6, mała aktywność</td></tr>
+<tr><td><strong>Faust</strong> (<code>faust-streaming</code>)</td><td>agenty async czytające tematy Kafki, tabele stanu</td><td>społecznościowy fork porzuconego projektu Robinhood; aktywny</td></tr>
+<tr><td><strong>Quix Streams</strong></td><td>StreamingDataFrame na Kafce, okna, stan w RocksDB</td><td>aktywnie rozwijany</td></tr>
+<tr><td><strong>Bytewax</strong></td><td>dataflow w Pythonie, silnik w Rust</td><td>ostatnie wydanie 0.21 (listopad 2024)</td></tr>
+<tr><td><strong>Pathway</strong></td><td>silnik w Rust, API w Pythonie, ETL i potoki dla LLM/RAG</td><td>aktywnie rozwijany</td></tr>
+<tr><td><strong>River</strong></td><td>uczenie maszynowe online (<code>learn_one</code>, <code>predict_one</code>)</td><td>uzupełnia potoki strumieniowe, nie zastępuje ich</td></tr>
+<tr><td><strong>PyFlink</strong>, <strong>PySpark</strong></td><td>API Pythona do rozproszonych silników na JVM</td><td>klaster, stan odporny na awarie; Flink: wykład 10</td></tr>
+</table>
+<p class="small">Wspólny model: źródło → operatory (bezstanowe i stanowe, okna) → ujście. Różnią się skalą, gwarancjami i tym, gdzie trzymają stan.</p>
+</div>
+<aside class="notes">Slajd poglądowy, można go pominąć, jeśli brakuje czasu.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Ćwiczenie: zbuduj potok</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="blanks cols wl">
+<pre class="exo"><span class="k">from</span> statistics <span class="k">import</span> fmean
+<span class="k">from</span> streamz <span class="k">import</span> Stream
+
+odczyty = Stream()
+<span class="c"># 1. alarm, gdy średnia z 3 OSTATNICH odczytów &gt; 30</span>
+(odczyty.<input class="blank" size="14" data-re="^sliding_window$" data-sol="sliding_window" aria-label="operacja 1">(3, return_partial=False)
+        .map(fmean)
+        .<input class="blank" size="8" data-re="^filter$" data-sol="filter" aria-label="operacja 2">(<span class="k">lambda</span> m: m &gt; 30)
+        .sink(print))
+<span class="c"># 2. maksimum z każdej ROZŁĄCZNEJ paczki 10 odczytów</span>
+odczyty.<input class="blank" size="10" data-re="^partition$" data-sol="partition" aria-label="operacja 3">(10).map(max).sink(print)
+<span class="c"># 3. liczba wszystkich odczytów do tej pory</span>
+odczyty.<input class="blank" size="10" data-re="^accumulate$" data-sol="accumulate" aria-label="operacja 4">(<span class="k">lambda</span> n, _: n + 1, start=0).sink(print)</pre>
+<div>
+<p class="lead">Uzupełnij nazwy operacji Streamz.</p>
+<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
+<p class="fb"></p>
+<p class="explain">Jedno źródło, trzy gałęzie: okno przesuwne, okno skaczące i stan bieżący. Każdy <code>odczyty.emit(t)</code> przejdzie przez wszystkie trzy, w kolejności podłączenia.</p>
+<div class="note"><p>W domu dopisz <code>for t in [28, 29, 31, 32, 33]: odczyty.emit(t)</code> i uruchom. Która gałąź wypisze coś najpierw?</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się: Streamz</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="quiz multi compact"><p class="q">Które zdania o Streamz są prawdziwe? (zaznacz wszystkie)</p><div class="opts"><button class="opt" data-ok="1">emit() bez operacji czasowych wraca dopiero po przejściu elementu przez cały graf</button><button class="opt" data-ok="0">Streamz obsługuje czas zdarzeń i watermarki</button><button class="opt" data-ok="1">po awarii procesu stan accumulate przepada</button><button class="opt" data-ok="1">Streamz potrafi czytać z Kafki</button><button class="opt" data-ok="0">map() w Streamz zwraca listę wyników</button><button class="opt" data-ok="1">jeden węzeł może mieć wiele węzłów podrzędnych</button></div><button class="btn check">Sprawdź</button><p class="explain">Czas zdarzeń i watermarki oferuje dopiero Flink. <code>map</code> zwraca nowy węzeł grafu (obiekt <code>Stream</code>), a nie listę; wyniki zbiera np. <code>sink_to_list()</code>.</p></div>
+<div class="quiz compact"><p class="q">Po <code>temp.emit(21)</code>, <code>temp.emit(22)</code>, <code>wilg.emit(40)</code> operator <code>temp.zip(wilg)</code> wyemitował:</p><div class="opts"><button class="opt" data-ok="1">(21, 40)</button><button class="opt" data-ok="0">(22, 40)</button><button class="opt" data-ok="0">(21, 40) i (22, 40)</button><button class="opt" data-ok="0">nic</button></div><p class="explain"><code>zip</code> łączy elementy w kolejności: pierwszy z pierwszym. 22 czeka w buforze na następną wilgotność. <code>(22, 40)</code> dałoby <code>combine_latest</code>.</p></div>
+<div class="quiz compact"><p class="q">Który operator wywołuje back pressure, czyli zatrzymuje <code>emit()</code> u producenta?</p><div class="opts"><button class="opt" data-ok="0">delay</button><button class="opt" data-ok="1">rate_limit</button><button class="opt" data-ok="0">map</button></div><p class="explain"><code>rate_limit</code> (i pełny <code>buffer(n)</code>) każe producentowi czekać. <code>delay</code> ma kolejkę bez limitu: producent nie czeka, ale zużycie pamięci może rosnąć bez końca.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Apache Flink">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Apache Flink</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead"><strong>Apache Flink</strong> to framework i <strong>rozproszony silnik</strong> do obliczeń <strong>stanowych</strong> na strumieniach <strong>nieograniczonych</strong> i <strong>ograniczonych</strong>. Działa w typowych środowiskach klastrowych, liczy w pamięci, szybko i w dowolnej skali.</p>
+<ul class="points side">
+<li><strong>Strumień ograniczony</strong> (bounded): wszystkie dane są znane przy starcie, czyli przetwarzanie wsadowe (batch).</li>
+<li><strong>Strumień nieograniczony</strong> (unbounded): dane wciąż dopływają, a agregacje liczymy zwykle w oknach czasowych.</li>
+<li>W 2026 r. aktualna linia to Flink 2.x (2.3 z czerwca 2026). API: Java, SQL, Python (PyFlink).</li>
+<li>Na tym wykładzie: <strong>architektura</strong>. API i model danych: wykład 10; stan i okna czasowe: kolejne wykłady.</li>
+</ul>
+</div>
+<div>
+<img class="pic" src="images/image-ZtHhFTL9.png" alt="Logo Apache Flink: wiewiórka" style="max-height:6em">
+<svg class="diagram" viewBox="0 0 440 190" role="img" aria-label="Strumień ograniczony ma początek i koniec; strumień nieograniczony ma początek, a jego koniec jest nieznany">
+<defs><marker id="arT" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs>
+<text x="10" y="22" style="font-size:15px" fill="#666">ograniczony (bounded)</text>
+<line x1="20" y1="45" x2="250" y2="45" stroke="#1a73d9" stroke-width="3"/>
+<line x1="20" y1="35" x2="20" y2="55" stroke="#1a73d9" stroke-width="3"/><line x1="250" y1="35" x2="250" y2="55" stroke="#1a73d9" stroke-width="3"/>
+<g fill="#1a73d9"><circle cx="45" cy="45" r="7"/><circle cx="85" cy="45" r="7"/><circle cx="125" cy="45" r="7"/><circle cx="165" cy="45" r="7"/><circle cx="205" cy="45" r="7"/></g>
+<text x="20" y="75" style="font-size:14px" fill="#666">start</text><text x="250" y="75" text-anchor="middle" style="font-size:14px" fill="#666">koniec</text>
+<text x="10" y="112" style="font-size:15px" fill="#666">nieograniczony (unbounded)</text>
+<line x1="20" y1="140" x2="420" y2="140" stroke="#53ae12" stroke-width="3" stroke-dasharray="none" marker-end="url(#arT)"/>
+<line x1="20" y1="130" x2="20" y2="150" stroke="#53ae12" stroke-width="3"/>
+<g fill="#53ae12"><circle cx="45" cy="140" r="7"/><circle cx="85" cy="140" r="7"/><circle cx="125" cy="140" r="7"/><circle cx="165" cy="140" r="7"/><circle cx="205" cy="140" r="7"/><circle cx="245" cy="140" r="7"/><circle cx="285" cy="140" r="7"/></g>
+<line x1="310" y1="125" x2="310" y2="160" stroke="#e8710a" stroke-width="2" stroke-dasharray="4 3"/>
+<text x="310" y="178" text-anchor="middle" style="font-size:14px" fill="#e8710a">teraz</text>
+<text x="380" y="128" text-anchor="middle" style="font-size:14px" fill="#666">przyszłość…</text>
+<text x="20" y="170" style="font-size:14px" fill="#666">start</text>
+</svg>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Architektura">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Architektura klastra Flink</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wr">
+<ul class="points side">
+<li><strong>Klient</strong> nie jest częścią środowiska wykonawczego: zamienia program na graf przepływu danych (JobGraph) i wysyła go do JobManagera. Potem może się odłączyć albo czekać na wynik.</li>
+<li><strong>JobManager</strong> (master) koordynuje wykonanie:
+<br>· <em>Dispatcher</em>: interfejs REST, Web UI, dla każdego joba uruchamia JobMastera,
+<br>· <em>ResourceManager</em>: przydziela sloty TaskManagerów,
+<br>· <em>JobMaster</em>: jeden na job; planuje taski, koordynuje checkpointy i odtwarzanie po awarii.</li>
+<li><strong>TaskManager</strong> (worker): proces JVM, wykonuje taski w <strong>slotach</strong>, buforuje i wymienia strumienie danych z innymi TaskManagerami.</li>
+</ul>
+<svg class="diagram" viewBox="0 0 640 420" role="img" aria-label="Klient wysyła JobGraph do JobManagera, który zawiera Dispatcher, ResourceManager i JobMastery; JobManager wdraża taski na dwa TaskManagery po trzy sloty; TaskManagery wymieniają strumienie danych">
+<defs><marker id="arF" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker></defs>
+<rect x="10" y="20" width="150" height="110" rx="8" fill="#fff" stroke="#999" stroke-width="2"/>
+<text x="85" y="45" text-anchor="middle" font-weight="bold">Klient</text>
+<rect x="25" y="60" width="120" height="55" rx="6" fill="#fce8e6" stroke="#d93025"/>
+<text x="85" y="84" text-anchor="middle" style="font-size:15px">program</text><text x="85" y="104" text-anchor="middle" style="font-size:15px">→ JobGraph</text>
+<line x1="160" y1="75" x2="228" y2="75" stroke="#555" stroke-width="2.5" marker-end="url(#arF)"/>
+<text x="194" y="65" text-anchor="middle" style="font-size:13px" fill="#555">REST</text>
+<rect x="230" y="10" width="400" height="170" rx="8" fill="#fef3c7" stroke="#e8710a" stroke-width="2"/>
+<text x="430" y="34" text-anchor="middle" font-weight="bold">JobManager</text>
+<rect x="245" y="50" width="115" height="50" rx="6" fill="#fff" stroke="#e8710a"/><text x="302" y="81" text-anchor="middle" style="font-size:15px">Dispatcher</text>
+<rect x="372" y="50" width="243" height="50" rx="6" fill="#fff" stroke="#e8710a"/><text x="493" y="81" text-anchor="middle" style="font-size:15px">ResourceManager</text>
+<rect x="245" y="112" width="175" height="54" rx="6" fill="#fff" stroke="#e8710a"/><text x="332" y="135" text-anchor="middle" style="font-size:15px">JobMaster (job A)</text><text x="332" y="155" text-anchor="middle" style="font-size:12px" fill="#666">planowanie, checkpointy</text>
+<rect x="432" y="112" width="183" height="54" rx="6" fill="#fff" stroke="#e8710a" stroke-dasharray="5 4"/><text x="523" y="135" text-anchor="middle" style="font-size:15px">JobMaster (job B)</text><text x="523" y="155" text-anchor="middle" style="font-size:12px" fill="#666">tylko w trybie session</text>
+<line x1="300" y1="180" x2="250" y2="243" stroke="#555" stroke-width="2.5" marker-end="url(#arF)"/>
+<line x1="470" y1="180" x2="520" y2="243" stroke="#555" stroke-width="2.5" marker-end="url(#arF)"/>
+<text x="385" y="222" text-anchor="middle" style="font-size:13px" fill="#555">wdrażanie tasków, heartbeat, statusy</text>
+<g>
+<rect x="60" y="245" width="270" height="165" rx="8" fill="#f7a33a" stroke="#c26d00" stroke-width="2"/>
+<text x="195" y="268" text-anchor="middle" font-weight="bold" fill="#fff">TaskManager 1 (JVM)</text>
+<rect x="72" y="280" width="78" height="80" rx="4" fill="#e8edf5" stroke="#8a99a6"/><rect x="156" y="280" width="78" height="80" rx="4" fill="#e8edf5" stroke="#8a99a6"/><rect x="240" y="280" width="78" height="80" rx="4" fill="#e8edf5" stroke="#8a99a6"/>
+<text x="111" y="298" text-anchor="middle" style="font-size:13px">slot</text><text x="195" y="298" text-anchor="middle" style="font-size:13px">slot</text><text x="279" y="298" text-anchor="middle" style="font-size:13px">slot</text>
+<circle cx="111" cy="330" r="17" fill="#9b59b6"/><circle cx="195" cy="330" r="17" fill="#9b59b6"/>
+<text x="111" y="335" text-anchor="middle" fill="#fff" style="font-size:12px">task</text><text x="195" y="335" text-anchor="middle" fill="#fff" style="font-size:12px">task</text>
+<text x="195" y="390" text-anchor="middle" style="font-size:13px">pamięć, sieć, I/O</text>
+</g>
+<g>
+<rect x="360" y="245" width="270" height="165" rx="8" fill="#f7a33a" stroke="#c26d00" stroke-width="2"/>
+<text x="495" y="268" text-anchor="middle" font-weight="bold" fill="#fff">TaskManager 2 (JVM)</text>
+<rect x="372" y="280" width="78" height="80" rx="4" fill="#e8edf5" stroke="#8a99a6"/><rect x="456" y="280" width="78" height="80" rx="4" fill="#e8edf5" stroke="#8a99a6"/><rect x="540" y="280" width="78" height="80" rx="4" fill="#e8edf5" stroke="#8a99a6"/>
+<text x="411" y="298" text-anchor="middle" style="font-size:13px">slot</text><text x="495" y="298" text-anchor="middle" style="font-size:13px">slot</text><text x="579" y="298" text-anchor="middle" style="font-size:13px">slot</text>
+<circle cx="411" cy="330" r="17" fill="#9b59b6"/><circle cx="495" cy="330" r="17" fill="#9b59b6"/>
+<text x="411" y="335" text-anchor="middle" fill="#fff" style="font-size:12px">task</text><text x="495" y="335" text-anchor="middle" fill="#fff" style="font-size:12px">task</text>
+<text x="495" y="390" text-anchor="middle" style="font-size:13px">pamięć, sieć, I/O</text>
+</g>
+<line x1="300" y1="380" x2="388" y2="380" stroke="#1a73d9" stroke-width="3" marker-start="url(#arF)" marker-end="url(#arF)"/>
+<text x="345" y="372" text-anchor="middle" style="font-size:12px" fill="#1a73d9">dane</text>
+</svg>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przesłanie zadania krok po kroku</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="submitsim">
+  <div class="simctl">
+    <button class="btn ghost" data-act="prev">Wstecz</button>
+    <button class="btn" data-act="next">Dalej</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+    <span class="stat">krok <b class="k">0</b> / 7</span>
+  </div>
+  <p class="stepdesc"></p>
+<svg class="diagram" viewBox="0 0 1180 345" role="img" aria-label="Przepływ komunikatów przy przesyłaniu zadania: klient, Dispatcher, JobMaster, ResourceManager, TaskManagery">
+<defs><marker id="arS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker></defs>
+<g font-weight="bold">
+<rect x="10" y="130" width="150" height="70" rx="8" fill="#fff" stroke="#999" stroke-width="2"/><text x="85" y="160" text-anchor="middle">Klient</text><text x="85" y="182" text-anchor="middle" font-weight="normal" style="font-size:14px">flink run</text>
+<rect x="300" y="20" width="170" height="60" rx="8" fill="#fef3c7" stroke="#e8710a" stroke-width="2"/><text x="385" y="56" text-anchor="middle">Dispatcher</text>
+<rect x="300" y="250" width="170" height="60" rx="8" fill="#fef3c7" stroke="#e8710a" stroke-width="2"/><text x="385" y="286" text-anchor="middle">JobMaster</text>
+<rect x="610" y="20" width="210" height="60" rx="8" fill="#fef3c7" stroke="#e8710a" stroke-width="2"/><text x="715" y="56" text-anchor="middle">ResourceManager</text>
+<rect x="980" y="40" width="190" height="60" rx="8" fill="#f7a33a" stroke="#c26d00" stroke-width="2"/><text x="1075" y="76" text-anchor="middle" fill="#fff">TaskManager 1</text>
+<rect x="980" y="230" width="190" height="60" rx="8" fill="#f7a33a" stroke="#c26d00" stroke-width="2"/><text x="1075" y="266" text-anchor="middle" fill="#fff">TaskManager 2</text>
+</g>
+<g class="arr" data-s="1"><path d="M160,150 L298,62" stroke="#555" stroke-width="3" fill="none" marker-end="url(#arS)"/><circle cx="229" cy="106" r="15" fill="#fff" stroke="#555" stroke-width="2.5"/><text x="229" y="112" text-anchor="middle" font-weight="bold" style="font-size:16px">1</text></g>
+<g class="arr" data-s="2"><path d="M385,80 L385,248" stroke="#555" stroke-width="3" fill="none" marker-end="url(#arS)"/><circle cx="385" cy="165" r="15" fill="#fff" stroke="#555" stroke-width="2.5"/><text x="385" y="171" text-anchor="middle" font-weight="bold" style="font-size:16px">2</text></g>
+<g class="arr" data-s="3"><path d="M470,265 C560,220 640,150 700,82" stroke="#555" stroke-width="3" fill="none" marker-end="url(#arS)"/><circle cx="596" cy="182" r="15" fill="#fff" stroke="#555" stroke-width="2.5"/><text x="596" y="188" text-anchor="middle" font-weight="bold" style="font-size:16px">3</text></g>
+<g class="arr" data-s="4"><path d="M820,55 L978,68" stroke="#555" stroke-width="3" fill="none" marker-end="url(#arS)"/><path d="M820,70 C900,120 940,200 978,250" stroke="#555" stroke-width="3" fill="none" marker-end="url(#arS)"/><circle cx="900" cy="62" r="15" fill="#fff" stroke="#555" stroke-width="2.5"/><text x="900" y="68" text-anchor="middle" font-weight="bold" style="font-size:16px">4</text></g>
+<g class="arr" data-s="5"><path d="M980,95 C800,180 600,280 472,282" stroke="#555" stroke-width="3" fill="none" marker-end="url(#arS)"/><path d="M978,262 L472,272" stroke="#555" stroke-width="3" fill="none" marker-end="url(#arS)"/><circle cx="725" cy="267" r="15" fill="#fff" stroke="#555" stroke-width="2.5"/><text x="725" y="273" text-anchor="middle" font-weight="bold" style="font-size:16px">5</text></g>
+<g class="arr" data-s="6"><path d="M472,300 C700,330 900,320 1000,292" stroke="#555" stroke-width="3" fill="none" marker-end="url(#arS)"/><path d="M472,256 C700,200 900,140 1030,102" stroke="#555" stroke-width="3" fill="none" marker-end="url(#arS)"/><circle cx="784" cy="318" r="15" fill="#fff" stroke="#555" stroke-width="2.5"/><text x="784" y="324" text-anchor="middle" font-weight="bold" style="font-size:16px">6</text></g>
+<g class="arr" data-s="7"><path d="M1075,102 L1075,228" stroke="#1a73d9" stroke-width="3" fill="none" marker-start="url(#arS)" marker-end="url(#arS)"/><path d="M298,280 L160,190" stroke="#555" stroke-width="3" fill="none" marker-end="url(#arS)"/><circle cx="1075" cy="165" r="15" fill="#fff" stroke="#555" stroke-width="2.5"/><text x="1075" y="171" text-anchor="middle" font-weight="bold" style="font-size:16px">7</text><circle cx="229" cy="235" r="15" fill="#fff" stroke="#555" stroke-width="2.5"/><text x="229" y="241" text-anchor="middle" font-weight="bold" style="font-size:16px">7</text></g>
+</svg>
+</div>
+</div>
+<aside class="notes">Na podstawie dokumentacji Flink 2.x (Dispatcher, JobMaster, ResourceManager). Dawny diagram z komunikatami SubmitJobWait / SubmitTask pochodził z Flink 0.x i był nieaktualny.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>JobManager w dokumentacji Flink</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<img class="pic" src="images/image-iPhDdDa2.png" alt="Diagram procesów Flink: program, klient, JobManager z grafem przepływu, schedulerem i koordynatorem checkpointów, dwa TaskManagery ze slotami" style="max-height:19em">
+<p class="cap">Źródło: dokumentacja Apache Flink, „Flink Architecture”.</p>
+</div>
+<div>
+<p class="lead"><strong>Zadania JobManagera</strong></p>
+<ul class="points side">
+<li>przyjęcie programu, budowa planu wykonania (ExecutionGraph) i rozmieszczenie tasków w slotach,</li>
+<li>koordynacja <strong>checkpointów</strong> (Checkpoint Coordinator),</li>
+<li>wykrywanie awarii (heartbeat) i restart od ostatniego checkpointu,</li>
+<li>zbieranie statusów i metryk, Web UI.</li>
+</ul>
+<div class="note"><p><em>Actor System</em> na diagramie to warstwa komunikacji RPC: od Flink 1.18 Apache Pekko (wcześniej Akka).</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="TaskManager">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>TaskManager i sloty (task slots)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<ul class="points side">
+<li><strong>TaskManager</strong> to proces JVM. Każdy <strong>subtask</strong> działa w osobnym wątku.</li>
+<li><strong>Slot</strong> to stała część zasobów TaskManagera: przy 3 slotach każdy dostaje 1/3 <strong>pamięci zarządzanej</strong>. Sloty <strong>nie izolują CPU</strong>.</li>
+<li>Sloty jednego TaskManagera dzielą JVM, połączenia TCP i heartbeaty. Jeden slot na TaskManager daje izolację procesów.</li>
+<li><strong>Łańcuchowanie operatorów</strong> (operator chaining): np. source i map tworzą jeden task w jednym wątku, bez przekazywania danych między wątkami.</li>
+<li><strong>Współdzielenie slotów</strong> (slot sharing): jeden slot może mieć cały „przekrój” potoku, więc job potrzebuje tylu slotów, ile wynosi jego <strong>największa równoległość</strong>.</li>
+</ul>
+</div>
+<div>
+<svg class="diagram" viewBox="0 0 500 360" role="img" aria-label="Potok source i map połączone w łańcuch, keyBy i okno, sink; przy równoległości 2 subtaski trafiają do dwóch slotów, sink do jednego z nich">
+<defs><marker id="arC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker></defs>
+<text x="10" y="22" style="font-size:15px" fill="#666">graf logiczny</text>
+<rect x="10" y="35" width="150" height="44" rx="22" fill="#9b59b6"/><text x="85" y="62" text-anchor="middle" fill="#fff" style="font-size:15px">source → map</text>
+<line x1="160" y1="57" x2="208" y2="57" stroke="#555" stroke-width="2.5" marker-end="url(#arC)"/>
+<rect x="210" y="35" width="150" height="44" rx="22" fill="#1a73d9"/><text x="285" y="62" text-anchor="middle" fill="#fff" style="font-size:15px">keyBy → okno</text>
+<line x1="360" y1="57" x2="408" y2="57" stroke="#555" stroke-width="2.5" marker-end="url(#arC)"/>
+<rect x="410" y="35" width="80" height="44" rx="22" fill="#53ae12"/><text x="450" y="62" text-anchor="middle" fill="#fff" style="font-size:15px">sink</text>
+<text x="85" y="100" text-anchor="middle" style="font-size:13px" fill="#666">łańcuch: 1 task</text>
+<text x="285" y="100" text-anchor="middle" style="font-size:13px" fill="#666">p = 2</text><text x="450" y="100" text-anchor="middle" style="font-size:13px" fill="#666">p = 1</text>
+<text x="10" y="140" style="font-size:15px" fill="#666">TaskManager z 3 slotami (p = 2, slot sharing)</text>
+<rect x="10" y="150" width="480" height="200" rx="8" fill="#f7a33a" stroke="#c26d00" stroke-width="2"/>
+<rect x="25" y="165" width="145" height="170" rx="4" fill="#e8edf5" stroke="#8a99a6"/><rect x="178" y="165" width="145" height="170" rx="4" fill="#e8edf5" stroke="#8a99a6"/><rect x="331" y="165" width="145" height="170" rx="4" fill="#e8edf5" stroke="#8a99a6"/>
+<text x="97" y="185" text-anchor="middle" style="font-size:13px">slot 1 (1/3 pamięci)</text><text x="250" y="185" text-anchor="middle" style="font-size:13px">slot 2 (1/3 pamięci)</text><text x="403" y="185" text-anchor="middle" style="font-size:13px">slot 3: wolny</text>
+<rect x="35" y="200" width="125" height="32" rx="16" fill="#9b59b6"/><text x="97" y="221" text-anchor="middle" fill="#fff" style="font-size:13px">source→map [1]</text>
+<rect x="35" y="242" width="125" height="32" rx="16" fill="#1a73d9"/><text x="97" y="263" text-anchor="middle" fill="#fff" style="font-size:13px">okno [1]</text>
+<rect x="35" y="284" width="125" height="32" rx="16" fill="#53ae12"/><text x="97" y="305" text-anchor="middle" fill="#fff" style="font-size:13px">sink [1]</text>
+<rect x="188" y="200" width="125" height="32" rx="16" fill="#9b59b6"/><text x="250" y="221" text-anchor="middle" fill="#fff" style="font-size:13px">source→map [2]</text>
+<rect x="188" y="242" width="125" height="32" rx="16" fill="#1a73d9"/><text x="250" y="263" text-anchor="middle" fill="#fff" style="font-size:13px">okno [2]</text>
+</svg>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Symulacja: sloty i równoległość</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="slotsim">
+  <div class="simctl">
+    <label>TaskManagery: <select class="ntm"><option>1</option><option selected>2</option><option>3</option></select></label>
+    <label>sloty na TaskManager: <select class="nsl"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></label>
+    <label>równoległość p: <select class="par"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>6</option><option>8</option></select></label>
+    <label><input type="checkbox" class="share" checked> slot sharing</label>
+  </div>
+  <div class="tms"></div>
+  <p class="verdict"></p>
+  <p class="hint">Job: <span class="chip" style="background:#9b59b6;color:#fff">source→map</span> (p) → <span class="chip" style="background:var(--blue);color:#fff">okno</span> (p) → <span class="chip" style="background:var(--green);color:#fff">sink</span> (1). Wyłącz slot sharing: ile slotów potrzeba teraz?</p>
+</div>
+</div>
+<aside class="notes">Bez slot sharing każdy subtask potrzebuje własnego slotu: 2p + 1. Przy niedoborze slotów job nie wystartuje: po timeoucie zgłasza NoResourceAvailableException (z adaptive scheduler może wystartować z mniejszą równoległością).</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Tryby wdrożenia i wysoka dostępność</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th>Tryb</th><th>Jak działa</th><th>Kiedy</th></tr>
+<tr><td><strong>Session</strong></td><td>długo działający klaster przyjmuje wiele jobów; jeden JobManager, osobny <strong>JobMaster</strong> dla każdego joba; zasoby współdzielone</td><td>wiele krótkich zapytań, środowisko deweloperskie</td></tr>
+<tr><td><strong>Application</strong></td><td>klaster tylko dla jednej aplikacji; <code>main()</code> uruchamia się na klastrze; klaster żyje tyle, co aplikacja</td><td>produkcja: lepsza izolacja zasobów</td></tr>
+<tr><td><strong>Per-job</strong></td><td>osobny klaster na każdy job, uruchamiany z klienta (YARN)</td><td>przestarzały (deprecated): używaj trybu Application</td></tr>
+</table>
+<div class="cols">
+<ul class="points side">
+<li>Gdzie: samodzielny klaster (standalone), Docker, Kubernetes (natywnie lub przez Flink Kubernetes Operator), YARN.</li>
+<li>Uwaga: „każde zadanie ma osobnego JobManagera” jest prawdą tylko w trybie Application. Zawsze każde zadanie ma za to osobnego <strong>JobMastera</strong>.</li>
+</ul>
+<div class="note"><p><strong>Wysoka dostępność (HA):</strong> kilka JobManagerów, jeden jest <strong>liderem</strong>, pozostałe czekają w gotowości (standby). Lidera wybiera ZooKeeper albo Kubernetes. Po awarii lidera nowy przejmuje joby z magazynu HA i wznawia je od ostatniego checkpointu.</p></div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Job status">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Cykl życia zadania (job status)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="jobsim">
+  <div class="simctl">
+    <button class="btn" data-ev="deploy">taski wdrożone</button>
+    <button class="btn" data-ev="ok">taski zakończone</button>
+    <button class="btn" data-ev="fail">awaria taska</button>
+    <button class="btn" data-ev="restart">restart możliwy</button>
+    <button class="btn" data-ev="norestart">restart niemożliwy</button>
+    <button class="btn" data-ev="restarted">restart gotowy</button>
+    <button class="btn" data-ev="cancel">anuluj</button>
+    <button class="btn" data-ev="canceled">taski anulowane</button>
+    <button class="btn" data-ev="lose">utrata lidera (HA)</button>
+    <button class="btn ghost" data-ev="reset">Reset</button>
+  </div>
+<svg class="diagram" viewBox="0 0 1180 340" role="img" aria-label="Diagram stanów joba: CREATED, RUNNING, FINISHED, FAILING, FAILED, RESTARTING, CANCELLING, CANCELED, SUSPENDED">
+<defs><marker id="arJ" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker></defs>
+<g class="tr" data-t="CREATED-RUNNING"><path d="M160,150 L248,150" stroke="#555" stroke-width="2.5" fill="none" marker-end="url(#arJ)"/></g>
+<g class="tr" data-t="RUNNING-FINISHED"><path d="M330,125 L330,72" stroke="#555" stroke-width="2.5" fill="none" marker-end="url(#arJ)"/></g>
+<g class="tr" data-t="RUNNING-CANCELLING"><path d="M410,135 C470,120 500,60 548,48" stroke="#555" stroke-width="2.5" fill="none" marker-end="url(#arJ)"/></g>
+<g class="tr" data-t="CANCELLING-CANCELED"><path d="M710,45 L848,45" stroke="#555" stroke-width="2.5" fill="none" marker-end="url(#arJ)"/></g>
+<g class="tr" data-t="RUNNING-FAILING"><path d="M410,150 L548,150" stroke="#555" stroke-width="2.5" fill="none" marker-end="url(#arJ)"/></g>
+<g class="tr" data-t="FAILING-FAILED"><path d="M710,150 L848,150" stroke="#555" stroke-width="2.5" fill="none" marker-end="url(#arJ)"/></g>
+<g class="tr" data-t="FAILING-RESTARTING"><path d="M630,175 L630,238" stroke="#555" stroke-width="2.5" fill="none" marker-end="url(#arJ)"/></g>
+<g class="tr" data-t="RESTARTING-CREATED"><path d="M550,272 C450,335 150,335 85,177" stroke="#555" stroke-width="2.5" fill="none" marker-end="url(#arJ)"/></g>
+<g class="tr" data-t="RUNNING-SUSPENDED"><path d="M330,175 L330,238" stroke="#555" stroke-width="2.5" fill="none" marker-end="url(#arJ)"/></g>
+<g class="stn term" data-s="FINISHED"><rect x="250" y="20" width="160" height="50" rx="10"/><text x="330" y="51" text-anchor="middle">FINISHED</text></g>
+<g class="stn" data-s="CANCELLING"><rect x="550" y="20" width="160" height="50" rx="10"/><text x="630" y="51" text-anchor="middle">CANCELLING</text></g>
+<g class="stn term" data-s="CANCELED"><rect x="850" y="20" width="160" height="50" rx="10"/><text x="930" y="51" text-anchor="middle">CANCELED</text></g>
+<g class="stn" data-s="CREATED"><rect x="10" y="125" width="150" height="50" rx="10"/><text x="85" y="156" text-anchor="middle">CREATED</text></g>
+<g class="stn" data-s="RUNNING"><rect x="250" y="125" width="160" height="50" rx="10"/><text x="330" y="156" text-anchor="middle">RUNNING</text></g>
+<g class="stn" data-s="FAILING"><rect x="550" y="125" width="160" height="50" rx="10"/><text x="630" y="156" text-anchor="middle">FAILING</text></g>
+<g class="stn term" data-s="FAILED"><rect x="850" y="125" width="160" height="50" rx="10"/><text x="930" y="156" text-anchor="middle">FAILED</text></g>
+<g class="stn" data-s="SUSPENDED"><rect x="250" y="240" width="160" height="50" rx="10"/><text x="330" y="271" text-anchor="middle">SUSPENDED</text></g>
+<g class="stn" data-s="RESTARTING"><rect x="550" y="240" width="160" height="50" rx="10"/><text x="630" y="271" text-anchor="middle">RESTARTING</text></g>
+</svg>
+  <p class="stepdesc"></p>
+</div>
+</div>
+<aside class="notes">Pogrubiona ramka: stany globalnie końcowe (FINISHED, FAILED, CANCELED). SUSPENDED jest końcowy tylko lokalnie: inny JobManager może przejąć job z magazynu HA.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Odporność na awarie: checkpointy</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<svg class="diagram" viewBox="0 0 640 210" role="img" aria-label="Bariery checkpointu płyną w strumieniu razem z danymi; operator po otrzymaniu bariery zapisuje swój stan do trwałego magazynu">
+<defs><marker id="arB9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#555"/></marker></defs>
+<line x1="10" y1="70" x2="420" y2="70" stroke="#999" stroke-width="2" marker-end="url(#arB9)"/>
+<g fill="#1a73d9"><circle cx="40" cy="70" r="9"/><circle cx="75" cy="70" r="9"/><circle cx="150" cy="70" r="9"/><circle cx="185" cy="70" r="9"/><circle cx="220" cy="70" r="9"/><circle cx="300" cy="70" r="9"/><circle cx="335" cy="70" r="9"/></g>
+<rect x="108" y="45" width="8" height="50" fill="#e8710a"/><text x="112" y="35" text-anchor="middle" style="font-size:14px" fill="#e8710a">bariera n+1</text>
+<rect x="258" y="45" width="8" height="50" fill="#e8710a"/><text x="262" y="35" text-anchor="middle" style="font-size:14px" fill="#e8710a">bariera n</text>
+<rect x="430" y="40" width="200" height="60" rx="8" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="530" y="66" text-anchor="middle">operator</text><text x="530" y="88" text-anchor="middle" style="font-size:14px" fill="#666">stan: np. sumy w oknach</text>
+<line x1="530" y1="100" x2="530" y2="148" stroke="#53ae12" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#arB9)"/>
+<rect x="420" y="150" width="220" height="50" rx="8" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="530" y="181" text-anchor="middle" style="font-size:15px">migawka stanu (S3, HDFS)</text>
+<text x="10" y="130" style="font-size:14px" fill="#666">dane płyną w prawo; elementy na prawo od bariery n</text>
+<text x="10" y="150" style="font-size:14px" fill="#666">(wcześniejsze) wchodzą do checkpointu n</text>
+</svg>
+<ul class="points side">
+<li>JobMaster (Checkpoint Coordinator) co zadany czas wstawia do źródeł <strong>bariery</strong>, które płyną razem z danymi.</li>
+<li>Gdy operator dostanie barierę, zapisuje <strong>migawkę swojego stanu</strong> w trwałym magazynie.</li>
+<li>Po awarii job wraca do ostatniego pełnego checkpointu, a źródło (np. Kafka) cofa się do zapisanej pozycji: stan jest odtworzony <strong>dokładnie raz</strong> (exactly-once).</li>
+</ul>
+</div>
+<div>
+<div class="note bad"><p><strong>Streamz:</strong> stan żyje tylko w pamięci procesu. Awaria = utrata stanu.</p></div>
+<div class="note"><p>Ten sam mechanizm pozwala zatrzymać job z <strong>savepointem</strong>, zmienić kod lub równoległość i wznowić od tego miejsca.</p></div>
+<div class="note"><p>Szczegóły stanu i okien czasowych: wykłady o Apache Flink w styczniu.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="PyFlink">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>PyFlink</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead"><strong>PyFlink</strong> to API Pythona dla Apache Flink: potoki wsadowe i strumieniowe, które wykonuje klaster na JVM.</p>
+<pre class="code-wrap"><code class="language-bash" data-trim data-noescape>
+# PyFlink 2.3: Python 3.9-3.12, nie 3.13!
+python3.12 -m venv flink-env
+source flink-env/bin/activate
+python -m pip install apache-flink==2.3.0
+</code></pre>
+<div class="note warn"><p>Potrzebna jest też Java (11 lub 17). Pakiet ma kilkaset MB, bo zawiera całą dystrybucję Flinka do uruchamiania lokalnego.</p></div>
+<div class="note"><p>Funkcje użytkownika w Pythonie (UDF) działają w osobnym procesie Pythona, który wymienia dane z JVM, albo w trybie wątkowym wewnątrz JVM.</p></div>
+</div>
+<div>
+<table class="simple">
+<tr><th>API</th><th>Charakter</th></tr>
+<tr><td><strong>SQL</strong></td><td>zapytania relacyjne na tabelach dynamicznych (strumieniach), deklaratywnie</td></tr>
+<tr><td><strong>Table API</strong></td><td>to samo co SQL, ale wywołaniami metod w Pythonie (<code>select</code>, <code>where</code>, <code>group_by</code>); SQL i Table API przechodzą przez <strong>ten sam</strong> planer i optymalizator</td></tr>
+<tr><td><strong>DataStream API</strong></td><td>niższy poziom: <code>map</code>, <code>filter</code>, <code>key_by</code>, okna, jawna kontrola stanu i czasu (jak w Streamz, ale rozproszone)</td></tr>
+</table>
+<p class="small">Przykłady kodu PyFlink: wykład 10.</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Streamz a Apache Flink</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th></th><th>Streamz</th><th>Apache Flink</th></tr>
+<tr><td>wykonanie</td><td>jeden proces Pythona (opcjonalnie Dask)</td><td>klaster: JobManager + TaskManagery (JVM)</td></tr>
+<tr><td>model</td><td>graf operatorów, push, <code>emit()</code></td><td>graf operatorów (JobGraph), równoległe subtaski</td></tr>
+<tr><td>stan</td><td>w pamięci (<code>accumulate</code>, okna)</td><td>zarządzany, dzielony po kluczu, w pamięci lub RocksDB</td></tr>
+<tr><td>awarie</td><td>stan przepada</td><td>checkpointy, restart, exactly-once</td></tr>
+<tr><td>czas</td><td>tylko czas przetwarzania</td><td>czas przetwarzania i czas zdarzeń z watermarkami</td></tr>
+<tr><td>skala</td><td>tysiące zdarzeń na sekundę</td><td>miliony zdarzeń na sekundę, setki maszyn</td></tr>
+<tr><td>do czego</td><td>nauka, prototypy, Jupyter, małe usługi</td><td>produkcyjne potoki strumieniowe</td></tr>
+</table>
+<p class="small">Wspólne pojęcia, które przeniesiemy na Flinka: źródło, operator, ujście, stan, okno skaczące i przesuwne, back pressure.</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się: Flink</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="quiz compact"><p class="q">Który komponent uruchamia JobMastera dla nowo przesłanego joba?</p><div class="opts"><button class="opt" data-ok="0">ResourceManager</button><button class="opt" data-ok="1">Dispatcher</button><button class="opt" data-ok="0">TaskManager</button><button class="opt" data-ok="0">klient</button></div><p class="explain">Dispatcher przyjmuje job przez REST i dla każdego joba uruchamia osobnego JobMastera. ResourceManager tylko przydziela sloty.</p></div>
+<div class="quiz compact"><p class="q">Job: source→map (p = 4), okno (p = 4), sink (p = 1), slot sharing włączony. Ile slotów potrzeba?</p><div class="opts"><button class="opt" data-ok="1">4</button><button class="opt" data-ok="0">5</button><button class="opt" data-ok="0">9</button></div><p class="explain">Przy współdzieleniu slotów liczy się największa równoległość: 4. Bez współdzielenia byłoby 4 + 4 + 1 = 9.</p></div>
+<div class="quiz multi compact"><p class="q">Co dzielą między sobą sloty jednego TaskManagera? (zaznacz wszystkie)</p><div class="opts"><button class="opt" data-ok="1">proces JVM</button><button class="opt" data-ok="1">rdzenie CPU</button><button class="opt" data-ok="0">pamięć zarządzaną (managed memory)</button><button class="opt" data-ok="1">połączenia TCP i heartbeaty</button></div><button class="btn check">Sprawdź</button><p class="explain">Pamięć zarządzana jest podzielona na sloty po równo. CPU nie jest izolowane, a JVM, połączenia i heartbeaty są wspólne.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Podsumowanie wykładu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<ul class="points">
+<li>Strumień nie ma końca: wynik aktualizujemy <strong>przyrostowo</strong>, pamiętając tylko stan pośredni.</li>
+<li><strong>Streamz</strong>: graf operatorów w modelu push. <code>emit</code> → <code>map</code>/<code>filter</code> (bezstanowe) → <code>accumulate</code>, okna (stanowe) → <code>sink</code>.</li>
+<li>Okna: <code>partition</code> (skaczące), <code>sliding_window</code> (przesuwne), <code>timed_window</code> (czasowe). Łączenie: <code>union</code>, <code>zip</code>, <code>combine_latest</code>, <code>zip_latest</code>.</li>
+<li><strong>Back pressure</strong>: ograniczona kolejka spowalnia producenta zamiast zjadać pamięć.</li>
+<li><strong>Flink</strong>: JobManager (Dispatcher, ResourceManager, JobMaster na job) + TaskManagery ze slotami; checkpointy dają odporność na awarie.</li>
+</ul>
+<div class="note"><p><strong>Laboratorium 9:</strong> przetwarzanie strumieniowe na przykładzie Streamz.</p>
+<p><strong>Następny wykład (09.12):</strong> korutyny i async w Pythonie, czyli pętla zdarzeń, na której działają operacje czasowe Streamz.</p></div>
+</div>
+</section>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/plugin.js"></script>
+<script>
+// ---------- copy buttons (raw text is captured before highlighting adds line numbers) ----------
+document.querySelectorAll('pre.code-wrap > code').forEach(code => {
+  const lines = code.textContent.replace(/^\s*\n/, '').replace(/\s+$/, '').split('\n');
+  const indent = Math.min(...lines.filter(l => l.trim()).map(l => l.match(/^ */)[0].length));
+  const raw = lines.map(l => l.slice(indent)).join('\n') + '\n';
+  const btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'copy-btn'; btn.textContent = 'Kopiuj';
+  btn.addEventListener('click', () => {
+    const done = ok => {
+      btn.textContent = ok ? 'Skopiowano!' : 'Błąd kopiowania'; btn.classList.toggle('copied', ok);
+      clearTimeout(btn._t); btn._t = setTimeout(() => { btn.textContent = 'Kopiuj'; btn.classList.remove('copied'); }, 1500);
+    };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(raw).then(() => done(true), () => done(false));
+    else {
+      const ta = document.createElement('textarea'); ta.value = raw; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { done(document.execCommand('copy')); } catch (e) { done(false); } finally { ta.remove(); }
+    }
+  });
+  code.parentNode.appendChild(btn);
+});
+</script>
+<script>
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.02,
+    center: false, hash: true, slideNumber: 'c/t',
+    transition: 'slide',
+    chalkboard: { boardmarkerWidth: 4, chalkWidth: 5 },
+    plugins: [RevealNotes, RevealHighlight, RevealChalkboard]
+  });
+</script>
+<script>
+// ---------- quizzes ----------
+document.querySelectorAll('.quiz').forEach(q => {
+  const opts = [...q.querySelectorAll('.opt')];
+  const reveal = () => {
+    opts.forEach(o => {
+      if (o.dataset.ok === '1') o.classList.add('good');
+      else if (o.classList.contains('sel')) o.classList.add('bad');
+    });
+    q.classList.add('done');
+  };
+  if (q.classList.contains('multi')) {
+    opts.forEach(o => o.addEventListener('click', () => { if (!q.classList.contains('done')) o.classList.toggle('sel'); }));
+    q.querySelector('.check').addEventListener('click', reveal);
+  } else {
+    opts.forEach(o => o.addEventListener('click', () => {
+      if (q.classList.contains('done')) return;
+      o.classList.add('sel'); reveal();
+    }));
+  }
+});
+
+// ---------- fill in the blanks (whitespace is ignored, data-re lists accepted answers) ----------
+document.querySelectorAll('.blanks').forEach(b => {
+  const inputs = [...b.querySelectorAll('input.blank')];
+  const fb = b.querySelector('.fb');
+  const check = () => {
+    let good = 0;
+    inputs.forEach(i => {
+      const ok = new RegExp(i.dataset.re).test(i.value.replace(/\s+/g, ''));
+      i.classList.toggle('good', ok); i.classList.toggle('bad', !ok); good += ok;
+    });
+    const all = good === inputs.length;
+    b.classList.toggle('done', all);
+    fb.textContent = all ? '' : inputs.length > 1 ? `Poprawne: ${good} z ${inputs.length}. Spróbuj jeszcze raz.` : 'Jeszcze nie. Spróbuj ponownie.';
+  };
+  b.querySelector('.check').addEventListener('click', check);
+  b.querySelector('.show').addEventListener('click', () => {
+    inputs.forEach(i => { i.value = i.dataset.sol; });
+    check();
+  });
+  inputs.forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') check(); }));
+});
+
+// ---------- lecture 9: element flowing through a Streamz graph ----------
+const flowSim = (() => {
+  const root = document.getElementById('flowsim'); if (!root) return null;
+  const nd = n => root.querySelector(`.nd[data-n="${n}"]`);
+  const chip = (t, cls = '') => `<span class="chip ${cls}">${t}</span>`;
+  const pyNum = x => Number.isInteger(x) ? String(x) : String(x);
+  const pyFloat1 = x => { const r = Math.round(x * 10) / 10; return Number.isInteger(r) ? r + '.0' : String(r); };
+  let win, acc, con, timers = [], busy = false;
+  const setSt = (n, t) => { nd(n).querySelector('.st').textContent = t; };
+  const setV = (n, h) => { nd(n).querySelector('.v').innerHTML = h; };
+  const hot = n => { root.querySelectorAll('.nd').forEach(e => e.classList.remove('hot')); if (n) nd(n).classList.add('hot'); };
+  const out = () => { const c = root.querySelector('.console'); c.textContent = con; c.scrollTop = c.scrollHeight; };
+  const reset = () => {
+    timers.forEach(clearTimeout); timers = []; busy = false;
+    win = []; acc = null; con = '# wyjście programu';
+    root.querySelectorAll('.nd').forEach(e => { e.classList.remove('hot', 'drop'); setV(e.dataset.n, ''); });
+    setSt('win', 'okno: ()'); setSt('acc', 'stan: brak'); setSt('al', ''); setSt('rec', '');
+    out();
+  };
+  const emit = t => {
+    if (busy || !Number.isFinite(t)) return;
+    busy = true;
+    root.querySelectorAll('.nd').forEach(e => { e.classList.remove('drop'); if (e.dataset.n !== 'acc') setV(e.dataset.n, ''); });
+    const steps = [];
+    steps.push(() => { hot('src'); setV('src', chip(pyNum(t))); con += `\n>>> source.emit(${pyNum(t)})`; out(); });
+    win = [...win, t].slice(-3);
+    const w = [...win];
+    steps.push(() => {
+      hot('win'); setSt('win', 'okno: (' + w.map(pyNum).join(', ') + (w.length === 1 ? ',' : '') + ')');
+      setV('win', w.length < 3 ? chip(`czeka ${w.length}/3`, 'wait') : chip('(' + w.map(pyNum).join(', ') + ')'));
+    });
+    if (w.length === 3) {
+      const m = (w[0] + w[1] + w[2]) / 3;
+      steps.push(() => { hot('avg'); setV('avg', chip(pyFloat1(m))); });
+      if (m > 30) {
+        steps.push(() => { hot('fil'); setV('fil', chip('✓ ' + pyFloat1(m))); });
+        steps.push(() => { hot('al'); setV('al', chip('ALARM', 'fin')); con += `\nALARM ${pyFloat1(m)}`; out(); });
+      } else {
+        steps.push(() => { hot('fil'); nd('fil').classList.add('drop'); setV('fil', chip('✗ odrzucony', 'no')); });
+      }
+    }
+    acc = acc === null ? t : Math.max(acc, t);
+    const a = acc;
+    steps.push(() => { hot('src'); });
+    steps.push(() => { hot('acc'); setSt('acc', 'stan: ' + pyNum(a)); setV('acc', chip(pyNum(a), 'acc')); });
+    steps.push(() => { hot('rec'); setV('rec', chip('rekord ' + pyNum(a), 'fin')); con += `\nrekord ${pyNum(a)}`; out(); });
+    steps.push(() => { hot(null); busy = false; });
+    steps.forEach((f, k) => timers.push(setTimeout(f, k * 380)));
+  };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'emit') emit(parseFloat(root.querySelector('.val').value.replace(',', '.')));
+    if (a === 'rand') { const t = 25 + Math.floor(Math.random() * 12); root.querySelector('.val').value = t; emit(t); }
+    if (a === 'reset') reset();
+  });
+  root.querySelector('.val').addEventListener('keydown', e => { if (e.key === 'Enter') emit(parseFloat(e.target.value.replace(',', '.'))); });
+  reset();
+  return { reset };
+})();
+
+// ---------- tumbling vs sliding windows ----------
+(() => {
+  const root = document.getElementById('winsim'); if (!root) return;
+  const N = 3, MAX = 10;
+  let n = 0;
+  const render = () => {
+    const partial = root.querySelector('.partial').checked;
+    let h = '<span class="lbl" style="grid-row:1;grid-column:1">dane</span>';
+    for (let i = 1; i <= n; i++) h += `<span class="cell" style="grid-row:1;grid-column:${i + 1}">${i}</span>`;
+    h += '<span class="lbl" style="grid-row:2;grid-column:1">partition(3)</span>';
+    const lines = [];
+    const ev = [];   // emission order, as in the listing
+    for (let i = 1; i <= n; i++) {
+      if (i % N === 0) ev.push({ k: 't', a: i - N + 1, b: i });
+      if (i >= N || partial) ev.push({ k: i >= N ? 's' : 'p', a: Math.max(1, i - N + 1), b: i });
+    }
+    let row = 3;
+    h += '<span class="lbl" style="grid-row:3;grid-column:1">sliding_window(3)</span>';
+    ev.forEach(e => {
+      if (e.k === 't') h += `<span class="bar t" style="grid-row:2;grid-column:${e.a + 1} / ${e.b + 2}"></span>`;
+      else h += `<span class="bar ${e.k}" style="grid-row:${row++};grid-column:${e.a + 1} / ${e.b + 2}"></span>`;
+      const tup = [];
+      for (let j = e.a; j <= e.b; j++) tup.push(j);
+      lines.push((e.k === 't' ? 'partition      ' : 'sliding_window ') + '(' + tup.join(', ') + (tup.length === 1 ? ',' : '') + ')');
+    });
+    root.querySelector('.wgrid').innerHTML = h;
+    root.querySelector('.emitted').innerHTML = lines.length ? lines.slice(-4).join('<br>') + (lines.length > 4 ? `<br><i>… łącznie ${lines.length} krotek</i>` : '') : '<i>Kliknij emit, aby wysłać 1, 2, 3, …</i>';
+    root.querySelector('[data-act=emit]').disabled = n >= MAX;
+  };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'emit' && n < MAX) { n++; render(); }
+    if (a === 'reset') { n = 0; render(); }
+  });
+  root.querySelector('.partial').addEventListener('change', render);
+  render();
+})();
+
+// ---------- zip / combine_latest / zip_latest ----------
+(() => {
+  const root = document.getElementById('joinsim'); if (!root) return;
+  let na, nb, zipA, zipB, cl, zlBuf, zlB, outs, con;
+  const tup = (a, b) => `(${a}, ${b})`;
+  const show = v => v === null ? '–' : v;
+  const render = (flash = []) => {
+    const st = {
+      zip: `bufor temp: [${zipA.join(', ')}]\nbufor wilg: [${zipB.join(', ')}]`,
+      cl: `ostatnia temp: ${show(cl.a)}\nostatnia wilg: ${show(cl.b)}`,
+      zl: `bufor temp: [${zlBuf.join(', ')}]\nostatnia wilg: ${show(zlB)}`
+    };
+    root.querySelectorAll('.jc').forEach(c => {
+      const k = c.dataset.k;
+      c.querySelector('.stt').textContent = st[k];
+      c.querySelector('.outs').innerHTML = outs[k].slice(-8).map((t, i, arr) => `<span class="chip ${i === arr.length - 1 && flash.includes(k) ? 'fin' : 'pair'}">${t}</span>`).join('') || '<i>brak wyjścia</i>';
+      c.classList.toggle('flash', flash.includes(k));
+    });
+    const cEl = root.querySelector('.console'); cEl.textContent = con; cEl.scrollTop = cEl.scrollHeight;
+  };
+  const reset = () => { na = 0; nb = 0; zipA = []; zipB = []; cl = { a: null, b: null }; zlBuf = []; zlB = null; outs = { zip: [], cl: [], zl: [] }; con = '# wyjście'; render(); };
+  const put = (k, t, fl) => { outs[k].push(t); fl.push(k); con += `\n${{ zip: 'zip           ', cl: 'combine_latest', zl: 'zip_latest    ' }[k]} ${t}`; };
+  const emitA = () => {
+    const x = 21 + na++; const fl = []; con += `\n>>> temp.emit(${x})`;
+    zipA.push(x); if (zipA.length === 1 && zipB.length) put('zip', tup(zipA.shift(), zipB.shift()), fl);
+    cl.a = x; if (cl.b !== null) put('cl', tup(cl.a, cl.b), fl);
+    zlBuf.push(x); if (zlB !== null) while (zlBuf.length) put('zl', tup(zlBuf.shift(), zlB), fl);
+    render(fl);
+  };
+  const emitB = () => {
+    const y = 40 + 5 * nb++; const fl = []; con += `\n>>> wilg.emit(${y})`;
+    zipB.push(y); if (zipB.length === 1 && zipA.length) put('zip', tup(zipA.shift(), zipB.shift()), fl);
+    cl.b = y; if (cl.a !== null) put('cl', tup(cl.a, cl.b), fl);
+    const first = zlB === null; zlB = y; if (first) while (zlBuf.length) put('zl', tup(zlBuf.shift(), zlB), fl);
+    render(fl);
+  };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'a') emitA();
+    if (a === 'b') emitB();
+    if (a === 'reset') reset();
+  });
+  reset();
+})();
+
+// ---------- back pressure: bounded vs unbounded queue ----------
+const bpSim = (() => {
+  const root = document.getElementById('bpsim'); if (!root) return null;
+  const $ = s => root.querySelector(s);
+  let t, q, cur, left, pending, sent, done, waits, maxQ, timer = null, next;
+  const cfg = () => ({ inf: $('.mode').value === 'inf', cap: +$('.cap').value, cons: +$('.cons').value });
+  const render = () => {
+    const c = cfg();
+    let slots = '';
+    if (c.inf) {
+      const shown = q.slice(0, 24);
+      slots = shown.map(x => `<span class="slot full">${x}</span>`).join('') + (q.length > 24 ? `<span class="small">+${q.length - 24}</span>` : '') || '<span class="small">pusta kolejka</span>';
+    } else {
+      for (let i = 0; i < c.cap; i++) slots += `<span class="slot ${i < q.length ? 'full' : ''}">${i < q.length ? q[i] : ''}</span>`;
+    }
+    $('.queue').innerHTML = slots;
+    const prod = $('.prod'), cons = $('.actor.cons');
+    prod.classList.toggle('blocked', pending !== null);
+    $('.ps').textContent = pending !== null ? `emit(${pending}) czeka: kolejka pełna` : t ? `emit(${next - 1}) przyjęty` : 'emit co takt';
+    cons.classList.toggle('busy', cur !== null);
+    $('.cs').textContent = cur !== null ? `przetwarza ${cur} (${c.cons - left + 1}/${c.cons})` : 'czeka na dane';
+    $('.s-t').textContent = t;
+    $('.s-io').textContent = `${sent} / ${done}`;
+    $('.s-q').textContent = `${q.length} (${maxQ})`;
+    $('.s-w').textContent = waits;
+    $('.s-q').parentNode.classList.toggle('bad', c.inf && q.length > 10);
+    $('.verdict').innerHTML = t < 8 ? '' : c.inf
+      ? `Producent nigdy nie czeka, ale kolejka rośnie o ok. ${(1 - 1 / c.cons).toFixed(2)} elementu na takt: przy prawdziwym strumieniu skończy się pamięć (tak działa <code>delay</code> w Streamz).`
+      : (c.cons === 1 ? 'Konsument nadąża: kolejka się nie zapełnia i nikt nie czeka.' : `Kolejka zapełniła się do ${c.cap}, a dalej producent emituje w tempie konsumenta (1 na ${c.cons} takty). Pamięć jest ograniczona: to jest back pressure.`);
+  };
+  const reset = () => { stop(); t = 0; q = []; cur = null; left = 0; pending = null; sent = 0; done = 0; waits = 0; maxQ = 0; next = 1; render(); };
+  const step = () => {
+    const c = cfg(); const cap = c.inf ? Infinity : c.cap;
+    t++;
+    if (cur !== null) { left--; if (left === 0) { done++; cur = null; } }
+    if (cur === null && q.length) { cur = q.shift(); left = c.cons; }
+    if (pending === null) pending = next++;
+    if (q.length < cap) { q.push(pending); pending = null; sent++; } else waits++;
+    maxQ = Math.max(maxQ, q.length);
+    render();
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'step') { stop(); step(); }
+    if (a === 'play') { if (timer) stop(); else timer = setInterval(step, 450); }
+    if (a === 'reset') reset();
+  });
+  root.querySelectorAll('select').forEach(s => s.addEventListener('change', reset));
+  reset();
+  return { stop };
+})();
+
+// ---------- Flink: job submission step by step ----------
+(() => {
+  const root = document.getElementById('submitsim'); if (!root) return;
+  const D = [
+    'Kliknij <b>Dalej</b>. Klient (polecenie <code>flink run</code>, program PyFlink) zamienił już program na graf przepływu danych: <b>JobGraph</b>.',
+    '1. Klient wysyła JobGraph (i potrzebne pliki JAR) przez REST do <b>Dispatchera</b>.',
+    '2. Dispatcher uruchamia dla tego joba osobnego <b>JobMastera</b>. JobMaster zamienia JobGraph na <b>ExecutionGraph</b>: równoległą wersję grafu, w której każdy operator ma p subtasków.',
+    '3. JobMaster prosi <b>ResourceManagera</b> o sloty. Przy współdzieleniu slotów potrzeba ich tyle, ile wynosi największa równoległość.',
+    '4. ResourceManager wybiera wolne sloty i każe TaskManagerom przydzielić je temu jobowi. Na Kubernetesie lub YARN może też uruchomić nowe TaskManagery, w klastrze standalone nie.',
+    '5. TaskManagery <b>oferują</b> sloty bezpośrednio JobMasterowi.',
+    '6. JobMaster <b>wdraża taski</b> do slotów. Job przechodzi w stan RUNNING.',
+    '7. TaskManagery wymieniają między sobą <b>strumienie danych</b>, a do JobMastera wysyłają heartbeaty i statusy tasków. Klient śledzi status przez REST lub Web UI (albo się odłącza).'
+  ];
+  let k = 0;
+  const render = () => {
+    root.querySelectorAll('.arr').forEach(g => {
+      const s = +g.dataset.s;
+      g.classList.toggle('past', s < k); g.classList.toggle('cur', s === k);
+    });
+    root.querySelector('.stepdesc').innerHTML = D[k];
+    root.querySelector('.k').textContent = k;
+    root.querySelector('[data-act=prev]').disabled = k === 0;
+    root.querySelector('[data-act=next]').disabled = k === D.length - 1;
+  };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'next' && k < D.length - 1) k++;
+    if (a === 'prev' && k > 0) k--;
+    if (a === 'reset') k = 0;
+    if (a) render();
+  });
+  render();
+})();
+
+// ---------- Flink: slots and parallelism ----------
+(() => {
+  const root = document.getElementById('slotsim'); if (!root) return;
+  const $ = s => root.querySelector(s);
+  const render = () => {
+    const T = +$('.ntm').value, S = +$('.nsl').value, p = +$('.par').value, share = $('.share').checked;
+    const total = T * S;
+    const slots = Array.from({ length: total }, () => []);
+    if (share) {
+      for (let i = 0; i < p; i++) if (i < total) slots[i].push(['a', `src→map [${i + 1}]`], ['b', `okno [${i + 1}]`]);
+      if (total) slots[0].push(['c', 'sink [1]']);
+    } else {
+      const subs = [];
+      for (let i = 0; i < p; i++) subs.push(['a', `src→map [${i + 1}]`]);
+      for (let i = 0; i < p; i++) subs.push(['b', `okno [${i + 1}]`]);
+      subs.push(['c', 'sink [1]']);
+      subs.forEach((s, i) => { if (i < total) slots[i].push(s); });
+    }
+    const need = share ? p : 2 * p + 1;
+    let h = '';
+    for (let tm = 0; tm < T; tm++) {
+      h += `<div class="tm"><b>TaskManager ${tm + 1}</b><div class="slots">`;
+      for (let s = 0; s < S; s++) {
+        const sl = slots[tm * S + s];
+        h += `<div class="slot"><small>slot ${s + 1}</small>${sl.map(([c, n]) => `<span class="sub ${c}">${n}</span>`).join('')}</div>`;
+      }
+      h += '</div></div>';
+    }
+    $('.tms').innerHTML = h;
+    const v = $('.verdict');
+    v.classList.toggle('bad', need > total);
+    v.innerHTML = need > total
+      ? `Potrzeba ${need} slotów, a klaster ma ${total}. Job nie wystartuje: czeka na zasoby i po timeoucie kończy się błędem <code>NoResourceAvailableException</code>.`
+      : `Potrzeba ${need} z ${total} slotów. ` + (share ? 'Ze współdzieleniem slotów liczy się największa równoległość (p).' : `Bez współdzielenia każdy subtask zajmuje własny slot: 2p + 1 = ${need}.`);
+  };
+  root.addEventListener('change', render);
+  render();
+})();
+
+// ---------- Flink: job status state machine ----------
+(() => {
+  const root = document.getElementById('jobsim'); if (!root) return;
+  const T = {
+    CREATED: { deploy: 'RUNNING' },
+    RUNNING: { ok: 'FINISHED', fail: 'FAILING', cancel: 'CANCELLING', lose: 'SUSPENDED' },
+    FAILING: { restart: 'RESTARTING', norestart: 'FAILED' },
+    RESTARTING: { restarted: 'CREATED' },
+    CANCELLING: { canceled: 'CANCELED' }
+  };
+  const D = {
+    CREATED: '<b>CREATED</b>: JobMaster zbudował ExecutionGraph, taski czekają na sloty i wdrożenie.',
+    RUNNING: '<b>RUNNING</b>: taski działają w slotach TaskManagerów. Przy strumieniu nieograniczonym job może być w tym stanie tygodniami.',
+    FINISHED: '<b>FINISHED</b>: wszystkie taski zakończone (np. skończył się strumień ograniczony). Stan globalnie końcowy, zasoby są zwalniane.',
+    FAILING: '<b>FAILING</b>: awaria taska, JobMaster anuluje pozostałe uruchomione taski. Dalej decyduje strategia restartu (np. fixed-delay, exponential-delay).',
+    RESTARTING: '<b>RESTARTING</b>: job zostanie uruchomiony ponownie, a stan odtworzony z ostatniego checkpointu. Po pełnym restarcie wraca do CREATED.',
+    FAILED: '<b>FAILED</b>: restart niemożliwy (np. wyczerpany limit prób). Stan globalnie końcowy.',
+    CANCELLING: '<b>CANCELLING</b>: użytkownik anulował job (Web UI, <code>flink cancel</code>), trwa zatrzymywanie tasków.',
+    CANCELED: '<b>CANCELED</b>: wszystkie taski zatrzymane. Stan globalnie końcowy.',
+    SUSPENDED: '<b>SUSPENDED</b>: JobManager stracił przywództwo (konfiguracja HA). Stan końcowy tylko lokalnie: nowy lider wznowi job z magazynu HA.'
+  };
+  let cur, seen, used;
+  const render = () => {
+    root.querySelectorAll('.stn').forEach(g => { g.classList.toggle('cur', g.dataset.s === cur); g.classList.toggle('seen', seen.has(g.dataset.s)); });
+    root.querySelectorAll('.tr').forEach(g => g.classList.toggle('used', used.has(g.dataset.t)));
+    root.querySelectorAll('[data-ev]').forEach(b => { if (b.dataset.ev !== 'reset') b.disabled = !(T[cur] && T[cur][b.dataset.ev]); });
+    root.querySelector('.stepdesc').innerHTML = D[cur];
+  };
+  const reset = () => { cur = 'CREATED'; seen = new Set([cur]); used = new Set(); render(); };
+  root.addEventListener('click', e => {
+    const ev = e.target.dataset.ev; if (!ev) return;
+    if (ev === 'reset') return reset();
+    const nx = T[cur] && T[cur][ev]; if (!nx) return;
+    used.add(`${cur}-${nx}`); cur = nx; seen.add(cur); render();
+  });
+  reset();
+})();
+
+Reveal.on('slidechanged', e => {
+  if (bpSim) bpSim.stop();
+  e.currentSlide.querySelectorAll('pre.console').forEach(c => { c.scrollTop = c.scrollHeight; });
+});
+</script>
+</body>
+</html>

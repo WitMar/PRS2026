@@ -1,0 +1,463 @@
+<html{html_attr}>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<title>PRS09.rst</title>
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.8.0/styles/monokai_sublime.min.css">
+    <script>hljs.initHighlightingOnLoad();</script>
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&subset=latin,cyrillic-ext,cyrillic,latin-ext,greek-ext,greek,vietnamese' rel='stylesheet' type='text/css'>
+</head>
+<body><section id="laboratoria-9-przetwarzanie-strumieniowe-na-przykladzie-streamz">
+<h2>Laboratoria 9 - Przetwarzanie strumieniowe na przykładzie Streamz</h2>
+</section>
+<section id="przetwarzanie-strumieniowe">
+<h2>Przetwarzanie Strumieniowe</h2>
+<p>Przetwarzanie strumieniowe, znane również jako przetwarzanie w czasie
+rzeczywistym, to technika przetwarzania danych, w której dane są
+przetwarzane na bieżąco, w miarę ich napływania. Oznacza to, że dane są
+analizowane w locie, w przeciwieństwie do tradycyjnego przetwarzania
+wsadowego, w którym dane są zgromadzane i przetwarzane później.</p>
+<p>Główną ideą przetwarzania strumieniowego jest ciągłe przetwarzanie
+danych w czasie rzeczywistym, w sposób inkrementalny, gdy tylko dane są
+dostępne. Strumienie danych mogą pochodzić z różnych źródeł, takich jak
+czujniki, urządzenia IoT (Internet of Things), sieci społecznościowe,
+transakcje finansowe itp.</p>
+<p>Przetwarzanie strumieniowe wymaga specjalnych narzędzi i technologii,
+które umożliwiają przetwarzanie danych na bieżąco. Istnieje wiele
+frameworków i platform, takich jak <strong>Apache Kafka, Apache Flink</strong> czy
+<strong>Apache Storm</strong>, które są popularne w dziedzinie przetwarzania
+strumieniowego i pomagają w skutecznym zarządzaniu strumieniami danych.</p>
+<p>Na tych zajęciach poznamy prostą bibliotekę przetwarzania strumieniowego
+dla języka Python o nazwie <strong>Streamz</strong>.</p>
+<section id="przyklad-przetwarzania-strumieniowego-wyliczanie-sredniej">
+<h3>Przykład przetwarzania strumieniowego : wyliczanie średniej</h3>
+<p>Weźmy przykład w którym mamy ciągły strumień plików CSV i chcemy
+wydrukować średnią naszych danych w czasie. Za każdym razem, gdy pojawia
+się nowy plik CSV, musimy ponownie obliczyć średnią całego zestawu
+danych.</p>
+<p>Jeśli jesteśmy sprytni, wystarczy że będziemy utrzymywać pośredni stan,
+abyśmy mogli obliczyć tę średnią bez patrzenia wstecz na resztę naszych
+danych historycznych. Możemy to osiągnąć, utrzymując bieżącą sumę i
+licznik w następujący sposób:</p>
+<pre class="code python highlight literal-block"><code><span class="comment single">#Przykład jest tylko teoretycznym szkicem i oczywiście się nie uruchomi w Jupyter, gdyż nie definiujemy zbioru plików filenames</span><span class="whitespace">
+
+</span><span class="name">total</span> <span class="operator">=</span> <span class="literal number integer">0</span><span class="whitespace">
+</span><span class="name">count</span> <span class="operator">=</span> <span class="literal number integer">0</span><span class="whitespace">
+
+</span><span class="keyword">for</span> <span class="name">filename</span> <span class="operator word">in</span> <span class="name">filenames</span><span class="punctuation">:</span>  <span class="comment single"># filenames is an infinite iterator</span><span class="whitespace">
+</span>    <span class="name">df</span> <span class="operator">=</span> <span class="name">pd</span><span class="operator">.</span><span class="name">read_csv</span><span class="punctuation">(</span><span class="name">filename</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="name">total</span> <span class="operator">=</span> <span class="name">total</span> <span class="operator">+</span> <span class="name">df</span><span class="operator">.</span><span class="name">sum</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">count</span> <span class="operator">=</span> <span class="name">count</span> <span class="operator">+</span> <span class="name">df</span><span class="operator">.</span><span class="name">count</span><span class="punctuation">()</span><span class="whitespace">
+</span>    <span class="name">mean</span> <span class="operator">=</span> <span class="name">total</span> <span class="operator">/</span> <span class="name">count</span><span class="whitespace">
+</span>    <span class="name builtin">print</span><span class="punctuation">(</span><span class="name">mean</span><span class="punctuation">)</span></code></pre>
+</section>
+</section>
+<section id="streamz">
+<h2>Streamz</h2>
+<p><strong>Streamz</strong> to biblioteka języka Python, która pomaga budować
+przetwarzanie do zarządzania ciągłymi strumieniami danych. Jest prosty w
+użyciu w prostych przypadkach, ale obsługuje również złożone
+przetwarzania, które obejmują rozgałęzienia, łączenie, kontrolę
+przepływu, sprzężenie zwrotne i tak dalej.</p>
+<p><a class="reference external" href="https://streamz.readthedocs.io/en/latest/">https://streamz.readthedocs.io/en/latest/</a></p>
+<p><strong>Uwaga! Streamz nie jest obecnie zainstalowany na Jupiterze w wersji
+online więc musisz korzystać z lokalnego Jupytera lub np z edytora
+PyCharm!</strong> Żeby zainstalować bibliotekę Streamz uruchom:</p>
+<pre class="code python highlight literal-block"><code><span class="name">pip</span> <span class="name">install</span> <span class="name">streamz</span></code></pre>
+<p>Prosty przykład programu z wykorzystaniem Streamz:</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">streamz</span> <span class="keyword namespace">import</span> <span class="name">Stream</span><span class="whitespace">
+
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span></code></pre>
+<p>Aby zdefniować proces przetwarzania danych musimy utworzyć strumień
+danych. Strumień ma swój początek i koniec. Końcem strumienia będzie
+funkcja <strong>sink()</strong>, która aplikuje podaną w argumencie funkcję do
+wszystkich elementów strumienia i kończy przetwarzanie.</p>
+<p>Mając zdefiniowany strumień możemy dodawać dane do przetwarzania
+korzystając z funkcji <strong>emit()</strong> dla tego strumienia.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">streamz</span> <span class="keyword namespace">import</span> <span class="name">Stream</span><span class="whitespace">
+
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">10</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">1
+2
+10</pre>
+<section id="map">
+<h3>Map</h3>
+<p>Najprostsza i znana nam już funkcja, która zamienia strumień danych
+wejściowych mapując element wchodzący na element wychodzący i tym samym
+zwracając zmieniony strumień danych.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">streamz</span> <span class="keyword namespace">import</span> <span class="name">Stream</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">toUpper</span><span class="punctuation">(</span><span class="name">a</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">a</span><span class="operator">.</span><span class="name">upper</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="name">toUpper</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal string single">'a'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal string single">'b'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal string single">'c'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal string single">'D'</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">A
+B
+C
+D</pre>
+<p>Kiedy wywołujesz <strong>Stream</strong>, tworzysz strumień. Gdy wywołujesz dowolną
+metodę w strumieniu, na przykład <strong>Stream.map</strong>, tworzysz również
+strumień. Wszystkie operacje można ze sobą połączyć. Ponadto, jak
+omówimy w części dotyczącej rozgałęzień, można rozdzielić wiele
+strumieni z dowolnego punktu. Strumienie będą przekazywać swoje dane
+wyjściowe do wszystkich dalszych strumieni, dzięki czemu każdy może
+podłączyć się w dowolnym momencie i uzyskać pełny wgląd w to, co ten
+strumień wytwarza.</p>
+</section>
+<section id="filter">
+<h3>Filter</h3>
+<p>Filter odrzuca elementy ze strumienia jeżeli nie spełniają warunku
+logicznego zawartego w funkcji filtrującej.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">numpy.core.defchararray</span> <span class="keyword namespace">import</span> <span class="name">islower</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">streamz</span> <span class="keyword namespace">import</span> <span class="name">Stream</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">upperIs</span><span class="punctuation">(</span><span class="name">x</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">islower</span><span class="punctuation">(</span><span class="name">x</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">toUpper</span><span class="punctuation">(</span><span class="name">a</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">a</span><span class="operator">.</span><span class="name">upper</span><span class="punctuation">()</span><span class="whitespace">
+
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">filter</span><span class="punctuation">(</span><span class="name">upperIs</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="name">toUpper</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal string single">'a'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal string single">'B'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal string single">'c'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal string single">'D'</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">A
+C</pre>
+<p>Kiedy nasze obliczenia są <strong>liniowe</strong> i <strong>proste</strong>, do wykonania
+obliczeń wystarczy pętla <strong>for</strong> oraz funkcje map, filter i sink. Jednak
+gdy nasze obliczenia mają kilka rozgałęzień lub zbieżności strumieni,
+być może z ograniczeniem szybkości lub buforowaniem między nimi, to
+podejście stosujące pętlę <strong>for</strong> może stać się złożone i trudne do
+zarządzania.</p>
+</section>
+<section id="accumulate">
+<h3>Accumulate</h3>
+<p>Wykonuje to bieżące lub skumulowane redukcje, stosując funkcję do
+poprzedniego stanu i nowego elementu. Funkcja powinna przyjąć dwa
+argumenty, poprzedni stan skumulowany i następny element oraz powinna
+zwrócić nowy stan skumulowany.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">streamz</span> <span class="keyword namespace">import</span> <span class="name">Stream</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">add</span><span class="punctuation">(</span><span class="name">x</span><span class="punctuation">,</span> <span class="name">y</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">x</span> <span class="operator">+</span> <span class="name">y</span><span class="whitespace">
+
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">accumulate</span><span class="punctuation">(</span><span class="name">add</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">4</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">1
+3
+6
+10</pre>
+<p>Powyższa funkcja akumulacji jest szczególnie prosta, stan, który
+przechowujemy, i wartość, którą emitujemy, są takie same. W bardziej
+złożonych sytuacjach możemy chcieć utrzymać inny stan niż emitujemy. Na
+przykład policzmy, ile różnych elementów widzieliśmy do tej pory.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">streamz</span> <span class="keyword namespace">import</span> <span class="name">Stream</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">num_distinct</span><span class="punctuation">(</span><span class="name">state</span><span class="punctuation">,</span> <span class="name">new</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">state</span><span class="operator">.</span><span class="name">add</span><span class="punctuation">(</span><span class="name">new</span><span class="punctuation">)</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">state</span><span class="punctuation">,</span> <span class="name builtin">len</span><span class="punctuation">(</span><span class="name">state</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">accumulate</span><span class="punctuation">(</span><span class="name">num_distinct</span><span class="punctuation">,</span> <span class="name">returns_state</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">,</span> <span class="name">start</span><span class="operator">=</span><span class="name builtin">set</span><span class="punctuation">())</span><span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal string single">'cat'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal string single">'dog'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal string single">'cat'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal string single">'mouse'</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">1
+2
+2
+3</pre>
+<p>Funkcja accumulate przyjmuje dwa argumenty, poprzedni stan skumulowany i
+następny element oraz powinna zwrócić nowy stan skumulowany i wynik,</p>
+<pre class="literal-block">- state = func(previous_state, new_value) (returns_state=False)
+- state,result = func(previous_state, new_value) (returns_state=Prawda)</pre>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">streamz</span> <span class="keyword namespace">import</span> <span class="name">Stream</span><span class="whitespace">
+
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">accumulate</span><span class="punctuation">(</span><span class="keyword">lambda</span> <span class="name">acc</span><span class="punctuation">,</span> <span class="name">x</span><span class="punctuation">:</span> <span class="name">acc</span> <span class="operator">+</span> <span class="literal number integer">1</span><span class="punctuation">,</span> <span class="name">start</span><span class="operator">=</span><span class="literal number integer">0</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">_</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">0</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">1
+2
+3
+4
+5</pre>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">streamz</span> <span class="keyword namespace">import</span> <span class="name">Stream</span><span class="whitespace">
+
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">accumulate</span><span class="punctuation">(</span><span class="keyword">lambda</span> <span class="name">acc</span><span class="punctuation">,</span> <span class="name">x</span><span class="punctuation">:</span> <span class="punctuation">((</span><span class="name">acc</span><span class="punctuation">[</span><span class="literal number integer">0</span><span class="punctuation">]</span> <span class="operator">+</span> <span class="literal number integer">1</span><span class="punctuation">,</span> <span class="name">x</span><span class="punctuation">),</span> <span class="punctuation">(</span><span class="name">acc</span><span class="punctuation">[</span><span class="literal number integer">0</span><span class="punctuation">],</span> <span class="name">x</span><span class="punctuation">)),</span><span class="whitespace">
+</span>                  <span class="name">start</span><span class="operator">=</span><span class="punctuation">(</span><span class="literal number integer">0</span><span class="punctuation">,</span> <span class="literal number integer">0</span><span class="punctuation">),</span> <span class="name">returns_state</span><span class="operator">=</span><span class="keyword constant">True</span><span class="punctuation">)</span>\
+    <span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">0</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">(0, 0)
+(1, 0)
+(2, 0)</pre>
+</section>
+</section>
+<section id="flow-control">
+<h2>Flow control</h2>
+<section id="flatten">
+<h3>Flatten</h3>
+<p>Rozpakowuje strumienie list lub iteracji w strumień elementów.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">streamz</span> <span class="keyword namespace">import</span> <span class="name">Stream</span><span class="whitespace">
+
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">flatten</span><span class="punctuation">()</span><span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">x</span> <span class="operator word">in</span> <span class="punctuation">[[</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">],</span> <span class="punctuation">[</span><span class="literal number integer">4</span><span class="punctuation">,</span> <span class="literal number integer">5</span><span class="punctuation">],</span> <span class="punctuation">[</span><span class="literal number integer">6</span><span class="punctuation">,</span> <span class="literal number integer">7</span><span class="punctuation">,</span> <span class="literal number integer">7</span><span class="punctuation">]]:</span><span class="whitespace">
+</span>     <span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="name">x</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">1
+2
+3
+4
+5
+6
+7
+7</pre>
+</section>
+<section id="partition">
+<h3>Partition</h3>
+<p>Podziel strumień na krotki o równym rozmiarze</p>
+<p>Parametry</p>
+<pre class="literal-block">n: rozmiar partycji
+limit czasu: int lub float, opcjonalnie. Liczba sekund, po których partycja zostanie wyemitowana, nawet jeśli jej rozmiar jest mniejszy niż n. Jeśli Brak (domyślnie), partycja zostanie wyemitowana tylko wtedy, gdy jej rozmiar osiągnie n.
+klucz: hashable lub callable, opcjonalny. Emituj elementy z tym samym kluczem razem jako oddzielną partycję. Jeśli klucz jest wywoływalny, partycja będzie identyfikowana przez klucz (x), w przeciwnym razie przez x[klucz]. Domyślnie Brak.</pre>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">streamz</span> <span class="keyword namespace">import</span> <span class="name">Stream</span><span class="whitespace">
+</span><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">partition</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">10</span><span class="punctuation">):</span><span class="whitespace">
+</span>     <span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="name">i</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">partition</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">,</span> <span class="name">key</span><span class="operator">=</span><span class="keyword">lambda</span> <span class="name">x</span><span class="punctuation">:</span> <span class="name">x</span> <span class="operator">%</span> <span class="literal number integer">2</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">4</span><span class="punctuation">):</span><span class="whitespace">
+</span>     <span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="name">i</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">partition</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">,</span> <span class="name">timeout</span><span class="operator">=</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="name">i</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">(0, 1, 2)
+(3, 4, 5)
+(6, 7, 8)
+(0, 2)
+(1, 3)
+(0, 1, 2)</pre>
+</section>
+<section id="union">
+<h3>Union</h3>
+<p>Łączy wiele strumieni w jeden</p>
+<p>Każdy element z dowolnego strumienia upstream natychmiast wpłynie do
+strumienia wyjściowego. Nie będą one łączone z elementami z innych
+strumieni.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">streamz</span> <span class="keyword namespace">import</span> <span class="name">Stream</span><span class="whitespace">
+
+</span><span class="name">source1</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">stream</span> <span class="operator">=</span> <span class="name">source1</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="keyword">lambda</span> <span class="name">x</span><span class="punctuation">:</span> <span class="name">x</span><span class="operator">-</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">union</span><span class="punctuation">(</span><span class="name">stream</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="keyword">lambda</span> <span class="name">x</span> <span class="punctuation">:</span> <span class="name">x</span><span class="operator">+</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">4</span><span class="punctuation">):</span><span class="whitespace">
+</span>     <span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="name">i</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name builtin">print</span><span class="punctuation">(</span><span class="literal string single">'Emituje do drugiego'</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">4</span><span class="punctuation">):</span><span class="whitespace">
+</span>     <span class="name">source1</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="name">i</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">1
+2
+3
+4
+Emituje do drugiego
+0
+1
+2
+3</pre>
+<p>Wizualizacja potoku:</p>
+<p class="center"><img alt="a" src="mystream_union.png" /></p>
+</section>
+<section id="unique">
+<h3>Unique</h3>
+<p>Unikaj wysyłania powtarzających się elementów.</p>
+<p>Powoduje to deduplikację strumienia, dzięki czemu przechodzą tylko nowe
+elementy. Możesz kontrolować, jak duża część historii jest przechowywana
+za pomocą parametru maxsize=. Na przykład ustawienie maxsize=1 pozwala
+uniknąć wysyłania elementów, gdy jeden jest powtarzany zaraz po drugim.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">streamz</span> <span class="keyword namespace">import</span> <span class="name">Stream</span><span class="whitespace">
+
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">unique</span><span class="punctuation">(</span><span class="name">maxsize</span><span class="operator">=</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">x</span> <span class="operator word">in</span> <span class="punctuation">[</span><span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">2</span><span class="punctuation">,</span> <span class="literal number integer">1</span><span class="punctuation">,</span> <span class="literal number integer">3</span><span class="punctuation">]:</span><span class="whitespace">
+</span>     <span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="name">x</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">1
+2
+1
+3</pre>
+</section>
+<section id="sliding-window">
+<h3>Sliding Window</h3>
+<p>Twórz nakładające się krotki o rozmiarze n.</p>
+<pre class="code python highlight literal-block"><code><span class="name">source</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">sliding_window</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">,</span> <span class="name">return_partial</span><span class="operator">=</span><span class="keyword constant">False</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="keyword">for</span> <span class="name">i</span> <span class="operator word">in</span> <span class="name builtin">range</span><span class="punctuation">(</span><span class="literal number integer">8</span><span class="punctuation">):</span><span class="whitespace">
+</span>     <span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="name">i</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">(0, 1, 2)
+(1, 2, 3)
+(2, 3, 4)
+(3, 4, 5)
+(4, 5, 6)
+(5, 6, 7)</pre>
+</section>
+</section>
+<section id="branching-and-joining">
+<h2>Branching and Joining</h2>
+<p>Możesz rozgałęziać wiele strumieni z jednego strumienia. Elementy, które
+trafią na wejście, przejdą do obu strumieni wyjściowych. <strong>Uwaga: do
+wizualizacji wykresu strumienia należy zainstalować graphviz i
+networkx.</strong></p>
+<pre class="code python highlight literal-block"><code><span class="name">pip</span> <span class="name">install</span> <span class="name">graphviz</span><span class="whitespace">
+</span><span class="name">pip</span> <span class="name">install</span> <span class="name">networkx</span></code></pre>
+<p>w katalogu w którym uruchomisz program wygeneruje się plik mystream.png
+z wizualizacją przetwarzania danych</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">streamz</span> <span class="keyword namespace">import</span> <span class="name">Stream</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">increment</span><span class="punctuation">(</span><span class="name">x</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">x</span> <span class="operator">+</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">decrement</span><span class="punctuation">(</span><span class="name">x</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">x</span> <span class="operator">-</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">a</span> <span class="operator">=</span> <span class="name">source</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="name">increment</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">b</span> <span class="operator">=</span> <span class="name">source</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="name">decrement</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">b</span><span class="operator">.</span><span class="name">visualize</span><span class="punctuation">(</span><span class="name">rankdir</span><span class="operator">=</span><span class="literal string single">'LR'</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">2
+0
+3
+1</pre>
+<p>Podobnie można również łączyć wiele strumieni razem z operacjami takimi
+jak Zip, który emituje, gdy oba strumienie dostarczą nowy element, lub
+Combine_latest, który emituje, gdy jeden ze strumieni dostarczy nowy
+element.</p>
+<p class="center"><img alt="a2" src="mystream2.png" /></p>
+<p>Podobnie można również łączyć wiele strumieni w jeden za pomocą operacji
+takich jak Zip, który emituje, gdy oba strumienie dostarczą nowy
+element, lub Combine_latest, który emituje, gdy jeden ze strumieni
+dostarczy nowy element.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">streamz</span> <span class="keyword namespace">import</span> <span class="name">Stream</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">increment</span><span class="punctuation">(</span><span class="name">x</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">x</span> <span class="operator">+</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">decrement</span><span class="punctuation">(</span><span class="name">x</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">x</span> <span class="operator">-</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">source2</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">a</span> <span class="operator">=</span> <span class="name">source</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="name">increment</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">b</span> <span class="operator">=</span> <span class="name">source2</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="name">decrement</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">c</span> <span class="operator">=</span> <span class="name">a</span><span class="operator">.</span><span class="name">zip</span><span class="punctuation">(</span><span class="name">b</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="name builtin">sum</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">10</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source2</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">20</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">30</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">visualize</span><span class="punctuation">(</span><span class="name">rankdir</span><span class="operator">=</span><span class="literal string single">'LR'</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">30</pre>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">streamz</span> <span class="keyword namespace">import</span> <span class="name">Stream</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">increment</span><span class="punctuation">(</span><span class="name">x</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">x</span> <span class="operator">+</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span><span class="keyword">def</span> <span class="name function">decrement</span><span class="punctuation">(</span><span class="name">x</span><span class="punctuation">):</span><span class="whitespace">
+</span>    <span class="keyword">return</span> <span class="name">x</span> <span class="operator">-</span> <span class="literal number integer">1</span><span class="whitespace">
+
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">source2</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">a</span> <span class="operator">=</span> <span class="name">source</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="name">increment</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">b</span> <span class="operator">=</span> <span class="name">source2</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="name">decrement</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">c</span> <span class="operator">=</span> <span class="name">a</span><span class="operator">.</span><span class="name">combine_latest</span><span class="punctuation">(</span><span class="name">b</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="name builtin">sum</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">10</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source2</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">20</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">30</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source2</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">30</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">visualize</span><span class="punctuation">(</span><span class="name">rankdir</span><span class="operator">=</span><span class="literal string single">'LR'</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">30
+50
+60</pre>
+<p class="center"><img alt="a3" src="mystream3.png" /></p>
+</section>
+<section id="processing-time-and-back-pressure">
+<h2>Processing Time and Back Pressure</h2>
+<p>Możesz kontrolować przepływ danych w swoim strumieniu w czasie. Na
+przykład możesz chcieć zgrupować wszystkie elementy, które dotarły w
+ostatniej chwili, lub spowolnić przepływ danych przez wrażliwe części
+potoku, zwłaszcza gdy mogą one zapisywać do wolnych zasobów, takich jak
+bazy danych.</p>
+<p>Streamz pomaga wykonywać te akcje operacjami takimi jak <strong>delay,
+rate_limit i timed_window</strong>.</p>
+<section id="time-window">
+<h3>Time_Window</h3>
+<p>Emituj krotkę zebranych wyników co interwał</p>
+<p>Co zadany interval w sekundach emituje krotkę wszystkich dotychczasowych
+wyników. Może to pomóc w grupowaniu danych wychodzących ze strumienia o
+dużej objętości.</p>
+<pre class="code python highlight literal-block"><code><span class="keyword namespace">from</span> <span class="name namespace">time</span> <span class="keyword namespace">import</span> <span class="name">sleep</span><span class="whitespace">
+
+</span><span class="keyword namespace">from</span> <span class="name namespace">streamz</span> <span class="keyword namespace">import</span> <span class="name">Stream</span><span class="whitespace">
+
+</span><span class="name">source</span> <span class="operator">=</span> <span class="name">Stream</span><span class="punctuation">()</span><span class="whitespace">
+</span><span class="name">a</span> <span class="operator">=</span> <span class="name">source</span><span class="operator">.</span><span class="name">timed_window</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">map</span><span class="punctuation">(</span><span class="name builtin">sum</span><span class="punctuation">)</span><span class="operator">.</span><span class="name">sink</span><span class="punctuation">(</span><span class="name builtin">print</span><span class="punctuation">)</span><span class="whitespace">
+
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">10</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">20</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">30</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">30</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">5</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">1</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">2</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">source</span><span class="operator">.</span><span class="name">emit</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">)</span><span class="whitespace">
+</span><span class="name">sleep</span><span class="punctuation">(</span><span class="literal number integer">3</span><span class="punctuation">)</span></code></pre>
+<pre class="literal-block">0
+90
+0
+9
+0</pre>
+</section>
+<section id="zrodla">
+<h3>Źródła</h3>
+<pre class="literal-block">https://matthewrocklin.com/blog/work/2017/10/16/streaming-dataframes-1
+https://streamz.readthedocs.io/en/latest/</pre>
+</section>
+</section></body>
+</html>
+
