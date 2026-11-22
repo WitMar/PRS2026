@@ -434,7 +434,7 @@ Wizualizacja potoku:
 	
 	|a|
 	
-.. |a| image:: mystream2.png
+.. |a| image:: mystream_union.png
 
 
 Unique

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Przetwarzanie równoległe i strumieniowe - Wykład 8</title>
+<title>Przetwarzanie równoległe i strumieniowe - Wykład 8: przetwarzanie strumieniowe i Streamz</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
@@ -174,16 +174,89 @@
   .reveal #topicsim ul.topics li.hit::before { content: "\2713  "; color: var(--green); font-weight: bold; }
   .reveal #topicsim .tverdict { min-height: 1.4em; }
   .reveal #topicsim .tverdict.err { color: var(--red); }
-  /* Kafka consumer groups */
-  .reveal #groupsim .gview { display: grid; grid-template-columns: 1.25fr 1fr; gap: .4em 1.2em; font-size: .72em; }
-  .reveal #groupsim .part { display: flex; align-items: center; gap: 3px; margin: .2em 0; }
-  .reveal #groupsim .part .pn { width: 2.6em; font-family: Consolas, Menlo, monospace; color: var(--muted); }
-  .reveal #groupsim .part i { display: block; width: 1.5em; height: 1.4em; line-height: 1.4em; text-align: center; font-style: normal; font-size: .8em; border-radius: 3px; color: #fff; }
-  .reveal #groupsim .part .who { margin-left: .5em; font-size: .9em; }
-  .reveal #groupsim .cons { display: inline-block; border: 2px solid; border-radius: .35em; padding: .1em .5em; margin: .15em .3em .15em 0; }
-  .reveal #groupsim .cons.idle { border-color: var(--line) !important; color: #aaa; border-style: dashed; }
-  .reveal #groupsim h4 { margin: .2em 0; }
   .reveal pre.out.lt { padding-top: 1.35em; }
+  /* console (as in lecture 2) */
+  .reveal pre.console { width: 100%; box-sizing: border-box; height: 15em; overflow: auto; margin: 0 0 .5em; padding: .5em .8em; font-size: .72em; line-height: 1.4;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #1e1e1e; color: #e0e0e0; border-radius: .3em; box-shadow: none; }
+  /* ---------- lecture 9: streams ---------- */
+  .reveal .cols > * { min-width: 0; }
+  .reveal .cols.three { grid-template-columns: 1fr 1fr 1fr; }
+  .reveal img.pic.wide { max-height: 6em; }
+  .reveal .cap { font-size: .7em; color: var(--muted); margin: .2em 0 .8em; }
+  .reveal .el.box h4 { font-size: .8em; }
+
+  /* stream graph simulation */
+  .reveal #flowsim .graph { display: grid; grid-template-columns: 6.5em 1.6em 1fr 1.6em 1fr 1.6em 1fr 1.6em 1fr; grid-template-rows: auto auto; gap: .5em 0; align-items: center; font-size: .62em; margin: .2em 0 .6em; }
+  .reveal .nd { border: 2px solid var(--blue); border-radius: .4em; background: #e8f0fe; padding: .25em .4em; text-align: center; min-height: 4.6em; transition: box-shadow .2s, background .2s; }
+  .reveal .nd b { display: block; font: bold 1em Consolas, Menlo, monospace; }
+  .reveal .nd .st { display: block; color: var(--muted); font-size: .85em; min-height: 1.3em; font-family: Consolas, Menlo, monospace; }
+  .reveal .nd .v { display: inline-block; min-width: 2em; min-height: 1.3em; margin-top: .15em; }
+  .reveal .nd.src { grid-row: 1 / span 2; background: #fff; border-color: #999; }
+  .reveal .nd.snk { background: #e6f4da; border-color: var(--green); }
+  .reveal .nd.hot { box-shadow: 0 0 0 4px var(--orange); }
+  .reveal .nd.drop { background: #fce8e6; }
+  .reveal .graph .ar { text-align: center; color: var(--muted); font-size: 1.4em; }
+  .reveal .chip.no { background: #fce8e6; color: var(--red); }
+  .reveal .chip.wait { background: #f1f3f4; color: #888; }
+  .reveal #flowsim pre.console { height: 11.5em; }
+  .reveal #joinsim pre.console { height: 8.6em; }
+
+  /* windows */
+  .reveal #winsim .wgrid { display: grid; grid-template-columns: 9.5em repeat(10, 1fr); gap: .2em .15em; font-size: .62em; align-items: center; margin: .3em 0 .5em; }
+  .reveal #winsim .wgrid .lbl { font-family: Consolas, Menlo, monospace; color: var(--muted); white-space: nowrap; }
+  .reveal #winsim .cell { text-align: center; border-radius: .3em; background: #e8f0fe; padding: .1em 0; animation: pop .25s; }
+  .reveal #winsim .bar { border-radius: .3em; height: 1.1em; animation: pop .25s; }
+  .reveal #winsim .bar.t { background: var(--blue); }
+  .reveal #winsim .bar.s { background: var(--green); }
+  .reveal #winsim .bar.p { background: #b7dd9c; }
+  .reveal #winsim .emitted { font: .7em/1.45 Consolas, Menlo, monospace; min-height: 4.4em; }
+  .reveal #winsim .emitted i, .reveal #joinsim .outs i { color: var(--muted); font-style: normal; }
+
+  /* joins */
+  .reveal #joinsim .jc { border: 2px solid var(--line); border-radius: .4em; padding: .3em .5em; font-size: .68em; }
+  .reveal #joinsim .jc h4 { font-size: 1.1em; margin: 0 0 .2em; font-family: Consolas, Menlo, monospace; }
+  .reveal #joinsim .jc .stt { font-family: Consolas, Menlo, monospace; color: var(--muted); min-height: 2.6em; white-space: pre; }
+  .reveal #joinsim .jc .outs { min-height: 7.5em; }
+  .reveal #joinsim .jc .chip { margin: .1em; font-family: Consolas, Menlo, monospace; }
+  .reveal #joinsim .jc.flash { border-color: var(--orange); }
+
+  
+  /* greenhouse sensors */
+  .reveal #sensorsim .sgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6em; font-size: .72em; margin: .3em 0 .5em; }
+  .reveal #sensorsim .sensor { position: relative; border: 2px solid var(--green); background: #f3faee; border-radius: .4em; padding: .3em .5em; }
+  .reveal #sensorsim .sensor.alarm { border-color: var(--red); background: #fce8e6; }
+  .reveal #sensorsim .bars { display: flex; align-items: flex-end; gap: 2px; height: 64px; margin: .2em 0; border-bottom: 1px solid var(--line); }
+  .reveal #sensorsim .bars i { display: block; width: 7%; background: var(--blue); border-radius: 2px 2px 0 0; }
+  .reveal #sensorsim .bars i.hi { background: var(--red); }
+  .reveal #sensorsim .v { font: bold 1.3em Consolas, Menlo, monospace; }
+  .reveal #sensorsim small { display: block; color: var(--muted); }
+  .reveal #sensorsim em { position: absolute; top: .3em; right: .5em; color: var(--red); font-weight: bold; font-style: normal; }
+  .reveal #sensorsim .sstat b { color: var(--blue); }
+  .reveal #sensorsim pre.console { height: 4.2em; }
+  /* event time vs processing time */
+  .reveal #eventsim .egrid { display: grid; grid-template-columns: 10.5em repeat(6, 1fr); gap: .25em; font-size: .66em; margin: .2em 0 .4em; }
+  .reveal #eventsim .egrid .lbl { color: var(--muted); align-self: center; }
+  .reveal #eventsim .egrid .hd { text-align: center; font-family: Consolas, Menlo, monospace; color: var(--muted); }
+  .reveal #eventsim .cell { text-align: center; border: 1px solid var(--line); border-radius: .3em; padding: .1em; background: #fff; }
+  .reveal #eventsim .cell.closed { background: #e6f4da; border-color: var(--green); }
+  .reveal #eventsim .cell.diff { background: #fff4e5; border-color: var(--orange); }
+  .reveal #eventsim .cell .lt { color: var(--red); font-weight: bold; }
+  .reveal #eventsim .estat b { color: var(--blue); }
+  .reveal #eventsim pre.console { height: 4.2em; margin-bottom: .3em; }
+  /* what is a window */
+  .reveal #winintro .wrow { display: flex; gap: .25em; flex-wrap: nowrap; overflow: hidden; margin: .5em 0; min-height: 2.2em; font-family: Consolas, Menlo, monospace; font-size: .75em; }
+  .reveal #winintro .wrow span { padding: .2em .35em; border: 2px solid var(--line); border-radius: .3em; background: #fff; }
+  .reveal #winintro .wrow span.in { border-color: var(--green); background: #e6f4da; font-weight: bold; }
+  .reveal #winintro .wrow span.hot { color: var(--red); }
+  .reveal #winintro .wstat { font-size: .65em; }
+  .reveal #winintro .wstat td.all, .reveal #winintro .wstat td.win { font-weight: bold; color: var(--blue); }
+  /* key partitioning */
+  .reveal #keysim .wks { display: grid; gap: .4em; font-size: .68em; margin: .3em 0; }
+  .reveal #keysim .wk { border: 2px solid var(--line); border-radius: .4em; padding: .25em .4em; min-height: 2.6em; }
+  .reveal #keysim .wk b { margin-right: .4em; }
+  .reveal #keysim .wk .chip { color: #fff; margin: .1em; font-size: .85em; padding: .05em .3em; animation: none; }
+  .reveal #keysim .kverdict { font-size: .7em; min-height: 3em; margin: 0; }
+  .reveal #keysim .kverdict.bad { color: var(--red); }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
@@ -198,7 +271,7 @@
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el text" style="left:2.179%;top:23.733%;width:61.002%;height:40%;"><p><span style="font-size:1.5em"><strong>Wykład 8</strong></span></p>
 
-<p><span style="font-size:1.5em"><strong>Dane sensoryczne, serwer danych, broker danych, biblioteki przetwarzania strumieniowego</strong></span></p>
+<p><span style="font-size:1.5em"><strong>Przetwarzanie strumieniowe: architektury, usługi chmurowe i biblioteka Streamz</strong></span></p>
 </div>
 <div class="el img" style="left:64.270%;top:21.576%;width:23.125%;height:40.000%;"><img src="images/image-n4hRi0h8.jpg" alt="UAM"></div>
 <div class="el img" style="left:47.930%;top:66.885%;width:19.608%;height:25.820%;"><img src="images/image-Tnelcxe1.png" alt=""></div>
@@ -210,15 +283,15 @@
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <div class="agenda">
-  <div class="ag"><b>1</b>Strumienie danych<p>przetwarzanie wsadowe a strumieniowe, wyzwania, zastosowania</p></div>
-  <div class="ag"><b>2</b>Dane sensoryczne (IoT)<p>czujniki, Bluetooth LE, odczyt i dekodowanie w Pythonie, problem skali</p></div>
-  <div class="ag"><b>3</b>Architektura strumieniowa<p>ETL, broker, procesor strumieni, analityka, przechowywanie</p></div>
-  <div class="ag"><b>4</b>Brokery wiadomości<p>kolejka a publish/subscribe, gwarancje dostarczenia, backpressure</p></div>
-  <div class="ag"><b>5</b>MQTT, Kafka, Kinesis<p>protokół IoT, partycjonowany log zdarzeń, usługi chmurowe</p></div>
-  <div class="ag"><b>6</b>Biblioteki strumieniowe<p>Flink, Spark, Kafka Streams, Storm, biblioteki Pythona</p></div>
+  <div class="ag"><b>1</b>Strumienie danych<p>wsad a strumień, zastosowania, okna, czas zdarzenia i spóźnione dane</p></div>
+  <div class="ag"><b>2</b>Architektura<p>przykład szklarni, broker, gwarancje, backpressure, MQTT, skalowanie po kluczu, Lambda i Kappa</p></div>
+  <div class="ag"><b>3</b>Chmura i technologie<p>Kinesis, usługi AWS / Azure / Google Cloud, Spark, biblioteki Pythona</p></div>
+  <div class="ag"><b>4</b>Biblioteka Streamz<p>emit, map, filter, accumulate, okna, łączenie, czas, back pressure, Dask</p></div>
 </div>
-<div class="note"><p><strong>Co już znamy:</strong> potoki generatorów (wykład 2), Streamz (wykład 9) i asyncio (wykład o korutynach). Dziś zobaczymy, skąd biorą się dane strumieniowe i jak trafiają do programów, które je przetwarzają. Następne wykłady: Apache Flink i Apache Kafka.</p></div>
+<div class="note"><p><strong>Co już znamy:</strong> potoki generatorów (wykład 2), wątki i kolejki, executory. Dziś zobaczymy, skąd biorą się dane strumieniowe, jak płyną przez system i jak przetwarzać je w Pythonie.</p>
+<p>Brokery logów zdarzeń i rozproszone silniki strumieniowe omówimy na kolejnych wykładach.</p></div>
 </div>
+<aside class="notes">Wykład łączy dawne wykłady 8 (architektura, brokery) i 9 (Streamz). Quizy warto zadawać na czacie, zanim klikniesz odpowiedź.</aside>
 </section>
 <section data-background-color="#ffffff" data-keywords="Strumienie">
 <div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Strumień danych (data stream)</strong></span></p></div>
@@ -260,27 +333,6 @@
 </div>
 </section>
 <section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wsad czy strumień? (batch vs stream)</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols wl">
-<table class="simple">
-<tr><th></th><th>Wsadowo</th><th>Strumieniowo</th></tr>
-<tr><td>Dane</td><td>ograniczone (bounded), znany koniec</td><td>nieograniczone (unbounded)</td></tr>
-<tr><td>Opóźnienie</td><td>minuty do godzin</td><td>milisekundy do sekund</td></tr>
-<tr><td>Wynik</td><td>ostateczny, po przetworzeniu całości</td><td>ciągle aktualizowany</td></tr>
-<tr><td>Przykład</td><td>raport dzienny, trening modelu ML</td><td>alarm, wykrywanie oszustw, dashboard</td></tr>
-<tr><td>Narzędzia</td><td>Spark, SQL, MapReduce (wykład 2)</td><td>Flink, Kafka Streams, Spark Structured Streaming</td></tr>
-</table>
-<div>
-<img class="pic" style="max-height:9em" src="images/image-wZx7Ls0n.jpeg" alt="Mem: Hulk (siła) czy Flash (szybkość)?">
-<p class="small" style="text-align:center">siła (wsad) czy szybkość (strumień)?</p>
-</div>
-</div>
-<div class="note warn"><p>Dawniej mówiło się, że strumieniowo da się policzyć tylko proste rzeczy (średnią w oknie, alarm). Dziś silniki strumieniowe przechowują stan, łączą strumienie, wykrywają wzorce i uruchamiają modele ML na bieżąco. Wsad wciąż wygrywa przy analizie całej historii i trenowaniu modeli.</p></div>
-</div>
-</section>
-<section data-background-color="#ffffff">
 <div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wsad a strumień: symulacja</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
@@ -300,43 +352,6 @@
 </div>
 </div>
 <aside class="notes">Zapytaj, jak skrócić opóźnienie wsadu. Odpowiedź: mniejsze wsady. W granicy wsad z jednego zdarzenia to strumień (tak działał Spark Streaming: mikrowsady).</aside>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Silnik przetwarzania strumieni</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols">
-<div>
-<p class="lead">Silnik strumieniowy przyjmuje wiele strumieni wejściowych i wykonuje na nich wiele operacji <strong>równolegle</strong>.</p>
-<p class="lead">Aplikacje strumieniowe opierają się na dwóch filarach:</p>
-<ul class="points">
-<li><strong>przechowywaniu</strong> zdarzeń (trwały, uporządkowany log),</li>
-<li><strong>przetwarzaniu</strong> zdarzeń (filtrowanie, łączenie, agregacja).</li>
-</ul>
-</div>
-<img class="pic" src="images/image-rSEnZPYv.png" alt="Dane wejściowe trafiają do silnika przetwarzania strumieniowego, a stamtąd do analityki i strumienia wyjściowego">
-</div>
-<ul class="points side">
-<li>Przetwarzanie musi być odporne na awarie i utratę danych oraz (zwykle) zachowywać kolejność zdarzeń, przynajmniej w obrębie jednego klucza.</li>
-<li>Pojedyncze wiadomości są małe (bajty do kilobajtów), ale jest ich bardzo dużo: tysiące do milionów na sekundę.</li>
-</ul>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wyzwania przetwarzania strumieniowego</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols wl">
-<ul class="points">
-<li><strong>Przepustowość:</strong> dane rzędu gigabitów na sekundę.</li>
-<li><strong>Skalowalność:</strong> obciążenie się zmienia (szczyty w dzień, cisza w nocy).</li>
-<li><strong>Niskie opóźnienie:</strong> odebrać, przetworzyć i udostępnić wynik dalej w ułamku sekundy.</li>
-<li><strong>Kolejność i czas:</strong> zdarzenia przychodzą spóźnione i nie po kolei. Liczy się czas zdarzenia (event time), a nie czas nadejścia.</li>
-<li><strong>Stan i awarie:</strong> stan (np. suma w oknie) trzeba odtworzyć po awarii bez gubienia i dublowania danych.</li>
-</ul>
-<img class="pic" src="images/image-Lci4udf0.jpg" alt="Mem: So much data, so little time">
-</div>
-</div>
 </section>
 <section data-background-color="#ffffff">
 <div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zastosowania i przypadki użycia</strong></span></p></div>
@@ -379,172 +394,129 @@
 </div>
 </div>
 </section>
-<section data-background-color="#ffffff" data-keywords="Sensory">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Dane sensoryczne: przykład ze szklarni</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<p class="lead">Czujniki w uprawie pomidorów na macie z wełny mineralnej (Grodan) mierzą warunki w podłożu w czasie rzeczywistym.</p>
-<div class="cols">
-<img class="pic" style="max-height:15em" src="images/image-Dci4l0xJ.png" alt="Czujnik Grodan wbijany w matę uprawową">
-<img class="pic" style="max-height:15em" src="images/image-vZfBpYF0.jpg" alt="Czujnik bezprzewodowy na macie Grotop w szklarni z pomidorami">
-</div>
-<p class="small">Źródło zdjęć: https://www.grodan.com/</p>
-</div>
-</section>
 <section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sensor profesjonalny i domowy</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols">
-<div>
-<img class="pic" style="max-height:11em" src="images/image-A6ROxcAl.png" alt="Sensor Grodan GroSens, cena 1100 euro netto">
-<p class="lead" style="margin-top:.4em"><strong>Profesjonalny:</strong> mierzy zawartość wody w podłożu (WC), temperaturę i przewodność elektryczną (EC), czyli zasolenie pożywki.</p>
-</div>
-<div>
-<div class="cols">
-<img class="pic" style="max-height:8em" src="images/image-yNKjudjx.jpg" alt="Domowy czujnik roślin: wilgotność, temperatura, nasłonecznienie, żyzność; Bluetooth 4.1">
-<p class="lead"><strong>Domowy</strong> (Xiaomi Mi Flora): wilgotność, temperatura, natężenie światła, żyzność (EC).</p>
-</div>
-<img class="pic" style="max-height:7.5em" src="images/image-MGdpjvYO.png" alt="Ceny domowych czujników roślin: 59-99 zł">
-<div class="note"><p>Około 1100 € wobec 60-100 zł (ceny z 2023 r.). Za różnicę płacimy za dokładność, kalibrację, trwałość, zasięg radiowy i integrację z systemem sterowania szklarnią.</p></div>
-</div>
-</div>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Budowa sensora i łączność</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<svg class="diagram" viewBox="0 0 1100 150" role="img" aria-label="Sensor przesyła odczyt przez Bluetooth LE do bramki, bramka przez Wi-Fi lub LTE protokołem MQTT do brokera w chmurze">
-<defs><marker id="arS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs>
-<rect x="10" y="40" width="200" height="70" rx="10" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="110" y="70" text-anchor="middle" font-weight="bold">sensor</text><text x="110" y="95" text-anchor="middle" style="font-size:15px">bateria, tylko pomiar</text>
-<line x1="210" y1="75" x2="388" y2="75" stroke="#666" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#arS)"/><text x="300" y="62" text-anchor="middle" style="font-size:15px">BLE / Zigbee / LoRa</text>
-<rect x="390" y="40" width="220" height="70" rx="10" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="500" y="70" text-anchor="middle" font-weight="bold">bramka (gateway)</text><text x="500" y="95" text-anchor="middle" style="font-size:15px">Raspberry Pi, ESP32</text>
-<line x1="610" y1="75" x2="788" y2="75" stroke="#666" stroke-width="2.5" marker-end="url(#arS)"/><text x="700" y="62" text-anchor="middle" style="font-size:15px">Wi-Fi / LTE, MQTT</text>
-<rect x="790" y="40" width="300" height="70" rx="10" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="940" y="70" text-anchor="middle" font-weight="bold">broker / chmura</text><text x="940" y="95" text-anchor="middle" style="font-size:15px">dalsze przetwarzanie</text>
-<text x="300" y="135" text-anchor="middle" fill="#666" style="font-size:14px">krótki zasięg, mało energii</text>
-</svg>
-<ul class="points">
-<li>Sensor to proste urządzenie zasilane baterią, które służy wyłącznie do pomiarów. Większość czasu „śpi”, a odczyt wysyła co kilka minut.</li>
-<li>Komunikuje się bezprzewodowo, najczęściej przez <strong>Bluetooth Low Energy</strong> (BLE). Na duże odległości: LoRaWAN, NB-IoT.</li>
-<li>W realnym wdrożeniu sensor zawsze rozmawia z odbiornikiem (agregatorem, bramką), który przesyła dane dalej do serwera lub chmury.</li>
-</ul>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Cel użycia sensorów</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<p class="lead">Chcemy zbudować system, który na podstawie odczytów:</p>
-<table class="simple">
-<tr><th>Cel</th><th>Przykład</th><th>Operacja na strumieniu</th></tr>
-<tr><td><strong>Alarmowanie</strong></td><td>temperatura powyżej 30 °C, czujnik milczy od 15 minut</td><td>filtr (bezstanowy), timer wykrywający brak danych</td></tr>
-<tr><td><strong>Sterowanie</strong></td><td>utrzymanie poziomu nawodnienia, strategie nawadniania i nawożenia</td><td>pętla sterowania z pamięcią stanu (stateful)</td></tr>
-<tr><td><strong>Raporty</strong></td><td>dzienne nasłonecznienie, minimalna i maksymalna temperatura</td><td>agregacja w oknach czasowych</td></tr>
-</table>
-<div class="note"><p>Każdy z tych celów to inny rodzaj przetwarzania strumieniowego. Filtry i okna czasowe zobaczymy w Apache Flink.</p></div>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Problem skali</strong></span></p></div>
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wyzwania przetwarzania strumieniowego</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <div class="cols wl">
-<div>
 <ul class="points">
-<li>Tysiące sensorów wysyłają dane do serwera.</li>
-<li>Dane pochodzą z <strong>różnych stref czasowych</strong>: zapisujemy czas zdarzenia w UTC.</li>
-<li>Różne ustawienia i alerty zależą od typu uprawy, klienta itp.: strumień trzeba wzbogacić o konfigurację (złączenie z tabelą).</li>
+<li><strong>Przepustowość:</strong> dane rzędu gigabitów na sekundę.</li>
+<li><strong>Skalowalność:</strong> obciążenie się zmienia (szczyty w dzień, cisza w nocy).</li>
+<li><strong>Niskie opóźnienie:</strong> odebrać, przetworzyć i udostępnić wynik dalej w ułamku sekundy.</li>
+<li><strong>Kolejność i czas:</strong> zdarzenia przychodzą spóźnione i nie po kolei. Liczy się czas zdarzenia (event time), a nie czas nadejścia.</li>
+<li><strong>Stan i awarie:</strong> stan (np. suma w oknie) trzeba odtworzyć po awarii bez gubienia i dublowania danych.</li>
 </ul>
-<div class="note"><p><strong>Policzmy:</strong> 5000 czujników × 4 wielkości × 1 odczyt na minutę = 20 000 wiadomości na minutę, czyli ok. 333 na sekundę i <strong>28,8 mln</strong> na dobę.</p></div>
-</div>
-<img class="pic" src="images/image-HwdhLkx1.jpg" alt="Szklarnia z długimi rzędami pomidorów">
+<img class="pic" src="images/image-Lci4udf0.jpg" alt="Mem: So much data, so little time">
 </div>
 </div>
 </section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Odczyt z sensora w Pythonie (BLE)</strong></span></p></div>
+<section data-background-color="#ffffff" data-keywords="Okno">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Czym jest okno?</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols wl">
-<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|4-6|8-14|16">
-import asyncio
-from bleak import BleakClient
-
-ADRES = "C4:7C:8D:6A:3E:91"  # MAC czujnika (macOS: UUID)
-TRYB = "00001a00-0000-1000-8000-00805f9b34fb"
-DANE = "00001a01-0000-1000-8000-00805f9b34fb"
-BATERIA = "00001a02-0000-1000-8000-00805f9b34fb"
-
-async def odczyt(adres):
-    async with BleakClient(adres, timeout=20) as czujnik:
-        await czujnik.write_gatt_char(TRYB, b"\xa0\x1f", response=True)
-        dane = await czujnik.read_gatt_char(DANE)
-        info = await czujnik.read_gatt_char(BATERIA)
-    return dekoduj(dane) | {"bateria": info[0],
-                            "firmware": info[2:].decode()}
-
-print(asyncio.run(odczyt(ADRES)))   # dekoduj(): następny slajd
-</code></pre>
+<div class="cols">
 <div>
 <ul class="points side">
-<li><strong>bleak</strong> to wieloplatformowa biblioteka BLE oparta na <code>asyncio</code> (wykład o korutynach).</li>
-<li>Protokół Mi Flora: zapis bajtów <code>A0 1F</code> do charakterystyki trybu, potem odczyt 16 bajtów z bieżącymi pomiarami.</li>
-<li>Charakterystyki GATT identyfikujemy po UUID.</li>
+<li>Strumień nie ma końca, więc „średnia ze wszystkich danych” nigdy nie jest gotowa, a pamięć kiedyś się skończy.</li>
+<li><strong>Okno</strong> (window) to skończony fragment strumienia, na którym liczymy wynik: sumę, średnią, maksimum.</li>
+<li>Okno opisują dwie rzeczy: <strong>rozmiar</strong> (3 ostatnie odczyty albo ostatnie 5 minut) i <strong>kiedy</strong> wysyła wynik (po każdym zdarzeniu albo co minutę).</li>
+<li>Pytamy więc o „średnią temperaturę z ostatnich 5 minut”, a nie „od początku świata”.</li>
 </ul>
-<div class="note warn"><p>Oryginalny przykład korzystał z biblioteki <code>miflora</code>. Jej ostatnie wydanie to 0.7.2, a backendy <code>bluepy</code>/<code>gatttool</code> nie są już rozwijane. Dziś lepiej użyć <code>bleak</code>.</p></div>
+<div class="note"><p>Jak okno w pociągu: widać tylko fragment krajobrazu, a ten fragment cały czas się przesuwa.</p></div>
+</div>
+<div class="sim" id="winintro">
+  <div class="simctl">
+    <button class="btn" data-act="add">nowy odczyt</button>
+    <button class="btn" data-act="hot" style="background:var(--red);border-color:var(--red)">skok do 35 °C</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+  </div>
+  <div class="wrow"></div>
+  <table class="simple wstat">
+    <tr><th></th><th>średnia</th><th>z ilu odczytów</th></tr>
+    <tr><td>od początku strumienia</td><td class="all">–</td><td class="mall">–</td></tr>
+    <tr><td>okno: 3 ostatnie odczyty</td><td class="win">–</td><td class="mwin">–</td></tr>
+  </table>
+  <p class="small whint">Kliknij kilka razy „nowy odczyt”, potem „skok”. Która średnia szybciej pokazuje upał?</p>
 </div>
 </div>
 </div>
+<aside class="notes">Pokaż, że średnia od początku reaguje na skok coraz słabiej, bo rozmywa się w coraz większej liczbie odczytów, a okno pokazuje bieżącą sytuację.</aside>
 </section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Dekodowanie bajtów: moduł struct</strong></span></p></div>
+<section data-background-color="#ffffff" data-keywords="Okna">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Rodzaje okien</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols wl">
-<div>
-<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
-import struct
-
-def dekoduj(raw: bytes) -> dict:
-    # &lt; little-endian | h: int16 temp*10 | x: pomiń bajt
-    # I: uint32 lux | B: uint8 wilgotność % | H: uint16 EC
-    temp, lux, wilg, ec = struct.unpack_from("&lt;hxIBH", raw)
-    return {"temp": temp / 10, "lux": lux, "wilg": wilg, "ec": ec}
-
-raw = bytes.fromhex("e800 00 c8090000 2a 5e01 023c00fb349b")
-print(len(raw), raw.hex(" "))
-print(dekoduj(raw))
-</code></pre>
-<pre class="out sm">16 e8 00 00 c8 09 00 00 2a 5e 01 02 3c 00 fb 34 9b
-{'temp': 23.2, 'lux': 2504, 'wilg': 42, 'ec': 350}</pre>
-<p class="small">Temperatura jest liczbą ze znakiem (<code>h</code>), bo bywa ujemna. <code>0x00e8</code> = 232, czyli 23,2 °C.</p>
-</div>
-<div class="blanks">
-<p class="lead">Czujnik zwrócił bajty:</p>
-<pre class="exo">2c 01 00 10 27 00 00 37 c8 00 ...</pre>
-<pre class="exo">temp = <input class="blank" size="6" data-re="^30(\.0)?$" data-sol="30.0" aria-label="temperatura"> °C
-lux  = <input class="blank" size="6" data-re="^10000$" data-sol="10000" aria-label="natężenie światła">
-wilg = <input class="blank" size="6" data-re="^55$" data-sol="55" aria-label="wilgotność"> %</pre>
-<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
-<p class="fb"></p>
-<p class="explain">Little-endian: najmłodszy bajt pierwszy. <code>2c 01</code> → 0x012c = 300 → 30,0 °C. <code>10 27 00 00</code> → 0x2710 = 10 000 lx. <code>37</code> → 55 %.</p>
-</div>
+<svg class="diagram" viewBox="0 0 1100 225" style="height:175px;width:100%;margin:0" role="img" aria-label="Te same zdarzenia w oknach skaczących, przesuwnych i sesyjnych"><text x="10" y="27" font-weight="bold" style="font-size:16px">zdarzenia</text><line x1="190" y1="22" x2="1054" y2="22" stroke="#ccc" stroke-width="2"/><circle cx="226" cy="22" r="7" fill="#1a73d9"/><circle cx="276.4" cy="22" r="7" fill="#1a73d9"/><circle cx="319.6" cy="22" r="7" fill="#1a73d9"/><circle cx="413.20000000000005" cy="22" r="7" fill="#1a73d9"/><circle cx="550" cy="22" r="7" fill="#1a73d9"/><circle cx="578.8" cy="22" r="7" fill="#1a73d9"/><circle cx="809.1999999999999" cy="22" r="7" fill="#1a73d9"/><circle cx="838" cy="22" r="7" fill="#1a73d9"/><circle cx="888.4" cy="22" r="7" fill="#1a73d9"/><circle cx="1010.8000000000001" cy="22" r="7" fill="#1a73d9"/><text x="10" y="70" font-weight="bold" style="font-size:16px">skaczące</text><rect x="192" y="52" width="284" height="26" rx="6" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="334" y="70" text-anchor="middle" style="font-size:14px">4</text><rect x="480" y="52" width="284" height="26" rx="6" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="622" y="70" text-anchor="middle" style="font-size:14px">2</text><rect x="768" y="52" width="284" height="26" rx="6" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="910" y="70" text-anchor="middle" style="font-size:14px">4</text><text x="10" y="123" font-weight="bold" style="font-size:16px">przesuwne</text><rect x="192" y="89" width="284" height="26" rx="6" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="334" y="107" text-anchor="middle" style="font-size:14px">4</text><rect x="336" y="115" width="284" height="26" rx="6" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="478" y="133" text-anchor="middle" style="font-size:14px">3</text><rect x="480" y="89" width="284" height="26" rx="6" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="622" y="107" text-anchor="middle" style="font-size:14px">2</text><rect x="624" y="115" width="284" height="26" rx="6" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="766" y="133" text-anchor="middle" style="font-size:14px">3</text><rect x="768" y="89" width="284" height="26" rx="6" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="910" y="107" text-anchor="middle" style="font-size:14px">4</text><text x="10" y="175" font-weight="bold" style="font-size:16px">sesyjne</text><rect x="206.4" y="157" width="226.39999999999995" height="26" rx="6" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="319.59999999999997" y="175" text-anchor="middle" style="font-size:14px">4</text><rect x="530.4000000000001" y="157" width="68" height="26" rx="6" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="564.4000000000001" y="175" text-anchor="middle" style="font-size:14px">2</text><rect x="789.5999999999999" y="157" width="118.40000000000009" height="26" rx="6" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="848.8" y="175" text-anchor="middle" style="font-size:14px">3</text><rect x="991.1999999999999" y="157" width="39.20000000000016" height="26" rx="6" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="1010.8" y="175" text-anchor="middle" style="font-size:14px">1</text><text x="190" y="212" text-anchor="middle" fill="#999" style="font-size:14px">0 s</text><text x="334" y="212" text-anchor="middle" fill="#999" style="font-size:14px">2 s</text><text x="478" y="212" text-anchor="middle" fill="#999" style="font-size:14px">4 s</text><text x="622" y="212" text-anchor="middle" fill="#999" style="font-size:14px">6 s</text><text x="766" y="212" text-anchor="middle" fill="#999" style="font-size:14px">8 s</text><text x="910" y="212" text-anchor="middle" fill="#999" style="font-size:14px">10 s</text><text x="1054" y="212" text-anchor="middle" fill="#999" style="font-size:14px">12 s</text></svg>
+<table class="simple" style="font-size:.6em;margin:.2em 0">
+<tr><th>Okno</th><th>Jak działa</th><th>Przykład</th><th>W Streamz</th></tr>
+<tr><td><strong>skaczące</strong> (tumbling)</td><td>stała długość, okna się nie nakładają: każde zdarzenie trafia do jednego okna</td><td>liczba odczytów na minutę</td><td><code>partition(n)</code>, <code>timed_window(t)</code></td></tr>
+<tr><td><strong>przesuwne</strong> (sliding)</td><td>stała długość i krok, okna się nakładają</td><td>średnia z 5 ostatnich minut, liczona co minutę</td><td><code>sliding_window(n)</code></td></tr>
+<tr><td><strong>sesyjne</strong> (session)</td><td>okno trwa, dopóki zdarzenia przychodzą; zamyka je przerwa dłuższa niż ustalony limit</td><td>jedna wizyta użytkownika na stronie</td><td>brak gotowej operacji</td></tr>
+</table>
+<div class="cols">
+<p class="small">Okno można liczyć w <strong>elementach</strong> (3 ostatnie odczyty) albo w <strong>czasie</strong> (ostatnia minuta). Bez okna stan rośnie od początku strumienia.</p>
+<div class="quiz compact"><p class="q">Panel pokazuje liczbę zamówień z ostatniej godziny i odświeża się co minutę. Jakie to okno?</p><div class="opts"><button class="opt" data-ok="0">skaczące</button><button class="opt" data-ok="1">przesuwne</button><button class="opt" data-ok="0">sesyjne</button></div><p class="explain">Okno ma 60 minut, a krok 1 minutę, więc kolejne okna się nakładają.</p></div>
 </div>
 </div>
 </section>
+<section data-background-color="#ffffff" data-keywords="Czas">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Czas zdarzenia a czas przetwarzania</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead" style="font-size:.95em"><strong>Czas zdarzenia</strong> (event time) to chwila, w której coś się naprawdę wydarzyło: znacznik zapisany w danych. <strong>Czas przetwarzania</strong> (processing time) to chwila, w której zdarzenie dotarło do programu. Przez sieć, bufory i urządzenia offline zdarzenia przychodzą <strong>spóźnione i nie po kolei</strong>.</p>
+<div class="sim" id="eventsim">
+  <div class="simctl">
+    <button class="btn" data-act="play">Start / pauza</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+    <label>dopuszczalne opóźnienie <input type="range" class="late" min="0" max="5" step="0.5" value="1"> <b class="latev">1</b> s</label>
+    <span class="stat estat"></span>
+  </div>
+  <div class="egrid"></div>
+  <pre class="console"></pre>
+</div>
+<div class="note"><p><strong>Watermark</strong> („znak wodny”) to sygnał „starszych zdarzeń już raczej nie będzie”: najnowszy widziany czas zdarzenia minus dopuszczalne opóźnienie. Gdy watermark minie koniec okna, okno się zamyka i wysyła wynik, a później przychodzące zdarzenia są <strong>spóźnione</strong> (odrzucamy je albo kierujemy do osobnego strumienia). Większe opóźnienie oznacza mniej strat, ale później wyniki.</p></div>
+</div>
+<aside class="notes">Najpierw opóźnienie 0 s: część zdarzeń jest odrzucana jako spóźnione. Potem 3-4 s: strat prawie nie ma, ale okna zamykają się później. Wiersz „wg czasu przyjścia” na pomarańczowo pokazuje okna, w których liczba zdarzeń różni się od prawdy.</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="Sensory">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przykład: czujniki w szklarni</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols" style="grid-template-columns:1fr 11em;align-items:center">
+<p class="lead" style="font-size:.95em">Czujniki w uprawie pomidorów mierzą temperaturę, wilgotność i zasolenie podłoża. <strong>5000 czujników × 4 wielkości × odczyt co minutę</strong> to ok. 333 wiadomości na sekundę i 28,8 mln na dobę. Na tych danych chcemy <strong>alarmować</strong>, <strong>sterować</strong> nawadnianiem i robić <strong>raporty</strong>.</p>
+<img class="pic" style="max-height:6.5em;width:100%;object-fit:cover;margin:0" src="images/image-vZfBpYF0.jpg" alt="Czujnik bezprzewodowy na macie w szklarni z pomidorami">
+</div>
+<div class="sim" id="sensorsim">
+  <div class="simctl">
+    <button class="btn" data-act="play">Start / pauza</button>
+    <button class="btn" data-act="heat" style="background:var(--red);border-color:var(--red)">upał w hali B</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+    <label>próg <input type="range" class="thr" min="27" max="33" step="0.5" value="30"> <b class="thrv">30</b> °C</label>
+  </div>
+  <div class="simctl">
+    <label><input type="radio" name="smode" value="one" checked> alarm z pojedynczego odczytu</label>
+    <label><input type="radio" name="smode" value="avg"> alarm ze średniej z 3 ostatnich odczytów</label>
+    <span class="stat sstat"></span>
+  </div>
+  <div class="sgrid"></div>
+  <pre class="console"></pre>
+</div>
+<p class="hint">Każdy słupek to jedno zdarzenie z czujnika. Porównaj tryby: pojedynczy odczyt daje fałszywe alarmy przy zwykłym szumie, a średnia z okna reaguje dopiero na prawdziwy upał. Dokładnie ten potok napiszemy później w Streamz (<code>sliding_window</code>).</p>
+</div>
+<aside class="notes">Najpierw tryb pojedynczego odczytu: po kilkunastu sekundach pojawią się pojedyncze fałszywe alarmy. Potem reset, tryb średniej i przycisk upału. Pytanie: co tracimy w trybie średniej? (alarm przychodzi później, po 2-3 odczytach).</aside>
+</section>
 <section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Od sensora do raportu: proces</strong></span></p></div>
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Od zdarzenia do wyniku: przepływ danych</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <svg class="diagram" viewBox="0 0 1180 250" role="img" aria-label="Proces: sensory, bramka, broker, przetwarzanie strumieniowe, magazyn danych, analityka i alerty">
 <defs><marker id="arP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs>
 <g style="font-size:15px" fill="#666" text-anchor="middle"><text x="95" y="25">zbieranie</text><text x="300" y="25">transport</text><text x="505" y="25">przetwarzanie</text><text x="790" y="25">przechowywanie</text><text x="1060" y="25">analiza, reakcja</text></g>
-<rect x="10" y="50" width="170" height="80" rx="10" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="95" y="85" text-anchor="middle" font-weight="bold">sensory</text><text x="95" y="110" text-anchor="middle" style="font-size:15px">+ bramki</text>
+<rect x="10" y="50" width="170" height="80" rx="10" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="95" y="85" text-anchor="middle" font-weight="bold">źródła</text><text x="95" y="110" text-anchor="middle" style="font-size:15px">czujniki, aplikacje</text>
 <line x1="180" y1="90" x2="218" y2="90" stroke="#666" stroke-width="2.5" marker-end="url(#arP)"/>
-<rect x="220" y="50" width="160" height="80" rx="10" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="300" y="85" text-anchor="middle" font-weight="bold">broker</text><text x="300" y="110" text-anchor="middle" style="font-size:15px">MQTT, Kafka</text>
+<rect x="220" y="50" width="160" height="80" rx="10" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="300" y="85" text-anchor="middle" font-weight="bold">broker</text><text x="300" y="110" text-anchor="middle" style="font-size:15px">MQTT, chmura</text>
 <line x1="380" y1="90" x2="418" y2="90" stroke="#666" stroke-width="2.5" marker-end="url(#arP)"/>
-<rect x="420" y="50" width="170" height="80" rx="10" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="505" y="85" text-anchor="middle" font-weight="bold">procesor</text><text x="505" y="110" text-anchor="middle" style="font-size:15px">Flink, Streamz</text>
+<rect x="420" y="50" width="170" height="80" rx="10" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="505" y="85" text-anchor="middle" font-weight="bold">procesor</text><text x="505" y="110" text-anchor="middle" style="font-size:15px">Streamz, Spark</text>
 <line x1="590" y1="90" x2="688" y2="90" stroke="#666" stroke-width="2.5" marker-end="url(#arP)"/><text x="640" y="78" text-anchor="middle" style="font-size:14px">wyniki</text>
 <rect x="690" y="50" width="200" height="80" rx="10" fill="#f1f3f4" stroke="#999" stroke-width="2"/><text x="790" y="85" text-anchor="middle" font-weight="bold">magazyn</text><text x="790" y="110" text-anchor="middle" style="font-size:15px">TSDB, data lake</text>
 <line x1="890" y1="90" x2="968" y2="90" stroke="#666" stroke-width="2.5" marker-end="url(#arP)"/>
@@ -560,92 +532,18 @@ wilg = <input class="blank" size="6" data-re="^55$" data-sol="55" aria-label="wi
 </div>
 </section>
 <section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>ETL (extract, transform, load)</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols">
-<div>
-<p class="lead"><strong>ETL</strong> (wyodrębnij, przekształć, załaduj) to proces integracji danych: łączy dane z wielu źródeł w jeden spójny zbiór i zapisuje go w hurtowni danych lub innym systemie docelowym.</p>
-<ul class="points side">
-<li><strong>Extract:</strong> pobranie i weryfikacja danych ze źródeł.</li>
-<li><strong>Transform:</strong> czyszczenie, ujednolicenie jednostek i formatów, wzbogacanie.</li>
-<li><strong>Load:</strong> zapis do repozytorium danych.</li>
-</ul>
-</div>
-<img class="pic" src="images/image-rN4l2rUM.png" alt="Proces ETL: Extract, Transform, Load">
-</div>
-<div class="note"><p><strong>ELT:</strong> najpierw ładujemy surowe dane (np. do data lake), a przekształcamy je później w docelowej bazie. <strong>Streaming ETL:</strong> te same trzy kroki wykonywane w sposób ciągły dla każdego zdarzenia.</p></div>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>ETL w Pythonie: potok generatorów</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols" style="grid-template-columns:1.75fr 1fr">
-<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|10-11|13-20|22-23|25-28">
-import csv, io, sqlite3
-from datetime import datetime, timezone
-
-SUROWE = io.StringIO("""czujnik;czas;temp_F
-s1;2026-12-16T08:00+01:00;75.2
-s2;2026-12-16T02:00-05:00;81.5
-s3;2026-12-16T08:00+01:00;ERR
-s1;2026-12-16T08:05+01:00;76.1
-""")
-def extract(plik):                   # E: wiersz po wierszu
-    yield from csv.DictReader(plik, delimiter=";")
-
-def transform(wiersze):              # T: walidacja, UTC, °F -&gt; °C
-    for w in wiersze:
-        try:
-            f = float(w["temp_F"])
-        except ValueError:
-            continue                 # odrzucamy błędny odczyt
-        czas = datetime.fromisoformat(w["czas"]).astimezone(timezone.utc)
-        yield w["czujnik"], czas.isoformat(), round((f - 32) / 1.8, 1)
-
-def load(rekordy, db):               # L: zapis do bazy
-    db.executemany("INSERT INTO odczyty VALUES (?, ?, ?)", rekordy)
-
-db = sqlite3.connect(":memory:")
-db.execute("CREATE TABLE odczyty (czujnik, czas_utc, temp_c)")
-load(transform(extract(SUROWE)), db)
-print(*db.execute("SELECT * FROM odczyty ORDER BY czas_utc"), sep="\n")
-</code></pre>
-<div>
-<pre class="out sm lt">('s1', '2026-12-16T07:00:00+00:00', 24.0)
-('s2', '2026-12-16T07:00:00+00:00', 27.5)
-('s1', '2026-12-16T07:05:00+00:00', 24.5)</pre>
-<ul class="points side">
-<li>Potok generatorów z wykładu 2: w pamięci jest zawsze jeden wiersz.</li>
-<li>Odczyty <code>s1</code> o 8:00 w Polsce i <code>s2</code> o 2:00 w Nowym Jorku to <strong>ten sam moment</strong>. Bez UTC trudno to zauważyć.</li>
-<li>Błędny odczyt <code>ERR</code> odpada w kroku T.</li>
-</ul>
-</div>
-</div>
-</div>
-</section>
-<section data-background-color="#ffffff" data-keywords="Architektura">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Architektura strumieniowa</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<p class="lead">Architektura przetwarzania strumieniowego (streaming data architecture) to zestaw komponentów, które przyjmują i przetwarzają duże ilości danych napływających jednocześnie z wielu źródeł.</p>
-<img class="pic" style="max-height:12em" src="images/image-YmZcHUKG.png" alt="Aplikacje, usługi, sensory i urządzenia wysyłają dane do kolejki wiadomości, procesor strumieni wykonuje zapytanie i przekazuje wyniki do API, akcji, wizualizacji i alertów">
-<p class="lead">Dzięki niej możemy zarządzać danymi strumieniowymi, monitorować je i analizować w czasie rzeczywistym.</p>
-</div>
-</section>
-<section data-background-color="#ffffff">
 <div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Cztery elementy architektury</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Architektura strumieniowa to zestaw elementów, które przyjmują zdarzenia z wielu źródeł naraz, przetwarzają je na bieżąco i udostępniają wyniki. Zwykle składa się z czterech części:</p>
 <table class="simple">
 <tr><th>Element</th><th>Rola</th><th>Przykłady (2026)</th></tr>
-<tr><td><strong>Broker wiadomości</strong> (message broker)</td><td>przyjmuje zdarzenia od producentów, buforuje je i przekazuje konsumentom</td><td>Apache Kafka, brokery MQTT (Mosquitto, EMQX), RabbitMQ, Amazon Kinesis Data Streams, Google Cloud Pub/Sub, Azure Event Hubs</td></tr>
-<tr><td><strong>Procesor strumieni</strong> (stream processing framework, streaming ETL)</td><td>filtruje, łączy, agreguje i wzbogaca zdarzenia</td><td>Apache Flink, Spark Structured Streaming, Kafka Streams, Google Dataflow (Apache Beam)</td></tr>
+<tr><td><strong>Broker wiadomości</strong> (message broker)</td><td>przyjmuje zdarzenia od producentów, buforuje je i przekazuje konsumentom</td><td>brokery MQTT (Mosquitto, EMQX), RabbitMQ, Amazon Kinesis Data Streams, Google Cloud Pub/Sub, Azure Event Hubs</td></tr>
+<tr><td><strong>Procesor strumieni</strong> (stream processing framework, streaming ETL)</td><td>filtruje, łączy, agreguje i wzbogaca zdarzenia</td><td>Spark Structured Streaming, Azure Stream Analytics, Google Dataflow (Apache Beam); w Pythonie: Streamz</td></tr>
 <tr><td><strong>Analityka</strong> (silnik zapytań, BI)</td><td>zapytania SQL, dashboardy, raporty</td><td>Amazon Athena, BigQuery, ClickHouse, Apache Druid, Grafana, Power BI</td></tr>
 <tr><td><strong>Magazyn danych strumieniowych</strong> (streaming data storage)</td><td>trwałe i tanie przechowywanie historii zdarzeń</td><td>data lake (S3 + Parquet, Apache Iceberg), bazy szeregów czasowych (InfluxDB, TimescaleDB)</td></tr>
 </table>
-<p class="small">Kolejne slajdy omawiają te elementy po kolei, a brokery (MQTT, Kafka, Kinesis) szczegółowo.</p>
+<p class="small">Dalej: broker (MQTT, Kinesis), usługi chmurowe i procesor strumieni.</p>
 </div>
 </section>
 <section data-background-color="#ffffff">
@@ -682,7 +580,7 @@ print(*db.execute("SELECT * FROM odczyty ORDER BY czas_utc"), sep="\n")
   <p class="hint info">Wybierz tryb i wyślij kilka wiadomości.</p>
 </div>
 </div>
-<aside class="notes">Pub/sub: każdy subskrybent dostaje kopię (MQTT, Kafka z różnymi grupami). Kolejka: konsumenci konkurują o wiadomości, każda trafia do jednego (RabbitMQ, SQS, Kafka w ramach jednej grupy).</aside>
+<aside class="notes">Pub/sub: każdy subskrybent dostaje kopię (MQTT, Google Pub/Sub). Kolejka: konsumenci konkurują o wiadomości, każda trafia do jednego (RabbitMQ, Amazon SQS).</aside>
 </section>
 <section data-background-color="#ffffff">
 <div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Gwarancje dostarczenia (delivery semantics)</strong></span></p></div>
@@ -690,11 +588,11 @@ print(*db.execute("SELECT * FROM odczyty ORDER BY czas_utc"), sep="\n")
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <table class="simple">
 <tr><th>Semantyka</th><th>Jak działa</th><th>Ryzyko</th></tr>
-<tr><td><strong>at-most-once</strong> (najwyżej raz)</td><td>wyślij i zapomnij, bez potwierdzeń</td><td>wiadomość może zginąć</td></tr>
-<tr><td><strong>at-least-once</strong> (co najmniej raz)</td><td>ponawiaj, aż odbiorca potwierdzi</td><td>duplikaty po ponowieniu</td></tr>
-<tr><td><strong>exactly-once</strong> (dokładnie raz)</td><td>at-least-once + deduplikacja lub transakcje (Kafka, Flink)</td><td>wyższy koszt i złożoność</td></tr>
+<tr><td><strong>at-most-once</strong> (najwyżej raz)</td><td>wyślij i zapomnij, bez potwierdzeń (MQTT QoS 0)</td><td>wiadomość może zginąć</td></tr>
+<tr><td><strong>at-least-once</strong> (co najmniej raz)</td><td>ponawiaj, aż odbiorca potwierdzi (MQTT QoS 1)</td><td>duplikaty po ponowieniu</td></tr>
+<tr><td><strong>exactly-once</strong> (dokładnie raz)</td><td>at-least-once + usuwanie duplikatów lub transakcje (MQTT QoS 2 między klientem a brokerem)</td><td>wyższy koszt i złożoność</td></tr>
 </table>
-<div class="quiz"><p class="q">Konsument przetworzył wiadomość, zapisał wynik do bazy i padł, zanim potwierdził odbiór (commit offsetu). Po restarcie przetworzy ją jeszcze raz. Jaka to semantyka?</p><div class="opts"><button class="opt" data-ok="0">at-most-once</button><button class="opt" data-ok="1">at-least-once</button><button class="opt" data-ok="0">exactly-once</button></div><p class="explain">At-least-once: nic nie zginie, ale mogą pojawić się duplikaty. Dlatego operacje warto projektować jako <strong>idempotentne</strong>: zapis „temperatura czujnika 17 o 8:00 = 23,2” można powtórzyć bez szkody, a „zwiększ licznik o 1” już nie.</p></div>
+<div class="quiz"><p class="q">Konsument przetworzył wiadomość, zapisał wynik do bazy i padł, zanim potwierdził odbiór. Po restarcie przetworzy ją jeszcze raz. Jaka to semantyka?</p><div class="opts"><button class="opt" data-ok="0">at-most-once</button><button class="opt" data-ok="1">at-least-once</button><button class="opt" data-ok="0">exactly-once</button></div><p class="explain">At-least-once: nic nie zginie, ale mogą pojawić się duplikaty. Dlatego operacje warto projektować jako <strong>idempotentne</strong>: zapis „temperatura czujnika 17 o 8:00 = 23,2” można powtórzyć bez szkody, a „zwiększ licznik o 1” już nie.</p></div>
 </div>
 </section>
 <section data-background-color="#ffffff">
@@ -718,130 +616,7 @@ print(*db.execute("SELECT * FROM odczyty ORDER BY czas_utc"), sep="\n")
   <p class="stat bpstat"></p>
   <p class="hint bpverdict"></p>
 </div>
-<p class="small"><strong>Push</strong> (MQTT, RabbitMQ): broker sam wysyła wiadomości do konsumenta. <strong>Pull</strong> (Kafka, Kinesis): konsument pobiera je we własnym tempie, a nadmiar czeka w logu na dysku (rośnie <em>consumer lag</em>).</p>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Generacje brokerów</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols wl">
-<div>
-<ul class="points side">
-<li><strong>Message Oriented Middleware</strong> (MOM): kolejki, routing, wiadomość znika po potwierdzeniu. RabbitMQ (4.x, od wersji 3.9 także trwałe <em>Streams</em>), Apache ActiveMQ Classic i Apache Artemis (od XI 2025 osobny projekt Apache).</li>
-<li><strong>Platformy logów zdarzeń</strong> (event streaming): bardzo wydajne, przechowują historię, którą można odczytać ponownie. Apache Kafka, Redpanda, Apache Pulsar.</li>
-<li><strong>Usługi chmurowe:</strong> Amazon Kinesis Data Streams, Google Cloud Pub/Sub, Azure Event Hubs (zgodny z protokołem Kafki), Azure IoT Hub dla urządzeń IoT.</li>
-<li><strong>Brokery IoT</strong> (protokół MQTT): Eclipse Mosquitto, EMQX, HiveMQ.</li>
-</ul>
-</div>
-<img class="pic" src="images/image-nHEDfHhK.jpg" alt="ActiveMQ kontra RabbitMQ">
-</div>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Procesor strumieni (stream processor)</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<ul class="points">
-<li>Procesor strumieni (stream processing framework, streaming ETL): strumienie z brokera trzeba zagregować, przekształcić i ustrukturyzować, zanim będzie można je analizować narzędziami opartymi na SQL.</li>
-<li>Robią to procesory strumieni: pobierają zdarzenia z kolejek, a następnie łączą, przekształcają lub agregują dane.</li>
-<li>Wynikiem może być wywołanie API, akcja, wizualizacja, alert albo <strong>nowy strumień</strong> zapisany z powrotem do brokera.</li>
-</ul>
-<div class="pipe">
-  <div class="st">źródło<small>temat w brokerze</small></div><span class="ar">→</span>
-  <div class="st">filter<small>bezstanowe</small></div><span class="ar">→</span>
-  <div class="st">keyBy(czujnik)<small>podział na klucze</small></div><span class="ar">→</span>
-  <div class="st">okno 1 min, avg<small>stanowe</small></div><span class="ar">→</span>
-  <div class="st">ujście<small>nowy temat, baza</small></div>
-</div>
-<p class="small">To ten sam model co potok generatorów z wykładu 2 i Streamz z wykładu 9. Silniki rozproszone dodają równoległość na wielu maszynach, stan odporny na awarie i obsługę czasu zdarzeń.</p>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie strumieni w chmurze</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<table class="simple">
-<tr><th>Dostawca</th><th>Usługi do przetwarzania strumieni (stan na 2026)</th></tr>
-<tr><td><strong>open source</strong></td><td>Apache Flink, Spark Structured Streaming, Kafka Streams, Apache Beam. Apache Storm wciąż jest rozwijany, ale stracił popularność.</td></tr>
-<tr><td><strong>AWS</strong></td><td>Amazon Managed Service for Apache Flink (dawniej Kinesis Data Analytics), Spark na Amazon EMR. Kinesis Data Analytics for SQL wyłączono w styczniu 2026 r.</td></tr>
-<tr><td><strong>Microsoft Azure</strong></td><td>Azure Stream Analytics, Microsoft Fabric Real-Time Intelligence, Spark w Azure Databricks i HDInsight. Storm nie jest już dostępny w HDInsight.</td></tr>
-<tr><td><strong>Google Cloud</strong></td><td>Dataflow (Apache Beam), Dataproc (Spark, Flink), Managed Service for Apache Kafka</td></tr>
-</table>
-<div class="note warn"><p>Nazwy i oferta usług chmurowych zmieniają się co rok. Warto znać silniki open source (Flink, Spark, Beam), bo na nich opiera się większość usług zarządzanych.</p></div>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Analityka i BI</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<ul class="points">
-<li>Po przetworzeniu przez procesor dane można dalej analizować: zapytaniami SQL, w bazach NoSQL, kolejnymi transformacjami.</li>
-<li><strong>Zapytania i hurtownie:</strong> Amazon Athena, Amazon Redshift, Google BigQuery.</li>
-<li><strong>Analityka czasu rzeczywistego:</strong> ClickHouse, Apache Druid, Apache Pinot, Elasticsearch / OpenSearch.</li>
-<li><strong>Bazy NoSQL:</strong> Cassandra (duży strumień zapisów).</li>
-<li><strong>Szeregi czasowe</strong> (dane z czujników): InfluxDB, TimescaleDB, wizualizacja w Grafanie.</li>
-<li><strong>BI i raporty:</strong> Power BI, Tableau, Sisense.</li>
-</ul>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przechowywanie danych: data lake</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols wl">
-<div>
-<ul class="points side">
-<li><strong>Data lake</strong> (jezioro danych) to najtańsza i najbardziej elastyczna opcja przechowywania zdarzeń: pliki w magazynie obiektowym (S3, Azure Blob, GCS). Poprawna konfiguracja i utrzymanie są jednak trudne.</li>
-<li><strong>Schema-on-read:</strong> strukturę nadajemy danym dopiero przy odczycie. W hurtowni (schema-on-write) schemat sprawdzany jest przy zapisie.</li>
-<li>Dziś dane w jeziorze zapisuje się zwykle w kolumnowym formacie <strong>Parquet</strong>, a tabele opisują formaty <strong>Apache Iceberg</strong> lub <strong>Delta Lake</strong> (tzw. lakehouse: transakcje i SQL na plikach).</li>
-<li>Wszyscy dostawcy chmury oferują odpowiednie komponenty.</li>
-</ul>
-</div>
-<img class="pic" src="images/image-18iPCDKU.png" alt="Schema-on-write: szybkie odczyty, wolny zapis, SQL; schema-on-read: wolniejsze odczyty, szybki zapis, NoSQL">
-</div>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Architektura Lambda i Kappa</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<svg class="diagram" viewBox="0 0 1180 230" role="img" aria-label="Lambda: dwie ścieżki, wsadowa i strumieniowa, łączone w warstwie serwującej. Kappa: jedna ścieżka strumieniowa z logu zdarzeń">
-<defs><marker id="arL" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs>
-<text x="10" y="22" font-weight="bold">Lambda</text>
-<rect x="10" y="60" width="110" height="50" rx="8" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="65" y="91" text-anchor="middle">dane</text>
-<path d="M120,75 L150,40 L178,40" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arL)"/><path d="M120,95 L150,130 L178,130" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arL)"/>
-<rect x="180" y="18" width="200" height="44" rx="8" fill="#f1f3f4" stroke="#999" stroke-width="2"/><text x="280" y="46" text-anchor="middle">wsad (Spark)</text>
-<rect x="180" y="108" width="200" height="44" rx="8" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="280" y="136" text-anchor="middle">strumień (Flink)</text>
-<path d="M380,40 L410,40 L438,75" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arL)"/><path d="M380,130 L410,130 L438,98" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arL)"/>
-<rect x="440" y="60" width="120" height="50" rx="8" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="500" y="91" text-anchor="middle">wyniki</text>
-<text x="280" y="185" text-anchor="middle" fill="#666" style="font-size:15px">dwa kody tej samej logiki</text>
-<text x="640" y="22" font-weight="bold">Kappa</text>
-<rect x="640" y="85" width="110" height="50" rx="8" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="695" y="116" text-anchor="middle">dane</text>
-<line x1="750" y1="110" x2="788" y2="110" stroke="#666" stroke-width="2" marker-end="url(#arL)"/>
-<rect x="790" y="85" width="120" height="50" rx="8" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="850" y="116" text-anchor="middle">log (Kafka)</text>
-<line x1="910" y1="110" x2="948" y2="110" stroke="#666" stroke-width="2" marker-end="url(#arL)"/>
-<rect x="950" y="85" width="110" height="50" rx="8" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="1005" y="116" text-anchor="middle">strumień</text>
-<line x1="1060" y1="110" x2="1088" y2="110" stroke="#666" stroke-width="2" marker-end="url(#arL)"/>
-<rect x="1090" y="85" width="85" height="50" rx="8" fill="#f1f3f4" stroke="#999" stroke-width="2"/><text x="1132" y="116" text-anchor="middle">wyniki</text>
-<path d="M850,135 C850,190 1005,190 1005,140" fill="none" stroke="#d93025" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arL)"/><text x="928" y="208" text-anchor="middle" fill="#d93025" style="font-size:15px">ponowne odtworzenie logu (replay)</text>
-</svg>
-<div class="cols">
-<ul class="points side">
-<li><strong>Lambda:</strong> ścieżka wsadowa daje dokładne wyniki z opóźnieniem, strumieniowa szybkie przybliżenie. Wadą jest utrzymywanie tej samej logiki w dwóch systemach.</li>
-</ul>
-<ul class="points side">
-<li><strong>Kappa:</strong> wszystko jest strumieniem. Aby przeliczyć historię, odtwarzamy log zdarzeń od początku tym samym kodem. Wymaga brokera, który przechowuje historię (Kafka).</li>
-</ul>
-</div>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="quiz multi compact"><p class="q">Które z poniższych to <b>brokery wiadomości</b>? (zaznacz wszystkie)</p><div class="opts"><button class="opt" data-ok="1">Apache Kafka</button><button class="opt" data-ok="1">RabbitMQ</button><button class="opt" data-ok="0">Apache Flink</button><button class="opt" data-ok="1">Eclipse Mosquitto</button><button class="opt" data-ok="0">Grafana</button><button class="opt" data-ok="1">Amazon Kinesis Data Streams</button><button class="opt" data-ok="0">InfluxDB</button></div><button class="btn check">Sprawdź</button><p class="explain">Flink to procesor strumieni, Grafana służy do wizualizacji, a InfluxDB to baza szeregów czasowych (magazyn).</p></div>
-<div class="quiz compact"><p class="q">Który element architektury liczy średnią temperaturę każdego czujnika w oknach 1-minutowych?</p><div class="opts"><button class="opt" data-ok="0">broker wiadomości</button><button class="opt" data-ok="1">procesor strumieni</button><button class="opt" data-ok="0">data lake</button></div><p class="explain">Agregacja w oknie to zadanie procesora strumieni (Flink, Kafka Streams, Quix Streams). Broker tylko przechowuje i przekazuje zdarzenia.</p></div>
+<p class="small"><strong>Push</strong> (MQTT, RabbitMQ): broker sam wysyła wiadomości do konsumenta. <strong>Pull</strong> (Kinesis, Pub/Sub w trybie pull): konsument pobiera je we własnym tempie, a nadmiar czeka u brokera (rośnie opóźnienie, tzw. <em>consumer lag</em>).</p>
 </div>
 </section>
 <section data-background-color="#ffffff" data-keywords="MQTT">
@@ -854,7 +629,8 @@ print(*db.execute("SELECT * FROM odczyty ORDER BY czas_utc"), sep="\n")
 <li><strong>MQTT</strong> to lekki protokół publish/subscribe działający nad TCP, standard OASIS (wersje 3.1.1 i 5.0). Nagłówek wiadomości ma zaledwie 2 bajty, więc protokół nadaje się do słabych urządzeń i niestabilnych łączy.</li>
 <li>Klienci <strong>publikują</strong> wiadomości w <strong>tematach</strong> (topics), np. <code>szklarnia/A/czujnik17/temp</code>, i <strong>subskrybują</strong> tematy. Broker przekazuje każdą wiadomość wszystkim subskrybentom tematu.</li>
 <li>Brokery: Eclipse Mosquitto, EMQX, HiveMQ, a także RabbitMQ (wtyczka MQTT) oraz Azure IoT Hub i AWS IoT Core.</li>
-<li>Typowo: MQTT od urządzeń do brokera, a dalej most (bridge, Kafka Connect) do Kafki i procesora strumieni.</li>
+<li>Typowo: MQTT od urządzeń do brokera, a dalej do usługi chmurowej (np. AWS IoT Core → Kinesis, Azure IoT Hub → Event Hubs) i procesora strumieni.</li>
+<li><strong>QoS</strong> 0, 1, 2 to gwarancje dostarczenia z poprzedniego slajdu. Czujnik, który wysyła odczyt co 10 s, zwykle używa QoS 0: zgubiony odczyt zastąpi następny.</li>
 </ul>
 </div>
 <svg class="diagram" viewBox="0 0 420 330" role="img" aria-label="Dwa czujniki publikują do brokera MQTT, broker przekazuje wiadomości subskrybentom: dashboardowi i usłudze alarmów">
@@ -899,122 +675,6 @@ print(*db.execute("SELECT * FROM odczyty ORDER BY czas_utc"), sep="\n")
 </div>
 </div>
 </section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Ćwiczenie: subskrypcje MQTT</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="blanks">
-<p class="lead">Tematy mają postać <code>szklarnia/&lt;hala&gt;/&lt;czujnik&gt;/&lt;wielkość&gt;</code>. Podaj filtry subskrypcji:</p>
-<pre class="exo"><span class="c"># 1. wszystkie wielkości z hali A</span>
-client.subscribe("<input class="blank" size="22" data-re="^szklarnia/A/(#|\+/\+|\+/#)$" data-sol="szklarnia/A/#" aria-label="filtr 1">")
-<span class="c"># 2. temperatura ze wszystkich czujników we wszystkich halach</span>
-client.subscribe("<input class="blank" size="22" data-re="^szklarnia/\+/\+/temp$" data-sol="szklarnia/+/+/temp" aria-label="filtr 2">")
-<span class="c"># 3. wszystko z czujnika 17 w dowolnej hali</span>
-client.subscribe("<input class="blank" size="22" data-re="^szklarnia/\+/czujnik17/(#|\+)$" data-sol="szklarnia/+/czujnik17/#" aria-label="filtr 3">")</pre>
-<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
-<p class="fb"></p>
-<p class="explain">Filtr <code>szklarnia/#/temp</code> jest niepoprawny, bo <code>#</code> musi być ostatni. Filtr 1 można zapisać też jako <code>szklarnia/A/+/+</code>, jeśli wszystkie tematy mają dokładnie 4 poziomy.</p>
-</div>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>MQTT: QoS, retained, Last Will</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<table class="simple">
-<tr><th>Mechanizm</th><th>Znaczenie</th></tr>
-<tr><td><strong>QoS 0</strong></td><td>najwyżej raz (at-most-once): wyślij i zapomnij</td></tr>
-<tr><td><strong>QoS 1</strong></td><td>co najmniej raz (at-least-once): potwierdzenie PUBACK, możliwe duplikaty</td></tr>
-<tr><td><strong>QoS 2</strong></td><td>dokładnie raz (exactly-once): czteroetapowe uzgodnienie, najwolniejsze</td></tr>
-<tr><td><strong>retained</strong></td><td>broker pamięta ostatnią wiadomość w temacie i od razu wysyła ją nowym subskrybentom (np. aktualny stan)</td></tr>
-<tr><td><strong>Last Will (LWT)</strong></td><td>wiadomość, którą broker opublikuje w imieniu klienta, gdy ten rozłączy się nieoczekiwanie (np. <code>offline</code>)</td></tr>
-<tr><td><strong>sesja trwała</strong></td><td>broker przechowuje subskrypcje i wiadomości QoS 1/2 dla klienta, który chwilowo jest offline</td></tr>
-</table>
-<div class="quiz compact"><p class="q">Czujnik wysyła temperaturę co 10 s i strata pojedynczego odczytu nie jest problemem. Jaki QoS wybrać?</p><div class="opts"><button class="opt" data-ok="1">QoS 0</button><button class="opt" data-ok="0">QoS 1</button><button class="opt" data-ok="0">QoS 2</button></div><p class="explain">QoS 0: najmniejszy narzut i najmniejsze zużycie baterii. Za 10 s przyjdzie nowy odczyt. QoS 1 lub 2 wybieramy dla komend (np. „zamknij zawór”) i zdarzeń, których nie wolno zgubić.</p></div>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>MQTT w Pythonie: publikacja (paho-mqtt 2.x)</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols" style="grid-template-columns:1.7fr 1fr">
-<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|8-9|10-12|14-21">
-import json, random, time
-from datetime import datetime, timezone
-import paho.mqtt.client as mqtt
-
-SENSOR = "czujnik17"
-TOPIC = f"szklarnia/A/{SENSOR}"
-
-client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=SENSOR)
-client.will_set(f"{TOPIC}/status", "offline", qos=1, retain=True)  # LWT
-client.connect("localhost", 1883)
-client.loop_start()                     # wątek sieciowy w tle
-client.publish(f"{TOPIC}/status", "online", qos=1, retain=True)
-
-for _ in range(3):
-    teraz = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    odczyt = {"ts": teraz, "temp": round(random.gauss(27, 3), 1),
-              "wilg": random.randint(30, 60)}
-    info = client.publish(f"{TOPIC}/odczyt", json.dumps(odczyt), qos=1)
-    info.wait_for_publish()             # QoS 1: czekamy na PUBACK
-    print("wysłano:", odczyt["ts"], odczyt["temp"])
-    time.sleep(1)
-
-client.loop_stop()
-client.disconnect()
-</code></pre>
-<div>
-<pre class="out sm lt">wysłano: 2026-10-10T22:52:48+00:00 30.2
-wysłano: 2026-10-10T22:52:49+00:00 30.1
-wysłano: 2026-10-10T22:52:50+00:00 23.2</pre>
-<div class="note warn"><p><strong>paho-mqtt 2.0</strong> (2024) zmieniło API: pierwszym argumentem <code>Client</code> jest wersja API callbacków. Kod z tutoriali dla 1.x (<code>mqtt.Client("id")</code>) zgłasza dziś błąd.</p></div>
-<ul class="points side">
-<li><code>loop_start()</code> uruchamia osobny <strong>wątek</strong> obsługi sieci (wykład o wątkach).</li>
-<li>Last Will: gdy czujnik zniknie bez <code>disconnect()</code>, broker sam opublikuje <code>offline</code>.</li>
-</ul>
-</div>
-</div>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>MQTT w Pythonie: subskrypcja</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols wl">
-<div>
-<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|4-6|8-11|13-17">
-import json
-import paho.mqtt.client as mqtt
-
-def on_connect(client, userdata, flags, reason_code, properties):
-    print("połączono:", reason_code)
-    client.subscribe("szklarnia/+/+/odczyt", qos=1)
-
-def on_message(client, userdata, msg):
-    odczyt = json.loads(msg.payload)
-    alarm = "  &lt;- ALARM" if odczyt["temp"] &gt; 30 else ""
-    print(f"{msg.topic}: {odczyt['temp']} °C{alarm}")
-
-client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
-client.on_connect = on_connect
-client.on_message = on_message
-client.connect("localhost", 1883)
-client.loop_forever()                # pętla sieciowa w tym wątku
-</code></pre>
-<pre class="out sm">połączono: Success
-szklarnia/A/czujnik17/odczyt: 30.2 °C  &lt;- ALARM
-szklarnia/A/czujnik17/odczyt: 30.1 °C  &lt;- ALARM
-szklarnia/A/czujnik17/odczyt: 23.2 °C</pre>
-</div>
-<ul class="points side">
-<li>Subskrybujemy w <code>on_connect</code>, więc po automatycznym ponownym połączeniu subskrypcja zostanie odnowiona.</li>
-<li>Callbacki działają w wątku sieciowym: długie przetwarzanie w <code>on_message</code> blokuje odbiór kolejnych wiadomości. Cięższą pracę przekazujemy do kolejki i puli wątków (wykład o executorach).</li>
-<li>To już jest prosty procesor strumienia: filtr <code>temp &gt; 30</code> na każdym zdarzeniu.</li>
-</ul>
-</div>
-</div>
-</section>
 <section data-background-color="#ffffff" data-keywords="Kinesis">
 <div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Amazon Kinesis Data Streams</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
@@ -1022,10 +682,10 @@ szklarnia/A/czujnik17/odczyt: 23.2 °C</pre>
 <img class="pic" style="max-height:9.5em" src="images/image-gZW5rvry.png" alt="Producenci wysyłają dane do strumienia Kinesis podzielonego na shardy, konsumenci na EC2 przekazują je do S3, DynamoDB, Redshift, EMR i Firehose">
 <div class="cols">
 <div>
-<p class="lead">Zarządzana usługa AWS, która nieprzerwanie przyjmuje gigabajty danych na sekundę z setek tysięcy źródeł. Strumień dzieli się na <strong>shardy</strong> (odpowiednik partycji Kafki).</p>
+<p class="lead">Zarządzana usługa AWS, która nieprzerwanie przyjmuje gigabajty danych na sekundę z setek tysięcy źródeł. Strumień dzieli się na <strong>shardy</strong> (niezależne „pasy ruchu”, każdy z własnym limitem przepustowości).</p>
 <ul class="points icons side">
 <li><i class="fa-solid fa-check"></i>łatwa konfiguracja, brak serwerów do utrzymania, tryb on-demand sam się skaluje</li>
-<li><i class="fa-solid fa-check"></i>integracja z AWS: Lambda, Amazon Data Firehose, Managed Service for Apache Flink</li>
+<li><i class="fa-solid fa-check"></i>integracja z AWS: IoT Core, Lambda, Amazon Data Firehose (zapis do S3)</li>
 </ul>
 </div>
 <div>
@@ -1038,331 +698,75 @@ szklarnia/A/czujnik17/odczyt: 23.2 °C</pre>
 </div>
 </div>
 </section>
-<section data-background-color="#ffffff" data-keywords="Kafka">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Apache Kafka</strong></span></p></div>
+<section data-background-color="#ffffff" data-keywords="Chmura">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie strumieni w chmurze</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols wr">
-<img class="pic" src="images/image-N52IZs16.png" alt="Producenci wysyłają do klastra Kafki z tematami podzielonymi na partycje, konsumenci odczytują">
-<div>
-<p class="lead">Apache Kafka to otwarta, rozproszona platforma strumieniowania zdarzeń dla wydajnych potoków danych, analityki strumieniowej, integracji danych i aplikacji krytycznych.</p>
-<ul class="points side">
-<li>Powstała w LinkedIn jako system kolejkowania wiadomości. W 2011 r. jej kod został otwarty i przekazany do Apache Software Foundation.</li>
-<li>Kafka 4.0 (2025) całkowicie usunęła ZooKeepera: metadane klastra zarządza wbudowany protokół <strong>KRaft</strong>. W 2026 r. aktualna jest gałąź 4.x.</li>
-<li>Szczegóły: wykład „Kafka, Kafka Streams, connectory”.</li>
-</ul>
-</div>
-</div>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Klaster Kafki</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<img class="pic" style="max-height:11em" src="images/image-30KHv9Hd.png" alt="Architektura Kafki: producenci, klaster z brokerem, tematy z partycjami, konsumenci, aplikacja analityczna">
-<ul class="points">
-<li>Kafka działa jako <strong>klaster</strong> w środowisku rozproszonym, które może obejmować wiele centrów danych.</li>
-<li>Klaster składa się z wielu <strong>brokerów</strong> (węzłów). Część węzłów pełni rolę <strong>kontrolerów</strong> KRaft, które przechowują metadane klastra i wybierają liderów partycji.</li>
-</ul>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Temat, partycja, offset</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<svg class="diagram" data-gen="part" viewBox="0 0 1180 250" role="img" aria-label="Temat odczyty z trzema partycjami; każda partycja to log z numerowanymi offsetami; producent dopisuje na końcu, grupy konsumentów mają własne pozycje odczytu w partycji 2"><defs><marker id="arK2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs>
-<text x="150" y="47" text-anchor="end" class="mono">partycja 0</text>
-<rect x="165" y="20" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="189" y="47" text-anchor="middle" class="mono">0</text>
-<rect x="217" y="20" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="241" y="47" text-anchor="middle" class="mono">1</text>
-<rect x="269" y="20" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="293" y="47" text-anchor="middle" class="mono">2</text>
-<rect x="321" y="20" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="345" y="47" text-anchor="middle" class="mono">3</text>
-<rect x="373" y="20" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="397" y="47" text-anchor="middle" class="mono">4</text>
-<rect x="425" y="20" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="449" y="47" text-anchor="middle" class="mono">5</text>
-<rect x="477" y="20" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="501" y="47" text-anchor="middle" class="mono">6</text>
-<rect x="529" y="20" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="553" y="47" text-anchor="middle" class="mono">7</text>
-<rect x="581" y="20" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="605" y="47" text-anchor="middle" class="mono">8</text>
-<rect x="633" y="20" width="48" height="40" rx="4" fill="#fff" stroke="#53ae12" stroke-width="1.5" stroke-dasharray="5 4"/>
-<text x="150" y="109" text-anchor="end" class="mono">partycja 1</text>
-<rect x="165" y="82" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="189" y="109" text-anchor="middle" class="mono">0</text>
-<rect x="217" y="82" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="241" y="109" text-anchor="middle" class="mono">1</text>
-<rect x="269" y="82" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="293" y="109" text-anchor="middle" class="mono">2</text>
-<rect x="321" y="82" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="345" y="109" text-anchor="middle" class="mono">3</text>
-<rect x="373" y="82" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="397" y="109" text-anchor="middle" class="mono">4</text>
-<rect x="425" y="82" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="449" y="109" text-anchor="middle" class="mono">5</text>
-<rect x="477" y="82" width="48" height="40" rx="4" fill="#fff" stroke="#53ae12" stroke-width="1.5" stroke-dasharray="5 4"/>
-<text x="150" y="171" text-anchor="end" class="mono">partycja 2</text>
-<rect x="165" y="144" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="189" y="171" text-anchor="middle" class="mono">0</text>
-<rect x="217" y="144" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="241" y="171" text-anchor="middle" class="mono">1</text>
-<rect x="269" y="144" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="293" y="171" text-anchor="middle" class="mono">2</text>
-<rect x="321" y="144" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="345" y="171" text-anchor="middle" class="mono">3</text>
-<rect x="373" y="144" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="397" y="171" text-anchor="middle" class="mono">4</text>
-<rect x="425" y="144" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="449" y="171" text-anchor="middle" class="mono">5</text>
-<rect x="477" y="144" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="501" y="171" text-anchor="middle" class="mono">6</text>
-<rect x="529" y="144" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="553" y="171" text-anchor="middle" class="mono">7</text>
-<rect x="581" y="144" width="48" height="40" rx="4" fill="#fff" stroke="#53ae12" stroke-width="1.5" stroke-dasharray="5 4"/>
-<text x="750" y="36" style="font-size:16px" fill="#53ae12">producent dopisuje</text><text x="750" y="56" style="font-size:16px" fill="#53ae12">na końcu (append)</text>
-<line x1="744" y1="40" x2="690" y2="40" stroke="#53ae12" stroke-width="2.5" marker-end="url(#arK2)"/>
-<line x1="345" y1="222" x2="345" y2="188" stroke="#e8710a" stroke-width="2.5" marker-end="url(#arK2)"/><text x="355" y="240" text-anchor="end" fill="#e8710a" style="font-size:15px">grupa „alarmy”: offset 3</text>
-<line x1="501" y1="222" x2="501" y2="188" stroke="#9334e6" stroke-width="2.5" marker-end="url(#arK2)"/><text x="491" y="240" text-anchor="start" fill="#9334e6" style="font-size:15px">grupa „archiwum”: offset 6</text>
-<text x="1010" y="120" style="font-size:15px" fill="#666">stare → nowe</text><line x1="1010" y1="130" x2="1160" y2="130" stroke="#666" stroke-width="2" marker-end="url(#arK2)"/></svg>
-<ul class="points side">
-<li><strong>Temat</strong> (topic) przechowuje strumień rekordów jako uporządkowaną, niezmienną sekwencję podzieloną na <strong>partycje</strong>. Każdy broker przechowuje część partycji.</li>
-<li>Rekordy z tym samym <strong>kluczem</strong> trafiają do tej samej partycji. Kolejność jest gwarantowana tylko w obrębie partycji.</li>
-<li><strong>Offset</strong> to numer rekordu w partycji. Rekord nie znika po odczycie: jest usuwany dopiero po czasie retencji (domyślnie 7 dni) albo nigdy (log compaction zostawia ostatnią wartość dla klucza).</li>
-<li>Partycje są <strong>replikowane</strong>: lider przyjmuje zapisy, a repliki na innych brokerach przejmują jego rolę po awarii.</li>
-</ul>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Producenci i konsumenci</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols wl">
-<div>
-<ul class="points side">
-<li>Aplikacje wysyłają dane do partycji przez <strong>producentów</strong>, a inne aplikacje odczytują je i przetwarzają przez <strong>konsumentów</strong>. Wielu producentów i konsumentów może działać jednocześnie.</li>
-<li>Kafka używa modelu <strong>pull</strong>: konsument sam pobiera partie wiadomości od zapamiętanego offsetu, we własnym tempie.</li>
-<li>Dwóch konsumentów czytających tę samą partycję dostanie dane w tej samej kolejności: wszyscy niezależni konsumenci widzą tę samą „rzeczywistość”.</li>
-<li>Konsument może cofnąć offset i <strong>odtworzyć</strong> historię, np. po poprawieniu błędu w kodzie (architektura Kappa).</li>
-</ul>
-</div>
-<img class="pic" src="images/image-WNtey7Iy.png" alt="Dwóch producentów pisze do tematów 1 i 2, dwóch konsumentów czyta z różnych offsetów">
-</div>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Grupy konsumentów (consumer groups)</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="sim" id="groupsim">
-  <div class="simctl">
-    <span>grupa <b>alarmy</b>:</span>
-    <button class="btn" data-act="add">+ konsument</button>
-    <button class="btn ghost" data-act="del">− konsument (awaria)</button>
-    <span class="stat">temat <code>odczyty</code> ma 4 partycje</span>
-  </div>
-  <div class="gview"></div>
-</div>
-<div class="quiz compact"><p class="q">Temat ma 3 partycje, a w grupie uruchomiliśmy 5 konsumentów. Ilu z nich będzie otrzymywać wiadomości?</p><div class="opts"><button class="opt" data-ok="0">5</button><button class="opt" data-ok="1">3</button><button class="opt" data-ok="0">1</button></div><p class="explain">W jednej grupie partycję czyta dokładnie jeden konsument, więc maksymalna równoległość grupy to liczba partycji. Dwóch konsumentów będzie bezczynnych (czekają w rezerwie na awarię innych). Od Kafki 4.2 alternatywą są <strong>share groups</strong> (kolejki w Kafce, KIP-932), w których wielu konsumentów może czytać tę samą partycję.</p></div>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kafka w Pythonie: producent</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols" style="grid-template-columns:1.6fr 1fr">
-<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|4|6-11|13-17">
-import json, random
-from confluent_kafka import Producer
-
-p = Producer({"bootstrap.servers": "localhost:9092", "acks": "all"})
-
-def raport(err, msg):                 # wywoływane po potwierdzeniu
-    if err:
-        print("błąd:", err)
-    else:
-        print(f"{msg.key().decode()} -&gt; partycja {msg.partition()}, "
-              f"offset {msg.offset()}")
-
-for i in range(6):
-    czujnik = f"czujnik{i % 3}"
-    odczyt = {"czujnik": czujnik, "temp": round(random.gauss(25, 3), 1)}
-    p.produce("odczyty", key=czujnik, value=json.dumps(odczyt), callback=raport)
-p.flush()                             # czekamy na wszystkie potwierdzenia
-</code></pre>
-<div>
-<pre class="out sm lt">czujnik1 -&gt; partycja 2, offset 0
-czujnik2 -&gt; partycja 2, offset 1
-czujnik1 -&gt; partycja 2, offset 2
-czujnik2 -&gt; partycja 2, offset 3
-czujnik0 -&gt; partycja 1, offset 0
-czujnik0 -&gt; partycja 1, offset 1</pre>
-<ul class="points side">
-<li><code>confluent-kafka</code> to oficjalny klient Pythona oparty na librdkafka.</li>
-<li><code>produce()</code> jest asynchroniczne: wiadomości trafiają do bufora i są wysyłane partiami.</li>
-<li>Ten sam klucz → ta sama partycja. Temat miał 3 partycje: partycja 0 nie dostała żadnego klucza.</li>
-<li><code>acks=all</code>: zapis potwierdzają wszystkie repliki.</li>
-</ul>
-</div>
-</div>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kafka w Pythonie: konsument</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols" style="grid-template-columns:1.6fr 1fr">
-<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|4-7|10-17|18-19">
-import json
-from confluent_kafka import Consumer
-
-c = Consumer({"bootstrap.servers": "localhost:9092",
-              "group.id": "alarmy",              # grupa konsumentów
-              "auto.offset.reset": "earliest"})  # nowa grupa: od początku
-c.subscribe(["odczyty"])
-try:
-    while True:
-        msg = c.poll(1.0)                        # model pull
-        if msg is None:
-            continue
-        if msg.error():
-            print(msg.error())
-            continue
-        o = json.loads(msg.value())
-        print(f"p{msg.partition()}@{msg.offset()}", o["czujnik"], o["temp"])
-finally:
-    c.close()                         # commit offsetów, wyjście z grupy
-</code></pre>
-<div>
-<pre class="out sm lt">p2@0 czujnik1 20.7
-p2@1 czujnik2 23.0
-p2@2 czujnik1 25.9
-p2@3 czujnik2 24.6
-p1@0 czujnik0 26.6
-p1@1 czujnik0 28.0</pre>
-<ul class="points side">
-<li>Kolejność jest zachowana w każdej partycji, ale nie między partycjami.</li>
-<li>Offsety są domyślnie zatwierdzane automatycznie co 5 s (at-least-once).</li>
-<li>Drugie uruchomienie z tym samym <code>group.id</code> nic nie wypisze: grupa zaczyna od zapisanego offsetu.</li>
-</ul>
-</div>
-</div>
-</div>
-<aside class="notes">Wyniki z prawdziwego uruchomienia na Kafce 4.1 w trybie KRaft (apache/kafka-native w Dockerze).</aside>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Dlaczego Kafka jest szybka?</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<ul class="points">
-<li><strong>Zapis sekwencyjny:</strong> partycja to log, do którego tylko dopisujemy na końcu. Na dysku jest podzielony na pliki segmentów, a stare segmenty usuwa się w całości.</li>
-<li><strong>Pamięć podręczna systemu (page cache):</strong> Kafka nie trzyma danych we własnej pamięci, korzysta z cache systemu operacyjnego. Przy odczycie jednego rekordu system z wyprzedzeniem wczytuje kolejne bloki pliku (read-ahead), więc następne rekordy są już w RAM.</li>
-<li><strong>Zero-copy:</strong> dane z page cache trafiają do gniazda sieciowego bez kopiowania przez pamięć aplikacji (<code>sendfile</code>).</li>
-<li><strong>Partie i kompresja:</strong> producent wysyła wiadomości partiami, skompresowanymi (lz4, zstd).</li>
-<li><strong>Partycje:</strong> równoległy zapis i odczyt na wielu brokerach i przez wielu konsumentów.</li>
-</ul>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kafka nie jest prosta</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols wl">
-<div>
-<ul class="points side">
-<li>Przygotowanie produkcyjnego środowiska Kafki zajmuje dni lub tygodnie, zależnie od doświadczenia zespołu.</li>
-<li>Jako system rozproszony wymaga własnego klastra, wielu węzłów, replikacji i partycji, aby zapewnić odporność na awarie i wysoką dostępność.</li>
-<li>Potrzebna jest wiedza o systemach rozproszonych, monitorowaniu, skalowaniu, równoważeniu obciążenia i zarządzaniu konfiguracją.</li>
-<li>Pomaga KRaft (brak osobnego klastra ZooKeepera) i usługi zarządzane: Confluent Cloud, Amazon MSK, Aiven. Istnieją też zgodne z protokołem Kafki alternatywy, np. Redpanda.</li>
-</ul>
-</div>
-<img class="pic" src="images/image-pSkGedNC.jpg" alt="Mem: Wasn't Kafka supposed to make things simpler?">
-</div>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kafka Streams</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<img class="pic" style="max-height:8.5em" src="images/image-8gOtF3X1.png" alt="Aplikacja z Kafka Streams czyta z tematu 1, przetwarza z lokalnym magazynem stanu i zapisuje do tematu 2">
-<ul class="points">
-<li><strong>Kafka Streams</strong> to biblioteka Javy dostarczana z Apache Kafka: filtrowanie, łączenie, agregacja i grupowanie strumieni.</li>
-<li>To „natywny” sposób przetwarzania danych w Kafce. Nie wymaga osobnego klastra: działa wewnątrz zwykłej aplikacji, a skaluje się przez uruchomienie kolejnych instancji (grupa konsumentów).</li>
-<li>Stan (np. liczniki) trzyma lokalnie w RocksDB i kopiuje do tematów w Kafce, aby odtworzyć go po awarii.</li>
-</ul>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kafka: plusy i minusy</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols">
-<div>
-<p class="lead"><strong>Plusy</strong></p>
-<ul class="points icons side">
-<li><i class="fa-solid fa-check"></i>bardzo duża przepustowość i opóźnienia rzędu milisekund</li>
-<li><i class="fa-solid fa-check"></i>trwały log: wielu niezależnych konsumentów i możliwość odtworzenia historii</li>
-<li><i class="fa-solid fa-check"></i>ogromny ekosystem: Kafka Connect (setki konektorów), Kafka Streams, Flink, klienci w wielu językach</li>
-<li><i class="fa-solid fa-check"></i>jeden system zamiast wielu integracji punkt-punkt</li>
-</ul>
-</div>
-<div>
-<p class="lead"><strong>Minusy</strong></p>
-<ul class="points icons cons side">
-<li><i class="fa-solid fa-xmark"></i>złożona konfiguracja i utrzymanie, źle skonfigurowana działa nieoptymalnie</li>
-<li><i class="fa-solid fa-xmark"></i>nie nadaje się do bezpośredniej komunikacji z małymi urządzeniami IoT (do tego MQTT)</li>
-<li><i class="fa-solid fa-xmark"></i>brak routingu wiadomości znanego z RabbitMQ. Kolejki punkt-punkt doszły dopiero w Kafce 4.2 (share groups)</li>
-</ul>
-</div>
-</div>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>MQTT, RabbitMQ czy Kafka?</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Każda duża chmura oferuje te same elementy architektury jako usługi zarządzane: nie utrzymujemy serwerów, płacimy za ilość danych lub czas pracy.</p>
 <table class="simple">
-<tr><th></th><th>MQTT (Mosquitto, EMQX)</th><th>RabbitMQ</th><th>Apache Kafka</th></tr>
-<tr><td>Model</td><td>publish/subscribe, push</td><td>kolejki z routingiem, push</td><td>partycjonowany log, pull</td></tr>
-<tr><td>Wiadomość po odczycie</td><td>znika (oprócz retained)</td><td>znika po potwierdzeniu</td><td>zostaje do końca retencji</td></tr>
-<tr><td>Klienci</td><td>tysiące do milionów małych urządzeń</td><td>usługi backendowe</td><td>usługi backendowe, procesory strumieni</td></tr>
-<tr><td>Mocna strona</td><td>lekki protokół, słabe łącza</td><td>elastyczny routing, zadania do wykonania</td><td>przepustowość, historia, odtwarzanie</td></tr>
-<tr><td>Typowe użycie</td><td>czujnik → bramka → broker</td><td>kolejka zadań, mikroserwisy</td><td>centralna magistrala zdarzeń, analityka</td></tr>
+<tr><th>Element</th><th>AWS</th><th>Microsoft Azure</th><th>Google Cloud</th></tr>
+<tr><td><strong>urządzenia IoT</strong> (MQTT)</td><td>AWS IoT Core</td><td>Azure IoT Hub</td><td>rozwiązania partnerów (IoT Core wyłączono w 2023 r.)</td></tr>
+<tr><td><strong>broker, przyjmowanie zdarzeń</strong></td><td>Kinesis Data Streams, SQS</td><td>Event Hubs, Service Bus</td><td>Pub/Sub</td></tr>
+<tr><td><strong>przetwarzanie</strong></td><td>Lambda (funkcja dla każdej paczki zdarzeń), Spark na EMR, Glue Streaming</td><td>Stream Analytics (zapytania SQL na strumieniu), Fabric Real-Time Intelligence, Databricks</td><td>Dataflow (Apache Beam), Dataproc (Spark)</td></tr>
+<tr><td><strong>zapis do magazynu</strong></td><td>Data Firehose → S3, Redshift</td><td>Event Hubs Capture → Blob Storage, Data Lake</td><td>subskrypcja Pub/Sub → BigQuery, Cloud Storage</td></tr>
+<tr><td><strong>analityka</strong></td><td>Athena, Redshift, QuickSight</td><td>Fabric, Power BI</td><td>BigQuery, Looker</td></tr>
 </table>
-<div class="note"><p>W systemie IoT często występują razem: urządzenia rozmawiają po MQTT, most przenosi dane do Kafki, a stamtąd czyta je procesor strumieni (Flink).</p></div>
+<div class="note warn"><p>Nazwy usług zmieniają się co roku (np. Kinesis Data Analytics for SQL wyłączono w styczniu 2026 r.). Lepiej zapamiętać <strong>rolę</strong> elementu niż nazwę produktu. Wiele usług zarządzanych działa na otwartych silnikach, które poznamy na kolejnych wykładach.</p></div>
 </div>
 </section>
 <section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Podsumowanie: dwie klasy technologii</strong></span></p></div>
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Procesor strumieni (stream processor)</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<img class="pic" style="max-height:11em" src="images/image-0rLJPNHI.png" alt="Zbieranie danych, log w Kafce, analiza we Flinku, serwowanie i przechowywanie w bazach">
-<p class="lead">W środowisku przetwarzania strumieni zdarzeń istnieją dwie główne klasy technologii:</p>
 <ul class="points">
-<li>system <strong>przechowujący</strong> zdarzenia (broker, log: Kafka, Kinesis),</li>
-<li>technologia, która pomaga pisać aplikacje <strong>działające</strong> na zdarzeniach (procesor strumieni: Flink, Spark, Kafka Streams).</li>
+<li>Procesor strumieni (stream processing framework, streaming ETL): strumienie z brokera trzeba zagregować, przekształcić i ustrukturyzować, zanim będzie można je analizować narzędziami opartymi na SQL.</li>
+<li>Robią to procesory strumieni: pobierają zdarzenia z kolejek, a następnie łączą, przekształcają lub agregują dane.</li>
+<li>Wynikiem może być wywołanie API, akcja, wizualizacja, alert albo <strong>nowy strumień</strong> zapisany z powrotem do brokera.</li>
 </ul>
+<div class="pipe">
+  <div class="st">źródło<small>temat w brokerze</small></div><span class="ar">→</span>
+  <div class="st">filter<small>bezstanowe</small></div><span class="ar">→</span>
+  <div class="st">grupuj po czujniku<small>podział na klucze</small></div><span class="ar">→</span>
+  <div class="st">okno 1 min, avg<small>stanowe</small></div><span class="ar">→</span>
+  <div class="st">ujście<small>nowy temat, baza</small></div>
+</div>
+<p class="small">To ten sam model co potok generatorów z wykładu 2. Dziś zbudujemy go w Streamz. Silniki rozproszone (kolejne wykłady) dodają równoległość na wielu maszynach i odporność na awarie.</p>
 </div>
 </section>
-<section data-background-color="#ffffff" data-keywords="Biblioteki">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Biblioteki do przetwarzania strumieniowego</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols wl">
-<img class="pic" src="images/image-2FUYaZDJ.png" alt="Logotypy: Apache Flink, Apache Spark, Amazon Kinesis, Apache Storm, Apache Samza">
-<div>
-<ul class="points side">
-<li>Na slajdzie są różne rzeczy: Flink, Spark, Storm i Samza to silniki open source, a Kinesis to usługa AWS.</li>
-<li>Apache Samza (z LinkedIn, ściśle związana z Kafką) jest dziś rzadko używana.</li>
-<li>Do listy trzeba dodać <strong>Kafka Streams</strong> i <strong>Apache Beam</strong> (jedno API, różne silniki wykonawcze, m.in. Flink, Spark, Google Dataflow).</li>
-</ul>
-</div>
-</div>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Apache Flink</strong></span></p></div>
+<section data-background-color="#ffffff" data-keywords="Skalowanie">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Skalowanie: partycjonowanie po kluczu</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <div class="cols wl">
 <div>
 <ul class="points side">
-<li>Rozproszony silnik obliczeń na <strong>nieograniczonych</strong> i ograniczonych strumieniach danych. Wsad traktuje jako szczególny przypadek strumienia.</li>
-<li>Przetwarza zdarzenie po zdarzeniu z opóźnieniem rzędu milisekund i dużą przepustowością.</li>
-<li><strong>Stan</strong> operatorów (np. sumy w oknach) jest częścią silnika. Okresowe <strong>checkpointy</strong> pozwalają po awarii wznowić pracę bez utraty danych, z gwarancją exactly-once dla stanu.</li>
-<li>Obsługuje <strong>czas zdarzeń</strong> i znaczniki postępu czasu (watermarks), czyli zdarzenia spóźnione i nie po kolei.</li>
-<li>API: Java, Python (PyFlink) i SQL. API Scali usunięto we Flinku 2.0 (2025). Aktualna wersja: 2.x.</li>
+<li>Operacje <strong>bezstanowe</strong> (<code>filter</code>, <code>map</code>) mogą działać na dowolnym workerze, więc łatwo je skalować.</li>
+<li>Operacje <strong>stanowe</strong> (suma na czujnik, okna) potrzebują wszystkich zdarzeń danego klucza w jednym miejscu: <code>worker = hash(klucz) % N</code>.</li>
+<li>Kolejność jest zachowana tylko <strong>w obrębie klucza</strong>, a nie w całym strumieniu.</li>
+<li><strong>Gorący klucz</strong> (hot key) przeciąża jeden worker. Zmiana liczby workerów wymaga przeniesienia stanu.</li>
 </ul>
+<div class="note"><p><strong>Co mierzyć:</strong> przepustowość (zdarzenia na sekundę), opóźnienie od zdarzenia do wyniku i zaległość konsumenta (lag).</p></div>
 </div>
-<div>
-<img class="pic" src="images/image-wbPBVxiT.png" alt="Flink: źródło, zdarzenie, operator stanowy z funkcją użytkownika i oknem, stan, ujście">
-<p class="small">Dane wchodzą przez źródło (source), przechodzą przez operatory i wychodzą przez ujście (sink). Szczegóły na trzech wykładach o Apache Flink.</p>
+<div class="sim" id="keysim">
+  <div class="simctl">
+    <button class="btn" data-act="send">wyślij 12 zdarzeń</button>
+    <button class="btn ghost hotbtn" data-act="hot">gorący klucz: wył.</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+  </div>
+  <div class="simctl">
+    <label>workery: <select class="nw"><option>2</option><option selected>3</option><option>4</option></select></label>
+    <label><input type="radio" name="kmode" value="key" checked> po kluczu</label>
+    <label><input type="radio" name="kmode" value="rr"> po kolei (round-robin)</label>
+  </div>
+  <div class="wks"></div>
+  <p class="kverdict"></p>
 </div>
 </div>
 </div>
+<aside class="notes">Najpierw round-robin: równy podział, ale czujnik rozrzucony po workerach (zła suma). Potem po kluczu i gorący klucz: jeden worker dostaje większość pracy.</aside>
 </section>
 <section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Apache Spark</strong></span></p></div>
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Apache Spark: Structured Streaming</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <div class="cols wl">
@@ -1378,109 +782,767 @@ p1@1 czujnik0 28.0</pre>
 </div>
 </div>
 </section>
+<section data-background-color="#ffffff" data-keywords="Python">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Strumienie w Pythonie: przegląd bibliotek</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th>Biblioteka</th><th>Do czego</th><th>Skala</th></tr>
+<tr><td><strong>Streamz</strong></td><td>lekkie potoki w modelu push; omawiamy ją dziś szczegółowo</td><td>jeden proces (+ Dask)</td></tr>
+<tr><td><strong>Quix Streams</strong></td><td>aplikacje czytające zdarzenia z brokera: filtry, okna czasowe, stan</td><td>wiele procesów</td></tr>
+<tr><td><strong>PySpark</strong></td><td>Spark Structured Streaming z Pythona, SQL na strumieniu</td><td>klaster</td></tr>
+<tr><td><strong>Apache Beam</strong> (Python SDK)</td><td>jedno API, uruchamiane np. w Google Dataflow albo na Sparku</td><td>klaster, chmura</td></tr>
+<tr><td><strong>Bytewax</strong>, <strong>Pathway</strong></td><td>dataflow w Pythonie z silnikiem w Ruście</td><td>od laptopa do klastra</td></tr>
+<tr><td><strong>River</strong></td><td>uczenie maszynowe online (<code>learn_one</code>, <code>predict_one</code>)</td><td>dodatek do potoku</td></tr>
+</table>
+<p class="small">Wspólny model: źródło → operatory (bezstanowe i stanowe, okna) → ujście. Biblioteki różnią się skalą, gwarancjami i miejscem przechowywania stanu.</p>
+</div>
+</section>
 <section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Apache Storm</strong></span></p></div>
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Architektura Lambda i Kappa</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<svg class="diagram" viewBox="0 0 1180 230" role="img" aria-label="Lambda: dwie ścieżki, wsadowa i strumieniowa, łączone w warstwie serwującej. Kappa: jedna ścieżka strumieniowa z logu zdarzeń">
+<defs><marker id="arL" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs>
+<text x="10" y="22" font-weight="bold">Lambda</text>
+<rect x="10" y="60" width="110" height="50" rx="8" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="65" y="91" text-anchor="middle">dane</text>
+<path d="M120,75 L150,40 L178,40" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arL)"/><path d="M120,95 L150,130 L178,130" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arL)"/>
+<rect x="180" y="18" width="200" height="44" rx="8" fill="#f1f3f4" stroke="#999" stroke-width="2"/><text x="280" y="46" text-anchor="middle">wsad (Spark)</text>
+<rect x="180" y="108" width="200" height="44" rx="8" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="280" y="136" text-anchor="middle">strumień (Spark SS)</text>
+<path d="M380,40 L410,40 L438,75" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arL)"/><path d="M380,130 L410,130 L438,98" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arL)"/>
+<rect x="440" y="60" width="120" height="50" rx="8" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="500" y="91" text-anchor="middle">wyniki</text>
+<text x="280" y="185" text-anchor="middle" fill="#666" style="font-size:15px">dwa kody tej samej logiki</text>
+<text x="640" y="22" font-weight="bold">Kappa</text>
+<rect x="640" y="85" width="110" height="50" rx="8" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="695" y="116" text-anchor="middle">dane</text>
+<line x1="750" y1="110" x2="788" y2="110" stroke="#666" stroke-width="2" marker-end="url(#arL)"/>
+<rect x="790" y="85" width="120" height="50" rx="8" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="850" y="116" text-anchor="middle">log zdarzeń</text>
+<line x1="910" y1="110" x2="948" y2="110" stroke="#666" stroke-width="2" marker-end="url(#arL)"/>
+<rect x="950" y="85" width="110" height="50" rx="8" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="1005" y="116" text-anchor="middle">strumień</text>
+<line x1="1060" y1="110" x2="1088" y2="110" stroke="#666" stroke-width="2" marker-end="url(#arL)"/>
+<rect x="1090" y="85" width="85" height="50" rx="8" fill="#f1f3f4" stroke="#999" stroke-width="2"/><text x="1132" y="116" text-anchor="middle">wyniki</text>
+<path d="M850,135 C850,190 1005,190 1005,140" fill="none" stroke="#d93025" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arL)"/><text x="928" y="208" text-anchor="middle" fill="#d93025" style="font-size:15px">ponowne odtworzenie logu (replay)</text>
+</svg>
+<div class="cols">
+<ul class="points side">
+<li><strong>Lambda:</strong> ścieżka wsadowa daje dokładne wyniki z opóźnieniem, strumieniowa szybkie przybliżenie. Wadą jest utrzymywanie tej samej logiki w dwóch systemach.</li>
+</ul>
+<ul class="points side">
+<li><strong>Kappa:</strong> wszystko jest strumieniem. Aby przeliczyć historię, odtwarzamy log zdarzeń od początku tym samym kodem. Wymaga brokera, który przechowuje historię zdarzeń (np. Kinesis z długą retencją; więcej na kolejnych wykładach).</li>
+</ul>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się: architektura i chmura</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <div class="cols">
 <div>
+<div class="quiz multi compact"><p class="q">Które z poniższych to <b>brokery wiadomości</b>? (zaznacz wszystkie)</p><div class="opts"><button class="opt" data-ok="1">RabbitMQ</button><button class="opt" data-ok="0">Spark Structured Streaming</button><button class="opt" data-ok="1">Eclipse Mosquitto</button><button class="opt" data-ok="0">Grafana</button><button class="opt" data-ok="1">Amazon Kinesis Data Streams</button><button class="opt" data-ok="1">Google Cloud Pub/Sub</button><button class="opt" data-ok="0">InfluxDB</button></div><button class="btn check">Sprawdź</button><p class="explain">Spark Structured Streaming to procesor strumieni, Grafana służy do wizualizacji, a InfluxDB to baza szeregów czasowych (magazyn).</p></div>
+<div class="quiz compact"><p class="q">Który element architektury liczy średnią temperaturę każdego czujnika w oknach 1-minutowych?</p><div class="opts"><button class="opt" data-ok="0">broker wiadomości</button><button class="opt" data-ok="1">procesor strumieni</button><button class="opt" data-ok="0">data lake</button></div><p class="explain">Agregacja w oknie to zadanie procesora strumieni (Streamz, Spark Structured Streaming, Stream Analytics). Broker tylko przechowuje i przekazuje zdarzenia.</p></div>
+</div>
+<div>
+<div class="quiz compact"><p class="q">10 000 czujników na baterie przesyła odczyty przez sieć komórkową. Czym połączyć je z serwerem?</p><div class="opts"><button class="opt" data-ok="1">MQTT</button><button class="opt" data-ok="0">bezpośrednio do bazy SQL</button><button class="opt" data-ok="0">Apache Spark</button></div><p class="explain">MQTT to lekki protokół dla słabych urządzeń i niestabilnych łączy. Dalej dane trafiają do brokera w chmurze i do procesora strumieni.</p></div>
+<div class="quiz compact"><p class="q">W Azure chcemy liczyć zapytania SQL na strumieniu zdarzeń bez utrzymywania serwerów. Która usługa?</p><div class="opts"><button class="opt" data-ok="0">Event Hubs</button><button class="opt" data-ok="1">Stream Analytics</button><button class="opt" data-ok="0">Power BI</button></div><p class="explain">Event Hubs przyjmuje zdarzenia (broker), Stream Analytics je przetwarza (procesor), a Power BI pokazuje wyniki (analityka).</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Strumienie">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Dane bez końca: stan pośredni</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead">NumPy i Pandas zakładają, że <strong>znają wszystkie dane z góry</strong>: <code>df.mean()</code> przegląda całą kolumnę. Strumień nie ma końca, więc po każdej nowej porcji danych aktualizujemy wynik <strong>przyrostowo</strong>, pamiętając tylko <strong>stan pośredni</strong>.</p>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+def srednie(paczki):        # strumień list pomiarów
+    total = count = 0       # stan pośredni: dwie liczby
+    for paczka in paczki:
+        total += sum(paczka)
+        count += len(paczka)
+        yield total / count
+
+for m in srednie([[10, 20], [30], [40, 50, 60]]):
+    print(m)
+</code></pre>
+<pre class="out">15.0
+20.0
+35.0</pre>
+</div>
+<div>
+<div class="note"><p>NumPy i Pandas nadal się przydają: <strong>wewnątrz</strong> kroku potoku, na pojedynczej paczce danych (np. <code>sum(paczka)</code> → <code>paczka.sum()</code>).</p></div>
+<div class="quiz compact"><p class="q">Której statystyki <b>nie</b> da się dokładnie liczyć przyrostowo ze stanem o stałym rozmiarze?</p><div class="opts"><button class="opt" data-ok="0">średnia</button><button class="opt" data-ok="0">maksimum</button><button class="opt" data-ok="0">liczba elementów</button><button class="opt" data-ok="1">mediana</button></div><p class="explain">Mediana wymaga pamiętania wszystkich elementów. W strumieniach liczy się ją w oknie albo w przybliżeniu (np. t-digest). Wariancję da się liczyć dokładnie: algorytm Welforda pamięta tylko (n, średnia, M2).</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Streamz">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Streamz</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
 <ul class="points side">
-<li>Jeden z pierwszych silników strumieniowych (BackType, potem Twitter; open source od 2011 r.). Przetwarza nieograniczone strumienie zdarzenie po zdarzeniu.</li>
-<li>Aplikacja to <strong>topologia</strong>: <strong>spouty</strong> (źródła) i <strong>bolty</strong> (operatory).</li>
-<li>Komponenty można pisać w dowolnym języku (protokół multi-lang). Silnik jest odporny na błędy i skalowalny.</li>
-<li>Projekt wciąż wydaje nowe wersje (2.8.x w 2026 r.), ale stracił znaczenie na rzecz Flinka. Domyślnie daje at-least-once. Stan, okna i exactly-once (warstwa Trident) dodano później i są uboższe niż we Flinku. Twitter zastąpił go w 2015 r. własnym silnikiem Heron.</li>
+<li>Biblioteka do budowania <strong>potoków dla ciągłych strumieni danych</strong>: od prostych łańcuchów po grafy z rozgałęzieniami, łączeniem, kontrolą przepływu i sprzężeniem zwrotnym.</li>
+<li>Autor: Matthew Rocklin (twórca Dask), 2017. Kod: <a href="https://github.com/python-streamz/streamz">github.com/python-streamz/streamz</a>, dokumentacja: <a href="https://streamz.readthedocs.io/">streamz.readthedocs.io</a>.</li>
+<li><strong>Stan w 2026:</strong> wersja 0.6.6 (kwiecień 2026), Python ≥ 3.10. Po przerwie w latach 2022-2025 projekt utrzymuje niewielka grupa osób: poprawki i drobne nowości (np. <code>map_async</code>), bez dużego rozwoju.</li>
+<li>Instalacja: <code>pip install streamz</code>. Zależności: tornado, toolz. Opcjonalnie: dask (równoległość), pandas (<code>streamz.dataframe</code>), paho-mqtt (MQTT), graphviz (wizualizacja).</li>
 </ul>
 </div>
-<img class="pic" src="images/image-gNSuo1Vo.png" alt="Topologia Storm: dwa spouty pobierają dane ze źródeł, bolty przetwarzają je i przekazują do celu">
-</div>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Porównanie silników</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<table class="simple">
-<tr><th></th><th>Apache Flink</th><th>Spark Structured Streaming</th><th>Kafka Streams</th><th>Apache Storm</th></tr>
-<tr><td>Model</td><td>zdarzenie po zdarzeniu</td><td>mikrowsady (+ tryb real-time)</td><td>zdarzenie po zdarzeniu</td><td>zdarzenie po zdarzeniu</td></tr>
-<tr><td>Opóźnienie</td><td>milisekundy</td><td>sekundy</td><td>milisekundy</td><td>milisekundy</td></tr>
-<tr><td>Stan, exactly-once</td><td>tak (checkpointy)</td><td>tak</td><td>tak (w obrębie Kafki)</td><td>at-least-once, exactly-once tylko w Trident</td></tr>
-<tr><td>Wdrożenie</td><td>własny klaster</td><td>klaster Spark</td><td>biblioteka w aplikacji</td><td>własny klaster</td></tr>
-<tr><td>Języki</td><td>Java, Python, SQL</td><td>Python, SQL, Scala, Java, R</td><td>Java (Kotlin, Scala)</td><td>Java, dowolny (multi-lang)</td></tr>
-<tr><td>Słabe strony</td><td>krzywa uczenia, operacje na klastrze</td><td>wyższe opóźnienie, zużycie pamięci</td><td>tylko Kafka jako źródło i cel</td><td>uboższe API stanu i okien, malejąca społeczność</td></tr>
-</table>
-<p class="small">Wszystkie są odporne na awarie i skalują się poziomo. Dawne zarzuty z tabel porównawczych, np. „Flink: ograniczone wsparcie społeczności” czy „Spark: brak buforowania” (jest <code>cache()</code>/<code>persist()</code>), są nieaktualne.</p>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie strumieni w Pythonie</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<table class="simple">
-<tr><th>Biblioteka</th><th>Do czego</th><th>Uwagi (2026)</th></tr>
-<tr><td><strong>Streamz</strong></td><td>lekkie potoki strumieni w jednym procesie</td><td>wykład 9</td></tr>
-<tr><td><strong>Quix Streams</strong></td><td>aplikacje na Kafce: filtry, okna, stan, łączenia</td><td>aktywnie rozwijana, czysty Python</td></tr>
-<tr><td><strong>PyFlink</strong></td><td>Python API do Apache Flink (DataStream, Table/SQL)</td><td>wymaga klastra Flinka (lub trybu lokalnego)</td></tr>
-<tr><td><strong>PySpark</strong></td><td>Spark Structured Streaming z Pythona</td><td>wymaga Sparka</td></tr>
-<tr><td><strong>Apache Beam</strong></td><td>jedno API, wykonanie na Flinku, Sparku lub Dataflow</td><td>Python SDK</td></tr>
-<tr><td><strong>Bytewax</strong></td><td>dataflow w Pythonie z rdzeniem w Ruście</td><td>od 2025 r. rozwijany tylko przez społeczność</td></tr>
-<tr><td><strong>Faust</strong></td><td>strumienie na Kafce w stylu asyncio</td><td>oryginał porzucony, fork <code>faust-streaming</code> mało aktywny</td></tr>
-</table>
-</div>
-</section>
-<section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Quix Streams: okno czasowe w Pythonie</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols" style="grid-template-columns:1.6fr 1fr">
 <div>
-<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|5-8|10-11|12-15|16-17">
-from datetime import timedelta
-from quixstreams import Application
-from quixstreams.dataframe.windows import Mean, Max
+<p class="lead"><strong>Smak Streamz</strong></p>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
 
-app = Application(broker_address="localhost:9092",
-                  consumer_group="szklarnia")
-odczyty = app.topic("odczyty", value_deserializer="json")
-alarmy = app.topic("alarmy", value_serializer="json")
+source = Stream()
+fahr = source.map(lambda c: c * 1.8 + 32)
+fahr.sink(print)
 
-sdf = app.dataframe(odczyty)
-sdf = sdf.filter(lambda o: o["temp"] &gt; -40)         # odrzuć błędne odczyty
-sdf = (sdf.tumbling_window(timedelta(minutes=1))    # okna 1-minutowe
-          .agg(srednia=Mean("temp"), maks=Max("temp"))
-          .final())                                  # wynik po zamknięciu okna
-sdf = sdf.filter(lambda w: w["srednia"] &gt; 30)
-sdf.print(metadata=True)
-sdf.to_topic(alarmy)
+source.emit(25)   # 77.0
+source.emit(30)   # 86.0
+</code></pre>
+<p class="lead" style="margin-top:.6em"><strong>Zastosowania</strong></p>
+<ul class="points side">
+<li>logi serwerów WWW,</li>
+<li>telemetria, instrumenty naukowe, potoki przetwarzania obrazu,</li>
+<li>finansowe szeregi czasowe,</li>
+<li>uczenie maszynowe online (model uczy się na bieżąco).</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Potok liniowy a graf przetwarzania</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<img class="pic wide" src="images/image-7Z0hR3sJ.png" alt="Potok liniowy: TextFile, map parse, filter select, map process, sink save" style="max-height:3em">
+<p class="cap">Potok liniowy: wystarczy pętla <code>for</code> albo potok generatorów z wykładu 2.</p>
+<img class="pic" src="images/image-KlanTCJT.png" alt="Graf: z parse wychodzą trzy gałęzie: sliding_window 100, sliding_window 10 z delay, accumulate count; gałęzie łączy zip i predict" style="max-height:9em">
+<p class="cap">Graf: trzy gałęzie z jednego źródła, okna, opóźnienie, złączenie <code>zip</code> i model uczony na bieżąco. Ręczna pętla staje się tu nieczytelna, a Streamz opisuje graf deklaratywnie. Źródło: streamz.readthedocs.io</p>
+<div class="cols">
+<div class="quiz compact"><p class="q">Do ilu gałęzi trafia każdy element wychodzący z <code>map; parse</code>?</p><div class="opts"><button class="opt" data-ok="0">do 1, losowej</button><button class="opt" data-ok="0">do 1, po kolei (round-robin)</button><button class="opt" data-ok="1">do wszystkich 3</button></div><p class="explain">Węzeł przekazuje każdy element wszystkim węzłom podłączonym za nim. Podział pracy między wykonawców to osobna operacja (np. <code>scatter</code> w Dask, pod koniec wykładu).</p></div>
+<div class="quiz compact"><p class="q">Kiedy <code>zip</code> przekaże krotkę do <code>map; predict</code>?</p><div class="opts"><button class="opt" data-ok="0">po każdym elemencie z dowolnej gałęzi</button><button class="opt" data-ok="1">gdy obie gałęzie dostarczą nowy element</button></div><p class="explain"><code>zip</code> czeka na element z każdego wejścia. Gałąź z <code>delay</code> spowalnia więc cały dalszy potok.</p></div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Pull czy push? Generator a Streamz</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<h4>Generator (wykład 2): <span style="color:var(--blue)">pull</span></h4>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+def podwoj(xs):
+    for x in xs:
+        yield x * 2
+
+for y in podwoj(range(3)):  # pull: konsument ciągnie
+    print(y)
+</code></pre>
+<pre class="out">0
+2
+4</pre>
+</div>
+<div>
+<h4>Streamz: <span style="color:var(--green)">push</span></h4>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+s = Stream()
+s.map(lambda x: x * 2).sink(print)
+
+for x in range(3):
+    s.emit(x)       # push: producent pcha
+</code></pre>
+<pre class="out">0
+2
+4</pre>
+</div>
+</div>
+<div class="cols">
+<ul class="points side">
+<li><strong>Pull:</strong> konsument wywołuje <code>next()</code>, a źródło czeka, aż ktoś poprosi. Naturalne, gdy dane już są (plik, lista).</li>
+<li><strong>Push:</strong> źródło wywołuje <code>emit()</code>, gdy dane nadejdą (czujnik, sieć, broker MQTT), a potok reaguje na zdarzenie. Tak działa też większość silników strumieniowych.</li>
+</ul>
+<div class="quiz compact"><p class="q">Odczyty z czujnika przychodzą przez sieć w nieprzewidywalnych chwilach. Który model jest naturalny?</p><div class="opts"><button class="opt" data-ok="0">pull</button><button class="opt" data-ok="1">push</button></div><p class="explain">Push: to nadejście danych wyzwala obliczenia. W modelu pull konsument musiałby co chwilę pytać (polling).</p></div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Streamz podstawy">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Pierwszy strumień: Stream, emit, sink</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+source = Stream()
+source.sink(print)
+
+source.emit(1)
+source.emit(2)
+source.emit(10)
+</code></pre>
+<pre class="out">1
+2
+10</pre>
+</div>
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+def increment(x):
+    return x + 1
+
+source = Stream()
+source.map(increment).sink(print)
+
+source.emit(1)
+source.emit(2)
+source.emit(10)
+</code></pre>
+<pre class="out">2
+3
+11</pre>
+</div>
+</div>
+<ul class="points side">
+<li class="fragment"><code>Stream()</code> tworzy źródło. Każda metoda (<code>map</code>, <code>sink</code>, …) tworzy <strong>nowy węzeł</strong> podłączony do poprzedniego i go zwraca: wywołania łączymy w łańcuch.</li>
+<li class="fragment"><code>emit(x)</code> wpycha element do grafu i wraca, gdy przejdzie on przez cały graf (<strong>synchronicznie</strong>).</li>
+<li class="fragment"><code>sink(f)</code> to ujście: wywołuje <code>f</code> dla każdego elementu (np. <code>print</code>, zapis do pliku).</li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>map, filter i rozgałęzienia</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+source = Stream()
+(source.filter(str.islower)  # tylko małe litery
+       .map(str.upper)
+       .sink(print))
+
+for ch in "aBcD":
+    source.emit(ch)
+</code></pre>
+<pre class="out">A
+C</pre>
+<p class="small">Metody można przekazywać jak zwykłe funkcje: <code>str.islower("a")</code> to to samo, co <code>"a".islower()</code>.</p>
+</div>
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+source = Stream()
+a = source.map(lambda x: x + 1)
+b = source.map(lambda x: x - 1)
+a.sink(lambda x: print("gałąź A:", x))
+b.sink(lambda x: print("gałąź B:", x))
+
+source.emit(1)
+source.emit(2)
+</code></pre>
+<pre class="out">gałąź A: 2
+gałąź B: 0
+gałąź A: 3
+gałąź B: 1</pre>
+</div>
+</div>
+<div class="note"><p>Węzeł przekazuje element <strong>wszystkim</strong> węzłom podłączonym za nim, w kolejności podłączenia. Element przechodzi najpierw całą gałąź A, potem całą gałąź B (w głąb), i dopiero wtedy <code>emit()</code> wraca.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Symulacja: element płynie przez graf</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="flowsim">
+  <div class="simctl">
+    <label>temperatura: <input type="text" class="val" value="31" size="4"></label>
+    <button class="btn" data-act="emit">source.emit(t)</button>
+    <button class="btn" data-act="rand">losowy odczyt</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+  </div>
+  <div class="graph">
+    <div class="nd src" data-n="src"><b>source</b><span class="st">Stream()</span><span class="v"></span></div>
+    <span class="ar">→</span>
+    <div class="nd" data-n="win"><b>sliding_window(3)</b><span class="st"></span><span class="v"></span></div>
+    <span class="ar">→</span>
+    <div class="nd" data-n="avg"><b>map(fmean)</b><span class="st">bezstanowy</span><span class="v"></span></div>
+    <span class="ar">→</span>
+    <div class="nd" data-n="fil"><b>filter(m &gt; 30)</b><span class="st">bezstanowy</span><span class="v"></span></div>
+    <span class="ar">→</span>
+    <div class="nd snk" data-n="al"><b>sink(alarm)</b><span class="st"></span><span class="v"></span></div>
+    <span class="ar">→</span>
+    <div class="nd" data-n="acc"><b>accumulate(max)</b><span class="st"></span><span class="v"></span></div>
+    <span class="ar">→</span>
+    <div class="nd snk" data-n="rec"><b>sink(rekord)</b><span class="st"></span><span class="v"></span></div>
+  </div>
+  <div class="cols">
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from statistics import fmean
+from streamz import Stream
+
+source = Stream()
+(source.sliding_window(3, return_partial=False)
+       .map(fmean)
+       .filter(lambda m: m &gt; 30)
+       .sink(lambda m: print("ALARM", round(m, 1))))
+source.accumulate(max).sink(lambda t: print("rekord", t))
+
+for t in [28, 31, 35]:          # albo przyciski powyżej
+    source.emit(t)
+</code></pre>
+    <pre class="console"></pre>
+  </div>
+</div>
+</div>
+<aside class="notes">Zapytaj przed kliknięciem: który węzeł wypisze coś po pierwszym emit? (tylko gałąź accumulate; okno czeka na 3 elementy). Potem podaj 35, 20, 20: okno nadal ma średnią > 30?</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="accumulate">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>accumulate: stan w potoku</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead"><code>map</code>, <code>filter</code>, <code>sink</code> są <strong>bezstanowe</strong>. <code>accumulate(func, start)</code> pamięta <strong>stan</strong>: <code>stan = func(stan, x)</code> i emituje nowy stan.</p>
+<div class="cols">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+def add(acc, x):
+    return acc + x
+
+source = Stream()
+# bez start: pierwszy element staje się stanem
+source.accumulate(add).sink(print)
+# druga gałąź z tego samego źródła, stan od 100
+source.accumulate(add, start=100).sink(print)
+
+for x in [1, 2, 3, 4]:
+    source.emit(x)
+</code></pre>
+<pre class="out sm">1
+101
+3
+103
+6
+106
+10
+110</pre>
+</div>
+<div class="blanks">
+<p class="small" style="margin-bottom:.3em">Co wypiszą dwa ostatnie <code>print</code>?</p>
+<pre class="exo">source = Stream()
+maks = source.accumulate(max).sink_to_list()
+licz = source.accumulate(<span class="k">lambda</span> n, _: n + 1, start=0)
+ile = licz.sink_to_list()
+<span class="k">for</span> x <span class="k">in</span> [3, 1, 4, 1, 5]:
+    source.emit(x)
+print(maks)   <span class="c"># </span><input class="blank" size="16" data-re="^\[3,3,4,4,5\]$" data-sol="[3, 3, 4, 4, 5]" aria-label="wynik maks">
+print(ile)    <span class="c"># </span><input class="blank" size="16" data-re="^\[1,2,3,4,5\]$" data-sol="[1, 2, 3, 4, 5]" aria-label="wynik ile"></pre>
+<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
+<p class="fb"></p>
+<p class="explain"><code>max(acc, x)</code> daje maksimum bieżące (running max). Licznik ignoruje sam element (<code>_</code>). To <code>itertools.accumulate</code> z wykładu 2, tylko w wersji push.</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>accumulate z returns_state=True</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Czasem stan to coś innego niż wynik. Z <code>returns_state=True</code> funkcja zwraca parę <code>(nowy_stan, wynik_do_wyemitowania)</code>.</p>
+<div class="cols">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+def num_distinct(state, new):
+    state.add(new)
+    return state, len(state)   # (stan, wynik)
+
+source = Stream()
+(source.accumulate(num_distinct,
+                   returns_state=True, start=set())
+       .sink(print))
+
+for animal in ["cat", "dog", "cat", "mouse"]:
+    source.emit(animal)
+</code></pre>
+<pre class="out sm">1
+2
+2
+3</pre>
+</div>
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+def update(state, x):
+    total, count = state
+    total, count = total + x, count + 1
+    return (total, count), total / count
+
+source = Stream()
+means = source.accumulate(update, returns_state=True,
+                          start=(0, 0))
+L = means.sink_to_list()
+
+for x in [10, 20, 30, 40]:
+    source.emit(x)
+print(L)
+</code></pre>
+<pre class="out sm">[10.0, 15.0, 20.0, 25.0]</pre>
+</div>
+</div>
+<div class="cols">
+<p class="small">Prawa strona to średnia przyrostowa ze slajdu „Dane bez końca” w wersji Streamz. <code>sink_to_list()</code> zbiera wyniki do listy: wygodne w testach i w Jupyterze.</p>
+<div class="note warn"><p>Zbiór w <code>num_distinct</code> rośnie bez końca. W strumieniu nieskończonym stan trzeba ograniczać (okno, <code>maxsize</code>).</p></div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Okna">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Okna: partition a sliding_window</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wr">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+source = Stream()
+source.partition(3).sink(
+    lambda w: print("partition     ", w))
+source.sliding_window(3, return_partial=False).sink(
+    lambda w: print("sliding_window", w))
+
+for i in range(1, 7):
+    source.emit(i)
+</code></pre>
+<pre class="out sm">partition      (1, 2, 3)
+sliding_window (1, 2, 3)
+sliding_window (2, 3, 4)
+sliding_window (3, 4, 5)
+partition      (4, 5, 6)
+sliding_window (4, 5, 6)</pre>
+<p class="small">Okno <strong>skaczące</strong> (tumbling): każdy element trafia do jednego okna. Okno <strong>przesuwne</strong> (sliding): element należy do <code>n</code> okien.</p>
+</div>
+<div class="sim" id="winsim">
+  <div class="simctl">
+    <button class="btn" data-act="emit">emit</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+    <label><input type="checkbox" class="partial"> return_partial=True</label>
+  </div>
+  <div class="wgrid"></div>
+  <div class="emitted"></div>
+</div>
+</div>
+</div>
+<aside class="notes">Pytanie na czat przed kliknięciem: ile okien wyemituje każda operacja po 6 elementach? Potem włącz return_partial=True.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Okno przesuwne w praktyce: alarm</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+from statistics import fmean
+from streamz import Stream
+
+odczyty = Stream()
+(odczyty.sliding_window(3, return_partial=False)
+        .map(lambda okno: (okno, round(fmean(okno), 1)))
+        .filter(lambda para: para[1] &gt; 30)
+        .sink(lambda para: print("ALARM", *para)))
+
+for t in [28, 29, 31, 32, 33, 30, 27, 26]:
+    odczyty.emit(t)
+</code></pre>
+<pre class="out">ALARM (29, 31, 32) 30.7
+ALARM (31, 32, 33) 32.0
+ALARM (32, 33, 30) 31.7</pre>
+<p class="small">To alarm z symulacji szklarni. Średnia z okna wygładza szum: pojedynczy skok temperatury nie wywoła alarmu.</p>
+</div>
+<div>
+<div class="quiz compact"><p class="q">Ile krotek wyemituje <code>sliding_window(3, return_partial=False)</code> dla 8 odczytów?</p><div class="opts"><button class="opt" data-ok="0">2</button><button class="opt" data-ok="1">6</button><button class="opt" data-ok="0">8</button></div><p class="explain">Pierwsza pełna krotka po 3. elemencie, potem po każdym kolejnym: 8 − 3 + 1 = 6.</p></div>
+<div class="quiz compact"><p class="q">A ile przy domyślnym <code>return_partial=True</code>?</p><div class="opts"><button class="opt" data-ok="0">6</button><button class="opt" data-ok="1">8</button><button class="opt" data-ok="0">9</button></div><p class="explain">Po jednej krotce na każdy element: <code>(28,)</code>, <code>(28, 29)</code>, a potem już pełne okna. Na niepełnym oknie średnia może dać fałszywy alarm!</p></div>
+<div class="quiz compact"><p class="q">A <code>partition(3)</code> dla tych 8 odczytów?</p><div class="opts"><button class="opt" data-ok="1">2</button><button class="opt" data-ok="0">3</button><button class="opt" data-ok="0">6</button></div><p class="explain">Dwie pełne paczki; ostatnie dwa odczyty czekają na trzeci (chyba że ustawimy <code>timeout</code>).</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Branching and joining">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Łączenie strumieni (joining)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from streamz import Stream
+
+temp, wilg = Stream(), Stream()
+temp.zip(wilg).sink(lambda t: print("zip           ", t))
+temp.combine_latest(wilg).sink(lambda t: print("combine_latest", t))
+
+temp.emit(21)
+temp.emit(22)
+wilg.emit(40)
+wilg.emit(45)
+temp.emit(23)
+</code></pre>
+<pre class="out sm">zip            (21, 40)
+combine_latest (22, 40)
+zip            (22, 45)
+combine_latest (22, 45)
+combine_latest (23, 45)</pre>
+</div>
+<table class="simple">
+<tr><th>Operacja</th><th>Kiedy emituje</th></tr>
+<tr><td><code>a.union(b)</code></td><td>każdy element z dowolnego wejścia, bez łączenia w krotki</td></tr>
+<tr><td><code>a.zip(b)</code></td><td>gdy <strong>każde</strong> wejście dostarczy nowy element; czekające elementy są buforowane (para „pierwszy z pierwszym”)</td></tr>
+<tr><td><code>a.combine_latest(b)</code></td><td>przy <strong>każdym</strong> nowym elemencie, z ostatnimi wartościami pozostałych wejść (gdy już wszystkie coś wysłały)</td></tr>
+<tr><td><code>a.zip_latest(b)</code></td><td>przy każdym elemencie z <code>a</code> (wejście „bezstratne”, buforowane), z ostatnią wartością <code>b</code></td></tr>
+</table>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Symulacja: zip, combine_latest, zip_latest</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="joinsim">
+  <div class="simctl">
+    <button class="btn" data-act="a">temp.emit(…)</button>
+    <button class="btn" data-act="b" style="background:var(--blue);border-color:var(--blue)">wilg.emit(…)</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+    <span class="hint">temp = 21, 22, 23, …&nbsp; wilg = 40, 45, 50, …</span>
+  </div>
+  <div class="cols three">
+    <div class="jc" data-k="zip"><h4>temp.zip(wilg)</h4><div class="stt"></div><div class="outs"></div></div>
+    <div class="jc" data-k="cl"><h4>temp.combine_latest(wilg)</h4><div class="stt"></div><div class="outs"></div></div>
+    <div class="jc" data-k="zl"><h4>temp.zip_latest(wilg)</h4><div class="stt"></div><div class="outs"></div></div>
+  </div>
+  <p class="hint" style="margin-top:.5em">Spróbuj: kilka razy temp, potem raz wilg. Który operator zgubi pomiary, a który je zbuforuje? Co się stanie z buforem <code>zip</code>, gdy wilgotność przestanie przychodzić?</p>
+  <pre class="console" style="height:6.2em"></pre>
+</div>
+</div>
+<aside class="notes">zip: temperatura bez pary czeka w buforze bez końca (w Streamz bufor zip ma limit i potem blokuje emit: back pressure). combine_latest: gubi pośrednie wartości, ale zawsze daje najświeższy stan. zip_latest: każdy element temp dokładnie raz, z ostatnią wilgotnością.</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="Czas">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Okna czasowe: timed_window</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+import time
+from streamz import Stream
+
+source = Stream()
+(source.timed_window(1.0)   # lista elementów z 1 s
+       .filter(len)         # pomiń puste okna
+       .sink(print))
+
+for i in range(10):
+    source.emit(i)
+    time.sleep(0.25)
+time.sleep(1.5)
+</code></pre>
+<pre class="out">[0, 1, 2, 3]
+[4, 5, 6, 7]
+[8, 9]</pre>
+<p class="small">Granice okien wyznacza zegar, więc na obciążonej maszynie podział może wyjść inaczej, np. <code>[0, 1, 2]</code>, <code>[3, 4, 5, 6]</code>, …</p>
+</div>
+<ul class="points side">
+<li><code>timed_window(t)</code> co <code>t</code> sekund emituje <strong>listę</strong> elementów zebranych w tym czasie (także pustą, stąd <code>filter(len)</code>). To okno skaczące, ale wyznaczane przez czas, a nie liczbę elementów.</li>
+<li class="fragment">Operacje czasowe działają na <strong>pętli zdarzeń</strong> (Tornado/asyncio), którą Streamz sam uruchamia w wątku w tle. W programie asynchronicznym: <code>Stream(asynchronous=True)</code> i <code>await source.emit(x)</code> (korutyny: osobny wykład).</li>
+<li class="fragment">To <strong>czas przetwarzania</strong> (processing time), czyli zegar maszyny w chwili przetwarzania, a nie <strong>czas zdarzenia</strong> (event time) zapisany w danych. Odczyt spóźniony o 2 s trafi do złego okna. Watermarki i obsługę spóźnionych danych mają dopiero silniki z czasem zdarzeń (slajd „Czas zdarzenia a czas przetwarzania”).</li>
+</ul>
+</div>
+</div>
+<aside class="notes">Starsza wersja materiałów (i laboratorium) opisuje timed_window jako emitujące krotki: w Streamz 0.6.6 emituje listy.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Tempo przepływu: rate_limit i delay</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import time
+from streamz import Stream
+
+start = time.perf_counter()
+def log(x):
+    print(f"{time.perf_counter() - start:4.1f} s  {x}")
+
+source = Stream(asynchronous=False)
+source.rate_limit(0.5).sink(log)  # max 1 element / 0,5 s
+
+for i in range(4):
+    source.emit(i)        # czeka, gdy potok "zatkany"
+log("koniec pętli")
+</code></pre>
+<pre class="out sm"> 0.0 s  0
+ 0.5 s  1
+ 1.0 s  2
+ 1.5 s  3
+ 1.5 s  koniec pętli</pre>
+</div>
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import time
+from streamz import Stream
+
+start = time.perf_counter()
+def log(x):
+    print(f"{time.perf_counter() - start:4.1f} s  {x}")
+
+source = Stream()
+source.delay(1.0).sink(log)   # kolejka, 1 element / 1 s
+
+for i in range(3):
+    source.emit(i)            # wraca od razu
+log("koniec pętli")
+time.sleep(2.5)
+</code></pre>
+<pre class="out sm"> 0.0 s  0
+ 0.0 s  koniec pętli
+ 1.0 s  1
+ 2.0 s  2</pre>
+</div>
+</div>
+<div class="cols">
+<div class="note"><p><code>rate_limit(t)</code> zatrzymuje <code>emit()</code> u producenta, aż minie <code>t</code>: to <strong>back pressure</strong>. Pętla kończy się po 1,5 s.</p></div>
+<div class="note warn"><p><code>delay(t)</code> wkłada elementy do kolejki <strong>bez limitu</strong> i wypuszcza je co <code>t</code> s (pierwszy od razu). <code>emit()</code> wraca natychmiast, więc kolejka może rosnąć bez końca.</p></div>
+</div>
+</div>
+<aside class="notes">Nazwa delay jest myląca: w Streamz 0.6.6 to nie jest stałe opóźnienie każdego elementu, tylko rozrzedzanie (pacing) przez kolejkę bez limitu. Czasy w wynikach są rzeczywiste, ale mogą się różnić o kilka setnych sekundy.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Źródła i ujścia danych</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<table class="simple">
+<tr><th>Źródła (<code>Stream.from_…</code>)</th><th>Ujścia</th></tr>
+<tr><td><code>from_iterable</code>, <code>from_textfile</code> (jak <code>tail -f</code>), <code>filenames</code> (nowe pliki w katalogu), <code>from_periodic</code> (funkcja wywoływana co <code>t</code> s)</td><td><code>sink(f)</code>, <code>sink_to_list()</code>, <code>sink_to_textfile(path)</code></td></tr>
+<tr><td><code>from_tcp</code>, <code>from_http_server</code>, <code>from_websocket</code>, <code>from_process</code> (wyjście programu)</td><td><code>to_websocket</code></td></tr>
+<tr><td><code>from_mqtt</code> (broker MQTT)</td><td><code>to_mqtt</code></td></tr>
+</table>
+<div class="note"><p>Źródła działają w pętli zdarzeń i trzeba je uruchomić: <code>source.start()</code> (albo <code>Stream.from_…(…, start=True)</code>).</p></div>
+</div>
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+import time
+from streamz import Stream
+
+source = Stream.from_iterable(range(10))
+wynik = (source.filter(lambda x: x % 2 == 0)
+               .map(lambda x: x * x)
+               .sink_to_list())
+
+source.start()      # pompuje dane w pętli zdarzeń
+time.sleep(0.5)     # dajmy mu chwilę
+print(wynik)
+</code></pre>
+<pre class="out">[0, 4, 16, 36, 64]</pre>
+<p class="small"><code>Stream.from_mqtt("localhost", 1883, "szklarnia/+/+/odczyt")</code> podłącza potok wprost do brokera MQTT z części o architekturze.</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Dask">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Równolegle: Streamz i Dask</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|10|13-16">
+import time
+from dask.distributed import Client
+from streamz import Stream
+
+def slow_square(x):     # czysta funkcja: można ją wysłać
+    time.sleep(1)
+    return x * x
 
 if __name__ == "__main__":
-    app.run()
+    client = Client(n_workers=4, threads_per_worker=1)
+
+    source = Stream(asynchronous=False)
+    wyniki = (source.scatter()         # element do klastra
+                    .map(slow_square)  # na workerach
+                    .buffer(8)         # do 8 zadań w locie
+                    .gather()          # wyniki z powrotem
+                    .sink_to_list())
+
+    start = time.perf_counter()
+    for x in range(8):
+        source.emit(x)
+    while len(wyniki) &lt; 8:
+        time.sleep(0.05)
+    print(wyniki, f"{time.perf_counter() - start:.1f} s")
+    client.close()
 </code></pre>
+<pre class="out sm">[0, 1, 4, 9, 16, 25, 36, 49] 2.1 s</pre>
 </div>
 <div>
-<pre class="out sm lt">{ 'value': { 'srednia': 30.666666666666668,
-             'maks': 33.0,
-             'start': 1791672180000,
-             'end': 1791667380000},
-  'key': b's1',
-  'timestamp': 1791672180000,
-  'headers': None}</pre>
+<div class="pipe">
+  <div class="st">scatter<small>do klastra</small></div><span class="ar">→</span>
+  <div class="st">map<small>na workerach</small></div><span class="ar">→</span>
+  <div class="st">buffer(8)<small>w locie</small></div><span class="ar">→</span>
+  <div class="st">gather<small>z powrotem</small></div>
+</div>
 <ul class="points side">
-<li>Okna liczone są osobno dla każdego <strong>klucza</strong> (czujnika), według znacznika czasu zdarzenia.</li>
-<li>Stan okien jest w lokalnej bazie RocksDB z kopią w Kafce.</li>
-<li>Zastosowane pojęcia (okna, czas zdarzeń, stan) zobaczymy we Flinku.</li>
+<li class="fragment">8 zadań po 1 s na 4 procesach: ok. 2 s zamiast 8 s (czas zależy od maszyny). Kolejność wyników jest zachowana.</li>
+<li class="fragment">To ten sam pomysł co <code>ex.map</code> z wykładu 7: czyste funkcje CPU-bound wysyłamy do procesów (GIL, wykład 1).</li>
+<li class="fragment"><code>buffer(8)</code> pozwala wysłać kolejne elementy, zanim wrócą wyniki poprzednich. Bez niego każdy <code>emit</code> czekałby na wynik.</li>
+<li class="fragment">Wymaga <code>pip install "dask[distributed]"</code>.</li>
 </ul>
 </div>
 </div>
 </div>
-<aside class="notes">Wynik z uruchomienia na Kafce 4.1: odczyty s1 z jednej minuty 28, 33, 31 dają średnią 30,67, więc trafiają do tematu alarmy. Okno s2 (średnia 22,5) jest odfiltrowane.</aside>
 </section>
 <section data-background-color="#ffffff">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się: które narzędzie?</strong></span></p></div>
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Ograniczenia Streamz</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="quiz compact"><p class="q">10 000 czujników na baterie w szklarniach przesyła odczyty przez sieć komórkową. Czym połączyć je z serwerem?</p><div class="opts"><button class="opt" data-ok="1">MQTT</button><button class="opt" data-ok="0">bezpośrednio Kafka</button><button class="opt" data-ok="0">Apache Spark</button></div><p class="explain">MQTT: lekki protokół dla słabych urządzeń i niestabilnych łączy. Dalej dane można przenieść do Kafki.</p></div>
-<div class="quiz compact"><p class="q">Chcemy po poprawieniu błędu przeliczyć ponownie zdarzenia z ostatniego tygodnia. Który broker na to pozwala?</p><div class="opts"><button class="opt" data-ok="0">RabbitMQ (klasyczna kolejka)</button><button class="opt" data-ok="1">Kafka</button><button class="opt" data-ok="0">MQTT z QoS 2</button></div><p class="explain">Kafka przechowuje log przez czas retencji, więc wystarczy cofnąć offset grupy konsumentów. W klasycznej kolejce wiadomość znika po potwierdzeniu.</p></div>
-<div class="quiz compact"><p class="q">Potrzebujemy średniej temperatury w oknach 1-minutowych, liczonej według czasu zdarzenia, z gwarancją exactly-once dla stanu. Który silnik?</p><div class="opts"><button class="opt" data-ok="0">Apache Storm</button><button class="opt" data-ok="1">Apache Flink</button><button class="opt" data-ok="0">Amazon Data Firehose</button></div><p class="explain">Flink ma wbudowany stan, checkpointy, czas zdarzeń i watermarks. Storm ma znacznie uboższą obsługę stanu i czasu zdarzeń (exactly-once tylko w mikrowsadowej warstwie Trident), a Firehose tylko dostarcza dane do magazynu.</p></div>
+<div class="cols wl">
+<div>
+<ul class="points side icons cons">
+<li><i class="fa-solid fa-xmark"></i><strong>Jeden proces Pythona.</strong> Równoległość tylko przez Dask (<code>scatter</code>/<code>gather</code>); stan (<code>accumulate</code>, okna) nie jest rozpraszany.</li>
+<li><i class="fa-solid fa-xmark"></i><strong>Tylko czas przetwarzania.</strong> Brak czasu zdarzeń, watermarków i obsługi danych spóźnionych lub przychodzących poza kolejnością.</li>
+<li><i class="fa-solid fa-xmark"></i><strong>Brak odporności na awarie.</strong> Nie ma checkpointów: po awarii procesu stan przepada; brak gwarancji exactly-once.</li>
+<li><i class="fa-solid fa-xmark"></i><strong>Wydajność.</strong> Narzut Pythona na każdy element, kopiowanie danych w dużych oknach. <code>streamz.dataframe</code> opiera się na Pandas, które nie były projektowane z myślą o szybko zmieniających się danych.</li>
+<li><i class="fa-solid fa-xmark"></i><strong>Mała aktywność projektu</strong>: kilka wydań na kilka lat, nieliczni opiekunowie.</li>
+</ul>
+</div>
+<div>
+<div class="note"><p><strong>Co się zmieniło od 2017 r.?</strong> Pierwotna lista braków (wpis M. Rocklina) wymieniała przetwarzanie równoległe i integrację z brokerami. Dziś Streamz ma Dask oraz źródła sieciowe (np. MQTT).</p></div>
+<div class="note"><p><strong>Dobre do:</strong> prototypów, notatników Jupyter, monitoringu i małych strumieni w jednym procesie.</p></div>
+<div class="note warn"><p><strong>Produkcja, duża skala, stan odporny na awarie:</strong> rozproszone silniki strumieniowe (kolejne wykłady) albo usługi chmurowe z części o architekturze.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się: Streamz</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="quiz multi compact"><p class="q">Które zdania o Streamz są prawdziwe? (zaznacz wszystkie)</p><div class="opts"><button class="opt" data-ok="1">emit() bez operacji czasowych wraca dopiero po przejściu elementu przez cały graf</button><button class="opt" data-ok="0">Streamz obsługuje czas zdarzeń i watermarki</button><button class="opt" data-ok="1">po awarii procesu stan accumulate przepada</button><button class="opt" data-ok="1">Streamz potrafi czytać z brokera MQTT</button><button class="opt" data-ok="0">map() w Streamz zwraca listę wyników</button><button class="opt" data-ok="1">jeden węzeł może mieć wiele węzłów podrzędnych</button></div><button class="btn check">Sprawdź</button><p class="explain">Czas zdarzeń i watermarki oferują dopiero rozproszone silniki strumieniowe. <code>map</code> zwraca nowy węzeł grafu (obiekt <code>Stream</code>), a nie listę; wyniki zbiera np. <code>sink_to_list()</code>.</p></div>
+<div class="quiz compact"><p class="q">Po <code>temp.emit(21)</code>, <code>temp.emit(22)</code>, <code>wilg.emit(40)</code> operator <code>temp.zip(wilg)</code> wyemitował:</p><div class="opts"><button class="opt" data-ok="1">(21, 40)</button><button class="opt" data-ok="0">(22, 40)</button><button class="opt" data-ok="0">(21, 40) i (22, 40)</button><button class="opt" data-ok="0">nic</button></div><p class="explain"><code>zip</code> łączy elementy w kolejności: pierwszy z pierwszym. 22 czeka w buforze na następną wilgotność. <code>(22, 40)</code> dałoby <code>combine_latest</code>.</p></div>
+<div class="quiz compact"><p class="q">Który operator wywołuje back pressure, czyli zatrzymuje <code>emit()</code> u producenta?</p><div class="opts"><button class="opt" data-ok="0">delay</button><button class="opt" data-ok="1">rate_limit</button><button class="opt" data-ok="0">map</button></div><p class="explain"><code>rate_limit</code> (i pełny <code>buffer(n)</code>) każe producentowi czekać. <code>delay</code> ma kolejkę bez limitu: producent nie czeka, ale zużycie pamięci może rosnąć bez końca.</p></div>
 </div>
 </section>
 <section data-background-color="#ffffff">
@@ -1488,15 +1550,14 @@ if __name__ == "__main__":
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <ul class="points side">
-<li><strong>Strumień</strong> to nieograniczony ciąg zdarzeń (klucz, wartość, czas). Przetwarzanie strumieniowe daje wynik od razu, wsadowe po zebraniu danych.</li>
-<li><strong>Sensory</strong> wysyłają małe, częste wiadomości przez bramki. Bajty dekodujemy (<code>struct</code>), czas zapisujemy w UTC, a skala szybko rośnie do milionów zdarzeń dziennie.</li>
-<li><strong>Architektura:</strong> broker → procesor strumieni → magazyn → analityka. ETL może działać w sposób ciągły.</li>
-<li><strong>Broker</strong> rozprzęga producentów i konsumentów: kolejka albo pub/sub, push albo pull, gwarancje at-most/at-least/exactly-once, backpressure.</li>
-<li><strong>MQTT</strong> łączy urządzenia (tematy, wildcardy, QoS). <strong>Kafka</strong> to partycjonowany, trwały log z grupami konsumentów.</li>
-<li><strong>Silniki:</strong> Flink (zdarzenie po zdarzeniu, stan), Spark (mikrowsady), Kafka Streams (biblioteka), Storm (historyczny). W Pythonie: Streamz, Quix Streams, PyFlink.</li>
+<li><strong>Strumień</strong> to nieograniczony ciąg zdarzeń (klucz, wartość, czas). Strumieniowo wynik mamy od razu, wsadowo dopiero po zebraniu danych.</li>
+<li><strong>Okna</strong> (skaczące, przesuwne, sesyjne) dzielą strumień na skończone kawałki. Liczy się <strong>czas zdarzenia</strong>; watermark decyduje, kiedy zamknąć okno, a co jest spóźnione.</li>
+<li><strong>Architektura:</strong> źródła → broker (kolejka albo pub/sub, gwarancje dostarczenia, backpressure; dla IoT: MQTT) → procesor → magazyn i analityka. Stan skalujemy, dzieląc zdarzenia <strong>po kluczu</strong>.</li>
+<li><strong>Chmura:</strong> te same elementy jako usługi, np. Kinesis / Event Hubs / Pub/Sub do przyjmowania zdarzeń, Lambda / Stream Analytics / Dataflow do przetwarzania.</li>
+<li><strong>Streamz:</strong> graf operatorów w modelu push: <code>emit</code> → <code>map</code>/<code>filter</code> → <code>accumulate</code> i okna → <code>sink</code>; łączenie <code>zip</code>/<code>combine_latest</code>; <code>timed_window</code>, <code>rate_limit</code>, <code>buffer</code>, Dask.</li>
 </ul>
-<div class="note"><p><strong>Laboratorium:</strong> problem zaawansowanego przetwarzania równoległego (projekt).</p>
-<p><strong>Następny wykład (13.01):</strong> przetwarzanie danych strumieniowych w Apache Flink, API i model danych.</p></div>
+<div class="note"><p><strong>Laboratorium:</strong> przetwarzanie strumieniowe na przykładzie Streamz.</p>
+<p><strong>Kolejne wykłady:</strong> korutyny i async, a potem logi zdarzeń i rozproszone silniki strumieniowe.</p></div>
 </div>
 </section>
 <section data-background-color="#ffffff">
@@ -1505,25 +1566,21 @@ if __name__ == "__main__":
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <div class="cols">
 <ul class="points side" style="word-break:break-all">
+<li>https://streamz.readthedocs.io/</li>
+<li>https://github.com/python-streamz/streamz</li>
 <li>https://www.altexsoft.com/blog/real-time-analytics/</li>
 <li>https://hazelcast.com/glossary/stream-processing/</li>
 <li>https://www.upsolver.com/blog/streaming-data-architecture-key-components</li>
-<li>https://www.upsolver.com/blog/comparing-apache-kafka-amazon-kinesis</li>
 <li>https://datacadamia.com/data/processing/stream_vs_batch</li>
 <li>https://www.grodan.com/</li>
-<li>https://www.informatica.com/se/resources/articles/what-is-etl.html</li>
-<li>https://luminousmen.com/post/schema-on-read-vs-schema-on-write</li>
-<li>https://softwareskill.pl/apache-kafka-wprowadzenie</li>
 </ul>
 <ul class="points side" style="word-break:break-all">
-<li>https://kafka.apache.org/documentation/</li>
-<li>https://mqtt.org/ oraz https://eclipse.dev/paho/files/paho.mqtt.python/html/migrations.html</li>
-<li>https://bleak.readthedocs.io/</li>
-<li>https://flink.apache.org/</li>
+<li>https://mqtt.org/</li>
+<li>https://docs.aws.amazon.com/streams/latest/dev/introduction.html</li>
+<li>https://learn.microsoft.com/azure/stream-analytics/</li>
+<li>https://cloud.google.com/pubsub/docs</li>
 <li>https://spark.apache.org/docs/latest/streaming/</li>
 <li>https://quix.io/docs/quix-streams/</li>
-<li>https://docs.aws.amazon.com/streams/latest/dev/introduction.html</li>
-<li>https://docs.confluent.io/kafka-clients/python/current/overview.html</li>
 </ul>
 </div>
 </div>
@@ -1773,9 +1830,9 @@ const bpSim = (() => {
       `w buforze <b>${buf}</b> | opóźnienie ≈ <b>${(buf / rc).toFixed(1)} s</b>` + (m === 'block' ? ` | producent zablokowany <b>${blocked.toFixed(1)} s</b>` : '');
     const over = +$('.rp').value > rc;
     $('.bpverdict').innerHTML = !over ? 'Konsument nadąża: bufor tylko wygładza chwilowe skoki.' :
-      m === 'grow' ? 'Bufor rośnie bez końca, a z nim opóźnienie i zużycie pamięci. W końcu proces zabraknie pamięci (OOM). W Kafce bufor jest na dysku, ale opóźnienie (consumer lag) i tak rośnie.' :
+      m === 'grow' ? 'Bufor rośnie bez końca, a z nim opóźnienie i zużycie pamięci. W końcu proces zabraknie pamięci (OOM). Broker z buforem na dysku odsuwa problem, ale opóźnienie i tak rośnie.' :
       m === 'drop' ? 'Pamięć i opóźnienie są ograniczone, ale tracimy dane. Bywa to dopuszczalne dla częstych odczytów czujnika (QoS 0), ale nie dla transakcji.' :
-      'Producent musi zwolnić do tempa konsumenta: nic nie ginie, a opóźnienie jest ograniczone. Tak działa backpressure we Flinku i w kolejkach z limitem (<code>queue.Queue(maxsize)</code> z wykładu o wątkach).';
+      'Producent musi zwolnić do tempa konsumenta: nic nie ginie, a opóźnienie jest ograniczone. Tak działa backpressure w silnikach strumieniowych i w kolejkach z limitem (<code>queue.Queue(maxsize)</code> z wykładu o wątkach).';
   };
   const tick = () => {
     const dt = 0.1, m = mode();
@@ -1838,43 +1895,326 @@ const bpSim = (() => {
   render();
 })();
 
-// ---------- Kafka consumer groups ----------
-(() => {
-  const root = document.getElementById('groupsim'); if (!root) return;
-  const COLS = ['#1a73d9', '#53ae12', '#e8710a', '#9334e6', '#d93025', '#00897b'];
-  const NP = 4, LEN = [7, 5, 6, 4];
-  let n = 2;
-  const render = () => {
-    const owner = [];
-    const per = Math.floor(NP / n), extra = NP % n;   // range assignor
-    let p = 0;
-    for (let c = 0; c < n; c++) { const k = per + (c < extra ? 1 : 0); for (let j = 0; j < k; j++) owner[p++] = c; }
-    let parts = '<h4>temat odczyty</h4>';
-    for (let i = 0; i < NP; i++) {
-      const col = COLS[owner[i]];
-      parts += `<div class="part"><span class="pn">P${i}</span>` + Array.from({ length: LEN[i] }, (_, k) => `<i style="background:${col}">${k}</i>`).join('') +
-        `<span class="who" style="color:${col}">→ K${owner[i] + 1}</span></div>`;
+// ---------- lecture 9: element flowing through a Streamz graph ----------
+const flowSim = (() => {
+  const root = document.getElementById('flowsim'); if (!root) return null;
+  const nd = n => root.querySelector(`.nd[data-n="${n}"]`);
+  const chip = (t, cls = '') => `<span class="chip ${cls}">${t}</span>`;
+  const pyNum = x => Number.isInteger(x) ? String(x) : String(x);
+  const pyFloat1 = x => { const r = Math.round(x * 10) / 10; return Number.isInteger(r) ? r + '.0' : String(r); };
+  let win, acc, con, timers = [], busy = false;
+  const setSt = (n, t) => { nd(n).querySelector('.st').textContent = t; };
+  const setV = (n, h) => { nd(n).querySelector('.v').innerHTML = h; };
+  const hot = n => { root.querySelectorAll('.nd').forEach(e => e.classList.remove('hot')); if (n) nd(n).classList.add('hot'); };
+  const out = () => { const c = root.querySelector('.console'); c.textContent = con; c.scrollTop = c.scrollHeight; };
+  const reset = () => {
+    timers.forEach(clearTimeout); timers = []; busy = false;
+    win = []; acc = null; con = '# wyjście programu';
+    root.querySelectorAll('.nd').forEach(e => { e.classList.remove('hot', 'drop'); setV(e.dataset.n, ''); });
+    setSt('win', 'okno: ()'); setSt('acc', 'stan: brak'); setSt('al', ''); setSt('rec', '');
+    out();
+  };
+  const emit = t => {
+    if (busy || !Number.isFinite(t)) return;
+    busy = true;
+    root.querySelectorAll('.nd').forEach(e => { e.classList.remove('drop'); if (e.dataset.n !== 'acc') setV(e.dataset.n, ''); });
+    const steps = [];
+    steps.push(() => { hot('src'); setV('src', chip(pyNum(t))); con += `\n>>> source.emit(${pyNum(t)})`; out(); });
+    win = [...win, t].slice(-3);
+    const w = [...win];
+    steps.push(() => {
+      hot('win'); setSt('win', 'okno: (' + w.map(pyNum).join(', ') + (w.length === 1 ? ',' : '') + ')');
+      setV('win', w.length < 3 ? chip(`czeka ${w.length}/3`, 'wait') : chip('(' + w.map(pyNum).join(', ') + ')'));
+    });
+    if (w.length === 3) {
+      const m = (w[0] + w[1] + w[2]) / 3;
+      steps.push(() => { hot('avg'); setV('avg', chip(pyFloat1(m))); });
+      if (m > 30) {
+        steps.push(() => { hot('fil'); setV('fil', chip('✓ ' + pyFloat1(m))); });
+        steps.push(() => { hot('al'); setV('al', chip('ALARM', 'fin')); con += `\nALARM ${pyFloat1(m)}`; out(); });
+      } else {
+        steps.push(() => { hot('fil'); nd('fil').classList.add('drop'); setV('fil', chip('✗ odrzucony', 'no')); });
+      }
     }
-    let cons = '<h4>grupa alarmy</h4>';
-    for (let c = 0; c < n; c++) {
-      const mine = owner.map((o, i) => o === c ? 'P' + i : null).filter(Boolean);
-      cons += `<span class="cons ${mine.length ? '' : 'idle'}" style="border-color:${COLS[c]}">K${c + 1}: ${mine.length ? mine.join(', ') : 'bezczynny'}</span>`;
-    }
-    cons += '<h4>grupa archiwum</h4><span class="cons" style="border-color:#666">A1: P0, P1, P2, P3</span>';
-    cons += `<p class="small">${n > NP ? 'Konsumentów jest więcej niż partycji: nadmiarowi czekają bezczynnie.' : n === 1 ? 'Jeden konsument czyta wszystkie partycje.' : 'Partycje rozdzielone między konsumentów grupy (rebalance).'} Grupa archiwum niezależnie dostaje wszystkie wiadomości.</p>`;
-    root.querySelector('.gview').innerHTML = `<div>${parts}</div><div>${cons}</div>`;
+    acc = acc === null ? t : Math.max(acc, t);
+    const a = acc;
+    steps.push(() => { hot('src'); });
+    steps.push(() => { hot('acc'); setSt('acc', 'stan: ' + pyNum(a)); setV('acc', chip(pyNum(a), 'acc')); });
+    steps.push(() => { hot('rec'); setV('rec', chip('rekord ' + pyNum(a), 'fin')); con += `\nrekord ${pyNum(a)}`; out(); });
+    steps.push(() => { hot(null); busy = false; });
+    steps.forEach((f, k) => timers.push(setTimeout(f, k * 380)));
   };
   root.addEventListener('click', e => {
     const a = e.target.dataset.act;
-    if (a === 'add' && n < 6) n++;
-    if (a === 'del' && n > 1) n--;
+    if (a === 'emit') emit(parseFloat(root.querySelector('.val').value.replace(',', '.')));
+    if (a === 'rand') { const t = 25 + Math.floor(Math.random() * 12); root.querySelector('.val').value = t; emit(t); }
+    if (a === 'reset') reset();
+  });
+  root.querySelector('.val').addEventListener('keydown', e => { if (e.key === 'Enter') emit(parseFloat(e.target.value.replace(',', '.'))); });
+  reset();
+  return { reset };
+})();
+
+// ---------- tumbling vs sliding windows ----------
+(() => {
+  const root = document.getElementById('winsim'); if (!root) return;
+  const N = 3, MAX = 10;
+  let n = 0;
+  const render = () => {
+    const partial = root.querySelector('.partial').checked;
+    let h = '<span class="lbl" style="grid-row:1;grid-column:1">dane</span>';
+    for (let i = 1; i <= n; i++) h += `<span class="cell" style="grid-row:1;grid-column:${i + 1}">${i}</span>`;
+    h += '<span class="lbl" style="grid-row:2;grid-column:1">partition(3)</span>';
+    const lines = [];
+    const ev = [];   // emission order, as in the listing
+    for (let i = 1; i <= n; i++) {
+      if (i % N === 0) ev.push({ k: 't', a: i - N + 1, b: i });
+      if (i >= N || partial) ev.push({ k: i >= N ? 's' : 'p', a: Math.max(1, i - N + 1), b: i });
+    }
+    let row = 3;
+    h += '<span class="lbl" style="grid-row:3;grid-column:1">sliding_window(3)</span>';
+    ev.forEach(e => {
+      if (e.k === 't') h += `<span class="bar t" style="grid-row:2;grid-column:${e.a + 1} / ${e.b + 2}"></span>`;
+      else h += `<span class="bar ${e.k}" style="grid-row:${row++};grid-column:${e.a + 1} / ${e.b + 2}"></span>`;
+      const tup = [];
+      for (let j = e.a; j <= e.b; j++) tup.push(j);
+      lines.push((e.k === 't' ? 'partition      ' : 'sliding_window ') + '(' + tup.join(', ') + (tup.length === 1 ? ',' : '') + ')');
+    });
+    root.querySelector('.wgrid').innerHTML = h;
+    root.querySelector('.emitted').innerHTML = lines.length ? lines.slice(-4).join('<br>') + (lines.length > 4 ? `<br><i>… łącznie ${lines.length} krotek</i>` : '') : '<i>Kliknij emit, aby wysłać 1, 2, 3, …</i>';
+    root.querySelector('[data-act=emit]').disabled = n >= MAX;
+  };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'emit' && n < MAX) { n++; render(); }
+    if (a === 'reset') { n = 0; render(); }
+  });
+  root.querySelector('.partial').addEventListener('change', render);
+  render();
+})();
+
+// ---------- zip / combine_latest / zip_latest ----------
+(() => {
+  const root = document.getElementById('joinsim'); if (!root) return;
+  let na, nb, zipA, zipB, cl, zlBuf, zlB, outs, con;
+  const tup = (a, b) => `(${a}, ${b})`;
+  const show = v => v === null ? '–' : v;
+  const render = (flash = []) => {
+    const st = {
+      zip: `bufor temp: [${zipA.join(', ')}]\nbufor wilg: [${zipB.join(', ')}]`,
+      cl: `ostatnia temp: ${show(cl.a)}\nostatnia wilg: ${show(cl.b)}`,
+      zl: `bufor temp: [${zlBuf.join(', ')}]\nostatnia wilg: ${show(zlB)}`
+    };
+    root.querySelectorAll('.jc').forEach(c => {
+      const k = c.dataset.k;
+      c.querySelector('.stt').textContent = st[k];
+      c.querySelector('.outs').innerHTML = outs[k].slice(-8).map((t, i, arr) => `<span class="chip ${i === arr.length - 1 && flash.includes(k) ? 'fin' : 'pair'}">${t}</span>`).join('') || '<i>brak wyjścia</i>';
+      c.classList.toggle('flash', flash.includes(k));
+    });
+    const cEl = root.querySelector('.console'); cEl.textContent = con; cEl.scrollTop = cEl.scrollHeight;
+  };
+  const reset = () => { na = 0; nb = 0; zipA = []; zipB = []; cl = { a: null, b: null }; zlBuf = []; zlB = null; outs = { zip: [], cl: [], zl: [] }; con = '# wyjście'; render(); };
+  const put = (k, t, fl) => { outs[k].push(t); fl.push(k); con += `\n${{ zip: 'zip           ', cl: 'combine_latest', zl: 'zip_latest    ' }[k]} ${t}`; };
+  const emitA = () => {
+    const x = 21 + na++; const fl = []; con += `\n>>> temp.emit(${x})`;
+    zipA.push(x); if (zipA.length === 1 && zipB.length) put('zip', tup(zipA.shift(), zipB.shift()), fl);
+    cl.a = x; if (cl.b !== null) put('cl', tup(cl.a, cl.b), fl);
+    zlBuf.push(x); if (zlB !== null) while (zlBuf.length) put('zl', tup(zlBuf.shift(), zlB), fl);
+    render(fl);
+  };
+  const emitB = () => {
+    const y = 40 + 5 * nb++; const fl = []; con += `\n>>> wilg.emit(${y})`;
+    zipB.push(y); if (zipB.length === 1 && zipA.length) put('zip', tup(zipA.shift(), zipB.shift()), fl);
+    cl.b = y; if (cl.a !== null) put('cl', tup(cl.a, cl.b), fl);
+    const first = zlB === null; zlB = y; if (first) while (zlBuf.length) put('zl', tup(zlBuf.shift(), zlB), fl);
+    render(fl);
+  };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'a') emitA();
+    if (a === 'b') emitB();
+    if (a === 'reset') reset();
+  });
+  reset();
+})();
+
+
+// ---------- greenhouse sensors: single reading vs window average ----------
+const sensorSim = (() => {
+  const root = document.getElementById('sensorsim'); if (!root) return null;
+  const $ = s => root.querySelector(s);
+  const NAMES = ['hala A', 'hala B', 'hala C'];
+  let base, hist, heat, n, alarms, log, timer = null;
+  const thr = () => +$('.thr').value;
+  const avgMode = () => root.querySelector('input[name=smode]:checked').value === 'avg';
+  const value = h => avgMode() ? (h.length >= 3 ? (h[h.length - 1] + h[h.length - 2] + h[h.length - 3]) / 3 : null) : h[h.length - 1];
+  const render = () => {
+    $('.thrv').textContent = thr();
+    $('.sgrid').innerHTML = NAMES.map((nm, i) => {
+      const h = hist[i], v = h.length ? value(h) : null, al = v !== null && v > thr();
+      const bars = h.slice(-14).map(t => `<i style="height:${Math.max(3, Math.min(64, (t - 20) * 4))}px" class="${t > thr() ? 'hi' : ''}"></i>`).join('');
+      const info = avgMode() ? 'średnia z 3: ' + (v === null ? 'czeka na 3 odczyty' : v.toFixed(1) + ' °C') : 'alarm z ostatniego odczytu';
+      return `<div class="sensor ${al ? 'alarm' : ''}"><b>${nm}</b>${al ? '<em>ALARM</em>' : ''}<div class="bars">${bars}</div>` +
+        `<span class="v">${h.length ? h[h.length - 1].toFixed(1) + ' °C' : '–'}</span><small>${info}</small></div>`;
+    }).join('');
+    $('.sstat').innerHTML = `zdarzeń: <b>${n}</b> | alarmów: <b>${alarms}</b>`;
+    const c = $('.console'); c.textContent = log.length ? log.slice(-30).join('\n') : '# kliknij Start'; c.scrollTop = c.scrollHeight;
+  };
+  const tick = () => {
+    NAMES.forEach((nm, i) => {
+      base[i] += (27 - base[i]) * 0.2 + (Math.random() - 0.5) * 0.4;
+      const noise = (Math.random() + Math.random() + Math.random() - 1.5) * 3;
+      const t = Math.round((base[i] + noise + (heat[i] > 0 ? 6 : 0)) * 10) / 10;
+      if (heat[i] > 0) heat[i]--;
+      hist[i].push(t); n++;
+      const v = value(hist[i]), al = v !== null && v > thr();
+      if (al) alarms++;
+      log.push(`${nm}: ${t.toFixed(1)} °C` + (al ? (avgMode() ? `  <- ALARM (średnia ${v.toFixed(1)})` : '  <- ALARM') : ''));
+    });
+    render();
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const reset = () => { stop(); base = [27, 27, 27]; hist = [[], [], []]; heat = [0, 0, 0]; n = 0; alarms = 0; log = []; render(); };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'play') { if (timer) stop(); else { tick(); timer = setInterval(tick, 800); } }
+    if (a === 'heat') heat[1] = 6;
+    if (a === 'reset') reset();
+  });
+  $('.thr').addEventListener('input', render);
+  root.querySelectorAll('input[name=smode]').forEach(r => r.addEventListener('change', reset));
+  reset();
+  return { stop };
+})();
+
+// ---------- what is a window ----------
+(() => {
+  const root = document.getElementById('winintro'); if (!root) return;
+  const $ = s => root.querySelector(s);
+  const N = 3, SHOW = 9;
+  let vals = [];
+  const avg = a => (a.reduce((x, y) => x + y, 0) / a.length).toFixed(1) + ' °C';
+  const render = () => {
+    const shown = vals.slice(-SHOW), off = vals.length - shown.length;
+    $('.wrow').innerHTML = (off ? '<span>…</span>' : '') + shown.map((v, i) =>
+      `<span class="${off + i >= vals.length - N ? 'in' : ''} ${v >= 33 ? 'hot' : ''}">${v}</span>`).join('');
+    $('.all').textContent = vals.length ? avg(vals) : '–';
+    $('.mall').textContent = vals.length ? vals.length + ' i rośnie' : '–';
+    $('.mwin').textContent = vals.length ? Math.min(N, vals.length) : '–';
+    $('.win').textContent = vals.length ? avg(vals.slice(-N)) : '–';
+  };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'add') vals.push(20 + Math.round(Math.random() * 4));
+    if (a === 'hot') vals.push(35);
+    if (a === 'reset') vals = [];
     render();
   });
   render();
 })();
 
-Reveal.on('slidechanged', () => {
-  [batchSim, brokerSim, bpSim].forEach(s => s && s.stop());
+// ---------- event time vs processing time, watermark ----------
+const eventSim = (() => {
+  const root = document.getElementById('eventsim'); if (!root) return null;
+  const $ = s => root.querySelector(s);
+  const W = 5, NW = 6, END = NW * W + 8;
+  let clock, events, maxEt, closed, closedAt, log, timer = null;
+  const lateness = () => +$('.late').value;
+  const render = () => {
+    $('.latev').textContent = lateness();
+    const wm = Math.max(0, maxEt - lateness());
+    let h = '<span></span>';
+    for (let i = 0; i < NW; i++) h += `<span class="hd">${i * W}–${(i + 1) * W} s</span>`;
+    const row = (label, f) => { h += `<span class="lbl">${label}</span>`; for (let i = 0; i < NW; i++) h += f(i); };
+    const truth = i => events.filter(e => e.w === i).length;
+    row('wg czasu przyjścia', i => {
+      const n = events.filter(e => Math.floor(e.at / W) === i).length;
+      return `<span class="cell ${n !== truth(i) && closed[i] ? 'diff' : ''}">${n}</span>`;
+    });
+    row('wg czasu zdarzenia', i => {
+      const ok = events.filter(e => e.w === i && !e.late).length, lt = events.filter(e => e.w === i && e.late).length;
+      return `<span class="cell ${closed[i] ? 'closed' : ''}">${ok}${lt ? ` <span class="lt">+${lt} spóźn.</span>` : ''}<br><small>${closed[i] ? 'zamknięte ' + closedAt[i].toFixed(1) + ' s' : 'otwarte'}</small></span>`;
+    });
+    row('prawda (wszystkie)', i => `<span class="cell">${truth(i)}</span>`);
+    $('.egrid').innerHTML = h;
+    $('.estat').innerHTML = `zegar <b>${clock.toFixed(1)} s</b> | watermark <b>${wm.toFixed(1)} s</b> | odrzucone <b>${events.filter(e => e.late).length}</b>`;
+    const c = $('.console'); c.textContent = log.length ? log.slice(-20).join('\n') : '# kliknij Start'; c.scrollTop = c.scrollHeight;
+  };
+  const tick = () => {
+    clock = Math.round((clock + 0.5) * 10) / 10;
+    const k = Math.random() < 0.7 ? 1 : 2;
+    for (let j = 0; j < k; j++) {
+      const delay = Math.random() < 0.15 ? 2.5 + Math.random() * 3.5 : Math.random() * 1.2;
+      const et = Math.round(Math.max(0, clock - delay) * 10) / 10, w = Math.floor(et / W);
+      const late = w < NW && closed[w];
+      events.push({ et, at: clock, w, late });
+      maxEt = Math.max(maxEt, et);
+      log.push(`zdarzenie z ${et.toFixed(1)} s dotarło w ${clock.toFixed(1)} s` + (delay > 2 ? ` (opóźnienie ${delay.toFixed(1)} s)` : '') + (late ? '  <- SPÓŹNIONE: okno zamknięte' : ''));
+    }
+    const wm = maxEt - lateness();
+    for (let i = 0; i < NW; i++) if (!closed[i] && wm >= (i + 1) * W) { closed[i] = true; closedAt[i] = clock; }
+    render();
+    if (clock >= END) stop();
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const reset = () => { stop(); clock = 0; events = []; maxEt = 0; closed = Array(NW).fill(false); closedAt = Array(NW).fill(0); log = []; render(); };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'play') { if (timer) stop(); else { if (clock >= END) reset(); timer = setInterval(tick, 250); } }
+    if (a === 'reset') reset();
+  });
+  $('.late').addEventListener('input', reset);
+  reset();
+  return { stop };
+})();
+
+// ---------- key partitioning: by key vs round-robin ----------
+(() => {
+  const root = document.getElementById('keysim'); if (!root) return;
+  const $ = s => root.querySelector(s);
+  const COLS = ['#1a73d9', '#53ae12', '#e8710a', '#9334e6', '#d93025', '#00897b'];
+  const hash = k => ((k * 2654435761) >>> 0) % 997;
+  let evs, hot;
+  const render = () => {
+    const N = +$('.nw').value, byKey = root.querySelector('input[name=kmode]:checked').value === 'key';
+    const wk = Array.from({ length: N }, () => []);
+    evs.forEach((k, i) => wk[byKey ? hash(k) % N : i % N].push(k));
+    $('.wks').innerHTML = wk.map((list, i) => `<div class="wk"><b>worker ${i + 1}</b><span class="small">${list.length} zdarzeń</span><br>` +
+      list.map(k => `<span class="chip" style="background:${COLS[k]}">c${k + 1}</span>`).join('') + '</div>').join('');
+    const v = $('.kverdict');
+    $('.hotbtn').textContent = 'gorący klucz: ' + (hot ? 'wł.' : 'wył.');
+    if (!evs.length) { v.textContent = 'Wyślij kilka paczek zdarzeń z 6 czujników (c1…c6).'; v.classList.remove('bad'); return; }
+    if (byKey) {
+      const top = Math.max(...wk.map(x => x.length)), share = top / evs.length;
+      const hotTxt = share > 0.5 ? ` Ale jeden worker dostaje ${Math.round(share * 100)}% zdarzeń: gorący klucz ogranicza skalowanie.` : '';
+      v.textContent = 'Każdy czujnik zawsze trafia do tego samego workera: suma na czujnik jest kompletna, a kolejność jego odczytów zachowana.' + hotTxt;
+      v.classList.toggle('bad', share > 0.5);
+    } else {
+      const split = [...new Set(evs)].filter(k => wk.filter(x => x.includes(k)).length > 1);
+      v.textContent = split.length
+        ? `Podział jest równy, ale odczyty czujników ${split.map(k => 'c' + (k + 1)).join(', ')} trafiły do kilku workerów: każdy zna tylko część sumy, a kolejność się miesza.`
+        : 'Podział jest równy. Wyślij więcej zdarzeń i sprawdź, gdzie trafiają odczyty jednego czujnika.';
+      v.classList.toggle('bad', split.length > 0);
+    }
+  };
+  const send = () => {
+    for (let i = 0; i < 12; i++) evs.push(hot && Math.random() < 0.7 ? 2 : Math.floor(Math.random() * 6));
+    if (evs.length > 48) evs = evs.slice(-48);
+    render();
+  };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'send') send();
+    if (a === 'hot') { hot = !hot; render(); }
+    if (a === 'reset') { evs = []; hot = false; render(); }
+  });
+  root.addEventListener('change', render);
+  evs = []; hot = false; render();
+})();
+
+Reveal.on('slidechanged', e => {
+  [batchSim, brokerSim, bpSim, sensorSim, eventSim].forEach(s => s && s.stop());
+  e.currentSlide.querySelectorAll('pre.console').forEach(c => { c.scrollTop = c.scrollHeight; });
 });
 </script>
 </body>

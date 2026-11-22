@@ -1,0 +1,1527 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Przetwarzanie równoległe i strumieniowe - Wykład 11: szeregi czasowe i biblioteka Kats</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+<style>
+  /* Slide = 1280x720; base font scaled to match H5P text metrics */
+  .reveal { font-size: 24px; font-family: "Open Sans", Arial, sans-serif; color: #000; }
+  .reveal .slides section { position: absolute; width: 100%; height: 100%; padding: 0; text-align: left; }
+  .reveal .el { position: absolute; box-sizing: border-box; overflow: visible; }
+  .reveal .el.text { padding: .375em .5em; line-height: 1.25; }
+  .reveal .el.text p, .reveal .el.text li { margin: 0 0 .5em 0; line-height: 1.25; }
+  .reveal .el.text ul { display: block; margin: 0 0 .5em 1.25em; padding: 0; }
+  .reveal .el.text h3 { font-size: 1em; text-transform: none; margin: 0 0 .5em; color: #000; font-family: inherit; }
+  .reveal .el.img img { width: 100%; height: 100%; object-fit: contain; margin: 0; max-width: none; max-height: none; }
+  .reveal .el.shape { display: flex; flex-direction: column; justify-content: center; }
+  .reveal .el.link { display: flex; align-items: center; justify-content: center; font-size: 1.5em; }
+  .reveal a { color: #1a73d9; }
+  /* ---------- interactive slides (as in lecture 1) ---------- */
+  :root { --green: rgb(83, 174, 18); --blue: #1a73d9; --red: #d93025; --orange: #e8710a; --muted: #666; --line: #ccc; }
+  .reveal .el.box { padding: 0 .5em; line-height: 1.3; }
+  .reveal .el.box p { margin: 0 0 .5em; }
+  .reveal .small, .reveal .hint { font-size: .7em; color: var(--muted); }
+  .reveal .btn, .reveal .opt {
+    font: inherit; font-size: .75em; padding: .3em .8em; margin: 0 .3em .3em 0; cursor: pointer;
+    border: 2px solid var(--green); background: var(--green); color: #fff; border-radius: .3em;
+  }
+  .reveal .btn.ghost { background: #fff; color: var(--green); }
+  .reveal .btn:disabled { opacity: .4; cursor: default; }
+  .reveal .simctl { display: flex; flex-wrap: wrap; align-items: center; gap: .3em .8em; font-size: .8em; margin-bottom: .5em; }
+  .reveal .simctl .btn { font-size: .9em; margin: 0; }
+  .reveal .simctl select, .reveal .simctl input[type=text] { font: inherit; padding: .1em .3em; }
+  .reveal .stat { font-size: .8em; }
+  .reveal h4 { font-size: .8em; margin: 0 0 .3em; text-transform: none; color: #000; font-family: inherit; }
+  .reveal code { font-family: Consolas, Menlo, monospace; }
+  @keyframes pop { from { transform: scale(.3); opacity: 0; } }
+
+  /* quiz */
+  .reveal .quiz .q { font-size: 1.1em; margin-bottom: .8em; }
+  .reveal .quiz .opts { display: flex; flex-wrap: wrap; gap: .5em; margin-bottom: .6em; }
+  .reveal .quiz .opt { background: #fff; color: #000; border-color: var(--line); font-size: .9em; margin: 0; }
+  .reveal .quiz .opt.sel { border-color: var(--blue); background: #e8f0fe; }
+  .reveal .quiz .opt.good { border-color: var(--green); background: #e6f4da; }
+  .reveal .quiz .opt.bad { border-color: var(--red); background: #fce8e6; }
+  .reveal .quiz .explain { visibility: hidden; font-size: .85em; border-left: 4px solid var(--green); padding-left: .6em; margin-top: .6em; }
+  .reveal .quiz.done .explain { visibility: visible; }
+  .reveal .quiz.compact .q { font-size: .9em; margin-bottom: .5em; }
+  .reveal .quiz.compact .opt { font-size: .75em; }
+  .reveal .quiz.compact .explain { font-size: .7em; margin-top: .3em; }
+  .reveal .quiz + .quiz { margin-top: .8em; }
+
+  /* ---------- lecture 2: layout, code listings, output ---------- */
+  .reveal .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.2em; align-items: start; }
+  .reveal .cols.wl { grid-template-columns: 1.35fr 1fr; }
+  .reveal .cols.wr { grid-template-columns: 1fr 1.35fr; }
+  /* type scale: .lead / ul.points = body text, .note = callouts, .small = captions, code .78em */
+  .reveal .lead { font-size: 1.1em; margin: 0 0 .5em; line-height: 1.35; }
+  .reveal ul.points { font-size: 1.1em; line-height: 1.35; margin: 0 0 .5em 1.1em; padding: 0; }
+  .reveal ul.points li { margin: 0 0 .45em; }
+  .reveal ul.points.side { font-size: .9em; }
+  .reveal ul.points.icons { list-style: none; margin-left: 0; }
+  .reveal ul.points.icons li { padding-left: 1.5em; text-indent: -1.5em; }
+  .reveal ul.points.icons i { width: 1.5em; text-indent: 0; color: var(--green); }
+  .reveal ul.points.icons.cons i { color: var(--red); }
+  .reveal img.pic { display: block; width: 100%; max-height: 20em; object-fit: contain; margin: 0 auto; }
+  .reveal svg.diagram { display: block; width: 100%; height: auto; margin: .2em 0 .6em; font-family: "Open Sans", Arial, sans-serif; }
+  .reveal svg.diagram text { font-size: 18px; }
+  .reveal svg.diagram .mono { font-family: Consolas, Menlo, monospace; }
+  .reveal .chain { display: flex; flex-wrap: wrap; align-items: center; gap: .3em; font-size: .8em; margin: .3em 0 .6em; }
+  .reveal .chain .op { color: var(--muted); font-family: Consolas, Menlo, monospace; font-size: .85em; }
+  .reveal .zipviz { font: .75em Consolas, Menlo, monospace; margin: 0 0 .6em; }
+  .reveal .zipviz > div { display: flex; gap: .4em; margin: .25em 0; align-items: center; }
+  .reveal .zipviz .lbl { width: 4.5em; color: var(--muted); font-family: "Open Sans", Arial, sans-serif; }
+  .reveal .chip.alt { background: #fef3c7; }
+  .reveal .chip.pair { background: #e6f4da; }
+  .reveal .lanes { font-size: .75em; }
+  .reveal .lanes .lane { display: flex; align-items: center; gap: 3px; height: 1.5em; margin: .15em 0; }
+  .reveal .lanes .lane span { width: 2.2em; color: var(--muted); }
+  .reveal .lanes .lane i { display: block; width: 10.5%; height: 1.1em; border-radius: 3px; background: var(--blue); }
+  .reveal .lanes .lane i.p { background: var(--green); }
+  .reveal .lanes h4 { margin: .5em 0 .1em; }
+  .reveal p code, .reveal li code, .reveal td code, .reveal .note code { background: #f1f3f4; padding: 0 .2em; border-radius: .2em; font-size: .9em; }
+  .reveal pre.code-wrap { position: relative; width: 100%; margin: 0 0 .5em; box-shadow: none; font-size: .78em; }
+  .reveal pre.code-wrap code { max-height: none; padding: .6em .8em; border-radius: .3em; }
+  .reveal pre.code-wrap.sm { font-size: .66em; }
+  .reveal pre.out { position: relative; width: 100%; box-sizing: border-box; margin: 0 0 .6em; padding: .45em .8em; font-size: .78em; line-height: 1.35;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #f4f6f8; color: #1f2a30; border: 1px solid #c9d1d9; border-left: 5px solid #586e75; border-radius: .3em; box-shadow: none; }
+  .reveal pre.out::before { content: "Wynik"; position: absolute; top: .3em; right: .6em; font: bold .7em "Open Sans", Arial, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #8a99a6; }
+  .reveal pre.code-wrap + pre.out { margin-top: -.5em; border-top: none; border-radius: 0 0 .3em .3em; }
+  .reveal pre.out.sm, .reveal pre.code-wrap.sm + pre.out { font-size: .66em; }
+  .reveal .copy-btn { position: absolute; top: .4em; right: .4em; z-index: 2; font: .8em "Open Sans", Arial, sans-serif; padding: .1em .6em; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, .3); border-radius: .3em; background: rgba(255, 255, 255, .1); color: #f8f8f2; opacity: 0; transition: opacity .15s; }
+  .reveal pre.code-wrap:hover .copy-btn, .reveal .copy-btn:focus-visible { opacity: 1; }
+  .reveal .copy-btn.copied { background: var(--green); border-color: var(--green); opacity: 1; }
+  .reveal .note { font-size: .75em; line-height: 1.35; border-left: 4px solid var(--green); background: #f3faee; padding: .35em .7em; margin: .2em 0 .6em; }
+  .reveal .note.warn { border-left-color: var(--orange); background: #fff4e5; }
+  .reveal .note.bad { border-left-color: var(--red); background: #fce8e6; }
+  .reveal .note p { margin: 0 0 .3em; }
+  .reveal .note p:last-child { margin: 0; }
+  .reveal table.simple { border-collapse: collapse; font-size: .75em; margin: .2em 0 .8em; width: 100%; }
+  .reveal table.simple th, .reveal table.simple td { border: 1px solid var(--line); padding: .3em .5em; vertical-align: top; text-align: left; }
+  .reveal table.simple th { background: #eef7e6; }
+  .reveal .textflow ul { margin: 0 0 .5em 1.2em; }
+  .reveal .textflow li { margin-bottom: .4em; }
+
+  /* agenda */
+  .reveal .agenda { display: grid; grid-template-columns: 1fr 1fr; gap: .7em; margin-bottom: .8em; }
+  .reveal .agenda .ag { border: 2px solid var(--line); border-radius: .4em; padding: .4em .7em; }
+  .reveal .agenda .ag b { display: inline-block; width: 1.6em; height: 1.6em; line-height: 1.6em; text-align: center; border-radius: 50%; background: var(--green); color: #fff; margin-right: .4em; }
+  .reveal .agenda .ag p { font-size: .75em; margin: .3em 0 0; color: #333; }
+
+  /* fill in the blanks */
+  .reveal pre.exo { width: 100%; box-sizing: border-box; margin: 0 0 .5em; padding: .6em .8em; font-size: .78em; line-height: 1.6; box-shadow: none;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #272822; color: #f8f8f2; border-radius: .3em; }
+  .reveal pre.exo .c { color: #75715e; }
+  .reveal pre.exo .k { color: #f92672; }
+  .reveal input.blank { font: inherit; color: #e6db74; background: #3e3d32; border: none; border-bottom: 2px dashed #e6db74; padding: 0 .3em; outline: none; }
+  .reveal input.blank:focus { background: #49483e; }
+  .reveal input.blank.good { color: #a6e22e; border-bottom: 2px solid #a6e22e; }
+  .reveal input.blank.bad { color: #f92672; border-bottom: 2px solid #f92672; }
+  .reveal .blanks .fb { font-size: .7em; min-height: 1.2em; margin: .2em 0; color: var(--red); }
+  .reveal .blanks .explain { visibility: hidden; font-size: .75em; border-left: 4px solid var(--green); padding-left: .6em; margin-top: .3em; }
+  .reveal .blanks.done .explain { visibility: visible; }
+
+  /* pure / impure cards */
+  .reveal .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8em; }
+  .reveal .quiz.card { border: 2px solid var(--line); border-radius: .4em; padding: .5em .6em; }
+  .reveal .quiz.card pre.code-wrap { font-size: .7em; margin-bottom: .6em; }
+  .reveal .quiz.card .opts { margin-bottom: 0; }
+  .reveal .quiz.card .opt { font-size: .75em; }
+  .reveal .quiz.card .explain { font-size: .7em; }
+
+  /* console (as in lecture 2) */
+  .reveal pre.console { width: 100%; box-sizing: border-box; height: 15em; overflow: auto; margin: 0 0 .5em; padding: .5em .8em; font-size: .72em; line-height: 1.4;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #1e1e1e; color: #e0e0e0; border-radius: .3em; box-shadow: none; }
+  /* chips and pipeline (as in lecture 2) */
+  .reveal .chip { display: inline-block; min-width: 1.6em; text-align: center; padding: .1em .45em; border-radius: .3em; background: #e8f0fe; animation: pop .25s; }
+  .reveal .chip.drop { background: #f1f3f4; color: #aaa; text-decoration: line-through; }
+  .reveal .chip.acc { background: #fef3c7; }
+  .reveal .chip.fin { background: var(--green); color: #fff; font-weight: bold; }
+  .reveal .chip.err { background: #fce8e6; color: var(--red); font-family: Consolas, Menlo, monospace; }
+  .reveal .pipe { display: flex; align-items: center; gap: .35em; font-size: .62em; margin: 0 0 .6em; }
+  .reveal .pipe .st { border: 2px solid var(--blue); border-radius: .4em; padding: .3em .5em; text-align: center; background: #e8f0fe; }
+  .reveal .pipe .st small { display: block; color: var(--muted); font-size: .8em; }
+  .reveal .pipe .ar { color: var(--muted); font-size: 1.4em; }
+
+  /* ---------- lecture 9: streams ---------- */
+  .reveal .cols > * { min-width: 0; }
+  .reveal .cols.three { grid-template-columns: 1fr 1fr 1fr; }
+  .reveal img.pic.wide { max-height: 6em; }
+  .reveal .cap { font-size: .7em; color: var(--muted); margin: .2em 0 .8em; }
+  .reveal .el.box h4 { font-size: .8em; }
+
+  /* ---------- lecture 11: time series ---------- */
+  .reveal .simctl input[type=range] { width: 7em; vertical-align: middle; }
+  .reveal #decsim .dplot, .reveal #decsim .aplot, .reveal #fcsim .fplot, .reveal #cusumsim .cplot { border: 1px solid var(--line); border-radius: .4em; background: #fff; }
+  .reveal #decsim .dexp { min-height: 3.5em; border-left: 4px solid var(--green); padding-left: .5em; margin-top: .4em; }
+  .reveal #fcsim .fstat { font-size: .72em; margin: .4em 0 0; }
+  .reveal #cusumsim pre.console { height: 3.4em; margin: .3em 0 0; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section data-background-color="#ffffff" data-keywords="PRS">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie równoległe i strumieniowe</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:23.733%;width:61.002%;height:40%;"><p><span style="font-size:1.5em"><strong>Wykład 11</strong></span></p>
+
+<p><span style="font-size:1.5em"><strong>Analiza szeregów czasowych: biblioteka Kats</strong></span></p>
+</div>
+<div class="el img" style="left:64.270%;top:21.576%;width:23.125%;height:40.000%;"><img src="images/image-CjtUUtTA.jpg" alt="UAM"></div>
+<div class="el img" style="left:47.930%;top:66.885%;width:19.608%;height:25.820%;"><img src="images/image-TbBRY920.png" alt=""></div>
+<div class="el img" style="left:82.438%;top:71.200%;width:17.564%;height:18.215%;"><img src="images/image-UhbZ9gWx.png" alt=""></div>
+<div class="el img" style="left:67.538%;top:73.357%;width:16.340%;height:16.944%;"><img src="images/image-utcHYa21.png" alt=""></div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Plan">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Plan wykładu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="agenda">
+  <div class="ag"><b>1</b>Szeregi czasowe<p>czym są, składowe (trend, sezonowość, szum), stacjonarność, autokorelacja, narzędzia pandas</p></div>
+  <div class="ag"><b>2</b>Prognozowanie<p>podział w czasie, błędy MAE i MAPE, prognozy bazowe, wygładzanie wykładnicze, ARIMA, Prophet</p></div>
+  <div class="ag"><b>3</b>Kats: prognozy<p>TimeSeriesData, wspólne API modeli, backtesting, zespoły modeli</p></div>
+  <div class="ag"><b>4</b>Kats: detekcja i cechy<p>wzrosty i spadki poziomu (CUSUM, BOCPD), trendy (Mann-Kendall), wartości odstające, sezonowość, TsFeatures, Kats w potoku Streamz</p></div>
+</div>
+<div class="note"><p><strong>Co już znamy:</strong> strumień danych z czujników (wykład 8) i model uczony po jednym zdarzeniu (River, wykład 9). Dziś patrzymy na te same dane jak na <strong>szereg czasowy</strong>: całą historię, którą analizujemy naraz, w oknach.</p></div>
+</div>
+<aside class="notes">Wykład 9 to uczenie online, dziś podejście wsadowe na oknach historii. Kats to zestaw narzędzi od Meta, który zbiera w jednym miejscu prognozy, detektory i cechy szeregów.</aside>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Szereg czasowy">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Co to jest szereg czasowy?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wr">
+<div>
+<p class="lead"><strong>Szereg czasowy</strong> to ciąg pomiarów uporządkowanych w czasie: <code>(t₁, y₁), (t₂, y₂), …</code></p>
+<ul class="points side">
+<li>Kolejność ma znaczenie: wartość dziś zależy od wartości wczoraj. Tasowanie wierszy niszczy informację.</li>
+<li>Najczęściej pomiary są <strong>regularne</strong> (co minutę, dzień, miesiąc). Nieregularne zdarzenia zwykle najpierw agregujemy do stałej częstotliwości.</li>
+<li><strong>Jednowymiarowy</strong> (jedna wielkość, np. temperatura) albo <strong>wielowymiarowy</strong> (kilka wielkości naraz: temperatura, wilgotność, nasłonecznienie).</li>
+</ul>
+</div>
+<div>
+<table class="simple">
+<tr><th>dziedzina</th><th>przykład</th><th>częstotliwość</th></tr>
+<tr><td>IoT, szklarnie</td><td>temperatura i wilgotność</td><td>co 1 min</td></tr>
+<tr><td>serwery</td><td>zużycie CPU, liczba zapytań</td><td>co 10 s</td></tr>
+<tr><td>handel</td><td>sprzedaż produktu</td><td>dzienna</td></tr>
+<tr><td>energetyka</td><td>zapotrzebowanie na prąd</td><td>co 15 min</td></tr>
+<tr><td>transport</td><td>pasażerowie linii lotniczych</td><td>miesięczna</td></tr>
+</table>
+<p class="small">Typowe pytania: co będzie dalej (<strong>prognoza</strong>), czy dzieje się coś dziwnego (<strong>anomalia</strong>), czy coś się zmieniło (<strong>punkt zmiany</strong>), jak opisać szereg liczbami (<strong>cechy</strong>).</p>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Strumień a szereg">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Strumień danych a szereg czasowy</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<svg class="diagram" viewBox="0 0 1180 150" style="width:100%;height:150px" role="img" aria-label="Strumień zdarzeń trafia do okna, okno staje się szeregiem czasowym analizowanym przez Kats albo zdarzenie trafia do modelu online River">
+<defs><marker id="ar11" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs>
+<rect x="10" y="45" width="220" height="60" rx="8" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="120" y="72" text-anchor="middle" font-weight="bold">strumień zdarzeń</text><text x="120" y="94" text-anchor="middle" style="font-size:15px" fill="#666">MQTT, Kafka, Streamz</text>
+<line x1="235" y1="60" x2="395" y2="30" stroke="#666" stroke-width="2" marker-end="url(#ar11)"/>
+<line x1="235" y1="90" x2="395" y2="120" stroke="#666" stroke-width="2" marker-end="url(#ar11)"/>
+<rect x="400" y="5" width="300" height="55" rx="8" fill="#f3faee" stroke="#53ae12" stroke-width="2"/><text x="550" y="29" text-anchor="middle" font-weight="bold">każde zdarzenie osobno</text><text x="550" y="50" text-anchor="middle" style="font-size:15px" fill="#666">model online, np. River</text>
+<rect x="400" y="92" width="300" height="55" rx="8" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="550" y="116" text-anchor="middle" font-weight="bold">okno ostatnich N pomiarów</text><text x="550" y="137" text-anchor="middle" style="font-size:15px" fill="#666">szereg czasowy</text>
+<line x1="705" y1="120" x2="800" y2="120" stroke="#666" stroke-width="2" marker-end="url(#ar11)"/>
+<rect x="805" y="92" width="365" height="55" rx="8" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="987" y="116" text-anchor="middle" font-weight="bold">analiza całego okna</text><text x="987" y="137" text-anchor="middle" style="font-size:15px" fill="#666">Kats: prognoza, punkt zmiany, cechy</text>
+</svg>
+<div class="cols">
+<ul class="points side">
+<li><strong>Online</strong> (wykład 9): stan modelu zmienia się po każdym zdarzeniu, dane są zapominane.</li>
+<li><strong>Wsadowo na oknach</strong> (dziś): bierzemy historię, np. ostatnie 7 dni, i liczymy na niej dokładniejsze, droższe metody. Powtarzamy co jakiś czas.</li>
+</ul>
+<div class="quiz compact"><p class="q">Chcesz co noc przygotować prognozę zużycia prądu na jutro, na podstawie dwóch lat historii. Które podejście pasuje lepiej?</p><div class="opts"><button class="opt" data-ok="1">wsadowe na oknie historii</button><button class="opt" data-ok="0">model online, aktualizacja co zdarzenie</button></div><p class="explain">Wynik potrzebny raz na dobę, a cała historia jest dostępna. Można policzyć dokładny model na pełnym oknie. Online przydaje się, gdy decyzja zapada przy każdym zdarzeniu.</p></div>
+</div>
+</div>
+<aside class="notes">Okna znamy z wykładu 8 (sliding_window, timed_window) i z Flinka. Szereg czasowy to po prostu zawartość okna z zachowaną kolejnością i znacznikami czasu.</aside>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Składowe">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Składowe szeregu: trend, sezonowość, szum</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<svg class="diagram" viewBox="0 0 700 300" style="width:100%;height:300px" role="img" aria-label="Szereg AirPassengers rozłożony na trend i sezonowość" id="compsvg"></svg>
+<p class="cap">Pasażerowie linii lotniczych 1949–1960 (tysiące, miesięcznie): rosnący trend i sezonowość roczna, której amplituda rośnie razem z poziomem.</p>
+</div>
+<div>
+<ul class="points side">
+<li><strong>Trend</strong> <code>T</code>: długookresowy kierunek (wzrost liczby klientów).</li>
+<li><strong>Sezonowość</strong> <code>S</code>: wzorzec o stałym okresie (doba, tydzień, rok).</li>
+<li><strong>Cykl</strong>: wahania bez stałego okresu (koniunktura gospodarcza).</li>
+<li><strong>Reszta (szum)</strong> <code>R</code>: to, czego nie wyjaśniają pozostałe składowe.</li>
+</ul>
+<table class="simple">
+<tr><th>model</th><th>wzór</th><th>kiedy</th></tr>
+<tr><td>addytywny</td><td><code>y = T + S + R</code></td><td>wahania sezonowe stałej wielkości</td></tr>
+<tr><td>multiplikatywny</td><td><code>y = T · S · R</code></td><td>wahania rosną z poziomem</td></tr>
+</table>
+</div>
+</div>
+</div>
+<aside class="notes">AirPassengers to klasyczny przykład modelu multiplikatywnego. Po logarytmie staje się addytywny: log y = log T + log S + log R.</aside>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Symulacja dekompozycji">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Symulacja: z czego składa się szereg?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="decsim">
+  <div class="simctl">
+    <label>trend: <input type="range" class="dt" min="0" max="2" step="0.1" value="0.8"></label>
+    <label>amplituda sezonu: <input type="range" class="ds" min="0" max="40" step="1" value="20"></label>
+    <label>szum: <input type="range" class="dn" min="0" max="20" step="1" value="5"></label>
+    <label>okres: <select class="dp"><option value="7">7 (tydzień)</option><option value="12" selected>12 (rok)</option><option value="24">24 (doba)</option></select></label>
+    <label><input type="checkbox" class="dm"> multiplikatywny</label>
+    <button class="btn ghost" data-act="noise">nowy szum</button>
+  </div>
+  <div class="cols wl">
+    <svg class="dplot" viewBox="0 0 700 330" style="width:100%;height:330px"></svg>
+    <div>
+      <svg class="aplot" viewBox="0 0 470 230" style="width:100%;height:230px"></svg>
+      <p class="small dexp"></p>
+    </div>
+  </div>
+</div>
+</div>
+<aside class="notes">Pokaż: sam szum (trend 0, sezon 0) daje ACF w paśmie. Sezon 12 daje szczyty przy opóźnieniu 12 i 24. Sam trend daje powoli malejące słupki: znak niestacjonarności. Tryb multiplikatywny: amplituda rośnie z trendem.</aside>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Stacjonarność">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Stacjonarność i autokorelacja</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead"><strong>Szereg stacjonarny:</strong> średnia, wariancja i zależności między pomiarami nie zmieniają się w czasie.</p>
+<ul class="points side">
+<li>Trend i sezonowość łamią stacjonarność. Wiele modeli (np. ARIMA) zakłada ją, więc najpierw ją „robimy”.</li>
+<li><strong>Różnicowanie</strong> <code>y'ₜ = yₜ − yₜ₋₁</code> usuwa trend. Różnica sezonowa <code>yₜ − yₜ₋₁₂</code> usuwa sezon roczny. <strong>Logarytm</strong> wyrównuje rosnące wahania.</li>
+<li><strong>Autokorelacja</strong> (ACF) przy opóźnieniu <code>k</code>: korelacja szeregu z nim samym przesuniętym o <code>k</code> kroków.</li>
+</ul>
+<p class="small">Dla AirPassengers: ACF(1) = 0,95, ACF(6) = 0,68, ACF(12) = 0,76. Wysoka wartość przy 12 zdradza sezon roczny.</p>
+</div>
+<div>
+<div class="quiz compact"><p class="q">ACF ma wyraźne szczyty przy opóźnieniach 7, 14, 21 dla danych dziennych. Co to oznacza?</p><div class="opts"><button class="opt" data-ok="0">trend liniowy</button><button class="opt" data-ok="1">sezonowość tygodniową</button><button class="opt" data-ok="0">sam szum</button></div><p class="explain">Szereg jest podobny do siebie sprzed 7, 14 i 21 dni, czyli powtarza się co tydzień.</p></div>
+<div class="quiz compact"><p class="q">Słupki ACF maleją bardzo powoli i są wysokie nawet przy dużych opóźnieniach. Co zrobić przed użyciem ARIMA?</p><div class="opts"><button class="opt" data-ok="1">zróżnicować szereg (usunąć trend)</button><button class="opt" data-ok="0">potasować wiersze</button><button class="opt" data-ok="0">nic, to idealny szereg stacjonarny</button></div><p class="explain">Powoli wygasająca ACF to typowy znak trendu. Parametr <code>d</code> w ARIMA(p, d, q) to właśnie liczba różnicowań.</p></div>
+</div>
+</div>
+</div>
+<aside class="notes">Formalne testy: ADF (statsmodels.tsa.stattools.adfuller) i KPSS. Kats ma ich wyniki wśród cech TsFeatures (unitroot_kpss).</aside>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="pandas">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>pandas: shift, diff, rolling, resample</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import pandas as pd
+
+df = pd.DataFrame(
+    {'sprzedaz': [10, 12, 15, 11, 18, 20, 17]},
+    index=pd.date_range('2026-03-02', periods=7, freq='D'))
+
+df['wczoraj'] = df['sprzedaz'].shift(1)       # opóźnienie (lag)
+df['zmiana'] = df['sprzedaz'].diff()          # różnicowanie
+df['sr3'] = df['sprzedaz'].rolling(3).mean()  # średnia ruchoma
+print(df)
+</code></pre>
+<pre class="out sm">            sprzedaz  wczoraj  zmiana        sr3
+2026-03-02        10      NaN     NaN        NaN
+2026-03-03        12     10.0     2.0        NaN
+2026-03-04        15     12.0     3.0  12.333333
+2026-03-05        11     15.0    -4.0  12.666667
+2026-03-06        18     11.0     7.0  14.666667
+2026-03-07        20     18.0     2.0  16.333333
+2026-03-08        17     20.0    -3.0  18.333333</pre>
+</div>
+<div>
+<ul class="points side">
+<li>Indeks czasowy (<code>DatetimeIndex</code>) to podstawa: wycinanie po datach (<code>df['2026-03']</code>), łączenie, częstotliwość.</li>
+<li><code>shift</code> i <code>diff</code> to cegiełki cech „wczoraj”, „tydzień temu” i różnicowania.</li>
+<li><code>rolling(n)</code> to okno przesuwne z wykładu 8, tyle że na gotowej historii.</li>
+<li><code>resample('h').mean()</code> agreguje nieregularne pomiary do stałej częstotliwości, a <code>asfreq</code> + <code>interpolate()</code> uzupełnia braki.</li>
+</ul>
+<div class="note"><p>Kats przyjmuje dane właśnie jako <code>DataFrame</code> z kolumną czasu, więc przygotowanie danych robimy w pandas.</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Ćwiczenie pandas">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zrób to sam: operacje na szeregu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div class="blanks">
+<p class="small" style="margin-bottom:.3em">Uzupełnij wartości, które wypisze kod.</p>
+<pre class="exo">s = pd.Series([5, 8, 6, 9])
+
+print(s.shift(1).iloc[-1])           <span class="c"># </span><input class="blank" size="5" data-re="^6(\.0)?$" data-sol="6.0" aria-label="shift">
+print(s.diff().iloc[-1])             <span class="c"># </span><input class="blank" size="5" data-re="^3(\.0)?$" data-sol="3.0" aria-label="diff">
+print(s.rolling(2).mean().iloc[-1])  <span class="c"># </span><input class="blank" size="5" data-re="^7\.5$" data-sol="7.5" aria-label="rolling">
+print(s.rolling(2).mean().iloc[0])   <span class="c"># </span><input class="blank" size="5" data-re="^(NaN|nan)$" data-sol="NaN" aria-label="rolling pierwszy"></pre>
+<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
+<p class="fb"></p>
+<p class="explain"><code>shift(1)</code> na ostatniej pozycji daje poprzednią wartość: 6. Różnica: 9 − 6 = 3. Średnia z dwóch ostatnich: (6 + 9) / 2 = 7,5. Na pierwszej pozycji okno 2 nie jest pełne, więc wynik to NaN.</p>
+</div>
+<div>
+<div class="quiz compact"><p class="q">Pomiary temperatury przychodzą nieregularnie, co 20–90 sekund. Chcesz szereg z jedną wartością na minutę. Której operacji użyjesz?</p><div class="opts"><button class="opt" data-ok="0"><code>diff()</code></button><button class="opt" data-ok="1"><code>resample('min').mean()</code></button><button class="opt" data-ok="0"><code>shift(60)</code></button></div><p class="explain"><code>resample</code> grupuje pomiary w przedziały czasu i liczy agregat. Minuty bez pomiarów dadzą NaN, które można uzupełnić <code>interpolate()</code>.</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Prognozowanie">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Prognozowanie: jak oceniać?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<svg class="diagram" viewBox="0 0 560 110" style="width:100%;height:110px" role="img" aria-label="Podział w czasie: zbiór treningowy z przeszłości, testowy z przyszłości">
+<rect x="10" y="20" width="380" height="40" rx="6" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="200" y="46" text-anchor="middle">trening: 1949–1958</text>
+<rect x="395" y="20" width="155" height="40" rx="6" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="472" y="46" text-anchor="middle">test: 1959–60</text>
+<text x="10" y="90" style="font-size:15px" fill="#666">czas →   model nie może „zajrzeć w przyszłość”</text>
+</svg>
+<ul class="points side">
+<li>Podział <strong>chronologiczny</strong>, nigdy losowy: losowe wiersze w teście to przeciek informacji z przyszłości.</li>
+<li><strong>Horyzont</strong> <code>h</code>: na ile kroków naprzód prognozujemy.</li>
+<li>Zawsze porównuj z <strong>prognozą bazową</strong>: naiwna („jak ostatnio”) albo sezonowa naiwna („jak rok temu”). Model, który jej nie pokonuje, jest bezużyteczny.</li>
+</ul>
+</div>
+<div>
+<table class="simple">
+<tr><th>miara</th><th>wzór</th><th>uwagi</th></tr>
+<tr><td>MAE</td><td><code>średnia |y − ŷ|</code></td><td>w jednostkach danych, łatwa do wyjaśnienia</td></tr>
+<tr><td>RMSE</td><td><code>√ średnia (y − ŷ)²</code></td><td>mocniej karze duże błędy</td></tr>
+<tr><td>MAPE</td><td><code>średnia |y − ŷ| / |y| · 100%</code></td><td>w procentach, porównywalna między szeregami; nie działa przy y ≈ 0</td></tr>
+<tr><td>sMAPE, MASE</td><td>warianty</td><td>MASE dzieli błąd przez błąd prognozy naiwnej</td></tr>
+</table>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Prognozy bazowe">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Prognozy bazowe na AirPassengers</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import numpy as np
+import pandas as pd
+
+df = pd.read_csv('air_passengers.csv', header=0,
+                 names=['time', 'value'], parse_dates=['time'])
+y = df.set_index('time')['value']
+train, test = y[:'1958'], y['1959':]          # 120 i 24 miesiące
+
+naive = np.repeat(train.iloc[-1], len(test))  # "jak w grudniu 1958"
+snaive = np.tile(train.iloc[-12:].values, 2)  # "jak rok wcześniej"
+
+def mae(f):  return np.mean(np.abs(test.values - f))
+def mape(f): return np.mean(np.abs(test.values - f) / test.values) * 100
+
+for nazwa, f in [('naiwna', naive), ('sezonowa naiwna', snaive)]:
+    print(f'{nazwa:16} MAE = {mae(f):5.1f}  MAPE = {mape(f):.1f}%')
+</code></pre>
+<pre class="out sm">naiwna           MAE = 115.3  MAPE = 23.6%
+sezonowa naiwna  MAE =  71.3  MAPE = 15.5%</pre>
+</div>
+<div>
+<ul class="points side">
+<li>Sama sezonowość zmniejsza błąd o jedną trzecią: wiemy, że latem lata się więcej.</li>
+<li>Sezonowa naiwna nie zna jednak <strong>trendu</strong>: zakłada, że w 1959 i 1960 r. będzie tyle pasażerów co w 1958.</li>
+<li>To jest poprzeczka. Każdy model z Kats musi mieć <strong>MAPE poniżej 15,5%</strong> na tym samym podziale, inaczej nie warto go używać.</li>
+</ul>
+<p class="small">Plik <code>air_passengers.csv</code> jest w repozytorium Kats (<code>kats/data/</code>).</p>
+</div>
+</div>
+</div>
+<aside class="notes">Wyniki policzone na klasycznym zbiorze AirPassengers (144 miesiące). Trening do grudnia 1958, test 1959–1960.</aside>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Modele">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Klasyczne modele prognoz</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th>model</th><th>idea</th><th>trend / sezon</th><th>w Kats</th></tr>
+<tr><td>średnia ruchoma</td><td>prognoza = średnia ostatnich <code>n</code> wartości</td><td>nie / nie</td><td>(pandas)</td></tr>
+<tr><td>wygładzanie wykładnicze (SES)</td><td>średnia ważona, nowsze pomiary ważą więcej (waga <code>α</code>)</td><td>nie / nie</td><td rowspan="2"><code>HoltWintersModel</code></td></tr>
+<tr><td>Holt, Holt-Winters</td><td>osobno wygładzany poziom (<code>α</code>), trend (<code>β</code>) i sezon (<code>γ</code>)</td><td>tak / tak</td></tr>
+<tr><td>ARIMA(p, d, q), SARIMA</td><td>regresja na własnych opóźnieniach (p) i błędach (q) po d różnicowaniach; S dodaje część sezonową</td><td>tak / tak (SARIMA)</td><td><code>ARIMAModel</code>, <code>SARIMAModel</code></td></tr>
+<tr><td>Theta</td><td>połączenie prostego trendu i wygładzania wykładniczego; mocny punkt odniesienia</td><td>tak / po desezonalizacji</td><td><code>ThetaModel</code></td></tr>
+<tr><td>Prophet</td><td>krzywa = trend + sezony (Fouriera) + święta; odporny na braki</td><td>tak / wiele sezonów</td><td><code>ProphetModel</code></td></tr>
+<tr><td>LSTM</td><td>sieć rekurencyjna uczona na oknach historii</td><td>uczy się sama</td><td><code>LSTMModel</code></td></tr>
+<tr><td>VAR</td><td>wiele szeregów naraz, każdy zależy od opóźnień wszystkich</td><td>wielowymiarowy</td><td><code>VARModel</code></td></tr>
+</table>
+<p class="small">Holt-Winters: poziom <code>lₜ = α·yₜ/sₜ₋ₘ + (1−α)(lₜ₋₁ + bₜ₋₁)</code>, prognoza <code>ŷₜ₊ₕ = (lₜ + h·bₜ)·sₜ₊ₕ₋ₘ</code> (wersja multiplikatywna, okres <code>m</code>).</p>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Symulacja prognoz">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Symulacja: pokonaj prognozę bazową</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="fcsim">
+  <div class="simctl">
+    <label>model: <select class="fm">
+      <option value="naive">naiwna</option>
+      <option value="snaive">sezonowa naiwna</option>
+      <option value="ma">średnia ruchoma (12)</option>
+      <option value="ses">wygładzanie wykładnicze (SES)</option>
+      <option value="holt">Holt (poziom + trend)</option>
+      <option value="hw" selected>Holt-Winters multiplikatywny</option>
+    </select></label>
+    <label>α <input type="range" class="fa" min="0.02" max="1" step="0.02" value="0.3"> <b class="fav"></b></label>
+    <label>β <input type="range" class="fb2" min="0" max="0.5" step="0.01" value="0.05"> <b class="fbv"></b></label>
+    <label>γ <input type="range" class="fg" min="0" max="1" step="0.02" value="0.6"> <b class="fgv"></b></label>
+  </div>
+  <svg class="fplot" viewBox="0 0 1180 320" style="width:100%;height:320px"></svg>
+  <p class="stat fstat"></p>
+</div>
+</div>
+<aside class="notes">Kolejno: naiwna (23,6%), sezonowa naiwna (15,5%), SES (płaska linia, nie zna sezonu), Holt (prosta, bez sezonu), Holt-Winters (ok. 7%). Zabawa suwakami: duże α robi prognozę nerwową, duże β przesadza z trendem.</aside>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Kats">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kats: narzędzia do szeregów czasowych</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<ul class="points side">
+<li><strong>Kats</strong> = <em>Kits to Analyze Time Series</em>. Biblioteka Pythona od Meta (zespół Infrastructure Data Science), otwarta w 2021 r., licencja MIT.</li>
+<li>Cel: <strong>jedno API</strong> zamiast osobnych bibliotek do prognoz, detekcji i cech. Pod spodem używa m.in. statsmodels, Prophet i PyTorch.</li>
+<li>Instalacja: <code>pip install kats</code>, wersja lekka bez części zależności: <code>MINIMAL_KATS=1 pip install kats</code>.</li>
+</ul>
+<div class="note warn"><p><strong>Stan w 2026:</strong> ostatnie wydanie na PyPI to 0.2.0 (2022). Z najnowszym Pythonem, NumPy i pandas instalacja często się nie udaje. Najlepiej osobne środowisko (conda z Pythonem 3.8–3.9) albo kontener Docker.</p></div>
+</div>
+<div>
+<p class="lead"><strong>Cztery obszary</strong></p>
+<table class="simple">
+<tr><th>moduł</th><th>co robi</th></tr>
+<tr><td><code>kats.models</code></td><td>prognozy: ARIMA, SARIMA, Holt-Winters, Prophet, Theta, LSTM, VAR, zespoły modeli</td></tr>
+<tr><td><code>kats.detectors</code></td><td>punkty zmiany, wartości odstające, trend, sezonowość</td></tr>
+<tr><td><code>kats.tsfeatures</code></td><td>ok. 40 cech opisujących szereg (do klasteryzacji, klasyfikacji, wyboru modelu)</td></tr>
+<tr><td><code>kats.utils</code></td><td>backtesting, strojenie parametrów, dekompozycja, symulator danych</td></tr>
+</table>
+</div>
+</div>
+</div>
+<aside class="notes">Kats nie jest biblioteką do uczenia online. Działa na całym szeregu (albo oknie) naraz. Dla Was to narzędzie do analizy historii i okresowego przeliczania prognoz i detekcji.</aside>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="TimeSeriesData">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>TimeSeriesData: podstawowa struktura Kats</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import pandas as pd
+from kats.consts import TimeSeriesData
+
+df = pd.read_csv('air_passengers.csv', header=0,
+                 names=['time', 'value'])
+ts = TimeSeriesData(df)          # kolumna czasu: 'time'
+
+print(len(ts), ts.is_univariate())
+print(ts[:3])                    # wycinek to też TimeSeriesData
+</code></pre>
+<pre class="out sm">144 True
+        time  value
+0 1949-01-01    112
+1 1949-02-01    118
+2 1949-03-01    132</pre>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+# inna nazwa kolumny czasu albo osobne serie
+ts = TimeSeriesData(df2, time_col_name='ds')
+ts = TimeSeriesData(time=df['time'], value=df['value'])
+</code></pre>
+</div>
+<div>
+<ul class="points side">
+<li>Każdy model i detektor w Kats przyjmuje <code>TimeSeriesData</code>: kolumna czasu + jedna lub więcej kolumn wartości.</li>
+<li>Kilka kolumn wartości = szereg <strong>wielowymiarowy</strong> (np. dla <code>VARModel</code>).</li>
+<li>Przydatne: <code>ts.time</code>, <code>ts.value</code>, <code>ts.to_dataframe()</code>, <code>ts.plot(cols=['value'])</code>, <code>ts.interpolate()</code> do uzupełniania braków.</li>
+<li>Czas zamieniany jest na typ daty pandas; częstotliwość Kats próbuje rozpoznać sam.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Prognoza Kats">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Prognoza w Kats: Params i Model</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+from kats.models.prophet import ProphetModel, ProphetParams
+
+params = ProphetParams(seasonality_mode='multiplicative')
+m = ProphetModel(ts, params)     # dane + parametry
+m.fit()
+
+fcst = m.predict(steps=24, freq='MS')   # 24 miesiące
+m.plot()
+print(fcst.columns.tolist())
+</code></pre>
+<pre class="out">['time', 'fcst', 'fcst_lower', 'fcst_upper']</pre>
+</div>
+<div>
+<ul class="points side">
+<li>Każdy model ma parę klas: <code>XxxParams</code> (hiperparametry) i <code>XxxModel</code> (dane + parametry).</li>
+<li><code>fit()</code> uczy, <code>predict(steps, freq)</code> zwraca <code>DataFrame</code> z prognozą punktową i przedziałem niepewności.</li>
+<li><code>freq='MS'</code> to częstotliwość pandas: początek miesiąca. Dla danych dziennych <code>'D'</code>, godzinowych <code>'h'</code>.</li>
+<li>Zmiana modelu = zmiana dwóch nazw klas. Reszta kodu zostaje.</li>
+</ul>
+</div>
+</div>
+</div>
+<aside class="notes">Tak wygląda przykład z oficjalnego tutoriala Kats 201 (forecasting). Prophet musi być zainstalowany osobno, w pełnej instalacji Kats jest zależnością.</aside>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Wiele modeli">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Ten sam kod, różne modele</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from kats.models.holtwinters import HoltWintersModel, HoltWintersParams
+from kats.models.sarima import SARIMAModel, SARIMAParams
+from kats.models.theta import ThetaModel, ThetaParams
+
+train_ts, test_ts = ts[:120], ts[120:]
+
+kandydaci = {
+    'holt-winters': (HoltWintersModel, HoltWintersParams(
+        trend='add', seasonal='mul', seasonal_periods=12)),
+    'sarima': (SARIMAModel, SARIMAParams(
+        p=2, d=1, q=1, trend='ct', seasonal_order=(1, 0, 1, 12))),
+    'theta': (ThetaModel, ThetaParams(m=12)),
+}
+
+for nazwa, (Model, params) in kandydaci.items():
+    m = Model(train_ts, params)
+    m.fit()
+    fcst = m.predict(steps=24, freq='MS')
+    print(nazwa, mape(fcst['fcst'].values))   # mape z poprzedniego slajdu
+</code></pre>
+</div>
+<div>
+<ul class="points side">
+<li>Wspólny interfejs pozwala porównać modele <strong>w jednej pętli</strong>, na tym samym podziale w czasie.</li>
+<li><code>ts[:120]</code> to lata 1949–1958, <code>ts[120:]</code> to test 1959–1960, jak w przykładzie z prognozami bazowymi.</li>
+<li><code>seasonal_order=(P, D, Q, m)</code>: część sezonowa SARIMA z okresem <code>m = 12</code>.</li>
+<li>Wybieramy model, który na teście najwyraźniej bije sezonową naiwną (15,5%).</li>
+</ul>
+<div class="note warn"><p>Jeden podział to jedna próba. Wynik może zależeć od przypadku, dlatego w praktyce używamy <strong>backtestingu</strong>.</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Backtesting">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Backtesting: ocena na wielu oknach</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<svg class="diagram" viewBox="0 0 560 150" style="width:100%;height:150px" role="img" aria-label="Okno rozszerzające: kolejne foldy mają coraz dłuższy trening i test tuż po nim">
+<text x="0" y="16" style="font-size:15px" fill="#666">okno rozszerzające (expanding window)</text>
+<rect x="10" y="28" width="200" height="22" fill="#e8f0fe" stroke="#1a73d9"/><rect x="212" y="28" width="80" height="22" fill="#fff4e5" stroke="#e8710a"/>
+<rect x="10" y="58" width="280" height="22" fill="#e8f0fe" stroke="#1a73d9"/><rect x="292" y="58" width="80" height="22" fill="#fff4e5" stroke="#e8710a"/>
+<rect x="10" y="88" width="360" height="22" fill="#e8f0fe" stroke="#1a73d9"/><rect x="372" y="88" width="80" height="22" fill="#fff4e5" stroke="#e8710a"/>
+<rect x="10" y="118" width="440" height="22" fill="#e8f0fe" stroke="#1a73d9"/><rect x="452" y="118" width="80" height="22" fill="#fff4e5" stroke="#e8710a"/>
+</svg>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from kats.models.arima import ARIMAModel, ARIMAParams
+from kats.utils.backtesters import BackTesterSimple
+
+bt = BackTesterSimple(
+    error_methods=['mape', 'mae'],
+    data=ts,
+    params=ARIMAParams(p=2, d=1, q=1),
+    train_percentage=75, test_percentage=25,
+    model_class=ARIMAModel)
+bt.run_backtest()
+print(bt.errors)          # {'mape': ..., 'mae': ...}
+</code></pre>
+</div>
+<div>
+<ul class="points side">
+<li><code>BackTesterSimple</code>: jeden podział procentowy, ale liczy wiele miar naraz.</li>
+<li><code>BackTesterExpandingWindow</code>: trening rośnie, test zawsze tuż za nim (rysunek). <code>BackTesterRollingWindow</code>: trening stałej długości przesuwa się w czasie.</li>
+<li>Średni błąd z wielu okien jest pewniejszy niż wynik jednego podziału.</li>
+</ul>
+<div class="quiz compact"><p class="q">Dlaczego nie używamy zwykłej walidacji krzyżowej z losowym podziałem na foldy?</p><div class="opts"><button class="opt" data-ok="0">bo jest za wolna</button><button class="opt" data-ok="1">bo model uczyłby się na danych z przyszłości względem testu</button><button class="opt" data-ok="0">bo szeregi są za krótkie</button></div><p class="explain">Losowy fold miesza przeszłość z przyszłością. Wynik wychodzi zbyt optymistyczny, a w produkcji przyszłości nie znamy.</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Zespoły">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zespoły modeli i wybór modelu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from kats.models import arima, holtwinters, prophet, theta
+from kats.models.ensemble.ensemble import BaseModelParams, EnsembleParams
+from kats.models.ensemble.kats_ensemble import KatsEnsemble
+
+modele = EnsembleParams([
+    BaseModelParams('arima', arima.ARIMAParams(p=1, d=1, q=1)),
+    BaseModelParams('holtwinters', holtwinters.HoltWintersParams()),
+    BaseModelParams('prophet', prophet.ProphetParams()),
+    BaseModelParams('theta', theta.ThetaParams(m=12)),
+])
+ens = KatsEnsemble(data=ts, params={
+    'models': modele,
+    'aggregation': 'median',            # albo 'weightedavg'
+    'seasonality_length': 12,
+    'decomposition_method': 'multiplicative',
+})
+ens.fit()
+fcst = ens.predict(steps=24)
+ens.aggregate()
+</code></pre>
+</div>
+<div>
+<ul class="points side">
+<li><strong>Zespół</strong>: kilka modeli prognozuje osobno, wynik to mediana albo średnia ważona (wagi z błędów na danych historycznych). Zwykle stabilniejszy niż najlepszy pojedynczy model.</li>
+<li>Kats najpierw usuwa sezonowość (dekompozycja), prognozuje resztę modelami, potem sezon dokłada z powrotem.</li>
+<li><strong>Metauczenie</strong> (<code>kats.models.metalearner</code>): na podstawie cech szeregu (TsFeatures) przewiduje, który model i jakie parametry sprawdzą się najlepiej. Przydaje się, gdy szeregów są tysiące.</li>
+</ul>
+</div>
+</div>
+</div>
+<aside class="notes">Przykład na podstawie tutoriala Kats 201. Meta używała metauczenia do automatycznej prognozy wielu metryk infrastruktury bez ręcznego strojenia każdego szeregu.</aside>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Ćwiczenie Kats">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zrób to sam: prognoza Holt-Winters w Kats</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div class="blanks">
+<p class="small" style="margin-bottom:.3em">Uzupełnij kod, który robi prognozę miesięczną na rok naprzód.</p>
+<pre class="exo"><span class="k">from</span> kats.consts <span class="k">import</span> TimeSeriesData
+<span class="k">from</span> kats.models.holtwinters <span class="k">import</span> (
+    HoltWintersModel, HoltWintersParams)
+
+ts = <input class="blank" size="14" data-re="^TimeSeriesData$" data-sol="TimeSeriesData" aria-label="klasa danych">(df)       <span class="c"># df: kolumny time, value</span>
+params = HoltWintersParams(trend=<span class="k">'add'</span>, seasonal=<span class="k">'mul'</span>,
+                           seasonal_periods=<input class="blank" size="3" data-re="^12$" data-sol="12" aria-label="okres">)
+m = HoltWintersModel(ts, params)
+m.<input class="blank" size="4" data-re="^fit\(\)$" data-sol="fit()" aria-label="uczenie">
+fcst = m.predict(steps=<input class="blank" size="3" data-re="^12$" data-sol="12" aria-label="horyzont">, freq=<span class="k">'MS'</span>)</pre>
+<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
+<p class="fb"></p>
+<p class="explain">Dane opakowujemy w <code>TimeSeriesData</code>. Sezon roczny dla danych miesięcznych ma okres 12. Najpierw <code>fit()</code>, potem prognoza 12 kroków (miesięcy) naprzód.</p>
+</div>
+<div>
+<div class="quiz compact"><p class="q">Dane z czujnika są godzinowe, z wyraźnym rytmem dobowym. Jaki <code>seasonal_periods</code> ustawić?</p><div class="opts"><button class="opt" data-ok="0">7</button><button class="opt" data-ok="0">12</button><button class="opt" data-ok="1">24</button></div><p class="explain">Doba to 24 pomiary godzinowe. Dla rytmu tygodniowego na danych godzinowych byłoby 168.</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Detekcja">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Detekcja: co dzieje się w szeregu?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<svg class="diagram" viewBox="0 0 1180 140" style="width:100%;height:140px" role="img" aria-label="Cztery typy zdarzeń: punkt zmiany, wartość odstająca, trend, sezonowość" id="detsvg"></svg>
+<table class="simple">
+<tr><th>pytanie</th><th>detektor w Kats</th><th>przykład</th></tr>
+<tr><td>czy poziom się zmienił? (punkt zmiany)</td><td><code>CUSUMDetector</code>, <code>BOCPDetector</code>, <code>RobustStatDetector</code></td><td>po aktualizacji serwera CPU rośnie z 30% do 45%</td></tr>
+<tr><td>czy są pojedyncze dziwne pomiary?</td><td><code>OutlierDetector</code>, <code>ProphetDetector</code></td><td>czujnik raz pokazał −40 °C</td></tr>
+<tr><td>czy jest trend?</td><td><code>MKDetector</code> (test Manna-Kendalla)</td><td>wilgotność w szklarni powoli spada</td></tr>
+<tr><td>czy jest sezonowość i jaki okres?</td><td><code>ACFDetector</code>, <code>FFTDetector</code></td><td>rytm dobowy zużycia prądu</td></tr>
+</table>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="CUSUM">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>CUSUM: sumowanie odchyleń</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead">Pojedyncze odchylenie może być szumem. Jeśli jednak <strong>wiele kolejnych</strong> pomiarów jest nieco powyżej normy, ich suma rośnie i zdradza zmianę.</p>
+<p style="font-size:.85em;text-align:center"><code>S⁺ₜ = max(0, S⁺ₜ₋₁ + (yₜ − μ₀ − k))</code>, alarm gdy <code>S⁺ₜ &gt; h</code></p>
+<ul class="points side">
+<li><code>μ₀</code>: oczekiwany poziom, <code>k</code>: tolerancja (ignorujemy małe odchylenia), <code>h</code>: próg alarmu. Analogicznie <code>S⁻</code> dla spadków.</li>
+<li>To klasyczny CUSUM Page'a (1954): działa <strong>online</strong>, pamięta jedną liczbę.</li>
+<li><code>CUSUMDetector</code> w Kats działa <strong>na całym szeregu</strong>: szuka punktu, który najlepiej dzieli go na część „przed” i „po” o różnych średnich, i sprawdza testem statystycznym, czy różnica jest istotna.</li>
+</ul>
+</div>
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import numpy as np, pandas as pd
+from kats.consts import TimeSeriesData
+from kats.detectors.cusum_detection import CUSUMDetector
+
+np.random.seed(10)
+df = pd.DataFrame({
+    'time': pd.date_range('2019-01-01', '2019-03-01'),
+    'value': np.concatenate([np.random.normal(1, 0.2, 30),
+                             np.random.normal(1.5, 0.2, 30)])})
+
+detector = CUSUMDetector(TimeSeriesData(df))
+cps = detector.detector(change_directions=['increase'])
+for cp in cps:
+    print(cp.start_time, cp.direction, cp.confidence)
+detector.plot(cps)
+</code></pre>
+<p class="small">Zmiana średniej z 1,0 na 1,5 następuje 31 stycznia (indeks 30), więc wykryty punkt powinien wypaść w okolicy tej daty (przykład z tutoriala Kats 202).</p>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Symulacja CUSUM">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Symulacja: CUSUM wykrywa zmianę</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="cusumsim">
+  <div class="simctl">
+    <button class="btn" data-act="play">Start / pauza</button>
+    <button class="btn" data-act="up" style="background:var(--orange);border-color:var(--orange)">poziom w górę</button>
+    <button class="btn ghost" data-act="down">poziom w dół</button>
+    <button class="btn ghost" data-act="spike">pojedynczy skok</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+    <label>k: <select class="ck"><option value="0.25">0,25</option><option value="0.5" selected>0,5</option><option value="1">1</option></select></label>
+    <label>h: <select class="ch"><option value="3">3</option><option value="5" selected>5</option><option value="8">8</option></select></label>
+    <span class="stat cstat"></span>
+  </div>
+  <svg class="cplot" viewBox="0 0 1000 300" preserveAspectRatio="none" style="width:100%;height:290px"></svg>
+  <pre class="console"></pre>
+</div>
+</div>
+<aside class="notes">Pojedynczy skok: S+ podskakuje, ale wraca do zera, alarmu brak (przy h=5). Przesunięcie o 1 sigma: alarm po kilkunastu punktach. Małe h: szybciej, ale fałszywe alarmy na samym szumie. Duże k: przegapia małe zmiany. Kolor linii alarmu pokazuje kierunek: pomarańczowa to wzrost (S⁺), fioletowa to spadek (S⁻).</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="Wzrosty i spadki CUSUM">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wzrosty i spadki poziomu: CUSUM</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import numpy as np, pandas as pd
+from kats.consts import TimeSeriesData
+from kats.detectors.cusum_detection import CUSUMDetector
+
+np.random.seed(0)
+czas = pd.date_range('2026-05-01', periods=96, freq='h')
+wilg = np.concatenate([np.random.normal(70, 1.5, 48),   # wilgotność %
+                       np.random.normal(62, 1.5, 48)])  # awaria zraszaczy
+ts = TimeSeriesData(pd.DataFrame({'time': czas, 'value': wilg}))
+
+det = CUSUMDetector(ts)
+cps = det.detector(change_directions=['increase', 'decrease'],
+                   threshold=0.01)       # poziom istotności testu
+for cp in cps:
+    print(cp.start_time, cp.direction, round(cp.confidence, 3),
+          f'{cp.mu0:.1f} -&gt; {cp.mu1:.1f}')
+det.plot(cps)
+</code></pre>
+<p class="small">Spodziewamy się jednego punktu <code>'decrease'</code> w okolicy 3 maja 00:00 (indeks 48), ze średnią przed ok. 70 i po ok. 62. Dla temperatury, która skacze w górę, ten sam kod zwróci <code>'increase'</code>.</p>
+</div>
+<div>
+<ul class="points side">
+<li><code>change_directions</code>: <code>['increase']</code> tylko wzrosty, <code>['decrease']</code> tylko spadki, obie wartości (domyślnie) oba kierunki.</li>
+<li>Każdy wynik to <code>CUSUMChangePoint</code>: <code>start_time</code> (kiedy), <code>direction</code> (wzrost czy spadek), <code>confidence</code> (pewność, 1 − p-wartość), <code>mu0</code> i <code>mu1</code> (średnia przed i po zmianie).</li>
+<li><code>threshold</code> to poziom istotności: mniejszy oznacza mniej fałszywych alarmów, ale słabsze zmiany zostaną pominięte.</li>
+<li>Detektor zwraca <strong>najwyżej jeden punkt na kierunek</strong> dla całego szeregu. Kilka zmian wykrywamy na oknach przesuwnych albo zawężamy szukanie: <code>interest_window=[start, koniec]</code> (indeksy punktów).</li>
+</ul>
+</div>
+</div>
+</div>
+<aside class="notes">Wyniku liczbowego Kats celowo nie pokazujemy, uruchomcie kod sami. Parametry magnitude_quantile i magnitude_ratio pozwalają dodatkowo odrzucać zmiany o zbyt małej wielkości; szczegóły w docstringu CUSUMDetector.detector.</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="Trend MK">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Trend rosnący i malejący: MKDetector</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from kats.detectors.trend_mk import MKDetector
+
+np.random.seed(1)
+czas = pd.date_range('2026-04-01', periods=60, freq='D')
+temp = np.r_[np.random.normal(22, 0.8, 30),            # stabilnie
+             22 + 0.2 * np.arange(30)                  # +0,2 °C dziennie
+                + np.random.normal(0, 0.8, 30)]
+ts = TimeSeriesData(pd.DataFrame({'time': czas, 'value': temp}))
+
+mk = MKDetector(data=ts, threshold=0.8)   # minimalna siła trendu
+wyniki = mk.detector(direction='up',      # 'down' albo 'both'
+                     window_size=20)      # okno: 20 punktów (dni)
+for w in wyniki:
+    print(w.start_time, w.end_time)
+mk.plot(wyniki)
+</code></pre>
+<p class="small"><strong>Test Manna-Kendalla</strong> w każdym oknie liczy pary punktów: <code>S = Σ sign(yⱼ − yᵢ)</code> dla <code>i &lt; j</code>, a <code>Tau = S / (liczba par)</code>. Tau = +1: każdy punkt wyższy od wcześniejszych, −1: każdy niższy. Próg <code>threshold=0.8</code> przepuszcza tylko silne trendy.</p>
+</div>
+<div>
+<ul class="points side">
+<li><code>direction</code>: <code>'up'</code> szuka wzrostów, <code>'down'</code> spadków, <code>'both'</code> obu.</li>
+<li>Wynik to lista okresów z trendem: <code>start_time</code> i <code>end_time</code>. Kierunek trendu i Tau są w metadanych wyniku.</li>
+<li>Gdy dane mają sezon (np. tygodniowy), parametr <code>freq</code> pozwala go usunąć przed testem, żeby sezon nie udawał trendu.</li>
+</ul>
+<table class="simple">
+<tr><th>co widać w danych</th><th>detektor</th></tr>
+<tr><td>nagły skok poziomu w górę lub w dół</td><td>CUSUM, BOCPD</td></tr>
+<tr><td>powolny, systematyczny wzrost lub spadek</td><td>MKDetector</td></tr>
+<tr><td>pojedynczy pik</td><td>OutlierDetector</td></tr>
+</table>
+</div>
+</div>
+</div>
+<aside class="notes">Mann-Kendall jest nieparametryczny: patrzy tylko na znaki różnic, więc nie zakłada liniowości ani rozkładu normalnego i jest odporny na pojedyncze piki.</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="RobustStat StatSig">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wzrost czy spadek metryki?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from kats.detectors.robust_stat_detection import (
+    RobustStatDetector)
+
+det = RobustStatDetector(ts)
+cps = det.detector(p_value_cutoff=0.01,
+                   smoothing_window_size=5,
+                   comparison_window=-2)
+</code></pre>
+<p class="small"><strong>RobustStatDetector</strong>: wygładza szereg średnią ruchomą, liczy zmianę względem wartości sprzed kilku kroków i zgłasza punkty, w których ta zmiana jest nietypowo duża (z-score, p-wartość). Kierunek odczytujemy z wartości przed i po punkcie.</p>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from kats.detectors.stat_sig_detector import StatSigDetectorModel
+
+model = StatSigDetectorModel(n_control=7, n_test=7)
+odp = model.fit_predict(data=ts_ostatnie,
+                        historical_data=ts_historia)
+odp.scores       # statystyka testu t: znak = kierunek zmiany
+</code></pre>
+<p class="small"><strong>StatSig</strong>: porównuje okno testowe (ostatnie 7 punktów) z kontrolnym (7 wcześniejszych) testem t. Wynik dodatni to wzrost, ujemny to spadek.</p>
+</div>
+<div>
+<div class="blanks">
+<p class="small" style="margin-bottom:.3em">Zrób to sam: wykryj <strong>tylko spadki</strong> wilgotności i <strong>tylko trendy malejące</strong> temperatury.</p>
+<pre class="exo">cps = CUSUMDetector(ts_wilg).detector(
+    change_directions=[<input class="blank" size="10" data-re="^['&quot;]decrease['&quot;]$" data-sol="'decrease'" aria-label="kierunek CUSUM">])
+
+trendy = MKDetector(data=ts_temp).detector(
+    direction=<input class="blank" size="6" data-re="^['&quot;]down['&quot;]$" data-sol="'down'" aria-label="kierunek MK">, window_size=20)
+
+<span class="k">for</span> cp <span class="k">in</span> cps:
+    print(cp.start_time, cp.<input class="blank" size="9" data-re="^direction$" data-sol="direction" aria-label="pole kierunku">)</pre>
+<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
+<p class="fb"></p>
+<p class="explain">CUSUM przyjmuje listę kierunków: <code>['decrease']</code>. MKDetector przyjmuje napis <code>'down'</code>. Kierunek wykrytej zmiany jest w polu <code>direction</code> (<code>'increase'</code> albo <code>'decrease'</code>).</p>
+</div>
+</div>
+</div>
+</div>
+<aside class="notes">StatSig przydaje się do monitorowania metryk: „czy ostatni tydzień jest istotnie wyższy lub niższy niż poprzedni”. RobustStat jest prosty i szybki, dobry na długie szeregi z wieloma zmianami.</aside>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="BOCPD i outliery">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Detektory: BOCPD i wartości odstające</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from kats.detectors.bocpd import BOCPDetector, BOCPDModelType
+
+bocpd = BOCPDetector(ts)
+cps = bocpd.detector(
+    model=BOCPDModelType.NORMAL_KNOWN_MODEL,
+    changepoint_prior=0.01)       # jak często zmiany a priori
+</code></pre>
+<p class="small"><strong>BOCPD</strong> (Bayesian Online Change Point Detection): po każdym punkcie liczy rozkład „ile czasu minęło od ostatniej zmiany”. Daje prawdopodobieństwo zmiany i, w przeciwieństwie do CUSUM, wykrywa <strong>wiele zmian</strong> w jednym szeregu, zarówno w górę, jak i w dół.</p>
+<div class="note"><p>Kierunek zmiany z BOCPD odczytujemy, porównując średnią szeregu przed i po każdym wykrytym punkcie, np. <code>df.value[:i].tail(20).mean()</code> i <code>df.value[i:].head(20).mean()</code>.</p></div>
+</div>
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from kats.detectors.outlier import OutlierDetector
+
+od = OutlierDetector(ts, 'multiplicative')
+od.detector()
+print(od.outliers[0])        # znaczniki czasu odstających
+
+ts_czysty = od.remover(interpolate=True)
+</code></pre>
+<p class="small"><strong>OutlierDetector</strong>: rozkłada szereg na trend i sezon, a odstające to punkty, których reszta wykracza daleko poza typowy rozrzut (rozstęp międzykwartylowy). <code>remover</code> zastępuje je interpolacją, co poprawia późniejszą prognozę.</p>
+<div class="quiz compact"><p class="q">Czujnik raz na tydzień wysyła błędny odczyt 0. Co zrobić przed prognozą?</p><div class="opts"><button class="opt" data-ok="1">wykryć i usunąć odstające, potem prognozować</button><button class="opt" data-ok="0">szukać punktów zmiany CUSUM</button><button class="opt" data-ok="0">zwiększyć horyzont prognozy</button></div><p class="explain">Pojedyncze błędne odczyty to wartości odstające, nie trwała zmiana poziomu. Psują model, więc je usuwamy.</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Sezonowość">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sezonowość i dekompozycja w Kats</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from kats.detectors.seasonality import ACFDetector, FFTDetector
+
+ACFDetector(ts).detector(lags=24, diff=1, alpha=0.05)
+FFTDetector(ts).detector()
+# wynik: słownik {'seasonality_presence': True/False,
+#                 'seasonalities': [wykryte okresy]}
+</code></pre>
+<ul class="points side">
+<li><strong>ACF</strong>: szuka opóźnień o istotnie wysokiej autokorelacji (jak w symulacji dekompozycji).</li>
+<li><strong>FFT</strong>: transformata Fouriera rozkłada szereg na fale; wyraźne szczyty mocy to okresy sezonowe.</li>
+</ul>
+</div>
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from kats.utils.decomposition import TimeSeriesDecomposition
+
+dec = TimeSeriesDecomposition(ts, decomposition='multiplicative')
+wynik = dec.decomposer()
+# trzy obiekty TimeSeriesData:
+wynik['trend'], wynik['seasonal'], wynik['rem']
+dec.plot()
+</code></pre>
+<ul class="points side">
+<li>Rozkład na trend, sezon i resztę (domyślnie metodą STL z statsmodels).</li>
+<li>Reszta <code>rem</code> to dobry materiał do wykrywania anomalii: bez trendu i sezonu odchylenia widać wyraźniej.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="TsFeatures">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>TsFeatures: szereg opisany liczbami</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from kats.tsfeatures.tsfeatures import TsFeatures
+
+cechy = TsFeatures().transform(ts)        # słownik ok. 40 cech
+wybrane = TsFeatures(selected_features=[
+    'mean', 'var', 'trend_strength', 'seasonality_strength',
+    'entropy', 'spikiness']).transform(ts)
+</code></pre>
+<table class="simple">
+<tr><th>cecha</th><th>znaczenie</th></tr>
+<tr><td><code>trend_strength</code>, <code>seasonality_strength</code></td><td>jaką część zmienności wyjaśnia trend / sezon (0–1)</td></tr>
+<tr><td><code>entropy</code></td><td>przewidywalność: niska dla regularnych, wysoka dla szumu</td></tr>
+<tr><td><code>lumpiness</code>, <code>stability</code></td><td>jak zmienia się wariancja i średnia w kolejnych oknach</td></tr>
+<tr><td><code>level_shift_size</code></td><td>największy skok średniej między oknami</td></tr>
+<tr><td><code>y_acf1</code>, <code>firstzero_ac</code></td><td>autokorelacja: pierwsze opóźnienie, pierwsze zero</td></tr>
+<tr><td><code>hw_alpha</code>, <code>hw_gamma</code></td><td>parametry dopasowanego modelu Holt-Winters</td></tr>
+</table>
+</div>
+<div>
+<p class="lead"><strong>Po co?</strong></p>
+<ul class="points side">
+<li>Tysiące szeregów (np. czujników) zamieniamy w <strong>tabelę</strong>: wiersz = szereg, kolumny = cechy.</li>
+<li>Na tej tabeli działa zwykłe uczenie maszynowe: <strong>klasteryzacja</strong> podobnych czujników, klasyfikacja („czujnik uszkodzony?”), wyszukiwanie podobnych szeregów.</li>
+<li>Cechy są wejściem metauczenia, które wybiera model prognozy.</li>
+<li>Liczenie cech dla wielu szeregów łatwo <strong>zrównoleglić</strong>, np. <code>ProcessPoolExecutor</code> z wykładu 5: każdy szereg osobno.</li>
+</ul>
+</div>
+</div>
+</div>
+<aside class="notes">Lista cech jest inspirowana pakietem R tsfeatures (Hyndman i in.). Pełna lista w dokumentacji klasy TsFeatures.</aside>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Streamz + Kats">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kats w potoku strumieniowym</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import itertools
+import pandas as pd
+from streamz import Stream
+from kats.consts import TimeSeriesData
+from kats.detectors.cusum_detection import CUSUMDetector
+
+licznik = itertools.count()
+zgloszone = set()
+
+def wykryj(okno):                    # krotka 240 słowników
+    df = pd.DataFrame(list(okno))[['time', 'value']]
+    cps = CUSUMDetector(TimeSeriesData(df)).detector()
+    return [cp.start_time for cp in cps]
+
+def nowe(czasy):
+    swieze = [t for t in czasy if t not in zgloszone]
+    zgloszone.update(swieze)
+    return swieze
+
+source = Stream()                    # np. Stream.from_mqtt(...)
+(source.sliding_window(240, return_partial=False)  # 4 h
+       .filter(lambda okno: next(licznik) % 15 == 0)  # co 15 min
+       .map(wykryj)
+       .map(nowe)
+       .filter(len)
+       .sink(lambda t: print('ZMIANA POZIOMU', t)))
+</code></pre>
+</div>
+<div>
+<ul class="points side">
+<li>Streamz zbiera okno (wykład 8), Kats analizuje je w całości.</li>
+<li>Detekcja na oknie jest droga, więc nie liczymy jej przy każdym zdarzeniu, tylko co 15 nowych pomiarów.</li>
+<li>Kolejne okna nakładają się, więc ten sam punkt zmiany zostałby zgłoszony wiele razy: <code>zgloszone</code> to stan potoku, który temu zapobiega.</li>
+<li>Przy wielu czujnikach: osobne okno na czujnik, analiza w puli procesów albo w Dask (<code>Stream(asynchronous=True).scatter()</code>).</li>
+</ul>
+<div class="note"><p>To samo w Flinku: okno przesuwne + funkcja okna (<code>ProcessWindowFunction</code>), która woła kod Pythona (PyFlink).</p></div>
+</div>
+</div>
+</div>
+<aside class="notes">Wzorzec mikrowsadowy: strumień tnie się na okna, a na oknach działają metody wsadowe. Zwracamy uwagę na koszt i duplikaty.</aside>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Kats online">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Czy Kats ma tryb online?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead"><strong>Krótko: nie w sensie River.</strong></p>
+<ul class="points side">
+<li>Nie ma <code>learn_one</code>: modele prognoz uczą się metodą <code>fit()</code> na całym <code>TimeSeriesData</code>. Nowe dane oznaczają <strong>ponowny trening</strong> na oknie historii.</li>
+<li>BOCPD jest z natury algorytmem online, ale implementacja w Kats i tak przetwarza cały podany szereg naraz.</li>
+<li><strong>Najbliżej trybu online</strong> są modele detektorów (<code>StatSigDetectorModel</code>, <code>CUSUMDetectorModel</code>, <code>ProphetDetectorModel</code>) z metodą <code>fit_predict(data, historical_data)</code>: podajemy nowe punkty i historię, dostajemy wynik dla <strong>każdego nowego punktu</strong>.</li>
+<li>Stan detektora można zapisać (<code>serialize()</code>) i odtworzyć po restarcie (<code>serialized_model=...</code>).</li>
+</ul>
+</div>
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from kats.detectors.stat_sig_detector import StatSigDetectorModel
+
+model = StatSigDetectorModel(n_control=60, n_test=10)
+historia = ts_start                  # np. ostatnie 2 godziny
+
+for nowe in paczki_co_10_min():      # nowe punkty
+    odp = model.fit_predict(data=nowe, historical_data=historia)
+    if (odp.scores.value.abs() &gt; 3).any():   # |t| &gt; 3
+        print('ALARM', nowe.time.iloc[-1])
+    historia.extend(nowe)            # dopisz nowe punkty
+    historia = historia[-600:]       # trzymaj ograniczone okno
+</code></pre>
+<p class="small">To wciąż <strong>mikrowsad</strong>: paczka nowych punktów + okno historii, ale opóźnienie to tylko długość paczki.</p>
+<div class="quiz compact"><p class="q">Pomiar co sekundę, każdy trzeba ocenić w kilka milisekund. Co wybrać?</p><div class="opts"><button class="opt" data-ok="1">River: model online, <code>score_one</code> po każdym pomiarze</button><button class="opt" data-ok="0">Kats: <code>fit()</code> modelu po każdym pomiarze</button></div><p class="explain">Ponowny trening Kats przy każdym zdarzeniu jest za drogi. Dobry podział ról: River do szybkich alarmów na bieżąco, Kats co kilka minut do dokładniejszej analizy okna.</p></div>
+</div>
+</div>
+</div>
+<aside class="notes">Kats powstał w Meta do monitorowania metryk infrastruktury, gdzie detektory uruchamia się okresowo (np. co kilka minut) na nowych punktach z historią, a nie zdarzenie po zdarzeniu. Interfejs fit_predict z historical_data jest właśnie pod taki tryb.</aside>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Porównanie">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kats na tle innych bibliotek (2026)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th>biblioteka</th><th>tryb</th><th>mocne strony</th><th>uwagi</th></tr>
+<tr><td><strong>Kats</strong> (Meta)</td><td>wsadowy</td><td>prognozy, detektory, cechy i backtesting w jednym API</td><td>brak nowych wydań od 2022, trudna instalacja</td></tr>
+<tr><td><strong>River</strong></td><td>online</td><td>uczenie po jednym zdarzeniu, ADWIN, Holt-Winters, SNARIMAX</td><td>prostsze modele, mało narzędzi analizy</td></tr>
+<tr><td><strong>statsmodels</strong></td><td>wsadowy</td><td>ARIMA, ETS, STL, testy ADF i KPSS</td><td>fundament wielu bibliotek, także Kats</td></tr>
+<tr><td><strong>Prophet</strong></td><td>wsadowy</td><td>jeden model: trend + sezony + święta</td><td>Kats go opakowuje</td></tr>
+<tr><td><strong>Darts</strong>, <strong>sktime</strong></td><td>wsadowy</td><td>jednolite API dla modeli klasycznych i sieci neuronowych, backtesting</td><td>aktywnie rozwijane</td></tr>
+<tr><td><strong>StatsForecast</strong> (Nixtla)</td><td>wsadowy</td><td>bardzo szybkie AutoARIMA i ETS dla tysięcy szeregów</td><td>aktywnie rozwijane</td></tr>
+<tr><td>modele bazowe: <strong>Chronos</strong>, <strong>TimesFM</strong></td><td>wsadowy</td><td>prognoza bez trenowania (zero-shot), uczone na ogromnych zbiorach szeregów</td><td>wymagają GPU dla dużych danych</td></tr>
+</table>
+<p class="small">Pojęcia z dzisiejszego wykładu (dekompozycja, backtesting, prognozy bazowe, punkty zmiany) są wspólne dla wszystkich tych bibliotek. Kats dobrze je porządkuje.</p>
+</div>
+<aside class="notes">Uczciwie: w nowym projekcie produkcyjnym w 2026 częściej wybierzemy Darts, StatsForecast albo sktime. Kats wciąż jest dobrym przykładem kompletnego zestawu narzędzi, a jego detektory i TsFeatures są rzadkie w innych bibliotekach.</aside>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Quiz Kats">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się: szeregi czasowe i Kats</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="quiz compact"><p class="q">Jak trzeba podzielić szereg na trening i test?</p><div class="opts"><button class="opt" data-ok="0">losowo, 80/20</button><button class="opt" data-ok="1">chronologicznie: test to najnowszy fragment</button><button class="opt" data-ok="0">co drugi punkt do testu</button></div><p class="explain">Test ma udawać przyszłość. Każdy inny podział przecieka informacją z przyszłości do treningu.</p></div>
+<div class="quiz compact"><p class="q">Jaki obiekt przyjmują modele i detektory Kats?</p><div class="opts"><button class="opt" data-ok="0">listę słowników</button><button class="opt" data-ok="1"><code>TimeSeriesData</code></button><button class="opt" data-ok="0">macierz NumPy bez czasu</button></div><p class="explain"><code>TimeSeriesData</code> łączy kolumnę czasu z jedną lub wieloma kolumnami wartości.</p></div>
+<div class="quiz compact"><p class="q">Filtr w szklarni powoli się zapycha: przepływ wody spada o ok. 1% dziennie. Co wykryje to najlepiej?</p><div class="opts"><button class="opt" data-ok="0">CUSUM, tylko wzrosty</button><button class="opt" data-ok="1">MKDetector, <code>direction='down'</code></button><button class="opt" data-ok="0">OutlierDetector</button></div><p class="explain">Nie ma tu jednego skoku ani pojedynczego piku. Jest powolny, systematyczny spadek, czyli trend malejący.</p></div>
+<div class="quiz multi compact"><p class="q">Które narzędzia Kats służą do detekcji? (zaznacz wszystkie)</p><div class="opts"><button class="opt" data-ok="1"><code>CUSUMDetector</code></button><button class="opt" data-ok="0"><code>ProphetParams</code></button><button class="opt" data-ok="1"><code>OutlierDetector</code></button><button class="opt" data-ok="1"><code>ACFDetector</code></button><button class="opt" data-ok="0"><code>BackTesterSimple</code></button></div><button class="btn check">Sprawdź</button><p class="explain">CUSUM szuka punktów zmiany, OutlierDetector wartości odstających, ACFDetector sezonowości. ProphetParams to parametry modelu prognozy, a BackTesterSimple służy do oceny prognoz.</p></div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Podsumowanie">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Podsumowanie wykładu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<ul class="points">
+<li><strong>Szereg czasowy:</strong> pomiary uporządkowane w czasie. Składa się z trendu, sezonowości i reszty; ACF i różnicowanie pomagają je rozpoznać i usunąć.</li>
+<li><strong>Prognozy:</strong> podział chronologiczny, miary MAE i MAPE, zawsze porównanie z prognozą naiwną. Holt-Winters na AirPassengers: ok. 7% MAPE wobec 15,5% sezonowej naiwnej.</li>
+<li><strong>Kats:</strong> <code>TimeSeriesData</code> + para <code>Params</code> / <code>Model</code> z <code>fit</code> i <code>predict</code>; backtesting, zespoły i metauczenie.</li>
+<li><strong>Detekcja i cechy:</strong> skoki w górę i w dół wykrywa CUSUM (<code>change_directions</code>, pole <code>direction</code>) i BOCPD, powolne trendy Mann-Kendall (<code>direction='up'/'down'</code>), dodatkowo OutlierDetector, ACF/FFT dla sezonu; TsFeatures zamienia szereg w wektor cech.</li>
+<li><strong>W strumieniu:</strong> Kats nie ma trybu online jak River; działa mikrowsadowo: okno przesuwne w Streamz lub Flinku albo <code>fit_predict(data, historical_data)</code> detektora na kolejnych paczkach, z deduplikacją wyników.</li>
+</ul>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Referencje">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Referencje</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<ul class="points side" style="overflow-wrap:anywhere">
+<li>https://facebookresearch.github.io/Kats/</li>
+<li>https://github.com/facebookresearch/Kats (tutoriale: 201 forecasting, 202 detection, 203 tsfeatures)</li>
+<li>R. J. Hyndman, G. Athanasopoulos, Forecasting: Principles and Practice, wyd. 3, https://otexts.com/fpp3/</li>
+<li>E. S. Page, Continuous inspection schemes, Biometrika 41 (1954) (CUSUM)</li>
+</ul>
+<ul class="points side" style="overflow-wrap:anywhere">
+<li>R. P. Adams, D. J. C. MacKay, Bayesian online changepoint detection, arXiv:0710.3742 (2007)</li>
+<li>S. J. Taylor, B. Letham, Forecasting at scale, The American Statistician 72 (2018) (Prophet)</li>
+<li>G. E. P. Box, G. M. Jenkins, Time Series Analysis: Forecasting and Control (ARIMA)</li>
+<li>https://pandas.pydata.org/docs/user_guide/timeseries.html</li>
+</ul>
+</div>
+</div>
+</section>
+
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/plugin.js"></script>
+<script>
+// ---------- copy buttons (raw text is captured before highlighting adds line numbers) ----------
+document.querySelectorAll('pre.code-wrap > code').forEach(code => {
+  const lines = code.textContent.replace(/^\s*\n/, '').replace(/\s+$/, '').split('\n');
+  const indent = Math.min(...lines.filter(l => l.trim()).map(l => l.match(/^ */)[0].length));
+  const raw = lines.map(l => l.slice(indent)).join('\n') + '\n';
+  const btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'copy-btn'; btn.textContent = 'Kopiuj';
+  btn.addEventListener('click', () => {
+    const done = ok => {
+      btn.textContent = ok ? 'Skopiowano!' : 'Błąd kopiowania'; btn.classList.toggle('copied', ok);
+      clearTimeout(btn._t); btn._t = setTimeout(() => { btn.textContent = 'Kopiuj'; btn.classList.remove('copied'); }, 1500);
+    };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(raw).then(() => done(true), () => done(false));
+    else {
+      const ta = document.createElement('textarea'); ta.value = raw; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { done(document.execCommand('copy')); } catch (e) { done(false); } finally { ta.remove(); }
+    }
+  });
+  code.parentNode.appendChild(btn);
+});
+</script>
+<script>
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.02,
+    center: false, hash: true, slideNumber: 'c/t',
+    transition: 'slide',
+    chalkboard: { boardmarkerWidth: 4, chalkWidth: 5 },
+    plugins: [RevealNotes, RevealHighlight, RevealChalkboard]
+  });
+</script>
+<script>
+// ---------- quizzes ----------
+document.querySelectorAll('.quiz').forEach(q => {
+  const opts = [...q.querySelectorAll('.opt')];
+  const reveal = () => {
+    opts.forEach(o => {
+      if (o.dataset.ok === '1') o.classList.add('good');
+      else if (o.classList.contains('sel')) o.classList.add('bad');
+    });
+    q.classList.add('done');
+  };
+  if (q.classList.contains('multi')) {
+    opts.forEach(o => o.addEventListener('click', () => { if (!q.classList.contains('done')) o.classList.toggle('sel'); }));
+    q.querySelector('.check').addEventListener('click', reveal);
+  } else {
+    opts.forEach(o => o.addEventListener('click', () => {
+      if (q.classList.contains('done')) return;
+      o.classList.add('sel'); reveal();
+    }));
+  }
+});
+
+// ---------- fill in the blanks (whitespace is ignored, data-re lists accepted answers) ----------
+document.querySelectorAll('.blanks').forEach(b => {
+  const inputs = [...b.querySelectorAll('input.blank')];
+  const fb = b.querySelector('.fb');
+  const check = () => {
+    let good = 0;
+    inputs.forEach(i => {
+      const ok = new RegExp(i.dataset.re).test(i.value.replace(/\s+/g, ''));
+      i.classList.toggle('good', ok); i.classList.toggle('bad', !ok); good += ok;
+    });
+    const all = good === inputs.length;
+    b.classList.toggle('done', all);
+    fb.textContent = all ? '' : inputs.length > 1 ? `Poprawne: ${good} z ${inputs.length}. Spróbuj jeszcze raz.` : 'Jeszcze nie. Spróbuj ponownie.';
+  };
+  b.querySelector('.check').addEventListener('click', check);
+  b.querySelector('.show').addEventListener('click', () => {
+    inputs.forEach(i => { i.value = i.dataset.sol; });
+    check();
+  });
+  inputs.forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') check(); }));
+});
+
+
+(function clientJs() {
+  const gauss = () => { let s = 0; for (let i = 0; i < 6; i++) s += Math.random(); return s / 6 * 2 - 1; };
+  const rng = seed => () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const pct = v => v.toFixed(1).replace('.', ',') + '%';
+  const AIR = [112,118,132,129,121,135,148,148,136,119,104,118,115,126,141,135,125,149,170,170,158,133,114,140,
+    145,150,178,163,172,178,199,199,184,162,146,166,171,180,193,181,183,218,230,242,209,191,172,194,
+    196,196,236,235,229,243,264,272,237,211,180,201,204,188,235,227,234,264,302,293,259,229,203,229,
+    242,233,267,269,270,315,364,347,312,274,237,278,284,277,317,313,318,374,413,405,355,306,271,306,
+    315,301,356,348,355,422,465,467,404,347,305,336,340,318,362,348,363,435,491,505,404,359,310,337,
+    360,342,406,396,420,472,548,559,463,407,362,405,417,391,419,461,472,535,622,606,508,461,390,432];
+  const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+  const poly = (pts, col, w, extra = '') => `<polyline points="${pts.map(([x, y]) => x.toFixed(1) + ',' + y.toFixed(1)).join(' ')}" fill="none" stroke="${col}" stroke-width="${w}" ${extra}/>`;
+
+  // ---------- static: AirPassengers with 2x12 centred moving average ----------
+  (() => {
+    const svg = document.getElementById('compsvg'); if (!svg) return;
+    const X = i => 50 + i * (640 / 143), Y = v => 280 - (v - 80) * (260 / 560);
+    const trend = AIR.map((_, i) => i < 6 || i > 137 ? null : (AIR.slice(i - 6, i + 6).reduce((s, v) => s + v, 0) + AIR.slice(i - 5, i + 7).reduce((s, v) => s + v, 0)) / 24);
+    let s = '';
+    [100, 300, 500].forEach(v => { s += `<line x1="50" x2="690" y1="${Y(v)}" y2="${Y(v)}" stroke="#eee"/><text x="44" y="${Y(v) + 5}" text-anchor="end" style="font-size:13px" fill="#999">${v}</text>`; });
+    for (let r = 0; r < 12; r += 2) s += `<text x="${X(r * 12 + 6)}" y="298" text-anchor="middle" style="font-size:13px" fill="#999">${1949 + r}</text>`;
+    s += poly(AIR.map((v, i) => [X(i), Y(v)]), '#1a73d9', 2);
+    s += poly(trend.map((v, i) => [i, v]).filter(p => p[1] !== null).map(([i, v]) => [X(i), Y(v)]), '#e8710a', 4);
+    s += `<text x="60" y="22" style="font-size:15px" fill="#1a73d9">━ pasażerowie</text><text x="200" y="22" style="font-size:15px" fill="#e8710a">━ trend (średnia ruchoma 2×12)</text>`;
+    svg.innerHTML = s;
+  })();
+
+  // ---------- static: four kinds of events ----------
+  (() => {
+    const svg = document.getElementById('detsvg'); if (!svg) return;
+    const r = rng(7), n = 60, W = 270, H = 90;
+    const g = () => { let s = 0; for (let i = 0; i < 6; i++) s += r(); return s / 6 * 2 - 1; };
+    const kinds = [
+      ['punkt zmiany', i => (i < 30 ? 0.3 : 0.65) + g() * 0.12, i => i === 30],
+      ['wartość odstająca', i => i === 38 ? 0.05 : 0.6 + g() * 0.12, i => i === 38],
+      ['trend', i => 0.2 + i / n * 0.55 + g() * 0.12, () => false],
+      ['sezonowość', i => 0.5 + 0.25 * Math.sin(i / 12 * 2 * Math.PI) + g() * 0.08, () => false],
+    ];
+    let s = '';
+    kinds.forEach(([name, f, mark], k) => {
+      const x0 = 10 + k * (W + 23), y0 = 30;
+      s += `<rect x="${x0}" y="${y0}" width="${W}" height="${H + 10}" rx="8" fill="#fafafa" stroke="#ddd"/><text x="${x0 + W / 2}" y="20" text-anchor="middle" font-weight="bold" style="font-size:16px">${name}</text>`;
+      const pts = []; let mx = null;
+      for (let i = 0; i < n; i++) {
+        const v = Math.max(0, Math.min(1, f(i))), px = x0 + 8 + i * (W - 16) / (n - 1), py = y0 + 5 + (1 - v) * H;
+        pts.push([px, py]); if (mark(i)) mx = [px, py];
+      }
+      s += poly(pts, '#1a73d9', 2);
+      if (mx && k === 0) s += `<line x1="${mx[0]}" x2="${mx[0]}" y1="${y0 + 2}" y2="${y0 + H + 8}" stroke="#d93025" stroke-width="3" stroke-dasharray="6 4"/>`;
+      if (mx && k === 1) s += `<circle cx="${mx[0]}" cy="${mx[1]}" r="9" fill="none" stroke="#d93025" stroke-width="3"/>`;
+    });
+    svg.innerHTML = s;
+  })();
+
+  // ---------- decomposition + ACF ----------
+  (() => {
+    const root = document.getElementById('decsim'); if (!root) return;
+    const $ = s => root.querySelector(s);
+    const N = 96, LAGS = 30;
+    let eps;
+    const newNoise = () => { eps = Array.from({ length: N }, () => gauss() * 1.7); };
+    const strip = (vals, y0, h, col, label, lo, hi) => {
+      const X = i => 60 + i * (630 / (N - 1)), Y = v => y0 + h - (v - lo) / (hi - lo || 1) * h;
+      return `<text x="4" y="${y0 + h / 2 + 5}" style="font-size:14px" fill="#666">${label}</text>` +
+        `<line x1="60" x2="690" y1="${y0 + h}" y2="${y0 + h}" stroke="#eee"/>` + poly(vals.map((v, i) => [X(i), Y(v)]), col, 2);
+    };
+    const render = () => {
+      const tr = +$('.dt').value, A = +$('.ds').value, sd = +$('.dn').value, P = +$('.dp').value, mult = $('.dm').checked;
+      const T = [], S = [], R = [], Yv = [];
+      for (let i = 0; i < N; i++) {
+        const t = 100 + tr * i, sea = Math.sin(2 * Math.PI * i / P), e = eps[i] * sd;
+        const sv = mult ? A / 100 * sea * t : A * sea;
+        T.push(t); S.push(sv); R.push(e); Yv.push(t + sv + e);
+      }
+      const lo = Math.min(...Yv, ...T), hi = Math.max(...Yv, ...T);
+      const sAbs = Math.max(1, ...S.map(Math.abs), ...R.map(Math.abs));
+      let s = strip(Yv, 5, 120, '#1a73d9', 'szereg', lo, hi);
+      s += strip(T, 140, 50, '#e8710a', 'trend', lo, hi);
+      s += strip(S, 205, 55, '#53ae12', 'sezon', -sAbs, sAbs);
+      s += strip(R, 270, 55, '#999', 'reszta', -sAbs, sAbs);
+      $('.dplot').innerHTML = s;
+      const m = mean(Yv); let d = 0; Yv.forEach(v => { d += (v - m) ** 2; });
+      const acf = Array.from({ length: LAGS }, (_, j) => { const k = j + 1; let c = 0; for (let i = k; i < N; i++) c += (Yv[i] - m) * (Yv[i - k] - m); return d ? c / d : 0; });
+      const band = 1.96 / Math.sqrt(N);
+      const X = k => 40 + (k - 0.5) * (420 / LAGS), Y = v => 115 - v * 95;
+      let a = `<text x="40" y="16" style="font-size:15px" font-weight="bold">autokorelacja (ACF)</text>`;
+      a += `<rect x="40" y="${Y(band)}" width="420" height="${Y(-band) - Y(band)}" fill="#e8f0fe"/><line x1="40" x2="460" y1="${Y(0)}" y2="${Y(0)}" stroke="#999"/>`;
+      acf.forEach((v, j) => { const k = j + 1; a += `<rect x="${X(k) - 5}" y="${Math.min(Y(v), Y(0))}" width="10" height="${Math.abs(Y(v) - Y(0))}" fill="${Math.abs(v) > band ? (k % P === 0 ? '#53ae12' : '#1a73d9') : '#bbb'}"/>`; });
+      [1, 10, 20, 30].forEach(k => { a += `<text x="${X(k)}" y="228" text-anchor="middle" style="font-size:13px" fill="#999">${k}</text>`; });
+      a += `<text x="460" y="16" text-anchor="end" style="font-size:13px" fill="#999">opóźnienie k →</text>`;
+      $('.aplot').innerHTML = a;
+      const peak = acf[P - 1];
+      let msg;
+      if (tr === 0 && A === 0) msg = 'Sam szum: słupki mieszczą się w niebieskim paśmie istotności. Szereg jest stacjonarny i nieprzewidywalny.';
+      else if (A === 0) msg = 'Sam trend: słupki ACF maleją powoli i długo są wysokie. To znak niestacjonarności; pomaga różnicowanie.';
+      else msg = `Sezon o okresie ${P}: ACF przy opóźnieniu ${P} wynosi ${peak.toFixed(2).replace('.', ',')}${P * 2 <= LAGS ? `, przy ${P * 2}: ${acf[2 * P - 1].toFixed(2).replace('.', ',')}` : ''} (zielone słupki).${tr > 0 ? ' Trend podnosi wszystkie słupki.' : ''}`;
+      $('.dexp').textContent = msg;
+    };
+    root.addEventListener('input', render);
+    root.addEventListener('change', render);
+    root.addEventListener('click', e => { if (e.target.dataset.act === 'noise') { newNoise(); render(); } });
+    newNoise(); render();
+  })();
+
+  // ---------- forecasting AirPassengers ----------
+  (() => {
+    const root = document.getElementById('fcsim'); if (!root) return;
+    const $ = s => root.querySelector(s);
+    const TR = AIR.slice(0, 120), TE = AIR.slice(120), H = 24, M = 12;
+    const models = {
+      naive: () => TE.map(() => TR[TR.length - 1]),
+      snaive: () => TE.map((_, h) => TR[TR.length - M + (h % M)]),
+      ma: () => TE.map(() => mean(TR.slice(-12))),
+      ses: (a) => { let l = TR[0]; for (let i = 1; i < TR.length; i++) l = a * TR[i] + (1 - a) * l; return TE.map(() => l); },
+      holt: (a, b) => {
+        let l = TR[0], t = TR[1] - TR[0];
+        for (let i = 1; i < TR.length; i++) { const l0 = l; l = a * TR[i] + (1 - a) * (l + t); t = b * (l - l0) + (1 - b) * t; }
+        return TE.map((_, h) => l + (h + 1) * t);
+      },
+      hw: (a, b, g) => {
+        let l = mean(TR.slice(0, M)), t = (mean(TR.slice(M, 2 * M)) - l) / M;
+        const s = TR.slice(0, M).map(v => v / l);
+        for (let i = M; i < TR.length; i++) {
+          const sp = s[i - M], l0 = l;
+          l = a * TR[i] / sp + (1 - a) * (l + t); t = b * (l - l0) + (1 - b) * t; s.push(g * TR[i] / l + (1 - g) * sp);
+        }
+        return TE.map((_, h) => (l + (h + 1) * t) * s[TR.length - M + (h % M)]);
+      },
+    };
+    const uses = { naive: '', snaive: '', ma: '', ses: 'a', holt: 'ab', hw: 'abg' };
+    const desc = {
+      naive: 'Każdy przyszły miesiąc = grudzień 1958.',
+      snaive: 'Każdy przyszły miesiąc = ten sam miesiąc z 1958 r. Zna sezon, nie zna trendu.',
+      ma: 'Średnia z ostatnich 12 miesięcy: płaska linia, gubi i sezon, i trend.',
+      ses: 'Wygładzanie wykładnicze: płaska prognoza na poziomie ostatniego wygładzonego punktu.',
+      holt: 'Holt: poziom + trend, prognoza to prosta. Brak sezonu.',
+      hw: 'Holt-Winters: poziom, trend i mnożnik sezonowy dla każdego miesiąca.',
+    };
+    const X = i => 50 + i * (1110 / 143), Y = v => 300 - (v - 80) * (285 / 580);
+    const render = () => {
+      const m = $('.fm').value, a = +$('.fa').value, b = +$('.fb2').value, g = +$('.fg').value;
+      [['.fa', 'a', '.fav', a], ['.fb2', 'b', '.fbv', b], ['.fg', 'g', '.fgv', g]].forEach(([sel, k, out, v]) => {
+        const on = uses[m].includes(k); $(sel).disabled = !on; $(sel).parentNode.style.opacity = on ? 1 : .35; $(out).textContent = v.toFixed(2).replace('.', ',');
+      });
+      const f = models[m](a, b, g);
+      const mae = f.reduce((s, v, i) => s + Math.abs(TE[i] - v), 0) / H;
+      const mape = f.reduce((s, v, i) => s + Math.abs(TE[i] - v) / TE[i], 0) / H * 100;
+      let s = '';
+      [100, 300, 500].forEach(v => { s += `<line x1="50" x2="1160" y1="${Y(v)}" y2="${Y(v)}" stroke="#eee"/><text x="44" y="${Y(v) + 5}" text-anchor="end" style="font-size:14px" fill="#999">${v}</text>`; });
+      for (let r = 0; r < 12; r++) s += `<text x="${X(r * 12 + 6)}" y="318" text-anchor="middle" style="font-size:13px" fill="#999">${1949 + r}</text>`;
+      s += `<rect x="${X(119.5)}" y="5" width="${X(143) - X(119.5)}" height="295" fill="#fff4e5" opacity=".6"/>`;
+      s += poly(TR.map((v, i) => [X(i), Y(v)]), '#1a73d9', 2.5);
+      s += poly(TE.map((v, i) => [X(120 + i), Y(v)]), '#333', 2.5, 'stroke-dasharray="7 5"');
+      s += poly([[X(119), Y(TR[119])], ...f.map((v, i) => [X(120 + i), Y(v)])], '#e8710a', 4);
+      s += `<text x="60" y="24" style="font-size:16px" fill="#1a73d9">━ trening 1949–1958</text><text x="250" y="24" style="font-size:16px" fill="#333">╍ prawda 1959–60</text><text x="420" y="24" style="font-size:16px" fill="#e8710a">━ prognoza</text>`;
+      $('.fplot').innerHTML = s;
+      const beat = mape < 15.5;
+      $('.fstat').innerHTML = `${desc[m]} &nbsp; MAE = <b>${mae.toFixed(1).replace('.', ',')}</b>, MAPE = <b style="color:${beat ? 'var(--green)' : 'var(--red)'}">${pct(mape)}</b> ${m === 'snaive' ? '(poprzeczka)' : beat ? '✓ lepiej niż sezonowa naiwna (15,5%)' : '✗ gorzej niż sezonowa naiwna (15,5%)'}`;
+    };
+    root.addEventListener('input', render);
+    root.addEventListener('change', render);
+    render();
+  })();
+
+  // ---------- CUSUM (Page, two-sided, reference level re-estimated after an alarm) ----------
+  const cusumSim = (() => {
+    const root = document.getElementById('cusumsim'); if (!root) return null;
+    const $ = s => root.querySelector(s);
+    const svg = $('.cplot'), SHOW = 200;
+    let t, level, mu0, sp, sm, hist, alarms, changes, log, timer = null, spike, recent;
+    const Xp = i => 10 + (i - Math.max(0, t - SHOW)) * (980 / SHOW);
+    const Yv = v => 78 - Math.max(-5, Math.min(5, v)) * 12;
+    const render = () => {
+      const h = +$('.ch').value, from = Math.max(0, t - SHOW);
+      const Ys = v => 290 - Math.min(v, h * 2) * (120 / (h * 2));
+      let s = `<rect x="0" y="0" width="1000" height="140" fill="#fff"/><text x="12" y="16" style="font-size:14px" fill="#666">pomiary</text>`;
+      s += `<text x="12" y="166" style="font-size:14px" fill="#666">S⁺ (zielona), S⁻ (niebieska), próg h</text><text x="988" y="16" text-anchor="end" style="font-size:14px"><tspan fill="#e8710a">┃ alarm: wzrost</tspan>   <tspan fill="#9334e6">┃ alarm: spadek</tspan></text>`;
+      s += `<line x1="0" x2="1000" y1="${Ys(h)}" y2="${Ys(h)}" stroke="#d93025" stroke-dasharray="8 6" stroke-width="2"/><line x1="0" x2="1000" y1="290" y2="290" stroke="#ccc"/>`;
+      const vis = hist.filter(p => p.i >= from);
+      s += poly(vis.map(p => [Xp(p.i), Yv(p.v)]), '#1a73d9', 1.5, 'opacity=".75"');
+      s += poly(vis.map(p => [Xp(p.i), Yv(p.mu)]), '#e8710a', 3, 'stroke-dasharray="8 6"');
+      s += poly(vis.map(p => [Xp(p.i), Ys(p.sp)]), '#53ae12', 2.5);
+      s += poly(vis.map(p => [Xp(p.i), Ys(p.sm)]), '#1a73d9', 2.5);
+      alarms.filter(a => a.i >= from).forEach(a => { s += `<line x1="${Xp(a.i)}" x2="${Xp(a.i)}" y1="0" y2="290" stroke="${a.up ? '#e8710a' : '#9334e6'}" stroke-width="3"/><text x="${Xp(a.i) + 5}" y="${a.up ? 36 : 128}" style="font-size:18px" fill="${a.up ? '#e8710a' : '#9334e6'}">${a.up ? '▲' : '▼'}</text>`; });
+      svg.innerHTML = s;
+      $('.cstat').innerHTML = `punkt <b>${t}</b> | μ₀ = <b>${mu0.toFixed(2).replace('.', ',')}</b> | S⁺ = <b>${sp.toFixed(1).replace('.', ',')}</b> | S⁻ = <b>${sm.toFixed(1).replace('.', ',')}</b> | alarmy <b>${alarms.length}</b>`;
+      const c = $('.console'); c.textContent = log.length ? log.slice(-12).join('\n') : '# kliknij Start, potem zmień poziom'; c.scrollTop = c.scrollHeight;
+    };
+    const tick = () => {
+      const k = +$('.ck').value, h = +$('.ch').value;
+      let v = level + gauss() * 1.7;
+      if (spike) { v += 4; spike = false; }
+      t++; recent.push(v); if (recent.length > 15) recent.shift();
+      sp = Math.max(0, sp + v - mu0 - k); sm = Math.max(0, sm + mu0 - v - k);
+      hist.push({ i: t, v, mu: level, sp, sm }); if (hist.length > SHOW + 5) hist.shift();
+      if (sp > h || sm > h) {
+        const up = sp > h;
+        alarms.push({ i: t, up });
+        const last = changes.filter(c => c.t <= t).pop();
+        const dir = up ? '▲ wzrost' : '▼ spadek';
+        log.push(last && t - last.t < 80 ? `punkt ${t}: ALARM (${dir}), ${t - last.t} punktów po zmianie` : `punkt ${t}: ALARM (${dir}) bez prawdziwej zmiany: fałszywy alarm`);
+        mu0 = mean(recent); sp = 0; sm = 0;
+      }
+      render();
+    };
+    const stop = () => { clearInterval(timer); timer = null; };
+    const shift = d => { level += d; changes.push({ t }); log.push(`punkt ${t}: prawdziwy poziom zmienia się na ${level.toFixed(1).replace('.', ',')}`); render(); };
+    const reset = () => { stop(); t = 0; level = 0; mu0 = 0; sp = 0; sm = 0; hist = []; alarms = []; changes = []; log = []; spike = false; recent = []; render(); };
+    root.addEventListener('click', e => {
+      const act = e.target.dataset.act;
+      if (act === 'play') { if (timer) stop(); else timer = setInterval(tick, 90); }
+      if (act === 'up') shift(1);
+      if (act === 'down') shift(-1);
+      if (act === 'spike') { spike = true; log.push(`punkt ${t + 1}: pojedynczy skok o +4`); }
+      if (act === 'reset') reset();
+    });
+    reset();
+    return { stop };
+  })();
+
+  Reveal.on('slidechanged', e => {
+    [cusumSim].forEach(s => s && s.stop());
+    e.currentSlide.querySelectorAll('pre.console').forEach(c => { c.scrollTop = c.scrollHeight; });
+  });
+})();
+</script>
+</body>
+</html>
