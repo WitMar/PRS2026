@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Serwer parkingów</title>
+  <link rel="stylesheet" href="/static/dashboard.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+<header class="topbar">
+  <div>
+    <h1>Serwer parkingów</h1>
+    <p class="muted">PRS · projekt 1 · zbieranie wyników od klientów</p>
+  </div>
+  <div class="conn" id="conn"><span class="dot"></span><span id="connText">łączenie…</span></div>
+</header>
+
+<main>
+  <section class="card connect" id="connect">
+    <div>
+      <h2>Adres serwera dla klientów</h2>
+      <p class="muted">wpisz w <code>main.py</code> klienta:</p>
+    </div>
+    <pre class="snippet" id="connectSnippet">…</pre>
+    <div id="connectExtra" class="connect-extra"></div>
+  </section>
+  <section class="card controls">
+    <div class="card-head">
+      <h2>Uruchom eksperyment</h2>
+      <label class="inline">Odbiorcy
+        <select id="target">
+          <option value="all">wszyscy klienci</option>
+          <option value="selected">zaznaczeni w tabeli</option>
+        </select>
+      </label>
+    </div>
+    <div class="variants" id="variants"></div>
+    <details class="custom">
+      <summary>Tryb ręczny – własne parametry (tylko na żądanie)</summary>
+    <form id="startForm">
+      <label>Liczba dni
+        <input type="number" id="days" min="1" max="60" required>
+      </label>
+      <label>Auta dziennie / 10 miejsc
+        <input type="number" id="cars" min="1" max="1000" required>
+      </label>
+      <button type="submit" id="startBtn" class="primary">Start</button>
+    </form>
+    </details>
+    <p id="startInfo" class="muted start-info"></p>
+    <div class="parkings" id="parkings"></div>
+  </section>
+
+  <section class="kpis" id="kpis"></section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Klienci</h2>
+      <span class="muted" id="clientsInfo"></span>
+    </div>
+    <div class="table-wrap">
+      <table class="clients">
+        <thead>
+        <tr>
+          <th><input type="checkbox" id="selectAll" aria-label="Zaznacz wszystkich"></th>
+          <th>Indeks</th><th>Adres</th><th>Status</th><th class="num">Uruch.</th>
+          <th class="num">Zdarzenia</th><th class="num" title="od rozpoczęcia wysyłania danych do odebrania wyniku">Czas [s]</th><th class="num" title="od potwierdzenia odbioru danych (201) do odebrania wyniku">Przetw. [s]</th><th class="num" title="czas wzorca sekwencyjnego / czas klienta">Przysp.</th><th>Poprawność</th>
+          <th class="num">Najlepszy [s]</th><th></th>
+        </tr>
+        </thead>
+        <tbody id="clientsBody"></tbody>
+      </table>
+    </div>
+    <p class="empty" id="clientsEmpty">Brak zarejestrowanych klientów. Klient rejestruje się przez <code>GET http://adres_klienta:port/hello</code>.</p>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Ranking studentów</h2>
+      <span class="muted">najlepszy poprawny czas [s] w każdym wariancie · ✕ = tylko niepoprawne wyniki · kolejność: liczba rozwiązanych wariantów, potem średnia strata do najszybszego</span>
+    </div>
+    <div class="table-wrap"><table class="leader" id="leader"></table></div>
+    <p class="empty" id="leaderEmpty">Ranking pojawi się po pierwszym poprawnym wyniku w gotowym wariancie.</p>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Eksperymenty</h2>
+      <span class="muted">usunięcie eksperymentu kasuje jego wyniki z historii i rankingu</span>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th class="num">#</th><th>Start</th><th>Wariant</th><th class="num">Dni</th><th class="num">Obciążenie</th><th>Klienci</th><th class="num">Wzorzec [s]</th><th>Wyniki</th><th class="num">Najlepszy [s]</th><th></th></tr></thead>
+      <tbody id="runsBody"></tbody>
+    </table></div>
+    <p class="empty" id="runsEmpty">Brak eksperymentów.</p>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Ranking – ostatni wynik każdego klienta</h2>
+      <span class="muted">czas od wysłania danych do odebrania wyniku · niepoprawne wyniki oznaczone ✕</span>
+    </div>
+    <div class="chart-box" id="rankingBox"><canvas id="rankingChart" aria-label="Ranking czasów"></canvas></div>
+    <p class="empty" id="rankingEmpty">Brak odebranych wyników.</p>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <h2>Komunikaty</h2>
+      <div class="filters">
+        <select id="fDir" aria-label="Kierunek">
+          <option value="">wszystkie kierunki</option>
+          <option value="in">→ do serwera</option>
+          <option value="out">← do klienta</option>
+        </select>
+        <select id="fKind" aria-label="Typ">
+          <option value="">wszystkie typy</option>
+          <option value="handshake">handshake</option>
+          <option value="start">start</option>
+          <option value="data">dane</option>
+          <option value="result">wynik</option>
+          <option value="invalid">niepoprawne</option>
+        </select>
+        <input type="search" id="fClient" placeholder="indeks" aria-label="Indeks klienta">
+        <label class="check"><input type="checkbox" id="fErrors"> tylko błędy</label>
+        <label class="check"><input type="checkbox" id="fFollow" checked> najnowsze na górze</label>
+        <button id="clearLog" class="ghost">Wyczyść</button>
+      </div>
+    </div>
+    <div class="table-wrap log-wrap">
+      <table class="log">
+        <thead><tr><th>Czas</th><th></th><th>Typ</th><th>Klient</th><th>Adres</th><th>Status</th><th class="num">Rozmiar</th><th>Opis</th></tr></thead>
+        <tbody id="logBody"></tbody>
+      </table>
+    </div>
+    <p class="empty" id="logEmpty">Brak komunikatów.</p>
+  </section>
+</main>
+
+<dialog id="detail">
+  <div class="dialog-head">
+    <h2 id="detailTitle">Klient</h2>
+    <button class="ghost" id="detailClose" aria-label="Zamknij">✕</button>
+  </div>
+  <div id="detailSummary" class="detail-summary"></div>
+  <div class="card-head"><h3>Czas odpowiedzi w kolejnych eksperymentach</h3><span class="muted">klient vs wzorcowy program sekwencyjny</span></div>
+  <div class="chart-box small"><canvas id="histChart"></canvas></div>
+  <div class="card-head diff-head"><h3>Różnice względem wzorca</h3><span class="muted" id="diffInfo"></span></div>
+  <div class="table-wrap diff-wrap" id="diffWrap"></div>
+  <div class="card-head"><h3>Pełne porównanie</h3><span class="muted">wartość klienta · najedź, aby zobaczyć wartość wzorca i różnicę</span></div>
+  <div class="table-wrap" id="cmpWrap"></div>
+  <div id="tooltip" class="tooltip" role="tooltip"></div>
+</dialog>
+
+<script src="/static/dashboard.js"></script>
+</body>
+</html>

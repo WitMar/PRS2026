@@ -1,0 +1,1475 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Przetwarzanie równoległe i strumieniowe - Wykład 2</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+<style>
+  /* Slide = 1280x720; base font scaled to match H5P text metrics */
+  .reveal { font-size: 24px; font-family: "Open Sans", Arial, sans-serif; color: #000; }
+  .reveal .slides section { position: absolute; width: 100%; height: 100%; padding: 0; text-align: left; }
+  .reveal .el { position: absolute; box-sizing: border-box; overflow: visible; }
+  .reveal .el.text { padding: .375em .5em; line-height: 1.25; }
+  .reveal .el.text p, .reveal .el.text li { margin: 0 0 .5em 0; line-height: 1.25; }
+  .reveal .el.text ul { display: block; margin: 0 0 .5em 1.25em; padding: 0; }
+  .reveal .el.text h3 { font-size: 1em; text-transform: none; margin: 0 0 .5em; color: #000; font-family: inherit; }
+  .reveal .el.img img { width: 100%; height: 100%; object-fit: contain; margin: 0; max-width: none; max-height: none; }
+  .reveal .el.shape { display: flex; flex-direction: column; justify-content: center; }
+  .reveal .el.link { display: flex; align-items: center; justify-content: center; font-size: 1.5em; }
+  .reveal a { color: #1a73d9; }
+  /* ---------- interactive slides (as in lecture 1) ---------- */
+  :root { --green: rgb(83, 174, 18); --blue: #1a73d9; --red: #d93025; --orange: #e8710a; --muted: #666; --line: #ccc; }
+  .reveal .el.box { padding: 0 .5em; line-height: 1.3; }
+  .reveal .el.box p { margin: 0 0 .5em; }
+  .reveal .small, .reveal .hint { font-size: .7em; color: var(--muted); }
+  .reveal .btn, .reveal .opt {
+    font: inherit; font-size: .75em; padding: .3em .8em; margin: 0 .3em .3em 0; cursor: pointer;
+    border: 2px solid var(--green); background: var(--green); color: #fff; border-radius: .3em;
+  }
+  .reveal .btn.ghost { background: #fff; color: var(--green); }
+  .reveal .btn:disabled { opacity: .4; cursor: default; }
+  .reveal .simctl { display: flex; flex-wrap: wrap; align-items: center; gap: .3em .8em; font-size: .8em; margin-bottom: .5em; }
+  .reveal .simctl .btn { font-size: .9em; margin: 0; }
+  .reveal .simctl select, .reveal .simctl input[type=text] { font: inherit; padding: .1em .3em; }
+  .reveal .stat { font-size: .8em; }
+  .reveal h4 { font-size: .8em; margin: 0 0 .3em; text-transform: none; color: #000; font-family: inherit; }
+  .reveal code { font-family: Consolas, Menlo, monospace; }
+  @keyframes pop { from { transform: scale(.3); opacity: 0; } }
+
+  /* quiz */
+  .reveal .quiz .q { font-size: 1.1em; margin-bottom: .8em; }
+  .reveal .quiz .opts { display: flex; flex-wrap: wrap; gap: .5em; margin-bottom: .6em; }
+  .reveal .quiz .opt { background: #fff; color: #000; border-color: var(--line); font-size: .9em; margin: 0; }
+  .reveal .quiz .opt.sel { border-color: var(--blue); background: #e8f0fe; }
+  .reveal .quiz .opt.good { border-color: var(--green); background: #e6f4da; }
+  .reveal .quiz .opt.bad { border-color: var(--red); background: #fce8e6; }
+  .reveal .quiz .explain { visibility: hidden; font-size: .85em; border-left: 4px solid var(--green); padding-left: .6em; margin-top: .6em; }
+  .reveal .quiz.done .explain { visibility: visible; }
+  .reveal .quiz.compact .q { font-size: .9em; margin-bottom: .5em; }
+  .reveal .quiz.compact .opt { font-size: .75em; }
+  .reveal .quiz.compact .explain { font-size: .7em; margin-top: .3em; }
+  .reveal .quiz + .quiz { margin-top: .8em; }
+
+  /* ---------- lecture 2: layout, code listings, output ---------- */
+  .reveal .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.2em; align-items: start; }
+  .reveal .cols.wl { grid-template-columns: 1.35fr 1fr; }
+  .reveal .cols.wr { grid-template-columns: 1fr 1.35fr; }
+  /* type scale: .lead / ul.points = body text, .note = callouts, .small = captions, code .78em */
+  .reveal .lead { font-size: 1.1em; margin: 0 0 .5em; line-height: 1.35; }
+  .reveal ul.points { font-size: 1.1em; line-height: 1.35; margin: 0 0 .5em 1.1em; padding: 0; }
+  .reveal ul.points li { margin: 0 0 .45em; }
+  .reveal ul.points.side { font-size: .9em; }
+  .reveal ul.points.icons { list-style: none; margin-left: 0; }
+  .reveal ul.points.icons li { padding-left: 1.5em; text-indent: -1.5em; }
+  .reveal ul.points.icons i { width: 1.5em; text-indent: 0; color: var(--green); }
+  .reveal ul.points.icons.cons i { color: var(--red); }
+  .reveal img.pic { display: block; width: 100%; max-height: 20em; object-fit: contain; margin: 0 auto; }
+  .reveal svg.diagram { display: block; width: 100%; height: auto; margin: .2em 0 .6em; font-family: "Open Sans", Arial, sans-serif; }
+  .reveal svg.diagram text { font-size: 18px; }
+  .reveal svg.diagram .mono { font-family: Consolas, Menlo, monospace; }
+  .reveal .chain { display: flex; flex-wrap: wrap; align-items: center; gap: .3em; font-size: .8em; margin: .3em 0 .6em; }
+  .reveal .chain .op { color: var(--muted); font-family: Consolas, Menlo, monospace; font-size: .85em; }
+  .reveal .zipviz { font: .75em Consolas, Menlo, monospace; margin: 0 0 .6em; }
+  .reveal .zipviz > div { display: flex; gap: .4em; margin: .25em 0; align-items: center; }
+  .reveal .zipviz .lbl { width: 4.5em; color: var(--muted); font-family: "Open Sans", Arial, sans-serif; }
+  .reveal .chip.alt { background: #fef3c7; }
+  .reveal .chip.pair { background: #e6f4da; }
+  .reveal .lanes { font-size: .75em; }
+  .reveal .lanes .lane { display: flex; align-items: center; gap: 3px; height: 1.5em; margin: .15em 0; }
+  .reveal .lanes .lane span { width: 2.2em; color: var(--muted); }
+  .reveal .lanes .lane i { display: block; width: 10.5%; height: 1.1em; border-radius: 3px; background: var(--blue); }
+  .reveal .lanes .lane i.p { background: var(--green); }
+  .reveal .lanes h4 { margin: .5em 0 .1em; }
+  .reveal p code, .reveal li code, .reveal td code, .reveal .note code { background: #f1f3f4; padding: 0 .2em; border-radius: .2em; font-size: .9em; }
+  .reveal pre.code-wrap { position: relative; width: 100%; margin: 0 0 .5em; box-shadow: none; font-size: .78em; }
+  .reveal pre.code-wrap code { max-height: none; padding: .6em .8em; border-radius: .3em; }
+  .reveal pre.code-wrap.sm { font-size: .66em; }
+  .reveal pre.out { position: relative; width: 100%; box-sizing: border-box; margin: 0 0 .6em; padding: .45em .8em; font-size: .78em; line-height: 1.35;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #f4f6f8; color: #1f2a30; border: 1px solid #c9d1d9; border-left: 5px solid #586e75; border-radius: .3em; box-shadow: none; }
+  .reveal pre.out::before { content: "Wynik"; position: absolute; top: .3em; right: .6em; font: bold .7em "Open Sans", Arial, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #8a99a6; }
+  .reveal pre.code-wrap + pre.out { margin-top: -.5em; border-top: none; border-radius: 0 0 .3em .3em; }
+  .reveal pre.out.sm, .reveal pre.code-wrap.sm + pre.out { font-size: .66em; }
+  .reveal .copy-btn { position: absolute; top: .4em; right: .4em; z-index: 2; font: .8em "Open Sans", Arial, sans-serif; padding: .1em .6em; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, .3); border-radius: .3em; background: rgba(255, 255, 255, .1); color: #f8f8f2; opacity: 0; transition: opacity .15s; }
+  .reveal pre.code-wrap:hover .copy-btn, .reveal .copy-btn:focus-visible { opacity: 1; }
+  .reveal .copy-btn.copied { background: var(--green); border-color: var(--green); opacity: 1; }
+  .reveal .note { font-size: .75em; line-height: 1.35; border-left: 4px solid var(--green); background: #f3faee; padding: .35em .7em; margin: .2em 0 .6em; }
+  .reveal .note.warn { border-left-color: var(--orange); background: #fff4e5; }
+  .reveal .note.bad { border-left-color: var(--red); background: #fce8e6; }
+  .reveal .note p { margin: 0 0 .3em; }
+  .reveal .note p:last-child { margin: 0; }
+  .reveal table.simple { border-collapse: collapse; font-size: .75em; margin: .2em 0 .8em; width: 100%; }
+  .reveal table.simple th, .reveal table.simple td { border: 1px solid var(--line); padding: .3em .5em; vertical-align: top; text-align: left; }
+  .reveal table.simple th { background: #eef7e6; }
+  .reveal .textflow ul { margin: 0 0 .5em 1.2em; }
+  .reveal .textflow li { margin-bottom: .4em; }
+
+  /* agenda */
+  .reveal .agenda { display: grid; grid-template-columns: 1fr 1fr; gap: .7em; margin-bottom: .8em; }
+  .reveal .agenda .ag { border: 2px solid var(--line); border-radius: .4em; padding: .4em .7em; }
+  .reveal .agenda .ag b { display: inline-block; width: 1.6em; height: 1.6em; line-height: 1.6em; text-align: center; border-radius: 50%; background: var(--green); color: #fff; margin-right: .4em; }
+  .reveal .agenda .ag p { font-size: .75em; margin: .3em 0 0; color: #333; }
+
+  /* fill in the blanks */
+  .reveal pre.exo { width: 100%; box-sizing: border-box; margin: 0 0 .5em; padding: .6em .8em; font-size: .78em; line-height: 1.6; box-shadow: none;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #272822; color: #f8f8f2; border-radius: .3em; }
+  .reveal pre.exo .c { color: #75715e; }
+  .reveal pre.exo .k { color: #f92672; }
+  .reveal input.blank { font: inherit; color: #e6db74; background: #3e3d32; border: none; border-bottom: 2px dashed #e6db74; padding: 0 .3em; outline: none; }
+  .reveal input.blank:focus { background: #49483e; }
+  .reveal input.blank.good { color: #a6e22e; border-bottom: 2px solid #a6e22e; }
+  .reveal input.blank.bad { color: #f92672; border-bottom: 2px solid #f92672; }
+  .reveal .blanks .fb { font-size: .7em; min-height: 1.2em; margin: .2em 0; color: var(--red); }
+  .reveal .blanks .explain { visibility: hidden; font-size: .75em; border-left: 4px solid var(--green); padding-left: .6em; margin-top: .3em; }
+  .reveal .blanks.done .explain { visibility: visible; }
+
+  /* pure / impure cards */
+  .reveal .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8em; }
+  .reveal .quiz.card { border: 2px solid var(--line); border-radius: .4em; padding: .5em .6em; }
+  .reveal .quiz.card pre.code-wrap { font-size: .7em; margin-bottom: .6em; }
+  .reveal .quiz.card .opts { margin-bottom: 0; }
+  .reveal .quiz.card .opt { font-size: .75em; }
+  .reveal .quiz.card .explain { font-size: .7em; }
+
+  /* generator step by step */
+  .reveal ol.steps { list-style: none; margin: 0 0 .5em; padding: .5em 0; background: #272822; color: #f8f8f2; border-radius: .3em; font: .75em/1.6 Consolas, Menlo, monospace; counter-reset: ln; }
+  .reveal ol.steps li { padding: 0 .8em; white-space: pre; border-left: 4px solid transparent; }
+  .reveal ol.steps li::before { counter-increment: ln; content: counter(ln); display: inline-block; width: 1.8em; color: #75715e; }
+  .reveal ol.steps li.ran { background: rgba(166, 226, 46, .18); }
+  .reveal ol.steps li.next { background: rgba(230, 219, 116, .28); border-left-color: #e6db74; }
+  .reveal ol.steps li.next::after { content: "   \23F8  tu wstrzymany"; color: #e6db74; }
+  .reveal pre.console { width: 100%; box-sizing: border-box; height: 15em; overflow: auto; margin: 0 0 .5em; padding: .5em .8em; font-size: .72em; line-height: 1.4;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #1e1e1e; color: #e0e0e0; border-radius: .3em; box-shadow: none; }
+  .reveal #gensim .state { font-size: .7em; border-left: 4px solid var(--blue); padding-left: .6em; min-height: 2.6em; }
+  .reveal #gensim .state code { background: none; padding: 0; font-weight: bold; }
+
+  /* eager vs lazy */
+  .reveal #lazysim .mode { display: none; }
+  .reveal #lazysim .mode.on { display: block; }
+  .reveal #lazysim table.flow { border-collapse: separate; border-spacing: .25em; font-size: .62em; margin: 0 0 .3em -.25em; }
+  .reveal #lazysim .flow th { text-align: right; font-weight: normal; color: var(--muted); padding-right: .4em; white-space: nowrap; font-family: Consolas, Menlo, monospace; }
+  .reveal #lazysim .flow td { width: 3em; height: 1.8em; text-align: center; border-radius: .3em; background: #f1f3f4; color: #bbb; }
+  .reveal #lazysim .flow td.done { background: #e8f0fe; color: #000; }
+  .reveal #lazysim .flow td.yes { background: #e6f4da; color: #2d6a0a; }
+  .reveal #lazysim .flow td.no { background: #fce8e6; color: var(--red); }
+  .reveal #lazysim .flow td.res { background: var(--green); color: #fff; font-weight: bold; }
+  .reveal #lazysim .flow td.cur { box-shadow: 0 0 0 3px var(--orange); }
+  .reveal #lazysim .counters { font-size: .75em; margin: .2em 0 .4em; }
+  .reveal #lazysim .counters b { color: var(--blue); }
+  .reveal #lazysim .verdict { min-height: 2.6em; }
+
+  /* map / filter / reduce playground */
+  .reveal #mfrsim .simctl { font-size: .75em; }
+  .reveal #mfrsim .stage { display: flex; align-items: center; gap: .3em; margin: .3em 0; font-size: .85em; flex-wrap: wrap; min-height: 1.8em; }
+  .reveal #mfrsim .stage .lbl { width: 11em; flex: none; font-family: Consolas, Menlo, monospace; color: var(--muted); }
+  .reveal .chip { display: inline-block; min-width: 1.6em; text-align: center; padding: .1em .45em; border-radius: .3em; background: #e8f0fe; animation: pop .25s; }
+  .reveal .chip.drop { background: #f1f3f4; color: #aaa; text-decoration: line-through; }
+  .reveal .chip.acc { background: #fef3c7; }
+  .reveal .chip.fin { background: var(--green); color: #fff; font-weight: bold; }
+  .reveal .chip.err { background: #fce8e6; color: var(--red); font-family: Consolas, Menlo, monospace; }
+  .reveal #mfrsim .arrow { color: var(--muted); }
+
+  /* pipeline diagram */
+  .reveal .pipe { display: flex; align-items: center; gap: .35em; font-size: .62em; margin: 0 0 .6em; }
+  .reveal .pipe .st { border: 2px solid var(--blue); border-radius: .4em; padding: .3em .5em; text-align: center; background: #e8f0fe; }
+  .reveal .pipe .st small { display: block; color: var(--muted); font-size: .8em; }
+  .reveal .pipe .ar { color: var(--muted); font-size: 1.4em; }
+
+  /* MapReduce */
+  .reveal #wcsim textarea { width: 100%; box-sizing: border-box; height: 3.6em; font: .65em/1.3 "Open Sans", Arial, sans-serif; padding: .3em .5em; border: 2px solid var(--line); border-radius: .3em; resize: none; }
+  .reveal #wcsim .mr { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: .5em; font-size: .6em; margin-top: .4em; }
+  .reveal #wcsim .mr h4 { font-size: 1.1em; margin: 0 0 .2em; }
+  .reveal #wcsim .col { border: 2px solid var(--line); border-radius: .3em; padding: .3em .4em; height: 13.5em; overflow: auto; }
+  .reveal #wcsim .kv { display: inline-block; background: #e8f0fe; padding: .05em .35em; margin: .1em; border-radius: .25em; font-family: Consolas, Menlo, monospace; }
+  .reveal #wcsim .grp { font-family: Consolas, Menlo, monospace; margin: .1em 0; }
+  .reveal #wcsim .red { display: flex; align-items: center; margin: .15em 0; }
+  .reveal #wcsim .red span { width: 6em; flex: none; }
+  .reveal #wcsim .bar { height: .9em; background: var(--green); border-radius: .2em; margin-right: .4em; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section data-background-color="#ffffff" data-keywords="PRS">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie równoległe i strumieniowe</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:23.733%;width:61.002%;height:40%;"><p><span style="font-size:1.5em"><strong>Wykład 2</strong></span></p>
+
+<p><span style="font-size:1.5em"><strong>Struktury danych, programowanie funkcyjne, strumienie w Python</strong></span></p>
+</div>
+<div class="el img" style="left:64.270%;top:21.576%;width:23.125%;height:40.000%;"><img src="images/image-n4hRi0h8.jpg" alt="UAM"></div>
+<div class="el img" style="left:47.930%;top:66.885%;width:19.608%;height:25.820%;"><img src="images/image-Tnelcxe1.png" alt=""></div>
+<div class="el img" style="left:82.438%;top:71.200%;width:17.564%;height:18.215%;"><img src="images/image-xx6i4mFK.png" alt=""></div>
+<div class="el img" style="left:67.538%;top:73.357%;width:16.340%;height:16.944%;"><img src="images/image-9tFXljdA.png" alt=""></div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Plan">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Plan wykładu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:21%;width:96%;height:77%">
+<div class="agenda">
+  <div class="ag"><b>1</b>Struktury danych<p>list, tuple, dict, set, list comprehensions, zip</p></div>
+  <div class="ag"><b>2</b>Funkcje i programowanie funkcyjne<p>funkcje jako obiekty, czyste funkcje, memoizacja</p></div>
+  <div class="ag"><b>3</b>Iteratory i generatory<p>protokół iteratora, yield, leniwa ewaluacja</p></div>
+  <div class="ag"><b>4</b>Strumienie w Pythonie<p>lambda, map, filter, reduce, itertools, potoki generatorów, MapReduce</p></div>
+</div>
+<div class="note"><p><strong>Dlaczego to na tym przedmiocie?</strong></p>
+<p class="fragment">Czyste funkcje nie mają współdzielonego stanu, więc łatwo je zrównoleglić bez wyścigów (race condition z wykładu 1).</p>
+<p class="fragment">Generatory przetwarzają dane element po elemencie, czyli tak samo jak systemy strumieniowe (Apache Flink, Kafka Streams) z drugiej części semestru.</p></div>
+</div>
+<aside class="notes">Wykład zdalny: pytania ze slajdów "Sprawdź się" zadawaj na czacie Teams, zanim klikniesz odpowiedź.</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="Struktury danych">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Struktury danych</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el img" style="left:20.697%;top:19.418%;width:50.109%;height:73.540%;"><img src="images/image-OMWDcSuZ.jpg" alt=""></div>
+<div class="el text" style="left:27.233%;top:92.776%;width:39.999%;height:7.204%;"><p>http://www.quickmeme.com/meme/3t5jki</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Listy są mutowalne</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead">Listę można zmieniać „w miejscu”. Przypisanie <code>b = a</code> <strong>nie kopiuje</strong> listy: obie nazwy wskazują na ten sam obiekt.</p>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+a = [1, 2, 3]
+b = a            # b to druga nazwa tej samej listy
+b.append(4)
+print(a)
+</code></pre>
+<div class="quiz compact"><p class="q">Co wypisze <code>print(a)</code>?</p><div class="opts"><button class="opt" data-ok="0">[1, 2, 3]</button><button class="opt" data-ok="1">[1, 2, 3, 4]</button><button class="opt" data-ok="0">błąd</button></div><p class="explain"><code>a</code> i <code>b</code> to ten sam obiekt. Kopię tworzymy przez <code>b = a.copy()</code> albo <code>b = list(a)</code>.</p></div>
+</div>
+<div>
+<svg class="diagram" viewBox="0 0 440 150" role="img" aria-label="Nazwy a i b wskazują na ten sam obiekt listy [1, 2, 3, 4]">
+<defs><marker id="arB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1a73d9"/></marker></defs>
+<rect x="10" y="15" width="60" height="44" rx="6" fill="#fff" stroke="#999" stroke-width="2"/><text x="40" y="44" text-anchor="middle" class="mono">a</text>
+<rect x="10" y="91" width="60" height="44" rx="6" fill="#fff" stroke="#999" stroke-width="2"/><text x="40" y="120" text-anchor="middle" class="mono">b</text>
+<line x1="70" y1="37" x2="208" y2="68" stroke="#1a73d9" stroke-width="3" marker-end="url(#arB)"/>
+<line x1="70" y1="113" x2="208" y2="84" stroke="#1a73d9" stroke-width="3" marker-end="url(#arB)"/>
+<rect x="210" y="50" width="220" height="50" rx="8" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="320" y="81" text-anchor="middle" class="mono">[1, 2, 3, 4]</text>
+<text x="320" y="128" text-anchor="middle" fill="#666" style="font-size:15px">jeden obiekt w pamięci</text>
+</svg>
+<table class="simple">
+<tr><th>Mutowalne</th><th>Niemutowalne</th></tr>
+<tr><td><code>list</code><br><code>dict</code><br><code>set</code><br><code>bytearray</code></td><td><code>int</code>, <code>float</code>, <code>bool</code><br><code>str</code><br><code>tuple</code><br><code>frozenset</code>, <code>bytes</code></td></tr>
+</table>
+<div class="note warn fragment"><p>Wykład 1: wątki jednego procesu współdzielą pamięć. Współdzielony <strong>mutowalny</strong> obiekt to przepis na wyścig.</p><p>Obiekt niemutowalny można bezpiecznie czytać z wielu wątków naraz.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Struktury danych - krotki (tuple)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Krotki to <strong>niemutowalne</strong> sekwencje. Krotkę tworzy przecinek, a nawiasy dodajemy dla czytelności: <code>(5,)</code> to krotka, a <code>(5)</code> to liczba 5.</p>
+<div class="cols">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+t = (5, 6, 7, 8)
+t[0] = 1                    # TypeError: 'tuple' object does
+                            # not support item assignment
+t = t[:1] + (99,) + t[2:]   # "zmiana" to nowa krotka:
+                            # (5, 99, 7, 8)
+</code></pre>
+<div class="note"><p>Krotki często zwracają kilka wartości z funkcji (<code>return min_, max_</code>), a dzięki niemutowalności mogą być kluczami słownika.</p></div>
+</div>
+<div>
+<p class="lead">Rozpakowanie:</p>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+a, b, c, d = t      # tyle zmiennych, ile elementów
+a, b = b, a         # zamiana bez zmiennej pomocniczej
+first, *rest = t    # first = 5, rest = [99, 7, 8]
+x, y = (1, 2, 3)    # ValueError: too many values
+                    # to unpack (expected 2)
+</code></pre>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Struktury danych - list comprehensions</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">List comprehension przypomina notację matematyczną: S = { x² : x ∈ {0 … 9} } to w Pythonie</p>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+S = [x**2 for x in range(10)]    # uwaga: ^ to w Pythonie XOR, potęga to **
+</code></pre>
+<p class="lead">Ogólna postać: <code>[wyrażenie for nazwa in kolekcja if warunek]</code>. Gdy elementy są krotkami, możemy je od razu rozpakować:</p>
+<div class="cols">
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+li = [3, 6, 2, 7]
+print([e * 2 for e in li if e &gt; 2])
+
+pary = [('a', 1), ('b', 2), ('c', 7)]
+print([n * 3 for (x, n) in pary])
+</code></pre>
+<div class="blanks">
+<p class="small" style="margin-bottom:.3em">Co wypisze ten kod?</p>
+<pre class="exo"><input class="blank" size="14" data-re="^\[6,12,14\]$" data-sol="[6, 12, 14]" aria-label="pierwsza linia wyniku">
+<input class="blank" size="14" data-re="^\[3,6,21\]$" data-sol="[3, 6, 21]" aria-label="druga linia wyniku"></pre>
+<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
+<p class="fb"></p>
+<p class="explain">Warunek <code>if</code> odrzuca 2. Krotki rozpakowujemy do <code>x</code> i <code>n</code>. Nieużywaną zmienną zwyczajowo nazywa się <code>_</code>: <code>[n * 3 for _, n in pary]</code>.</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Nie tylko listy: comprehensions</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th>Składnia</th><th>Wynik</th></tr>
+<tr><td><code>[x % 3 for x in range(6)]</code></td><td>lista <code>[0, 1, 2, 0, 1, 2]</code></td></tr>
+<tr><td><code>{x % 3 for x in range(6)}</code></td><td>zbiór <code>{0, 1, 2}</code></td></tr>
+<tr><td><code>{x: x**2 for x in range(4)}</code></td><td>słownik <code>{0: 0, 1: 1, 2: 4, 3: 9}</code></td></tr>
+</table>
+<div class="quiz"><p class="q">A co zwróci wersja w nawiasach okrągłych: <code>(x**2 for x in range(4))</code>?</p><div class="opts"><button class="opt" data-ok="0">krotkę (0, 1, 4, 9)</button><button class="opt" data-ok="1">generator</button><button class="opt" data-ok="0">błąd składni</button></div><p class="explain">To <strong>wyrażenie generatorowe</strong>: leniwy iterator, który nie liczy niczego, dopóki nie pobierzemy elementów. Krotkę dostaniemy przez <code>tuple(x**2 for x in range(4))</code>. Do generatorów wrócimy w trzeciej części wykładu.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Struktury danych - słowniki (dict)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Słowniki przechowują pary <strong>klucz-wartość</strong>. Od Pythona 3.7 zachowują kolejność wstawiania kluczy.</p>
+<div class="cols wl">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+params = {"a": 1.0, "b": 2.0}
+params["a"] = "A"                # zmiana wartości
+params["c"] = 3.0                # nowa para
+print(params.get("x", 0))        # brak klucza: wartość domyślna
+
+for key, val in params.items():  # pary (klucz, wartość)
+    print(key, "-&gt;", val)
+
+print(params["x"])               # brak klucza: wyjątek
+</code></pre>
+<pre class="out">0
+a -&gt; A
+b -&gt; 2.0
+c -&gt; 3.0
+KeyError: 'x'</pre>
+</div>
+<div>
+<div class="note"><p><code>for key in d</code> iteruje po kluczach. <code>d.keys()</code>, <code>d.values()</code> i <code>d.items()</code> zwracają <strong>widoki</strong>, które odzwierciedlają późniejsze zmiany słownika.</p></div>
+<div class="note warn"><p>Klucze muszą być <strong>hashowalne</strong> (w praktyce niemutowalne): <code>str</code>, <code>int</code>, <code>tuple</code> tak, <code>list</code> nie.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Struktury danych - zip</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Funkcja <strong>zip()</strong> łączy elementy kilku sekwencji w krotki, jak zamek błyskawiczny. Wynik łatwo zamienić na słownik funkcją <strong>dict()</strong>.</p>
+<div class="cols wl">
+<pre class="code-wrap"><code class="language-python-repl" data-trim data-noescape>
+&gt;&gt;&gt; keys = ['a', 'b', 'c']
+&gt;&gt;&gt; values = [1, 2, 3]
+&gt;&gt;&gt; zip(keys, values)               # leniwy iterator!
+&lt;zip object at 0x7f1c2a3b4e80&gt;
+&gt;&gt;&gt; list(zip(keys, values))
+[('a', 1), ('b', 2), ('c', 3)]
+&gt;&gt;&gt; dict(zip(keys, values))
+{'a': 1, 'b': 2, 'c': 3}
+&gt;&gt;&gt; list(zip([1, 2, 3], "ab"))      # kończy na najkrótszej
+[(1, 'a'), (2, 'b')]
+&gt;&gt;&gt; list(zip(*[('a', 1), ('b', 2)])) # "rozpinanie"
+[('a', 'b'), (1, 2)]
+</code></pre>
+<div>
+<div class="zipviz">
+<div><span class="lbl">keys</span><span class="chip">'a'</span><span class="chip">'b'</span><span class="chip">'c'</span></div>
+<div><span class="lbl">values</span><span class="chip alt">1</span><span class="chip alt">2</span><span class="chip alt">3</span></div>
+<div><span class="lbl">zip</span><span class="chip pair">('a', 1)</span><span class="chip pair">('b', 2)</span><span class="chip pair">('c', 3)</span></div>
+</div>
+<div class="note warn"><p><code>zip(a, b, strict=True)</code> (Python 3.10+) zgłosi <code>ValueError</code>, gdy sekwencje mają różne długości, zamiast po cichu uciąć dane.</p></div>
+<div class="note"><p>Pokrewna funkcja: <code>enumerate("abc")</code> daje <code>(0, 'a'), (1, 'b'), (2, 'c')</code>.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zbiory (set) i operator in</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Zbiory to <strong>mutowalne</strong> kolekcje <strong>unikalnych</strong>, nieuporządkowanych elementów. Niemutowalną wersją jest <code>frozenset</code>.</p>
+<div class="cols">
+<pre class="code-wrap"><code class="language-python-repl" data-trim data-noescape>
+&gt;&gt;&gt; {1, 2, 2, 3, 3, 3}        # duplikaty znikają
+{1, 2, 3}
+&gt;&gt;&gt; s = set("abrakadabra")
+&gt;&gt;&gt; s                         # kolejność może być inna
+{'k', 'a', 'r', 'b', 'd'}
+&gt;&gt;&gt; "k" in s, "z" in s
+(True, False)
+</code></pre>
+<table class="simple">
+<tr><th>Operacja</th><th>Przykład</th></tr>
+<tr><td>suma <code>a | b</code></td><td><code>{1, 2, 3} | {3, 4}</code> → <code>{1, 2, 3, 4}</code></td></tr>
+<tr><td>część wspólna <code>a &amp; b</code></td><td><code>{1, 2, 3} &amp; {2, 3, 4}</code> → <code>{2, 3}</code></td></tr>
+<tr><td>różnica <code>a - b</code></td><td><code>{1, 2, 3} - {2}</code> → <code>{1, 3}</code></td></tr>
+<tr><td>różnica symetryczna <code>a ^ b</code></td><td><code>{1, 2, 3} ^ {3, 4}</code> → <code>{1, 2, 4}</code></td></tr>
+</table>
+</div>
+<div class="note warn fragment"><p><strong>Koszt operatora in:</strong> dla listy przegląda elementy po kolei, czyli O(n). Dla <code>set</code> i <code>dict</code> (sprawdza klucze) korzysta z tablicy haszującej, czyli średnio O(1). Gdy wielokrotnie sprawdzamy przynależność do dużej kolekcji, zamieńmy listę na zbiór.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="quiz multi compact"><p class="q">Co może być <b>kluczem słownika</b> lub elementem zbioru? (zaznacz wszystkie)</p><div class="opts"><button class="opt" data-ok="1">(1, 2)</button><button class="opt" data-ok="1">"abc"</button><button class="opt" data-ok="0">[1, 2]</button><button class="opt" data-ok="1">42</button><button class="opt" data-ok="0">{1, 2}</button><button class="opt" data-ok="1">frozenset({1, 2})</button></div><button class="btn check">Sprawdź</button><p class="explain">Klucze i elementy zbioru muszą być hashowalne, czyli w praktyce niemutowalne: krotki, napisy, liczby, frozenset. Lista i zbiór są mutowalne, więc nie mogą.</p></div>
+<div class="quiz compact"><p class="q">Jaki typ ma <code>{}</code>?</p><div class="opts"><button class="opt" data-ok="0">set</button><button class="opt" data-ok="1">dict</button><button class="opt" data-ok="0">tuple</button></div><p class="explain"><code>{}</code> to pusty <strong>słownik</strong>. Pusty zbiór tworzymy przez <code>set()</code>.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Funkcje">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Funkcje</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el img" style="left:25.054%;top:19.418%;width:43.573%;height:71.611%;"><img src="images/image-nDNo33RP.png" alt=""></div>
+<div class="el text" style="left:5.229%;top:92.776%;width:94.771%;height:7.204%;"><p>https://blog.kotlin-academy.com/programmer-dictionary-higher-order-function-9cadb07df94e</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Funkcje</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Funkcje w Pythonie są <strong>obiektami</strong> (obiektami „pierwszej klasy”): można je przypisać do zmiennej, przekazać jako <strong>argument</strong> i <strong>zwrócić</strong> z innej funkcji.</p>
+<div class="cols">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+def g():
+    print("Hi, it's me 'g'")
+
+def f(func):
+    print("Hi, it's me 'f'")
+    func()
+
+f(g)       # przekazujemy funkcję, nie g()!
+</code></pre>
+<pre class="out">Hi, it's me 'f'
+Hi, it's me 'g'</pre>
+</div>
+<div class="fragment">
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+def mnoznik(k):
+    def razy(x):
+        return x * k
+    return razy          # zwracamy funkcję
+
+podwoj = mnoznik(2)
+print(podwoj(21))
+print(mnoznik(3)(5))
+</code></pre>
+<pre class="out">42
+15</pre>
+</div>
+</div>
+<p class="small fragment">Funkcja, która przyjmuje lub zwraca funkcję, to <strong>funkcja wyższego rzędu</strong> (higher-order function). Przykłady z biblioteki standardowej: <code>map</code>, <code>filter</code>, <code>sorted(key=...)</code>.</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Programowanie funkcyjne</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead"><strong>Programowanie funkcyjne</strong>, jak sama nazwa wskazuje, polega na definiowaniu wykonania programu jako wywołań <strong>funkcji</strong>.</p>
+<p class="lead">Pozwala pisać prostszy, niezależny, krótszy kod, który łatwiej przetestować oraz zrównoleglić.</p>
+<p class="lead">Programowanie funkcyjne opiera się na tzw. <strong>czystych funkcjach</strong> (pure functions).</p>
+</div>
+<img class="pic" src="images/image-J8jTyWwk.png" alt="Tablica z równaniem E=mc²">
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Funkcje czyste">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Czyste funkcje (pure functions)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead">Funkcja jest <strong>czysta</strong>, jeśli:</p>
+<ul class="points">
+<li class="fragment">zawsze zwraca <strong>ten sam</strong> wynik dla tych samych argumentów,</li>
+<li class="fragment">nie ma <strong>skutków ubocznych</strong>: nie zmienia argumentów ani zmiennych globalnych, nie wypisuje na konsolę, nie zapisuje do plików ani bazy danych,</li>
+<li class="fragment">nie zależy od <strong>stanu zewnętrznego</strong>: zmiennych globalnych, czasu, liczb losowych, zawartości plików.</li>
+</ul>
+<p class="lead fragment">Jedynym wynikiem wywołania czystej funkcji jest <strong>wartość zwracana</strong>.</p>
+</div>
+<svg class="diagram" viewBox="0 0 440 320" role="img" aria-label="Czysta funkcja: z argumentów powstaje wynik; nie czyta stanu zewnętrznego i nie ma skutków ubocznych">
+<defs><marker id="arG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#53ae12"/></marker><marker id="arR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#d93025"/></marker></defs>
+<rect x="140" y="10" width="160" height="56" rx="8" fill="#fce8e6" stroke="#d93025" stroke-width="2"/>
+<text x="220" y="34" text-anchor="middle" style="font-size:15px">zmienne globalne,</text><text x="220" y="54" text-anchor="middle" style="font-size:15px">czas, random</text>
+<line x1="220" y1="68" x2="220" y2="128" stroke="#d93025" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#arR)"/>
+<circle cx="220" cy="98" r="13" fill="#fff" stroke="#d93025" stroke-width="2"/><text x="220" y="104" text-anchor="middle" fill="#d93025" font-weight="bold">✗</text>
+<rect x="5" y="135" width="105" height="50" rx="8" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="57" y="166" text-anchor="middle">argumenty</text>
+<line x1="110" y1="160" x2="168" y2="160" stroke="#53ae12" stroke-width="3" marker-end="url(#arG)"/>
+<rect x="170" y="128" width="100" height="64" rx="10" fill="#53ae12"/><text x="220" y="169" text-anchor="middle" fill="#fff" font-weight="bold" style="font-size:26px">f</text>
+<line x1="270" y1="160" x2="328" y2="160" stroke="#53ae12" stroke-width="3" marker-end="url(#arG)"/>
+<rect x="330" y="135" width="105" height="50" rx="8" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="382" y="166" text-anchor="middle">wynik</text>
+<line x1="220" y1="192" x2="220" y2="252" stroke="#d93025" stroke-width="2.5" stroke-dasharray="6 5" marker-end="url(#arR)"/>
+<circle cx="220" cy="222" r="13" fill="#fff" stroke="#d93025" stroke-width="2"/><text x="220" y="228" text-anchor="middle" fill="#d93025" font-weight="bold">✗</text>
+<rect x="140" y="254" width="160" height="56" rx="8" fill="#fce8e6" stroke="#d93025" stroke-width="2"/>
+<text x="220" y="278" text-anchor="middle" style="font-size:15px">print, pliki, baza,</text><text x="220" y="298" text-anchor="middle" style="font-size:15px">zmiana argumentów</text>
+</svg>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Czyste i nieczyste funkcje</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<ul class="points icons">
+<li><i class="fa-solid fa-check"></i><strong>Czyste:</strong> <code>len("abc")</code>, <code>pow(x, y)</code>, <code>math.sqrt(x)</code></li>
+</ul>
+<ul class="points icons cons">
+<li><i class="fa-solid fa-xmark"></i><strong>Nieczyste:</strong> <code>print()</code> (zmienia stan: wypisuje na ekran), <code>random.randint(x, y)</code> i <code>time.time()</code> (zależą od stanu globalnego)</li>
+</ul>
+</div>
+<div>
+<pre class="code-wrap"><code class="language-python-repl" data-trim data-noescape>
+&gt;&gt;&gt; len("abc")             # czysta
+3
+&gt;&gt;&gt; math.sqrt(2)           # czysta
+1.4142135623730951
+&gt;&gt;&gt; pow(2, 2)              # czysta
+4
+&gt;&gt;&gt; print('abc')           # skutek uboczny
+abc
+&gt;&gt;&gt; random.randint(1, 22)  # stan generatora
+14
+&gt;&gt;&gt; time.time()            # zegar systemowy
+1678135234.6053753
+</code></pre>
+<p class="small">Uruchom dwa razy: wyniki trzech ostatnich wywołań się zmienią.</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Czyste funkcje i memoizacja</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Skoro wynik czystej funkcji zależy tylko od argumentów, można go <strong>zapamiętać</strong> i nie liczyć ponownie (memoizacja). Podobnie kompilatory C/C++ optymalizują wywołania funkcji, o których wiedzą, że są czyste.</p>
+<div class="cols wl">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+from functools import cache
+
+@cache
+def fib(n):
+    return n if n &lt; 2 else fib(n - 1) + fib(n - 2)
+
+print(fib(100))
+print(fib.cache_info())
+</code></pre>
+<pre class="out">354224848179261915075
+CacheInfo(hits=98, misses=101, maxsize=None, currsize=101)</pre>
+</div>
+<div>
+<div class="note"><p>Bez <code>@cache</code> wywołanie <code>fib(100)</code> wykonywałoby się dłużej niż istnieje wszechświat: liczba wywołań rośnie wykładniczo.</p></div>
+<div class="note bad fragment"><p><code>@cache</code> na funkcji nieczystej (np. czytającej czas albo plik) będzie zwracać nieaktualne wyniki.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Czysta czy nie? (1/2)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cards">
+<div class="quiz card"><pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+l = [1, 2, 3]
+
+def last(l):
+    return l[-1]
+</code></pre><div class="opts"><button class="opt" data-ok="1">czysta</button><button class="opt" data-ok="0">nieczysta</button></div><p class="explain">Czysta: tylko odczytuje argument i zwraca wartość.</p></div>
+<div class="quiz card"><pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+m = ''
+
+def add(a, b):
+    global m
+    m = 'added'
+    return a + b
+</code></pre><div class="opts"><button class="opt" data-ok="0">czysta</button><button class="opt" data-ok="1">nieczysta</button></div><p class="explain">Nieczysta: zmienia globalny stan (zmienną <code>m</code>).</p></div>
+<div class="quiz card"><pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+l = [1, 2, 3]
+
+def last(l):
+    return l.pop()
+</code></pre><div class="opts"><button class="opt" data-ok="0">czysta</button><button class="opt" data-ok="1">nieczysta</button></div><p class="explain">Nieczysta: <code>pop()</code> zmienia wejściową listę, więc drugie wywołanie zwróci coś innego.</p></div>
+</div>
+</div>
+<aside class="notes">Najpierw głosowanie na czacie, potem klikamy.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Czysta czy nie? (2/2)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cards">
+<div class="quiz card"><pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+min(3, 1, 2)
+</code></pre><div class="opts"><button class="opt" data-ok="1">czysta</button><button class="opt" data-ok="0">nieczysta</button></div><p class="explain">Czysta: wynik zależy tylko od argumentów.</p></div>
+<div class="quiz card"><pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+K = 10
+
+def add10(a):
+    return a + K
+</code></pre><div class="opts"><button class="opt" data-ok="0">czysta</button><button class="opt" data-ok="1">nieczysta</button></div><p class="explain">Nieczysta: korzysta z globalnego stanu. Po <code>K = 20</code> ten sam argument da inny wynik.</p></div>
+<div class="quiz card"><pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+def dopisz(x, lista=[]):
+    lista.append(x)
+    return lista
+</code></pre><div class="opts"><button class="opt" data-ok="0">czysta</button><button class="opt" data-ok="1">nieczysta</button></div><p class="explain">Nieczysta, i to podstępnie: domyślna lista powstaje <strong>raz</strong>. <code>dopisz(1)</code> daje <code>[1]</code>, a potem <code>dopisz(2)</code> daje <code>[1, 2]</code>. Poprawnie: <code>lista=None</code> i nowa lista w środku funkcji.</p></div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Python a programowanie funkcyjne</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Programy w Pythonie mają często <strong>funkcyjnie</strong> wyglądający interfejs, ale wewnętrznie używają <strong>niefunkcyjnych</strong> operacji (przypisań, pętli).</p>
+<p class="lead">Funkcja może zmieniać swoje zmienne lokalne. Dopóki nie zmienia zmiennych globalnych ani nie ma innych skutków ubocznych, z zewnątrz pozostaje czysta.</p>
+<p class="lead"><strong>Przykład:</strong></p>
+<div class="cols">
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+def suma_kwadratow(liczby):
+    wynik = 0               # lokalny, zmienny stan...
+    for x in liczby:
+        wynik += x * x
+    return wynik            # ...ale z zewnątrz funkcja jest czysta
+</code></pre>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+# to samo w stylu funkcyjnym
+def suma_kwadratow(liczby):
+    return sum(x * x for x in liczby)
+</code></pre>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Programowanie funkcyjne - zalety i wady</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead"><strong>Zalety</strong></p>
+<ul class="points icons">
+<li class="fragment"><i class="fa-solid fa-check"></i>łatwe debugowanie i testowanie</li>
+<li class="fragment"><i class="fa-solid fa-check"></i>modularność</li>
+<li class="fragment"><i class="fa-solid fa-check"></i>leniwa ewaluacja (lazy evaluation)</li>
+<li class="fragment"><i class="fa-solid fa-check"></i>wykonanie równoległe</li>
+<li class="fragment"><i class="fa-solid fa-check"></i>czytelność</li>
+</ul>
+</div>
+<div>
+<p class="lead"><strong>Wady</strong></p>
+<ul class="points icons cons">
+<li class="fragment"><i class="fa-solid fa-xmark"></i>trudne do opanowania</li>
+<li class="fragment"><i class="fa-solid fa-xmark"></i>czasem trudno uniknąć kontekstu (stanu)</li>
+<li class="fragment"><i class="fa-solid fa-xmark"></i>kopiowanie zamiast modyfikacji w miejscu kosztuje pamięć i czas</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Iteratory">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Iteratory</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Iterator to obiekt, który reprezentuje <strong>strumień danych</strong> i zwraca kolejne elementy jeden po drugim.</p>
+<svg class="diagram" viewBox="0 0 1100 100" role="img" aria-label="iter() zamienia listę w iterator, kolejne next() zwracają 3, 4, 5, a potem StopIteration"><defs><marker id="arK" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs><rect x="10" y="30" width="150" height="50" rx="8" fill="#fff" stroke="#999" stroke-width="2"/><text x="85.0" y="61.0" text-anchor="middle" class="mono">[3, 4, 5]</text><line x1="160" y1="55" x2="248" y2="55" stroke="#666" stroke-width="2.5" marker-end="url(#arK)"/><text x="205.0" y="43" text-anchor="middle" class="mono" style="font-size:15px">iter()</text><rect x="250" y="30" width="140" height="50" rx="8" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="320.0" y="61.0" text-anchor="middle">iterator</text><line x1="390" y1="55" x2="468" y2="55" stroke="#666" stroke-width="2.5" marker-end="url(#arK)"/><text x="430.0" y="43" text-anchor="middle" class="mono" style="font-size:15px">next()</text><rect x="470" y="30" width="60" height="50" rx="8" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="500.0" y="61.0" text-anchor="middle" class="mono">3</text><line x1="530" y1="55" x2="608" y2="55" stroke="#666" stroke-width="2.5" marker-end="url(#arK)"/><text x="570.0" y="43" text-anchor="middle" class="mono" style="font-size:15px">next()</text><rect x="610" y="30" width="60" height="50" rx="8" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="640.0" y="61.0" text-anchor="middle" class="mono">4</text><line x1="670" y1="55" x2="748" y2="55" stroke="#666" stroke-width="2.5" marker-end="url(#arK)"/><text x="710.0" y="43" text-anchor="middle" class="mono" style="font-size:15px">next()</text><rect x="750" y="30" width="60" height="50" rx="8" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="780.0" y="61.0" text-anchor="middle" class="mono">5</text><line x1="810" y1="55" x2="888" y2="55" stroke="#666" stroke-width="2.5" marker-end="url(#arK)"/><text x="850.0" y="43" text-anchor="middle" class="mono" style="font-size:15px">next()</text><rect x="890" y="30" width="200" height="50" rx="8" fill="#fce8e6" stroke="#d93025" stroke-width="2"/><text x="990.0" y="61.0" text-anchor="middle" class="mono">StopIteration</text></svg>
+<ul class="points">
+<li class="fragment">Metoda <strong>__next__()</strong> (wywoływana przez <code>next(it)</code>) nie przyjmuje argumentów i zwraca następny element, a metoda <strong>__iter__()</strong> zwraca sam iterator.</li>
+<li class="fragment">Gdy elementów już nie ma, <code>__next__()</code> zgłasza wyjątek <strong>StopIteration</strong>.</li>
+<li class="fragment">Iterator nie musi być <strong>skończony</strong>: iterator generujący nieskończony strumień danych jest całkowicie poprawny.</li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Jak działa pętla for?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead">Pętla</p>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+for x in L:
+    print(x)
+</code></pre>
+<p class="lead">jest w rzeczywistości wykonywana tak:</p>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape data-line-numbers="|1|3-4|5-6|7">
+it = iter(L)                # 1. pobierz iterator
+while True:
+    try:
+        x = next(it)        # 2. pobierz kolejny element
+    except StopIteration:   # 3. koniec strumienia
+        break
+    print(x)
+</code></pre>
+</div>
+<div>
+<p class="lead"><strong>Iterable</strong> (obiekt iterowalny): ma metodę <code>__iter__()</code>, która zwraca iterator. Przykłady: lista, krotka, napis, słownik, zbiór, plik.</p>
+<p class="lead fragment"><strong>Iterator</strong>: ma <code>__next__()</code> i <code>__iter__()</code>, pamięta, w którym miejscu strumienia jest.</p>
+<p class="lead fragment">Z tego protokołu korzystają też <code>list()</code>, <code>sum()</code>, <code>zip()</code>, <code>in</code>, rozpakowanie <code>a, b = ...</code> i list comprehensions.</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Nieskończony iterator</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape data-line-numbers="|3|4-5|7-9|11-13">
+from collections.abc import Iterator
+
+class Licznik(Iterator):
+    def __init__(self, start=0, krok=1):
+        self.c, self.krok = start - krok, krok
+
+    def __next__(self):
+        self.c += self.krok
+        return self.c
+
+licznik = Licznik(0, 1)
+print(next(licznik))
+print(next(licznik))
+</code></pre>
+<pre class="out">0
+1</pre>
+</div>
+<div>
+<div class="note"><p>Dziedziczenie po <code>collections.abc.Iterator</code> dostarcza gotową metodę <code>__iter__()</code>, więc wystarczy napisać <code>__next__()</code>.</p></div>
+<div class="note"><p><code>__next__()</code> nigdy nie zgłasza <code>StopIteration</code>, więc strumień jest nieskończony. Nie wywołuj na nim <code>list()</code>!</p></div>
+<div class="note"><p>Biblioteka standardowa ma gotowy odpowiednik: <code>itertools.count(start, step)</code>.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>iter() i next()</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead">Wbudowana funkcja <strong>iter()</strong> zwraca iterator dla obiektu. Jeśli obiekt nie pozwala na iterację, zgłasza <strong>TypeError</strong>: <code>iter(42)</code> daje <code>'int' object is not iterable</code>.</p>
+<p class="lead">Iterację obsługują wszystkie wbudowane kolekcje (listy, krotki, napisy, słowniki, zbiory), a także pliki.</p>
+<p class="lead"><code>next(it)</code> to wygodny zapis <code>it.__next__()</code>, tak jak <code>len(x)</code> zamiast <code>x.__len__()</code>.</p>
+<div class="note"><p>Tak wygląda traceback w nowym REPL Pythona 3.13: <code>&lt;python-input-N&gt;</code> zamiast dawnego <code>&lt;stdin&gt;</code> oraz podkreślenie wywołania, które zgłosiło wyjątek.</p></div>
+</div>
+<pre class="code-wrap"><code class="language-python-repl" data-trim data-noescape>
+&gt;&gt;&gt; L = [3, 4, 5]
+&gt;&gt;&gt; it = iter(L)
+&gt;&gt;&gt; it
+&lt;list_iterator object at 0x7f36682eea70&gt;
+&gt;&gt;&gt; next(it)                 # to samo co it.__next__()
+3
+&gt;&gt;&gt; next(it)
+4
+&gt;&gt;&gt; next(it)
+5
+&gt;&gt;&gt; next(it)
+Traceback (most recent call last):
+  File "&lt;python-input-6&gt;", line 1, in &lt;module&gt;
+    next(it)
+    ~~~~^^^^
+StopIteration
+&gt;&gt;&gt; next(it, "koniec")       # wartość domyślna zamiast wyjątku
+'koniec'
+</code></pre>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Iterator działa tylko do przodu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead">W iteratorze można iść <strong>tylko do przodu</strong>: nie można wrócić do poprzedniego elementu, skopiować iteratora ani go zresetować.</p>
+<p class="lead">Funkcja może przetworzyć całe wyjście iteratora, ale żeby zrobić coś innego z tym samym strumieniem, trzeba utworzyć <strong>nowy iterator</strong>.</p>
+<pre class="code-wrap"><code class="language-python-repl" data-trim data-noescape>
+&gt;&gt;&gt; it = iter([1, 2, 3])
+&gt;&gt;&gt; list(it)
+[1, 2, 3]
+&gt;&gt;&gt; list(it)          # iterator jest już wyczerpany
+[]
+</code></pre>
+</div>
+<img class="pic" src="images/image-fj1bhIot.png" alt="Znak drogowy: jednokierunkowa">
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Generatory">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Generatory</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Generatory to specjalny rodzaj funkcji, który upraszcza pisanie iteratorów. Zwykła funkcja oblicza wartość i ją zwraca, a generator zwraca iterator, który produkuje <strong>strumień wartości</strong>.</p>
+<pre class="code-wrap" style="width:60%"><code class="language-python" data-trim data-noescape>
+def generate_ints(N):
+    for i in range(N):
+        yield i
+</code></pre>
+<p class="lead"><strong>yield</strong> działa podobnie do <strong>return</strong>, ale funkcja się nie kończy: zostaje <strong>wstrzymana</strong> razem ze zmiennymi lokalnymi i wznawia działanie przy kolejnym <code>next()</code>.</p>
+<p class="lead">Generatory nie przechowują wszystkich wartości w pamięci, <strong>generują je w locie.</strong></p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Generator krok po kroku</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="gensim">
+  <div class="simctl">
+    <button class="btn" data-act="next">next(gen)</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+    <span class="stat">zwrócone wartości: <b class="ylist">[]</b></span>
+  </div>
+  <div class="cols">
+    <div>
+      <ol class="steps"></ol>
+      <p class="state"></p>
+      <p class="hint">Stan generatora pokazuje <code>inspect.getgeneratorstate(gen)</code>, a jego zmienne lokalne <code>inspect.getgeneratorlocals(gen)</code>.</p>
+    </div>
+    <pre class="console"></pre>
+  </div>
+</div>
+</div>
+<aside class="notes">Zapytaj przed pierwszym kliknięciem: co wypisze "gen = generate_ints(3)"? Większość osób spodziewa się "start".</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wyrażenia generatorowe i pamięć</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Krótki generator można zapisać jak list comprehension, tylko w nawiasach okrągłych:</p>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+import sys
+
+lista = [x * x for x in range(1_000_000)]   # wszystkie wartości od razu w pamięci
+gen   = (x * x for x in range(1_000_000))   # wartości liczone na żądanie
+
+print(sys.getsizeof(lista))
+print(sys.getsizeof(gen))
+print(sum(x * x for x in range(1_000_000))) # nawiasy wywołania funkcji wystarczą
+</code></pre>
+<pre class="out">8448728
+200
+333332833333500000</pre>
+<div class="cols">
+<div class="note fragment"><p>Lista zajmuje ok. 8 MB, a generator ok. 200 B niezależnie od liczby elementów. Do tego <code>getsizeof</code> listy liczy tylko tablicę referencji, bez samych obiektów <code>int</code>.</p></div>
+<div class="note warn fragment"><p>Generator przejdziemy <strong>tylko raz</strong>. Jeśli dane są potrzebne wielokrotnie albo potrzebujemy <code>len()</code> czy indeksowania, wybierzmy listę.</p></div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Leniwa ewaluacja</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead"><strong>Leniwa ewaluacja</strong> (lazy evaluation, call-by-need) opóźnia obliczenie wyrażenia do momentu, gdy jego wartość jest naprawdę potrzebna. Iteratory i generatory zwracają jeden element na raz.</p>
+<p class="lead">Dzięki temu możemy opisać nawet <strong>nieskończony</strong> ciąg liczb i pobrać z niego tylko tyle, ile potrzeba:</p>
+<div class="cols wl">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+from itertools import islice
+
+def fibonacci():
+    a, b = 0, 1
+    while True:            # nieskończona pętla, ale leniwa
+        yield a
+        a, b = b, a + b
+
+print(list(islice(fibonacci(), 10)))
+</code></pre>
+<pre class="out">[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]</pre>
+</div>
+<div class="note bad fragment"><p><code>list(fibonacci())</code> nigdy się nie skończy: lista musi mieć wszystkie elementy naraz.</p></div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Listy vs generatory: symulacja</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="lazysim">
+  <div class="simctl">
+    <label><input type="radio" name="lazymode" value="eager" checked> listy (eager)</label>
+    <label><input type="radio" name="lazymode" value="lazy"> generatory (lazy)</label>
+    <button class="btn" data-act="step">Krok</button>
+    <button class="btn" data-act="play">Odtwarzaj / pauza</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+  </div>
+  <pre class="code-wrap sm mode eager on"><code class="language-python" data-trim data-noescape>
+dane = range(1, 11)
+kw = [x * x for x in dane]               # lista: liczy wszystko od razu
+pa = [y for y in kw if y % 2 == 0]       # lista
+wynik = pa[:3]
+</code></pre>
+  <pre class="code-wrap sm mode lazy"><code class="language-python" data-trim data-noescape>
+dane = range(1, 11)
+kw = (x * x for x in dane)               # generator: nic jeszcze nie liczy
+pa = (y for y in kw if y % 2 == 0)       # generator
+wynik = list(islice(pa, 3))              # dopiero tutaj dane zaczynają płynąć
+</code></pre>
+  <table class="flow"></table>
+  <p class="counters">wywołań <code>x * x</code>: <b class="nmap">0</b> &nbsp;|&nbsp; testów <code>% 2 == 0</code>: <b class="nfil">0</b></p>
+  <p class="hint verdict"></p>
+</div>
+</div>
+<aside class="notes">Najpierw tryb listy, potem generatory. Kluczowe: przy nieskończonym źródle (itertools.count()) wersja z listami nigdy się nie kończy.</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="Lambda">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Lambdy</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead"><strong>lambda</strong> tworzy małe, <strong>anonimowe</strong> funkcje: dowolna liczba argumentów, ale tylko <strong>jedno wyrażenie</strong>, którego wartość jest zwracana (bez pętli, <code>return</code> i przypisań).</p>
+<div class="cols wl">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+def f1(x):
+    return x**2
+
+f1 = lambda x: x**2                       # to samo jako lambda
+
+(lambda x, y: x + y)(2, 3)                # 5
+lambda x: x if x &gt; 0 else -x              # wyrażenie warunkowe jest dozwolone
+list(map(lambda x: x**2, range(-3, 4)))   # [9, 4, 1, 0, 1, 4, 9]
+</code></pre>
+</div>
+<div>
+<div class="note"><p>Lambda najlepiej sprawdza się <strong>w miejscu użycia</strong>, jako argument innej funkcji: <code>map</code>, <code>filter</code>, <code>sorted(key=...)</code>.</p></div>
+<div class="note warn"><p>Zgodnie z PEP 8 nie przypisujemy lambdy do nazwy (jak <code>f1</code> obok). Jeśli funkcja ma mieć nazwę, użyjmy <code>def</code>: komunikaty błędów są wtedy czytelniejsze.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Lambdy w praktyce: key=</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Najczęstsze użycie lambdy to argument <code>key</code>, czyli funkcja wyznaczająca, po czym porównujemy elementy:</p>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape data-line-numbers="|3-4|6-7|9-10|12-13">
+studenci = [("Ola", 4.5), ("Jan", 3.0), ("Ewa", 5.0)]
+
+sorted(studenci, key=lambda s: s[1])
+# [('Jan', 3.0), ('Ola', 4.5), ('Ewa', 5.0)]
+
+sorted(studenci, key=lambda s: s[1], reverse=True)[0]
+# ('Ewa', 5.0)
+
+max(studenci, key=lambda s: s[1])
+# ('Ewa', 5.0)
+
+sorted(["kiwi", "jabłko", "fig"], key=len)   # zwykła funkcja też działa
+# ['fig', 'kiwi', 'jabłko']
+</code></pre>
+<p class="small">Ten sam argument <code>key</code> przyjmują <code>min</code>, <code>max</code>, <code>sorted</code>, <code>list.sort</code> i <code>itertools.groupby</code>.</p>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="map filter reduce">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>map i filter</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead"><strong>map(f, it, ...)</strong> wywołuje <code>f</code> dla każdego elementu (przy kilku sekwencjach dla kolejnych elementów każdej z nich). <strong>filter(f, it)</strong> zostawia tylko elementy, dla których <code>f</code> zwraca wartość prawdziwą. W Pythonie 3 obie zwracają <strong>leniwe iteratory</strong>, a nie listy.</p>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+a = [1, 2, 3, 4, 5, 6]
+
+map(lambda x: x * 2, a)                                  # &lt;map object at 0x...&gt;
+list(map(lambda x: x * 2, a))                            # [2, 4, 6, 8, 10, 12]
+list(map(lambda x, y: x + y, [1, 2, 3], [10, 20, 30]))   # [11, 22, 33]
+list(filter(lambda x: x % 2 == 0, a))                    # [2, 4, 6]
+
+[x * 2 for x in a]                 # to samo jako comprehension
+[x for x in a if x % 2 == 0]
+</code></pre>
+<p class="small">Gdy funkcja już istnieje, <code>map</code> jest zwięzły: <code>map(str.upper, slowa)</code>, <code>map(int, linia.split())</code>. Z lambdą zwykle czytelniejsze jest comprehension.</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<pre class="code-wrap" style="width:60%"><code class="language-python" data-trim data-noescape>
+m = map(str.upper, ["a", "b"])
+print(list(m))
+print(list(m))
+</code></pre>
+<div class="quiz"><p class="q">Co wypisze ten kod?</p><div class="opts"><button class="opt" data-ok="0">['A', 'B'] i ['A', 'B']</button><button class="opt" data-ok="1">['A', 'B'] i []</button><button class="opt" data-ok="0">['A', 'B'] i błąd StopIteration</button></div><p class="explain">W Pythonie 3 <code>map</code> zwraca <strong>iterator</strong>. Pierwsze <code>list(m)</code> go wyczerpuje, drugie dostaje pusty strumień. Jeśli potrzebujesz danych kilka razy, zapisz je w liście: <code>wynik = list(map(...))</code>.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>reduce</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Funkcja <strong>reduce(f, iterable[, initial])</strong> „zwija” sekwencję do jednej wartości. Funkcja <code>f</code> dostaje wewnętrzny akumulator i kolejny element, a jej wynik staje się nowym akumulatorem.</p>
+<div class="cols wl">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+from functools import reduce    # w Pythonie 3 reduce jest w functools
+
+reduce(lambda n, m: n * m, range(1, 10))    # 362880
+reduce(lambda n, m: n * m, range(1, 11))    # 3628800 = 10!
+
+reduce(lambda acc, x: acc + x, [], 0)       # 0: wartość początkowa
+reduce(lambda acc, x: acc + x, [])          # TypeError: reduce() of
+                                            # empty iterable with no initial value
+</code></pre>
+</div>
+<div>
+<div class="note warn"><p><code>range(1, 10)</code> to liczby 1…9, więc pierwszy wynik to <strong>9!</strong>, a nie 10!.</p></div>
+<div class="note fragment"><p>Typowe redukcje mają gotowe funkcje: <code>sum()</code>, <code>math.prod()</code>, <code>max()</code>, <code>min()</code>, <code>any()</code>, <code>all()</code>.</p></div>
+</div>
+</div>
+<div class="chain"><span class="small">akumulator:</span><span class="chip acc">1</span><span class="op">·2 →</span><span class="chip acc">2</span><span class="op">·3 →</span><span class="chip acc">6</span><span class="op">·4 →</span><span class="chip acc">24</span><span class="op">·5 →</span><span class="chip acc">120</span><span class="op">·6 →</span><span class="chip acc">720</span><span class="op">·7 →</span><span class="chip acc">5040</span><span class="op">·8 →</span><span class="chip acc">40320</span><span class="op">·9 →</span><span class="chip fin">362880</span></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>map, filter, reduce: spróbuj sam</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="mfrsim">
+  <div class="simctl">
+    <label>dane = [<input type="text" class="data" value="1, 2, 3, 4, 5, 6" size="16">]</label>
+    <label>map: <select class="fmap"><option>x * 2</option><option>x ** 2</option><option>x + 1</option><option>x</option></select></label>
+    <label>filter: <select class="ffil"><option>x % 2 == 0</option><option>x % 2 == 1</option><option>x &gt; 5</option><option>x &gt; 100</option><option>True</option></select></label>
+    <label>reduce: <select class="fred"><option>a + b</option><option>a * b</option><option>a if a &gt; b else b</option></select></label>
+    <label>initial: <select class="finit"><option value="">brak</option><option>0</option><option>1</option></select></label>
+  </div>
+  <div class="stage"><span class="lbl">dane</span><span class="vals v0"></span></div>
+  <div class="stage"><span class="lbl">map</span><span class="vals v1"></span></div>
+  <div class="stage"><span class="lbl">filter</span><span class="vals v2"></span></div>
+  <div class="stage"><span class="lbl">reduce: akumulator</span><span class="vals v3"></span></div>
+  <pre class="exo pycode"></pre>
+  <p class="hint">Zmień dane lub funkcje. Ustaw filter na <code>x &gt; 100</code>: co się stanie z reduce bez wartości początkowej?</p>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Po co nam to na PRS?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|3-4|9|11-12">
+from concurrent.futures import ProcessPoolExecutor
+
+def ciezka_funkcja(n):     # czysta funkcja
+    return sum(i * i for i in range(n))
+
+dane = [10_000_000] * 8
+
+if __name__ == "__main__":
+    wyniki = list(map(ciezka_funkcja, dane))     # po kolei
+
+    with ProcessPoolExecutor() as ex:            # równolegle
+        wyniki = list(ex.map(ciezka_funkcja, dane))
+</code></pre>
+<div class="lanes">
+<h4><code>map</code>: 1 proces</h4>
+<div class="lane"><span>P1</span><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<h4><code>ex.map</code>: 4 procesy</h4>
+<div class="lane"><span>P1</span><i class="p"></i><i class="p"></i></div><div class="lane"><span>P2</span><i class="p"></i><i class="p"></i></div><div class="lane"><span>P3</span><i class="p"></i><i class="p"></i></div><div class="lane"><span>P4</span><i class="p"></i><i class="p"></i></div>
+<p class="small">czas →&nbsp; 8 wywołań <code>ciezka_funkcja</code></p>
+</div>
+</div>
+<div class="cols">
+<ul class="points side">
+<li class="fragment"><code>ex.map</code> ma ten sam interfejs co <code>map</code>: zmieniamy jedną linię.</li>
+<li class="fragment">Działa poprawnie, bo funkcja jest <strong>czysta</strong>: brak współdzielonego stanu, więc nie ma wyścigów.</li>
+</ul>
+<ul class="points side">
+<li class="fragment">Procesy zamiast wątków, bo obliczenia są CPU-bound, a w standardowym CPythonie jest GIL (wykład 1). W wersji free-threaded (3.13t) równolegle zadziała też <code>ThreadPoolExecutor</code>.</li>
+<li class="fragment"><code>if __name__ == "__main__":</code> jest wymagane, bo procesy potomne importują ten moduł.</li>
+</ul>
+</div>
+<p class="small fragment">Szczegóły: wykład „Thread Pool, Executory w Python” (18.11).</p>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Strumienie">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>itertools: klocki do strumieni</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Moduł <code>itertools</code> zawiera gotowe, <strong>leniwe</strong> operacje na iteratorach:</p>
+<table class="simple">
+<tr><th>Wywołanie</th><th>Kolejne elementy</th><th>Skojarzenie</th></tr>
+<tr><td><code>count(10, 5)</code></td><td>10, 15, 20, 25, … (bez końca)</td><td>nieskończone źródło</td></tr>
+<tr><td><code>islice(it, 4)</code></td><td>pierwsze 4 elementy dowolnego iteratora</td><td>„weź n”</td></tr>
+<tr><td><code>takewhile(lambda x: x &lt; 100, fibonacci())</code></td><td>0, 1, 1, 2, 3, 5, …, 89</td><td>„weź, dopóki”</td></tr>
+<tr><td><code>chain([1, 2], "ab")</code></td><td>1, 2, 'a', 'b'</td><td>sklejanie strumieni</td></tr>
+<tr><td><code>accumulate([3, 1, 4, 1, 5])</code></td><td>3, 4, 8, 9, 14</td><td>agregacja na bieżąco</td></tr>
+<tr><td><code>pairwise([20, 22, 25, 31])</code></td><td>(20, 22), (22, 25), (25, 31)</td><td>okno przesuwne</td></tr>
+<tr><td><code>batched(range(7), 3)</code></td><td>(0, 1, 2), (3, 4, 5), (6,)</td><td>przetwarzanie wsadowe</td></tr>
+</table>
+<p class="small"><code>pairwise</code> jest dostępne od Pythona 3.10, a <code>batched</code> od 3.12 (od 3.13 z opcją <code>strict=True</code>, która zgłasza błąd przy niepełnej ostatniej partii). Okna i partie wrócą przy Apache Flink (okna czasowe), a wsady pamiętamy z symulacji na wykładzie 1.</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Potok generatorów = strumień</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="pipe">
+  <div class="st">odczyty()<small>źródło</small></div><span class="ar">→</span>
+  <div class="st">parsuj()<small>transformacja</small></div><span class="ar">→</span>
+  <div class="st">t &gt; 30<small>filtr</small></div><span class="ar">→</span>
+  <div class="st">islice(…, 3)<small>ujście</small></div>
+</div>
+<div class="cols wl">
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|3-6|8-11|13-14|16-17">
+from itertools import islice
+
+def odczyty(sciezka):                  # źródło: plik z milionami linii
+    with open(sciezka) as f:
+        for linia in f:
+            yield linia
+
+def parsuj(linie):                     # transformacja
+    for linia in linie:
+        czujnik, temp = linia.strip().split(";")
+        yield czujnik, float(temp)
+
+pomiary = parsuj(odczyty("czujniki.csv"))
+alarmy = ((c, t) for c, t in pomiary if t &gt; 30)    # filtr
+
+for czujnik, temp in islice(alarmy, 3):            # ujście
+    print("ALARM", czujnik, temp)
+</code></pre>
+<div>
+<ul class="points side">
+<li class="fragment">W pamięci jest zawsze tylko <strong>jedna</strong> linia pliku.</li>
+<li class="fragment">Po 3 alarmach program kończy pracę, a reszta pliku nie jest nawet czytana.</li>
+<li class="fragment">Ten sam model (źródło → operatory → ujście) zobaczymy w Apache Flink i Kafka Streams.</li>
+</ul>
+<pre class="out sm">ALARM czujnik1 31.2
+ALARM czujnik0 33.4
+ALARM czujnik2 35.1</pre>
+</div>
+</div>
+</div>
+<aside class="notes">Nawiązanie do symulacji czujnika z wykładu 1 (alarm powyżej 30 stopni).</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>MapReduce: liczenie słów</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import re
+from functools import reduce
+from collections import defaultdict
+
+slowa = re.findall(r"\w+", tekst.lower())
+pary = map(lambda w: (w, 1), slowa)          # MAP
+
+grupy = defaultdict(list)                    # SHUFFLE:
+for w, n in pary:                            # grupowanie
+    grupy[w].append(n)                       # po kluczu
+
+wynik = {w: reduce(lambda a, b: a + b, ns)   # REDUCE
+         for w, ns in grupy.items()}
+</code></pre>
+<p class="small">W Hadoop i Spark etapy map i reduce działają równolegle na wielu maszynach, co jest możliwe dzięki czystym funkcjom. W zwykłym Pythonie wystarczy <code>collections.Counter(slowa)</code>.</p>
+</div>
+<div class="sim" id="wcsim">
+  <textarea aria-label="tekst" spellcheck="false">Ala ma kota, kot ma Alę. Ala lubi kota.</textarea>
+  <div class="mr">
+    <div><h4>Map</h4><div class="col cmap"></div></div>
+    <div><h4>Shuffle</h4><div class="col cgrp"></div></div>
+    <div><h4>Reduce</h4><div class="col cred"></div></div>
+  </div>
+  <p class="hint">Wpisz własny tekst: wynik liczy się na bieżąco.</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Ćwiczenia</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="blanks">
+<p class="lead">Znajdź część wspólną dwóch list:</p>
+<pre class="exo">a = [1, 2, 3, 5, 7, 9]
+b = [2, 3, 5, 6, 7, 8]
+list(filter(<input class="blank" size="20" data-re="^(?:lambda(\w+):\(?\1ina\)?|a\.__contains__)$" data-sol="lambda x: x in a" aria-label="funkcja dla filter">, b))   <span class="c"># [2, 3, 5, 7]</span></pre>
+<p class="lead">Znajdź maksimum w liście:</p>
+<pre class="exo"><span class="k">from</span> functools <span class="k">import</span> reduce
+f = <input class="blank" size="30" data-re="^(?:lambda(\w+),(\w+):(?:\1if\(?\1&gt;=?\2\)?else\2|\2if\(?\2&gt;=?\1\)?else\1|\2if\(?\1&lt;=?\2\)?else\1|\1if\(?\2&lt;=?\1\)?else\2|max\(\1,\2\))|max)$" data-sol="lambda a, b: a if a &gt; b else b" aria-label="funkcja f">
+reduce(f, [47, 11, 42, 102, 13])   <span class="c"># 102</span></pre>
+<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
+<p class="fb"></p>
+<div class="explain"><p>W praktyce prościej i szybciej: <code>set(a) &amp; set(b)</code> daje <code>{2, 3, 5, 7}</code> w czasie O(n + m) zamiast O(n·m), a <code>max([47, 11, 42, 102, 13])</code> daje 102.</p></div>
+</div>
+</div>
+<aside class="notes">Wcześniej w H5P odpowiedzi trzeba było wpisywać ze średnikiem zamiast dwukropka. Tutaj działa normalna składnia, spacje są ignorowane.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Podsumowanie wykładu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div>
+<ul class="points">
+<li><code>list</code>, <code>dict</code>, <code>set</code> są mutowalne, a <code>tuple</code>, <code>str</code>, <code>frozenset</code> nie. Współdzielony mutowalny stan to ryzyko wyścigu.</li>
+<li><strong>Czysta funkcja</strong>: wynik zależy tylko od argumentów i nie ma skutków ubocznych. Łatwo ją testować, cache'ować i zrównoleglać.</li>
+<li><strong>Iterator</strong>: <code>next()</code> aż do <code>StopIteration</code>. Działa tylko do przodu i tylko raz.</li>
+<li><strong>Generator</strong> (<code>yield</code> lub wyrażenie generatorowe) jest leniwy, oszczędza pamięć i może być nieskończony.</li>
+<li><code>map</code> i <code>filter</code> zwracają leniwe iteratory, a <code>reduce</code> jest w <code>functools</code>.</li>
+<li>Potok generatorów to w miniaturze model przetwarzania strumieniowego.</li>
+</ul>
+</div>
+</div>
+</section>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/plugin.js"></script>
+<script>
+// ---------- copy buttons (raw text is captured before highlighting adds line numbers) ----------
+document.querySelectorAll('pre.code-wrap > code').forEach(code => {
+  const lines = code.textContent.replace(/^\s*\n/, '').replace(/\s+$/, '').split('\n');
+  const indent = Math.min(...lines.filter(l => l.trim()).map(l => l.match(/^ */)[0].length));
+  const raw = lines.map(l => l.slice(indent)).join('\n') + '\n';
+  const btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'copy-btn'; btn.textContent = 'Kopiuj';
+  btn.addEventListener('click', () => {
+    const done = ok => {
+      btn.textContent = ok ? 'Skopiowano!' : 'Błąd kopiowania'; btn.classList.toggle('copied', ok);
+      clearTimeout(btn._t); btn._t = setTimeout(() => { btn.textContent = 'Kopiuj'; btn.classList.remove('copied'); }, 1500);
+    };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(raw).then(() => done(true), () => done(false));
+    else {
+      const ta = document.createElement('textarea'); ta.value = raw; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { done(document.execCommand('copy')); } catch (e) { done(false); } finally { ta.remove(); }
+    }
+  });
+  code.parentNode.appendChild(btn);
+});
+</script>
+<script>
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.02,
+    center: false, hash: true, slideNumber: 'c/t',
+    transition: 'slide',
+    chalkboard: { boardmarkerWidth: 4, chalkWidth: 5 },
+    plugins: [RevealNotes, RevealHighlight, RevealChalkboard]
+  });
+</script>
+<script>
+// ---------- quizzes ----------
+document.querySelectorAll('.quiz').forEach(q => {
+  const opts = [...q.querySelectorAll('.opt')];
+  const reveal = () => {
+    opts.forEach(o => {
+      if (o.dataset.ok === '1') o.classList.add('good');
+      else if (o.classList.contains('sel')) o.classList.add('bad');
+    });
+    q.classList.add('done');
+  };
+  if (q.classList.contains('multi')) {
+    opts.forEach(o => o.addEventListener('click', () => { if (!q.classList.contains('done')) o.classList.toggle('sel'); }));
+    q.querySelector('.check').addEventListener('click', reveal);
+  } else {
+    opts.forEach(o => o.addEventListener('click', () => {
+      if (q.classList.contains('done')) return;
+      o.classList.add('sel'); reveal();
+    }));
+  }
+});
+
+// ---------- fill in the blanks (whitespace is ignored, data-re lists accepted answers) ----------
+document.querySelectorAll('.blanks').forEach(b => {
+  const inputs = [...b.querySelectorAll('input.blank')];
+  const fb = b.querySelector('.fb');
+  const check = () => {
+    let good = 0;
+    inputs.forEach(i => {
+      const ok = new RegExp(i.dataset.re).test(i.value.replace(/\s+/g, ''));
+      i.classList.toggle('good', ok); i.classList.toggle('bad', !ok); good += ok;
+    });
+    const all = good === inputs.length;
+    b.classList.toggle('done', all);
+    fb.textContent = all ? '' : inputs.length > 1 ? `Poprawne: ${good} z ${inputs.length}. Spróbuj jeszcze raz.` : 'Jeszcze nie. Spróbuj ponownie.';
+  };
+  b.querySelector('.check').addEventListener('click', check);
+  b.querySelector('.show').addEventListener('click', () => {
+    inputs.forEach(i => { i.value = i.dataset.sol; });
+    check();
+  });
+  inputs.forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') check(); }));
+});
+
+// ---------- generator step by step ----------
+(() => {
+  const root = document.getElementById('gensim'); if (!root) return;
+  const LINES = ['def generate_ints(N):', '    print("start")', '    for i in range(N):', '        yield i', '    print("koniec")', '', 'gen = generate_ints(3)'];
+  const STOP = () => `Traceback (most recent call last):\n  File "<python-input-${n + 1}>", line 1, in <module>\n    next(gen)\n    ~~~~^^^^^\nStopIteration`;
+  let n, con, state, paused, ran, yielded;
+  const render = () => {
+    root.querySelector('.steps').innerHTML = LINES.map((l, k) =>
+      `<li class="${k === paused ? 'next' : ran.includes(k) ? 'ran' : ''}">${l.replace(/</g, '&lt;') || ' '}</li>`).join('');
+    const c = root.querySelector('.console');
+    c.textContent = con; c.scrollTop = c.scrollHeight;
+    root.querySelector('.state').innerHTML = state;
+    root.querySelector('.ylist').textContent = '[' + yielded.join(', ') + ']';
+  };
+  const reset = () => {
+    n = 0; paused = null; ran = [6]; yielded = [];
+    con = '>>> gen = generate_ints(3)\n>>> gen\n<generator object generate_ints at 0x7f3a1c2b5e40>';
+    state = '<code>GEN_CREATED</code>: generator utworzony, ale ciało funkcji jeszcze się <b>nie wykonało</b> (nie ma "start").';
+    render();
+  };
+  const step = () => {
+    n++; con += '\n>>> next(gen)';
+    if (n === 1) { con += '\nstart\n0'; ran = [1, 2]; paused = 3; yielded.push(0); }
+    else if (n <= 3) { con += '\n' + (n - 1); ran = [2]; paused = 3; yielded.push(n - 1); }
+    else if (n === 4) { con += '\nkoniec\n' + STOP(); ran = [2, 4]; paused = null; }
+    else { con += '\n' + STOP(); ran = []; paused = null; }
+    state = n <= 3
+      ? `<code>GEN_SUSPENDED</code>: wstrzymany na <code>yield</code>, zmienne lokalne zachowane: N = 3, i = ${n - 1}.`
+      : '<code>GEN_CLOSED</code>: generator zakończony. Każde kolejne <code>next()</code> zgłasza StopIteration.';
+    render();
+  };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'next') step();
+    if (a === 'reset') reset();
+  });
+  reset();
+})();
+
+// ---------- eager vs lazy ----------
+const lazySim = (() => {
+  const root = document.getElementById('lazysim'); if (!root) return null;
+  const DATA = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], TAKE = 3;
+  const even = x => (x * x) % 2 === 0;
+  let mode = 'eager', events, pos, timer = null;
+  const build = () => {
+    const ev = [];
+    if (mode === 'eager') {
+      DATA.forEach((_, i) => ev.push({ s: 'map', i }));
+      DATA.forEach((_, i) => ev.push({ s: 'fil', i }));
+      DATA.map((x, i) => i).filter(i => even(DATA[i])).slice(0, TAKE).forEach(i => ev.push({ s: 'take', i }));
+    } else {
+      for (let i = 0, t = 0; i < DATA.length && t < TAKE; i++) {
+        ev.push({ s: 'map', i }, { s: 'fil', i });
+        if (even(DATA[i])) { ev.push({ s: 'take', i }); t++; }
+      }
+    }
+    return ev;
+  };
+  const render = () => {
+    const done = events.slice(0, pos), cur = pos ? events[pos - 1] : null;
+    const has = (s, i) => done.some(e => e.s === s && e.i === i);
+    const curc = (s, i) => cur && cur.s === s && cur.i === i ? ' cur' : '';
+    const row = (label, cell) => `<tr><th>${label}</th>${DATA.map(cell).join('')}</tr>`;
+    root.querySelector('.flow').innerHTML =
+      row('dane', x => `<td class="done">${x}</td>`) +
+      row('x * x', (x, i) => has('map', i) ? `<td class="done${curc('map', i)}">${x * x}</td>` : '<td>·</td>') +
+      row('% 2 == 0', (x, i) => has('fil', i) ? `<td class="${even(x) ? 'yes' : 'no'}${curc('fil', i)}">${even(x) ? '✓' : '✗'}</td>` : '<td>·</td>') +
+      row('wynik', (x, i) => has('take', i) ? `<td class="res${curc('take', i)}">${x * x}</td>` : '<td></td>');
+    const nmap = done.filter(e => e.s === 'map').length, nfil = done.filter(e => e.s === 'fil').length;
+    root.querySelector('.nmap').textContent = nmap;
+    root.querySelector('.nfil').textContent = nfil;
+    root.querySelector('.verdict').innerHTML = pos < events.length ? '' : mode === 'eager'
+      ? `Wynik [4, 16, 36], ale policzyliśmy wszystkie ${nmap} kwadratów i ${nfil} testów, a w pamięci były dwie pełne listy. Przy nieskończonym źródle (<code>count()</code>) ten kod nigdy by się nie skończył.`
+      : `Ten sam wynik [4, 16, 36] po ${nmap} kwadratach i ${nfil} testach. Każdy element przechodzi przez cały potok, zanim pobierzemy następny. Elementy 7-10 nigdy nie zostały policzone.`;
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const step = () => { if (pos < events.length) { pos++; render(); } if (pos >= events.length) stop(); };
+  const reset = () => { stop(); events = build(); pos = 0; render(); };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'step') { stop(); step(); }
+    if (a === 'play') { if (timer) stop(); else { if (pos >= events.length) reset(); timer = setInterval(step, 350); } }
+    if (a === 'reset') reset();
+  });
+  root.querySelectorAll('input[name=lazymode]').forEach(r => r.addEventListener('change', () => {
+    mode = r.value;
+    root.querySelectorAll('.mode').forEach(m => m.classList.toggle('on', m.classList.contains(mode)));
+    reset();
+  }));
+  reset();
+  return { stop };
+})();
+
+// ---------- map / filter / reduce playground ----------
+(() => {
+  const root = document.getElementById('mfrsim'); if (!root) return;
+  const pymod = (a, b) => ((a % b) + b) % b;
+  const MAPS = { 'x * 2': x => x * 2, 'x ** 2': x => x ** 2, 'x + 1': x => x + 1, 'x': x => x };
+  const FILS = { 'x % 2 == 0': x => pymod(x, 2) === 0, 'x % 2 == 1': x => pymod(x, 2) === 1, 'x > 5': x => x > 5, 'x > 100': x => x > 100, 'True': () => true };
+  const REDS = { 'a + b': (a, b) => a + b, 'a * b': (a, b) => a * b, 'a if a > b else b': (a, b) => a > b ? a : b };
+  const $ = c => root.querySelector(c);
+  const chips = (xs, cls = '') => xs.map(x => `<span class="chip ${cls}">${x}</span>`).join(' ');
+  const render = () => {
+    const data = $('.data').value.split(/[\s,;]+/).map(Number).filter(Number.isInteger).slice(0, 12);
+    const fm = $('.fmap').value, ff = $('.ffil').value, fr = $('.fred').value, init = $('.finit').value;
+    const mapped = data.map(MAPS[fm]);
+    const kept = mapped.filter(FILS[ff]);
+    $('.v0').innerHTML = chips(data);
+    $('.v1').innerHTML = chips(mapped);
+    $('.v2').innerHTML = mapped.map(x => `<span class="chip ${FILS[ff](x) ? '' : 'drop'}">${x}</span>`).join(' ');
+    const seq = init === '' ? kept : [+init, ...kept];
+    let result;
+    if (!seq.length) {
+      result = 'TypeError: reduce() of empty iterable with no initial value';
+      $('.v3').innerHTML = `<span class="chip err">${result}</span>`;
+    } else {
+      const accs = [seq[0]];
+      for (let k = 1; k < seq.length; k++) accs.push(REDS[fr](accs[k - 1], seq[k]));
+      result = accs[accs.length - 1];
+      $('.v3').innerHTML = accs.map((a, k) => `<span class="chip ${k === accs.length - 1 ? 'fin' : 'acc'}">${a}</span>`).join(' <span class="arrow">→</span> ');
+    }
+    $('.pycode').innerHTML =
+      `reduce(lambda a, b: ${fr.replace(/>/g, '&gt;')},\n` +
+      `       filter(lambda x: ${ff.replace(/>/g, '&gt;')},\n` +
+      `              map(lambda x: ${fm}, [${data.join(', ')}]))` +
+      (init === '' ? ')' : `,\n       ${init})`) +
+      `\n<span class="c"># ${result}</span>`;
+  };
+  root.addEventListener('input', render);
+  root.addEventListener('change', render);
+  render();
+})();
+
+// ---------- MapReduce word count ----------
+(() => {
+  const root = document.getElementById('wcsim'); if (!root) return;
+  const ta = root.querySelector('textarea');
+  const render = () => {
+    const words = ta.value.toLowerCase().split(/[^\p{L}\p{N}_]+/u).filter(Boolean).slice(0, 60);
+    const groups = new Map();
+    words.forEach(w => { if (!groups.has(w)) groups.set(w, []); groups.get(w).push(1); });
+    const counts = [...groups].map(([w, ns]) => [w, ns.length]).sort((a, b) => b[1] - a[1]);
+    const top = counts.length ? counts[0][1] : 1;
+    root.querySelector('.cmap').innerHTML = words.map(w => `<span class="kv">('${w}', 1)</span>`).join('');
+    root.querySelector('.cgrp').innerHTML = [...groups].map(([w, ns]) => `<div class="grp">'${w}': [${ns.join(', ')}]</div>`).join('');
+    root.querySelector('.cred').innerHTML = counts.map(([w, c]) =>
+      `<div class="red"><span>${w}</span><i class="bar" style="width:${c / top * 5}em"></i>${c}</div>`).join('');
+  };
+  ta.addEventListener('input', render);
+  render();
+})();
+
+Reveal.on('slidechanged', e => {
+  if (lazySim) lazySim.stop();
+  e.currentSlide.querySelectorAll('pre.console').forEach(c => { c.scrollTop = c.scrollHeight; });
+});
+</script>
+</body>
+</html>

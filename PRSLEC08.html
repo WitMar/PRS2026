@@ -1,0 +1,1881 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Przetwarzanie równoległe i strumieniowe - Wykład 8</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+<style>
+  /* Slide = 1280x720; base font scaled to match H5P text metrics */
+  .reveal { font-size: 24px; font-family: "Open Sans", Arial, sans-serif; color: #000; }
+  .reveal .slides section { position: absolute; width: 100%; height: 100%; padding: 0; text-align: left; }
+  .reveal .el { position: absolute; box-sizing: border-box; overflow: visible; }
+  .reveal .el.text { padding: .375em .5em; line-height: 1.25; }
+  .reveal .el.text p, .reveal .el.text li { margin: 0 0 .5em 0; line-height: 1.25; }
+  .reveal .el.text ul { display: block; margin: 0 0 .5em 1.25em; padding: 0; }
+  .reveal .el.text h3 { font-size: 1em; text-transform: none; margin: 0 0 .5em; color: #000; font-family: inherit; }
+  .reveal .el.img img { width: 100%; height: 100%; object-fit: contain; margin: 0; max-width: none; max-height: none; }
+  .reveal .el.shape { display: flex; flex-direction: column; justify-content: center; }
+  .reveal .el.link { display: flex; align-items: center; justify-content: center; font-size: 1.5em; }
+  .reveal a { color: #1a73d9; }
+  /* ---------- interactive slides (as in lecture 1) ---------- */
+  :root { --green: rgb(83, 174, 18); --blue: #1a73d9; --red: #d93025; --orange: #e8710a; --muted: #666; --line: #ccc; }
+  .reveal .el.box { padding: 0 .5em; line-height: 1.3; }
+  .reveal .el.box p { margin: 0 0 .5em; }
+  .reveal .small, .reveal .hint { font-size: .7em; color: var(--muted); }
+  .reveal .btn, .reveal .opt {
+    font: inherit; font-size: .75em; padding: .3em .8em; margin: 0 .3em .3em 0; cursor: pointer;
+    border: 2px solid var(--green); background: var(--green); color: #fff; border-radius: .3em;
+  }
+  .reveal .btn.ghost { background: #fff; color: var(--green); }
+  .reveal .btn:disabled { opacity: .4; cursor: default; }
+  .reveal .simctl { display: flex; flex-wrap: wrap; align-items: center; gap: .3em .8em; font-size: .8em; margin-bottom: .5em; }
+  .reveal .simctl .btn { font-size: .9em; margin: 0; }
+  .reveal .simctl select, .reveal .simctl input[type=text] { font: inherit; padding: .1em .3em; }
+  .reveal .stat { font-size: .8em; }
+  .reveal h4 { font-size: .8em; margin: 0 0 .3em; text-transform: none; color: #000; font-family: inherit; }
+  .reveal code { font-family: Consolas, Menlo, monospace; }
+  @keyframes pop { from { transform: scale(.3); opacity: 0; } }
+
+  /* quiz */
+  .reveal .quiz .q { font-size: 1.1em; margin-bottom: .8em; }
+  .reveal .quiz .opts { display: flex; flex-wrap: wrap; gap: .5em; margin-bottom: .6em; }
+  .reveal .quiz .opt { background: #fff; color: #000; border-color: var(--line); font-size: .9em; margin: 0; }
+  .reveal .quiz .opt.sel { border-color: var(--blue); background: #e8f0fe; }
+  .reveal .quiz .opt.good { border-color: var(--green); background: #e6f4da; }
+  .reveal .quiz .opt.bad { border-color: var(--red); background: #fce8e6; }
+  .reveal .quiz .explain { visibility: hidden; font-size: .85em; border-left: 4px solid var(--green); padding-left: .6em; margin-top: .6em; }
+  .reveal .quiz.done .explain { visibility: visible; }
+  .reveal .quiz.compact .q { font-size: .9em; margin-bottom: .5em; }
+  .reveal .quiz.compact .opt { font-size: .75em; }
+  .reveal .quiz.compact .explain { font-size: .7em; margin-top: .3em; }
+  .reveal .quiz + .quiz { margin-top: .8em; }
+
+  /* ---------- lecture 2: layout, code listings, output ---------- */
+  .reveal .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.2em; align-items: start; }
+  .reveal .cols.wl { grid-template-columns: 1.35fr 1fr; }
+  .reveal .cols.wr { grid-template-columns: 1fr 1.35fr; }
+  /* type scale: .lead / ul.points = body text, .note = callouts, .small = captions, code .78em */
+  .reveal .lead { font-size: 1.1em; margin: 0 0 .5em; line-height: 1.35; }
+  .reveal ul.points { font-size: 1.1em; line-height: 1.35; margin: 0 0 .5em 1.1em; padding: 0; }
+  .reveal ul.points li { margin: 0 0 .45em; }
+  .reveal ul.points.side { font-size: .9em; }
+  .reveal ul.points.icons { list-style: none; margin-left: 0; }
+  .reveal ul.points.icons li { padding-left: 1.5em; text-indent: -1.5em; }
+  .reveal ul.points.icons i { width: 1.5em; text-indent: 0; color: var(--green); }
+  .reveal ul.points.icons.cons i { color: var(--red); }
+  .reveal img.pic { display: block; width: 100%; max-height: 20em; object-fit: contain; margin: 0 auto; }
+  .reveal svg.diagram { display: block; width: 100%; height: auto; margin: .2em 0 .6em; font-family: "Open Sans", Arial, sans-serif; }
+  .reveal svg.diagram text { font-size: 18px; }
+  .reveal svg.diagram .mono { font-family: Consolas, Menlo, monospace; }
+  .reveal .chain { display: flex; flex-wrap: wrap; align-items: center; gap: .3em; font-size: .8em; margin: .3em 0 .6em; }
+  .reveal .chain .op { color: var(--muted); font-family: Consolas, Menlo, monospace; font-size: .85em; }
+  .reveal .zipviz { font: .75em Consolas, Menlo, monospace; margin: 0 0 .6em; }
+  .reveal .zipviz > div { display: flex; gap: .4em; margin: .25em 0; align-items: center; }
+  .reveal .zipviz .lbl { width: 4.5em; color: var(--muted); font-family: "Open Sans", Arial, sans-serif; }
+  .reveal .chip.alt { background: #fef3c7; }
+  .reveal .chip.pair { background: #e6f4da; }
+  .reveal .lanes { font-size: .75em; }
+  .reveal .lanes .lane { display: flex; align-items: center; gap: 3px; height: 1.5em; margin: .15em 0; }
+  .reveal .lanes .lane span { width: 2.2em; color: var(--muted); }
+  .reveal .lanes .lane i { display: block; width: 10.5%; height: 1.1em; border-radius: 3px; background: var(--blue); }
+  .reveal .lanes .lane i.p { background: var(--green); }
+  .reveal .lanes h4 { margin: .5em 0 .1em; }
+  .reveal p code, .reveal li code, .reveal td code, .reveal .note code { background: #f1f3f4; padding: 0 .2em; border-radius: .2em; font-size: .9em; }
+  .reveal pre.code-wrap { position: relative; width: 100%; margin: 0 0 .5em; box-shadow: none; font-size: .78em; }
+  .reveal pre.code-wrap code { max-height: none; padding: .6em .8em; border-radius: .3em; }
+  .reveal pre.code-wrap.sm { font-size: .66em; }
+  .reveal pre.out { position: relative; width: 100%; box-sizing: border-box; margin: 0 0 .6em; padding: .45em .8em; font-size: .78em; line-height: 1.35;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #f4f6f8; color: #1f2a30; border: 1px solid #c9d1d9; border-left: 5px solid #586e75; border-radius: .3em; box-shadow: none; }
+  .reveal pre.out::before { content: "Wynik"; position: absolute; top: .3em; right: .6em; font: bold .7em "Open Sans", Arial, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #8a99a6; }
+  .reveal pre.code-wrap + pre.out { margin-top: -.5em; border-top: none; border-radius: 0 0 .3em .3em; }
+  .reveal pre.out.sm, .reveal pre.code-wrap.sm + pre.out { font-size: .66em; }
+  .reveal .copy-btn { position: absolute; top: .4em; right: .4em; z-index: 2; font: .8em "Open Sans", Arial, sans-serif; padding: .1em .6em; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, .3); border-radius: .3em; background: rgba(255, 255, 255, .1); color: #f8f8f2; opacity: 0; transition: opacity .15s; }
+  .reveal pre.code-wrap:hover .copy-btn, .reveal .copy-btn:focus-visible { opacity: 1; }
+  .reveal .copy-btn.copied { background: var(--green); border-color: var(--green); opacity: 1; }
+  .reveal .note { font-size: .75em; line-height: 1.35; border-left: 4px solid var(--green); background: #f3faee; padding: .35em .7em; margin: .2em 0 .6em; }
+  .reveal .note.warn { border-left-color: var(--orange); background: #fff4e5; }
+  .reveal .note.bad { border-left-color: var(--red); background: #fce8e6; }
+  .reveal .note p { margin: 0 0 .3em; }
+  .reveal .note p:last-child { margin: 0; }
+  .reveal table.simple { border-collapse: collapse; font-size: .75em; margin: .2em 0 .8em; width: 100%; }
+  .reveal table.simple th, .reveal table.simple td { border: 1px solid var(--line); padding: .3em .5em; vertical-align: top; text-align: left; }
+  .reveal table.simple th { background: #eef7e6; }
+  .reveal .textflow ul { margin: 0 0 .5em 1.2em; }
+  .reveal .textflow li { margin-bottom: .4em; }
+
+  /* agenda */
+  .reveal .agenda { display: grid; grid-template-columns: 1fr 1fr; gap: .7em; margin-bottom: .8em; }
+  .reveal .agenda .ag { border: 2px solid var(--line); border-radius: .4em; padding: .4em .7em; }
+  .reveal .agenda .ag b { display: inline-block; width: 1.6em; height: 1.6em; line-height: 1.6em; text-align: center; border-radius: 50%; background: var(--green); color: #fff; margin-right: .4em; }
+  .reveal .agenda .ag p { font-size: .75em; margin: .3em 0 0; color: #333; }
+
+  /* fill in the blanks */
+  .reveal pre.exo { width: 100%; box-sizing: border-box; margin: 0 0 .5em; padding: .6em .8em; font-size: .78em; line-height: 1.6; box-shadow: none;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #272822; color: #f8f8f2; border-radius: .3em; }
+  .reveal pre.exo .c { color: #75715e; }
+  .reveal pre.exo .k { color: #f92672; }
+  .reveal input.blank { font: inherit; color: #e6db74; background: #3e3d32; border: none; border-bottom: 2px dashed #e6db74; padding: 0 .3em; outline: none; }
+  .reveal input.blank:focus { background: #49483e; }
+  .reveal input.blank.good { color: #a6e22e; border-bottom: 2px solid #a6e22e; }
+  .reveal input.blank.bad { color: #f92672; border-bottom: 2px solid #f92672; }
+  .reveal .blanks .fb { font-size: .7em; min-height: 1.2em; margin: .2em 0; color: var(--red); }
+  .reveal .blanks .explain { visibility: hidden; font-size: .75em; border-left: 4px solid var(--green); padding-left: .6em; margin-top: .3em; }
+  .reveal .blanks.done .explain { visibility: visible; }
+
+  /* pure / impure cards */
+  .reveal .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8em; }
+  .reveal .quiz.card { border: 2px solid var(--line); border-radius: .4em; padding: .5em .6em; }
+  .reveal .quiz.card pre.code-wrap { font-size: .7em; margin-bottom: .6em; }
+  .reveal .quiz.card .opts { margin-bottom: 0; }
+  .reveal .quiz.card .opt { font-size: .75em; }
+  .reveal .quiz.card .explain { font-size: .7em; }
+  .reveal .chip { display: inline-block; min-width: 1.6em; text-align: center; padding: .1em .45em; border-radius: .3em; background: #e8f0fe; animation: pop .25s; }
+  .reveal .chip.drop { background: #f1f3f4; color: #aaa; text-decoration: line-through; }
+  .reveal .chip.acc { background: #fef3c7; }
+  .reveal .chip.fin { background: var(--green); color: #fff; font-weight: bold; }
+  .reveal .chip.err { background: #fce8e6; color: var(--red); font-family: Consolas, Menlo, monospace; }
+  /* pipeline diagram */
+  .reveal .pipe { display: flex; align-items: center; gap: .35em; font-size: .62em; margin: 0 0 .6em; }
+  .reveal .pipe .st { border: 2px solid var(--blue); border-radius: .4em; padding: .3em .5em; text-align: center; background: #e8f0fe; }
+  .reveal .pipe .st small { display: block; color: var(--muted); font-size: .8em; }
+  .reveal .pipe .ar { color: var(--muted); font-size: 1.4em; }
+
+  /* ---------- lecture 8: sensors, brokers, stream processing ---------- */
+  .reveal .cards.c2 { grid-template-columns: 1fr 1fr; }
+  .reveal .quiz.card .q { font-size: .9em; margin-bottom: .5em; }
+  .reveal .el.box .cols + .cols { margin-top: .2em; }
+  .reveal img.pic + img.pic { margin-top: .5em; }
+  .reveal .pipe .st { min-width: 6.5em; }
+  /* batch vs stream */
+  .reveal #batchsim .stat { margin: 0; }
+  .reveal #batchsim .stat b { color: var(--blue); }
+  /* broker: queue vs pub/sub */
+  .reveal #brokersim .info { min-height: 2.6em; font-size: .75em; }
+  /* backpressure */
+  .reveal #bpsim .bpbuf { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; min-height: 2.2em; margin: .3em 0; font-size: .8em; }
+  .reveal #bpsim .bpbuf .lbl { width: 5.5em; color: var(--muted); }
+  .reveal #bpsim .bpbuf i { display: block; width: 1.3em; height: 1.3em; border-radius: 3px; background: #f1f3f4; border: 1px solid var(--line); box-sizing: border-box; }
+  .reveal #bpsim .bpbuf i.on { background: var(--blue); border-color: var(--blue); }
+  .reveal #bpsim .bpbuf i.over { background: var(--red); border-color: var(--red); }
+  .reveal #bpsim .bpbuf .more { color: var(--red); font-weight: bold; margin-left: .4em; }
+  .reveal #bpsim .bpstat { font-size: .75em; }
+  .reveal #bpsim .bpstat b { color: var(--blue); }
+  .reveal #bpsim .bpverdict { min-height: 2.6em; font-size: .75em; }
+  /* MQTT topic matcher */
+  .reveal #topicsim .simctl input[type=text] { font-family: Consolas, Menlo, monospace; }
+  .reveal #topicsim .presets .btn { font-family: Consolas, Menlo, monospace; font-size: .8em; text-transform: none; }
+  .reveal #topicsim ul.topics { list-style: none; margin: .2em 0 .4em; padding: 0; font: .72em/1.5 Consolas, Menlo, monospace; }
+  .reveal #topicsim ul.topics li { padding: .05em .5em; margin: .15em 0; border-radius: .25em; background: #f1f3f4; color: #888; }
+  .reveal #topicsim ul.topics li.hit { background: #e6f4da; color: #000; }
+  .reveal #topicsim ul.topics li.hit::before { content: "\2713  "; color: var(--green); font-weight: bold; }
+  .reveal #topicsim .tverdict { min-height: 1.4em; }
+  .reveal #topicsim .tverdict.err { color: var(--red); }
+  /* Kafka consumer groups */
+  .reveal #groupsim .gview { display: grid; grid-template-columns: 1.25fr 1fr; gap: .4em 1.2em; font-size: .72em; }
+  .reveal #groupsim .part { display: flex; align-items: center; gap: 3px; margin: .2em 0; }
+  .reveal #groupsim .part .pn { width: 2.6em; font-family: Consolas, Menlo, monospace; color: var(--muted); }
+  .reveal #groupsim .part i { display: block; width: 1.5em; height: 1.4em; line-height: 1.4em; text-align: center; font-style: normal; font-size: .8em; border-radius: 3px; color: #fff; }
+  .reveal #groupsim .part .who { margin-left: .5em; font-size: .9em; }
+  .reveal #groupsim .cons { display: inline-block; border: 2px solid; border-radius: .35em; padding: .1em .5em; margin: .15em .3em .15em 0; }
+  .reveal #groupsim .cons.idle { border-color: var(--line) !important; color: #aaa; border-style: dashed; }
+  .reveal #groupsim h4 { margin: .2em 0; }
+  .reveal pre.out.lt { padding-top: 1.35em; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section data-background-color="#ffffff" data-keywords="PRS">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie równoległe i strumieniowe</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:23.733%;width:61.002%;height:40%;"><p><span style="font-size:1.5em"><strong>Wykład 8</strong></span></p>
+
+<p><span style="font-size:1.5em"><strong>Dane sensoryczne, serwer danych, broker danych, biblioteki przetwarzania strumieniowego</strong></span></p>
+</div>
+<div class="el img" style="left:64.270%;top:21.576%;width:23.125%;height:40.000%;"><img src="images/image-n4hRi0h8.jpg" alt="UAM"></div>
+<div class="el img" style="left:47.930%;top:66.885%;width:19.608%;height:25.820%;"><img src="images/image-Tnelcxe1.png" alt=""></div>
+<div class="el img" style="left:82.438%;top:71.200%;width:17.564%;height:18.215%;"><img src="images/image-xx6i4mFK.png" alt=""></div>
+<div class="el img" style="left:67.538%;top:73.357%;width:16.340%;height:16.944%;"><img src="images/image-9tFXljdA.png" alt=""></div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Plan">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Plan wykładu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="agenda">
+  <div class="ag"><b>1</b>Strumienie danych<p>przetwarzanie wsadowe a strumieniowe, wyzwania, zastosowania</p></div>
+  <div class="ag"><b>2</b>Dane sensoryczne (IoT)<p>czujniki, Bluetooth LE, odczyt i dekodowanie w Pythonie, problem skali</p></div>
+  <div class="ag"><b>3</b>Architektura strumieniowa<p>ETL, broker, procesor strumieni, analityka, przechowywanie</p></div>
+  <div class="ag"><b>4</b>Brokery wiadomości<p>kolejka a publish/subscribe, gwarancje dostarczenia, backpressure</p></div>
+  <div class="ag"><b>5</b>MQTT, Kafka, Kinesis<p>protokół IoT, partycjonowany log zdarzeń, usługi chmurowe</p></div>
+  <div class="ag"><b>6</b>Biblioteki strumieniowe<p>Flink, Spark, Kafka Streams, Storm, biblioteki Pythona</p></div>
+</div>
+<div class="note"><p><strong>Co już znamy:</strong> potoki generatorów (wykład 2), Streamz (wykład 9) i asyncio (wykład o korutynach). Dziś zobaczymy, skąd biorą się dane strumieniowe i jak trafiają do programów, które je przetwarzają. Następne wykłady: Apache Flink i Apache Kafka.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Strumienie">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Strumień danych (data stream)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead"><strong>Strumień</strong> to nieograniczony (unbounded) ciąg zdarzeń: dane napływają tak długo, jak działa źródło, i nie mają ustalonego końca.</p>
+<div class="cols wl">
+<div>
+<ul class="points side">
+<li>Każde <strong>zdarzenie</strong> (event) to mały rekord: <strong>klucz</strong>, <strong>wartość</strong> i <strong>znacznik czasu</strong>.</li>
+<li>Zdarzenia są niezmienne: dopisujemy nowe, nie poprawiamy starych (append-only).</li>
+<li>Przykłady: kliknięcie w link, odczyt czujnika, transakcja kartą, wpis w logu serwera.</li>
+</ul>
+<pre class="code-wrap"><code class="language-json" data-trim data-noescape>
+{"key": "czujnik17", "ts": "2026-12-16T08:00:05Z",
+ "value": {"temp": 23.2, "wilg": 42}}
+</code></pre>
+</div>
+<div>
+<img class="pic" src="images/image-ehCc4OZC.png" alt="Strumień danych: producenci wysyłają do konsumentów pary klucz-wartość">
+<img class="pic" src="images/image-TMNL51Xf.png" alt="Ciągły napływ danych jest przetwarzany i zamieniany na wykresy">
+</div>
+</div>
+<p class="small">Generator z wykładu 2 to też strumień: dostarcza elementy jeden po drugim i może być nieskończony.</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie wsadowe a strumieniowe</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead"><strong>Przetwarzanie wsadowe</strong> (batch processing): dane są gromadzone w paczki (np. z całego dnia) i przetwarzane okresowo. Wynik pojawia się po przetworzeniu całego wsadu.</p>
+<p class="lead"><strong>Przetwarzanie strumieniowe</strong> (stream processing): każde zdarzenie jest przetwarzane zaraz po nadejściu, a wynik jest aktualizowany na bieżąco.</p>
+</div>
+<img class="pic" src="images/image-3Ihial54.png" alt="Te same zdarzenia 1-9: wsadowo w trzech paczkach, strumieniowo w sposób ciągły">
+</div>
+<div class="note"><p>To ta sama różnica co między listą a generatorem z wykładu 2: lista czeka na wszystkie elementy, generator oddaje je po jednym.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wsad czy strumień? (batch vs stream)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<table class="simple">
+<tr><th></th><th>Wsadowo</th><th>Strumieniowo</th></tr>
+<tr><td>Dane</td><td>ograniczone (bounded), znany koniec</td><td>nieograniczone (unbounded)</td></tr>
+<tr><td>Opóźnienie</td><td>minuty do godzin</td><td>milisekundy do sekund</td></tr>
+<tr><td>Wynik</td><td>ostateczny, po przetworzeniu całości</td><td>ciągle aktualizowany</td></tr>
+<tr><td>Przykład</td><td>raport dzienny, trening modelu ML</td><td>alarm, wykrywanie oszustw, dashboard</td></tr>
+<tr><td>Narzędzia</td><td>Spark, SQL, MapReduce (wykład 2)</td><td>Flink, Kafka Streams, Spark Structured Streaming</td></tr>
+</table>
+<div>
+<img class="pic" style="max-height:9em" src="images/image-wZx7Ls0n.jpeg" alt="Mem: Hulk (siła) czy Flash (szybkość)?">
+<p class="small" style="text-align:center">siła (wsad) czy szybkość (strumień)?</p>
+</div>
+</div>
+<div class="note warn"><p>Dawniej mówiło się, że strumieniowo da się policzyć tylko proste rzeczy (średnią w oknie, alarm). Dziś silniki strumieniowe przechowują stan, łączą strumienie, wykrywają wzorce i uruchamiają modele ML na bieżąco. Wsad wciąż wygrywa przy analizie całej historii i trenowaniu modeli.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wsad a strumień: symulacja</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="batchsim">
+  <div class="simctl">
+    <button class="btn" data-act="play">Start / pauza</button>
+    <button class="btn ghost" data-act="reset">Nowe dane</button>
+    <label>wsad co <input type="range" class="period" min="2" max="10" step="1" value="5"> <b class="pv">5</b> s</label>
+    <span class="stat">czas: <b class="clock">0.0</b> s</span>
+  </div>
+  <svg class="diagram" viewBox="0 0 1100 290" role="img" aria-label="Oś czasu: zdarzenia, ich przetworzenie wsadowe i strumieniowe"></svg>
+  <div class="cols">
+    <p class="stat bs-batch"></p>
+    <p class="stat bs-stream"></p>
+  </div>
+  <p class="hint">Czerwone kropki to odczyty powyżej 30 °C, czyli alarmy. Zmień okres wsadu i porównaj opóźnienia.</p>
+</div>
+</div>
+<aside class="notes">Zapytaj, jak skrócić opóźnienie wsadu. Odpowiedź: mniejsze wsady. W granicy wsad z jednego zdarzenia to strumień (tak działał Spark Streaming: mikrowsady).</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Silnik przetwarzania strumieni</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead">Silnik strumieniowy przyjmuje wiele strumieni wejściowych i wykonuje na nich wiele operacji <strong>równolegle</strong>.</p>
+<p class="lead">Aplikacje strumieniowe opierają się na dwóch filarach:</p>
+<ul class="points">
+<li><strong>przechowywaniu</strong> zdarzeń (trwały, uporządkowany log),</li>
+<li><strong>przetwarzaniu</strong> zdarzeń (filtrowanie, łączenie, agregacja).</li>
+</ul>
+</div>
+<img class="pic" src="images/image-rSEnZPYv.png" alt="Dane wejściowe trafiają do silnika przetwarzania strumieniowego, a stamtąd do analityki i strumienia wyjściowego">
+</div>
+<ul class="points side">
+<li>Przetwarzanie musi być odporne na awarie i utratę danych oraz (zwykle) zachowywać kolejność zdarzeń, przynajmniej w obrębie jednego klucza.</li>
+<li>Pojedyncze wiadomości są małe (bajty do kilobajtów), ale jest ich bardzo dużo: tysiące do milionów na sekundę.</li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wyzwania przetwarzania strumieniowego</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<ul class="points">
+<li><strong>Przepustowość:</strong> dane rzędu gigabitów na sekundę.</li>
+<li><strong>Skalowalność:</strong> obciążenie się zmienia (szczyty w dzień, cisza w nocy).</li>
+<li><strong>Niskie opóźnienie:</strong> odebrać, przetworzyć i udostępnić wynik dalej w ułamku sekundy.</li>
+<li><strong>Kolejność i czas:</strong> zdarzenia przychodzą spóźnione i nie po kolei. Liczy się czas zdarzenia (event time), a nie czas nadejścia.</li>
+<li><strong>Stan i awarie:</strong> stan (np. suma w oknie) trzeba odtworzyć po awarii bez gubienia i dublowania danych.</li>
+</ul>
+<img class="pic" src="images/image-Lci4udf0.jpg" alt="Mem: So much data, so little time">
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zastosowania i przypadki użycia</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead"><strong>Zastosowania</strong></p>
+<ul class="points side">
+<li>Monitorowanie dowolnej liczby strumieni zdarzeń w narzędziach analitycznych.</li>
+<li>Wykrywanie i analiza wzorców zachowań.</li>
+<li>Reagowanie na zdarzenia w momencie ich wystąpienia.</li>
+<li>Automatyczne działania bez udziału człowieka.</li>
+<li>Przewidywanie zdarzeń.</li>
+</ul>
+</div>
+<div>
+<p class="lead"><strong>Przypadki użycia</strong></p>
+<ul class="points side">
+<li><strong>Clickstream analytics:</strong> śledzenie zachowania użytkowników na stronach WWW.</li>
+<li><strong>IoT:</strong> analiza danych z czujników w czasie rzeczywistym.</li>
+<li><strong>Cyberbezpieczeństwo:</strong> wykrywanie ataków DDoS.</li>
+<li><strong>Fraud detection:</strong> podejrzane transakcje bankowe.</li>
+<li><strong>Analiza logów:</strong> wykrywanie anomalii w systemach.</li>
+<li><strong>Logistyka:</strong> śledzenie pojazdów i przesyłek (GPS).</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się: wsad czy strumień?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cards c2">
+<div class="quiz card"><p class="q">Miesięczny raport zużycia wody w szklarni.</p><div class="opts"><button class="opt" data-ok="1">wsad</button><button class="opt" data-ok="0">strumień</button></div><p class="explain">Wsad: wynik potrzebny raz w miesiącu, liczy się kompletność danych, a nie opóźnienie.</p></div>
+<div class="quiz card"><p class="q">Blokada karty po podejrzanej transakcji.</p><div class="opts"><button class="opt" data-ok="0">wsad</button><button class="opt" data-ok="1">strumień</button></div><p class="explain">Strumień: decyzja musi zapaść w ciągu sekund, zanim oszust zrobi kolejne zakupy.</p></div>
+<div class="quiz card"><p class="q">Włączenie wentylacji, gdy temperatura przekroczy 30 °C.</p><div class="opts"><button class="opt" data-ok="0">wsad</button><button class="opt" data-ok="1">strumień</button></div><p class="explain">Strumień: sterowanie w pętli zwrotnej wymaga reakcji na bieżący odczyt.</p></div>
+<div class="quiz card"><p class="q">Trening modelu prognozy plonów na danych z 5 lat.</p><div class="opts"><button class="opt" data-ok="1">wsad</button><button class="opt" data-ok="0">strumień</button></div><p class="explain">Wsad: model uczymy na całej historii. Gotowy model można potem uruchamiać na strumieniu.</p></div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Sensory">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Dane sensoryczne: przykład ze szklarni</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Czujniki w uprawie pomidorów na macie z wełny mineralnej (Grodan) mierzą warunki w podłożu w czasie rzeczywistym.</p>
+<div class="cols">
+<img class="pic" style="max-height:15em" src="images/image-Dci4l0xJ.png" alt="Czujnik Grodan wbijany w matę uprawową">
+<img class="pic" style="max-height:15em" src="images/image-vZfBpYF0.jpg" alt="Czujnik bezprzewodowy na macie Grotop w szklarni z pomidorami">
+</div>
+<p class="small">Źródło zdjęć: https://www.grodan.com/</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sensor profesjonalny i domowy</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<img class="pic" style="max-height:11em" src="images/image-A6ROxcAl.png" alt="Sensor Grodan GroSens, cena 1100 euro netto">
+<p class="lead" style="margin-top:.4em"><strong>Profesjonalny:</strong> mierzy zawartość wody w podłożu (WC), temperaturę i przewodność elektryczną (EC), czyli zasolenie pożywki.</p>
+</div>
+<div>
+<div class="cols">
+<img class="pic" style="max-height:8em" src="images/image-yNKjudjx.jpg" alt="Domowy czujnik roślin: wilgotność, temperatura, nasłonecznienie, żyzność; Bluetooth 4.1">
+<p class="lead"><strong>Domowy</strong> (Xiaomi Mi Flora): wilgotność, temperatura, natężenie światła, żyzność (EC).</p>
+</div>
+<img class="pic" style="max-height:7.5em" src="images/image-MGdpjvYO.png" alt="Ceny domowych czujników roślin: 59-99 zł">
+<div class="note"><p>Około 1100 € wobec 60-100 zł (ceny z 2023 r.). Za różnicę płacimy za dokładność, kalibrację, trwałość, zasięg radiowy i integrację z systemem sterowania szklarnią.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Budowa sensora i łączność</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<svg class="diagram" viewBox="0 0 1100 150" role="img" aria-label="Sensor przesyła odczyt przez Bluetooth LE do bramki, bramka przez Wi-Fi lub LTE protokołem MQTT do brokera w chmurze">
+<defs><marker id="arS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs>
+<rect x="10" y="40" width="200" height="70" rx="10" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="110" y="70" text-anchor="middle" font-weight="bold">sensor</text><text x="110" y="95" text-anchor="middle" style="font-size:15px">bateria, tylko pomiar</text>
+<line x1="210" y1="75" x2="388" y2="75" stroke="#666" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#arS)"/><text x="300" y="62" text-anchor="middle" style="font-size:15px">BLE / Zigbee / LoRa</text>
+<rect x="390" y="40" width="220" height="70" rx="10" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="500" y="70" text-anchor="middle" font-weight="bold">bramka (gateway)</text><text x="500" y="95" text-anchor="middle" style="font-size:15px">Raspberry Pi, ESP32</text>
+<line x1="610" y1="75" x2="788" y2="75" stroke="#666" stroke-width="2.5" marker-end="url(#arS)"/><text x="700" y="62" text-anchor="middle" style="font-size:15px">Wi-Fi / LTE, MQTT</text>
+<rect x="790" y="40" width="300" height="70" rx="10" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="940" y="70" text-anchor="middle" font-weight="bold">broker / chmura</text><text x="940" y="95" text-anchor="middle" style="font-size:15px">dalsze przetwarzanie</text>
+<text x="300" y="135" text-anchor="middle" fill="#666" style="font-size:14px">krótki zasięg, mało energii</text>
+</svg>
+<ul class="points">
+<li>Sensor to proste urządzenie zasilane baterią, które służy wyłącznie do pomiarów. Większość czasu „śpi”, a odczyt wysyła co kilka minut.</li>
+<li>Komunikuje się bezprzewodowo, najczęściej przez <strong>Bluetooth Low Energy</strong> (BLE). Na duże odległości: LoRaWAN, NB-IoT.</li>
+<li>W realnym wdrożeniu sensor zawsze rozmawia z odbiornikiem (agregatorem, bramką), który przesyła dane dalej do serwera lub chmury.</li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Cel użycia sensorów</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Chcemy zbudować system, który na podstawie odczytów:</p>
+<table class="simple">
+<tr><th>Cel</th><th>Przykład</th><th>Operacja na strumieniu</th></tr>
+<tr><td><strong>Alarmowanie</strong></td><td>temperatura powyżej 30 °C, czujnik milczy od 15 minut</td><td>filtr (bezstanowy), timer wykrywający brak danych</td></tr>
+<tr><td><strong>Sterowanie</strong></td><td>utrzymanie poziomu nawodnienia, strategie nawadniania i nawożenia</td><td>pętla sterowania z pamięcią stanu (stateful)</td></tr>
+<tr><td><strong>Raporty</strong></td><td>dzienne nasłonecznienie, minimalna i maksymalna temperatura</td><td>agregacja w oknach czasowych</td></tr>
+</table>
+<div class="note"><p>Każdy z tych celów to inny rodzaj przetwarzania strumieniowego. Filtry i okna czasowe zobaczymy w Apache Flink.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Problem skali</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<ul class="points">
+<li>Tysiące sensorów wysyłają dane do serwera.</li>
+<li>Dane pochodzą z <strong>różnych stref czasowych</strong>: zapisujemy czas zdarzenia w UTC.</li>
+<li>Różne ustawienia i alerty zależą od typu uprawy, klienta itp.: strumień trzeba wzbogacić o konfigurację (złączenie z tabelą).</li>
+</ul>
+<div class="note"><p><strong>Policzmy:</strong> 5000 czujników × 4 wielkości × 1 odczyt na minutę = 20 000 wiadomości na minutę, czyli ok. 333 na sekundę i <strong>28,8 mln</strong> na dobę.</p></div>
+</div>
+<img class="pic" src="images/image-HwdhLkx1.jpg" alt="Szklarnia z długimi rzędami pomidorów">
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Odczyt z sensora w Pythonie (BLE)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|4-6|8-14|16">
+import asyncio
+from bleak import BleakClient
+
+ADRES = "C4:7C:8D:6A:3E:91"  # MAC czujnika (macOS: UUID)
+TRYB = "00001a00-0000-1000-8000-00805f9b34fb"
+DANE = "00001a01-0000-1000-8000-00805f9b34fb"
+BATERIA = "00001a02-0000-1000-8000-00805f9b34fb"
+
+async def odczyt(adres):
+    async with BleakClient(adres, timeout=20) as czujnik:
+        await czujnik.write_gatt_char(TRYB, b"\xa0\x1f", response=True)
+        dane = await czujnik.read_gatt_char(DANE)
+        info = await czujnik.read_gatt_char(BATERIA)
+    return dekoduj(dane) | {"bateria": info[0],
+                            "firmware": info[2:].decode()}
+
+print(asyncio.run(odczyt(ADRES)))   # dekoduj(): następny slajd
+</code></pre>
+<div>
+<ul class="points side">
+<li><strong>bleak</strong> to wieloplatformowa biblioteka BLE oparta na <code>asyncio</code> (wykład o korutynach).</li>
+<li>Protokół Mi Flora: zapis bajtów <code>A0 1F</code> do charakterystyki trybu, potem odczyt 16 bajtów z bieżącymi pomiarami.</li>
+<li>Charakterystyki GATT identyfikujemy po UUID.</li>
+</ul>
+<div class="note warn"><p>Oryginalny przykład korzystał z biblioteki <code>miflora</code>. Jej ostatnie wydanie to 0.7.2, a backendy <code>bluepy</code>/<code>gatttool</code> nie są już rozwijane. Dziś lepiej użyć <code>bleak</code>.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Dekodowanie bajtów: moduł struct</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import struct
+
+def dekoduj(raw: bytes) -> dict:
+    # &lt; little-endian | h: int16 temp*10 | x: pomiń bajt
+    # I: uint32 lux | B: uint8 wilgotność % | H: uint16 EC
+    temp, lux, wilg, ec = struct.unpack_from("&lt;hxIBH", raw)
+    return {"temp": temp / 10, "lux": lux, "wilg": wilg, "ec": ec}
+
+raw = bytes.fromhex("e800 00 c8090000 2a 5e01 023c00fb349b")
+print(len(raw), raw.hex(" "))
+print(dekoduj(raw))
+</code></pre>
+<pre class="out sm">16 e8 00 00 c8 09 00 00 2a 5e 01 02 3c 00 fb 34 9b
+{'temp': 23.2, 'lux': 2504, 'wilg': 42, 'ec': 350}</pre>
+<p class="small">Temperatura jest liczbą ze znakiem (<code>h</code>), bo bywa ujemna. <code>0x00e8</code> = 232, czyli 23,2 °C.</p>
+</div>
+<div class="blanks">
+<p class="lead">Czujnik zwrócił bajty:</p>
+<pre class="exo">2c 01 00 10 27 00 00 37 c8 00 ...</pre>
+<pre class="exo">temp = <input class="blank" size="6" data-re="^30(\.0)?$" data-sol="30.0" aria-label="temperatura"> °C
+lux  = <input class="blank" size="6" data-re="^10000$" data-sol="10000" aria-label="natężenie światła">
+wilg = <input class="blank" size="6" data-re="^55$" data-sol="55" aria-label="wilgotność"> %</pre>
+<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
+<p class="fb"></p>
+<p class="explain">Little-endian: najmłodszy bajt pierwszy. <code>2c 01</code> → 0x012c = 300 → 30,0 °C. <code>10 27 00 00</code> → 0x2710 = 10 000 lx. <code>37</code> → 55 %.</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Od sensora do raportu: proces</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<svg class="diagram" viewBox="0 0 1180 250" role="img" aria-label="Proces: sensory, bramka, broker, przetwarzanie strumieniowe, magazyn danych, analityka i alerty">
+<defs><marker id="arP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs>
+<g style="font-size:15px" fill="#666" text-anchor="middle"><text x="95" y="25">zbieranie</text><text x="300" y="25">transport</text><text x="505" y="25">przetwarzanie</text><text x="790" y="25">przechowywanie</text><text x="1060" y="25">analiza, reakcja</text></g>
+<rect x="10" y="50" width="170" height="80" rx="10" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="95" y="85" text-anchor="middle" font-weight="bold">sensory</text><text x="95" y="110" text-anchor="middle" style="font-size:15px">+ bramki</text>
+<line x1="180" y1="90" x2="218" y2="90" stroke="#666" stroke-width="2.5" marker-end="url(#arP)"/>
+<rect x="220" y="50" width="160" height="80" rx="10" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="300" y="85" text-anchor="middle" font-weight="bold">broker</text><text x="300" y="110" text-anchor="middle" style="font-size:15px">MQTT, Kafka</text>
+<line x1="380" y1="90" x2="418" y2="90" stroke="#666" stroke-width="2.5" marker-end="url(#arP)"/>
+<rect x="420" y="50" width="170" height="80" rx="10" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="505" y="85" text-anchor="middle" font-weight="bold">procesor</text><text x="505" y="110" text-anchor="middle" style="font-size:15px">Flink, Streamz</text>
+<line x1="590" y1="90" x2="688" y2="90" stroke="#666" stroke-width="2.5" marker-end="url(#arP)"/><text x="640" y="78" text-anchor="middle" style="font-size:14px">wyniki</text>
+<rect x="690" y="50" width="200" height="80" rx="10" fill="#f1f3f4" stroke="#999" stroke-width="2"/><text x="790" y="85" text-anchor="middle" font-weight="bold">magazyn</text><text x="790" y="110" text-anchor="middle" style="font-size:15px">TSDB, data lake</text>
+<line x1="890" y1="90" x2="968" y2="90" stroke="#666" stroke-width="2.5" marker-end="url(#arP)"/>
+<rect x="970" y="50" width="180" height="80" rx="10" fill="#f1f3f4" stroke="#999" stroke-width="2"/><text x="1060" y="85" text-anchor="middle" font-weight="bold">dashboard</text><text x="1060" y="110" text-anchor="middle" style="font-size:15px">Grafana, BI</text>
+<path d="M505,130 L505,190 L968,190" fill="none" stroke="#d93025" stroke-width="2.5" marker-end="url(#arP)"/>
+<rect x="970" y="165" width="180" height="50" rx="10" fill="#fce8e6" stroke="#d93025" stroke-width="2"/><text x="1060" y="196" text-anchor="middle" font-weight="bold">alarm, sterowanie</text>
+<path d="M300,130 L300,230 L690,230 L790,230 L790,130" fill="none" stroke="#999" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arP)"/><text x="545" y="222" text-anchor="middle" fill="#666" style="font-size:14px">surowe dane (archiwum, przetwarzanie wsadowe)</text>
+</svg>
+<ul class="points side">
+<li>Alarmy i sterowanie nie czekają na zapis do bazy: działają bezpośrednio na strumieniu.</li>
+<li>Surowe dane archiwizujemy osobno, aby móc je później przeliczyć wsadowo, np. po poprawieniu błędu w kodzie.</li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>ETL (extract, transform, load)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead"><strong>ETL</strong> (wyodrębnij, przekształć, załaduj) to proces integracji danych: łączy dane z wielu źródeł w jeden spójny zbiór i zapisuje go w hurtowni danych lub innym systemie docelowym.</p>
+<ul class="points side">
+<li><strong>Extract:</strong> pobranie i weryfikacja danych ze źródeł.</li>
+<li><strong>Transform:</strong> czyszczenie, ujednolicenie jednostek i formatów, wzbogacanie.</li>
+<li><strong>Load:</strong> zapis do repozytorium danych.</li>
+</ul>
+</div>
+<img class="pic" src="images/image-rN4l2rUM.png" alt="Proces ETL: Extract, Transform, Load">
+</div>
+<div class="note"><p><strong>ELT:</strong> najpierw ładujemy surowe dane (np. do data lake), a przekształcamy je później w docelowej bazie. <strong>Streaming ETL:</strong> te same trzy kroki wykonywane w sposób ciągły dla każdego zdarzenia.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>ETL w Pythonie: potok generatorów</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols" style="grid-template-columns:1.75fr 1fr">
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|10-11|13-20|22-23|25-28">
+import csv, io, sqlite3
+from datetime import datetime, timezone
+
+SUROWE = io.StringIO("""czujnik;czas;temp_F
+s1;2026-12-16T08:00+01:00;75.2
+s2;2026-12-16T02:00-05:00;81.5
+s3;2026-12-16T08:00+01:00;ERR
+s1;2026-12-16T08:05+01:00;76.1
+""")
+def extract(plik):                   # E: wiersz po wierszu
+    yield from csv.DictReader(plik, delimiter=";")
+
+def transform(wiersze):              # T: walidacja, UTC, °F -&gt; °C
+    for w in wiersze:
+        try:
+            f = float(w["temp_F"])
+        except ValueError:
+            continue                 # odrzucamy błędny odczyt
+        czas = datetime.fromisoformat(w["czas"]).astimezone(timezone.utc)
+        yield w["czujnik"], czas.isoformat(), round((f - 32) / 1.8, 1)
+
+def load(rekordy, db):               # L: zapis do bazy
+    db.executemany("INSERT INTO odczyty VALUES (?, ?, ?)", rekordy)
+
+db = sqlite3.connect(":memory:")
+db.execute("CREATE TABLE odczyty (czujnik, czas_utc, temp_c)")
+load(transform(extract(SUROWE)), db)
+print(*db.execute("SELECT * FROM odczyty ORDER BY czas_utc"), sep="\n")
+</code></pre>
+<div>
+<pre class="out sm lt">('s1', '2026-12-16T07:00:00+00:00', 24.0)
+('s2', '2026-12-16T07:00:00+00:00', 27.5)
+('s1', '2026-12-16T07:05:00+00:00', 24.5)</pre>
+<ul class="points side">
+<li>Potok generatorów z wykładu 2: w pamięci jest zawsze jeden wiersz.</li>
+<li>Odczyty <code>s1</code> o 8:00 w Polsce i <code>s2</code> o 2:00 w Nowym Jorku to <strong>ten sam moment</strong>. Bez UTC trudno to zauważyć.</li>
+<li>Błędny odczyt <code>ERR</code> odpada w kroku T.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Architektura">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Architektura strumieniowa</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Architektura przetwarzania strumieniowego (streaming data architecture) to zestaw komponentów, które przyjmują i przetwarzają duże ilości danych napływających jednocześnie z wielu źródeł.</p>
+<img class="pic" style="max-height:12em" src="images/image-YmZcHUKG.png" alt="Aplikacje, usługi, sensory i urządzenia wysyłają dane do kolejki wiadomości, procesor strumieni wykonuje zapytanie i przekazuje wyniki do API, akcji, wizualizacji i alertów">
+<p class="lead">Dzięki niej możemy zarządzać danymi strumieniowymi, monitorować je i analizować w czasie rzeczywistym.</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Cztery elementy architektury</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th>Element</th><th>Rola</th><th>Przykłady (2026)</th></tr>
+<tr><td><strong>Broker wiadomości</strong> (message broker)</td><td>przyjmuje zdarzenia od producentów, buforuje je i przekazuje konsumentom</td><td>Apache Kafka, brokery MQTT (Mosquitto, EMQX), RabbitMQ, Amazon Kinesis Data Streams, Google Cloud Pub/Sub, Azure Event Hubs</td></tr>
+<tr><td><strong>Procesor strumieni</strong> (stream processing framework, streaming ETL)</td><td>filtruje, łączy, agreguje i wzbogaca zdarzenia</td><td>Apache Flink, Spark Structured Streaming, Kafka Streams, Google Dataflow (Apache Beam)</td></tr>
+<tr><td><strong>Analityka</strong> (silnik zapytań, BI)</td><td>zapytania SQL, dashboardy, raporty</td><td>Amazon Athena, BigQuery, ClickHouse, Apache Druid, Grafana, Power BI</td></tr>
+<tr><td><strong>Magazyn danych strumieniowych</strong> (streaming data storage)</td><td>trwałe i tanie przechowywanie historii zdarzeń</td><td>data lake (S3 + Parquet, Apache Iceberg), bazy szeregów czasowych (InfluxDB, TimescaleDB)</td></tr>
+</table>
+<p class="small">Kolejne slajdy omawiają te elementy po kolei, a brokery (MQTT, Kafka, Kinesis) szczegółowo.</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Broker wiadomości (message broker)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead">Broker pobiera dane ze źródła (<strong>producenta</strong>), opcjonalnie tłumaczy je na standardowy format wiadomości i przesyła dalej.</p>
+<p class="lead">Inne komponenty (<strong>konsumenci</strong>) nasłuchują i wykorzystują komunikaty przekazywane przez brokera.</p>
+</div>
+<img class="pic" src="images/image-U79toil5.png" alt="Aplikacja 1 wysyła do kolejki w brokerze, aplikacja 2 odbiera z kolejki">
+</div>
+<ul class="points side">
+<li><strong>Rozprzęga</strong> (decoupling) systemy: producent nie musi znać konsumentów ani czekać, aż będą gotowi.</li>
+<li><strong>Buforuje</strong> chwilowe szczyty: to problem producenta i konsumenta z wykładu o klasycznych problemach synchronizacji, tylko w skali sieci.</li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kolejka czy publish/subscribe?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="brokersim">
+  <div class="simctl">
+    <label><input type="radio" name="bmode" value="pubsub" checked> publish/subscribe (temat)</label>
+    <label><input type="radio" name="bmode" value="queue"> kolejka (point-to-point)</label>
+    <button class="btn" data-act="p0">czujnik T wysyła</button>
+    <button class="btn" data-act="p1">czujnik W wysyła</button>
+    <button class="btn ghost" data-act="auto">Auto</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+  </div>
+  <svg class="diagram" viewBox="0 0 1100 300" role="img" aria-label="Dwóch producentów, broker z dwoma tematami i trzech konsumentów"></svg>
+  <p class="hint info">Wybierz tryb i wyślij kilka wiadomości.</p>
+</div>
+</div>
+<aside class="notes">Pub/sub: każdy subskrybent dostaje kopię (MQTT, Kafka z różnymi grupami). Kolejka: konsumenci konkurują o wiadomości, każda trafia do jednego (RabbitMQ, SQS, Kafka w ramach jednej grupy).</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Gwarancje dostarczenia (delivery semantics)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th>Semantyka</th><th>Jak działa</th><th>Ryzyko</th></tr>
+<tr><td><strong>at-most-once</strong> (najwyżej raz)</td><td>wyślij i zapomnij, bez potwierdzeń</td><td>wiadomość może zginąć</td></tr>
+<tr><td><strong>at-least-once</strong> (co najmniej raz)</td><td>ponawiaj, aż odbiorca potwierdzi</td><td>duplikaty po ponowieniu</td></tr>
+<tr><td><strong>exactly-once</strong> (dokładnie raz)</td><td>at-least-once + deduplikacja lub transakcje (Kafka, Flink)</td><td>wyższy koszt i złożoność</td></tr>
+</table>
+<div class="quiz"><p class="q">Konsument przetworzył wiadomość, zapisał wynik do bazy i padł, zanim potwierdził odbiór (commit offsetu). Po restarcie przetworzy ją jeszcze raz. Jaka to semantyka?</p><div class="opts"><button class="opt" data-ok="0">at-most-once</button><button class="opt" data-ok="1">at-least-once</button><button class="opt" data-ok="0">exactly-once</button></div><p class="explain">At-least-once: nic nie zginie, ale mogą pojawić się duplikaty. Dlatego operacje warto projektować jako <strong>idempotentne</strong>: zapis „temperatura czujnika 17 o 8:00 = 23,2” można powtórzyć bez szkody, a „zwiększ licznik o 1” już nie.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Push, pull i przeciwciśnienie (backpressure)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Co się stanie, gdy producent wysyła szybciej, niż konsument nadąża przetwarzać?</p>
+<div class="sim" id="bpsim">
+  <div class="simctl">
+    <label>producent <input type="range" class="rp" min="1" max="20" value="12"> <b class="rpv">12</b>/s</label>
+    <label>konsument <input type="range" class="rc" min="1" max="20" value="8"> <b class="rcv">8</b>/s</label>
+    <button class="btn" data-act="play">Start / pauza</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+  </div>
+  <div class="simctl">
+    <label><input type="radio" name="bpmode" value="grow" checked> bufor bez limitu</label>
+    <label><input type="radio" name="bpmode" value="drop"> odrzucaj nadmiar (drop)</label>
+    <label><input type="radio" name="bpmode" value="block"> backpressure: spowolnij producenta</label>
+  </div>
+  <div class="bpbuf"></div>
+  <p class="stat bpstat"></p>
+  <p class="hint bpverdict"></p>
+</div>
+<p class="small"><strong>Push</strong> (MQTT, RabbitMQ): broker sam wysyła wiadomości do konsumenta. <strong>Pull</strong> (Kafka, Kinesis): konsument pobiera je we własnym tempie, a nadmiar czeka w logu na dysku (rośnie <em>consumer lag</em>).</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Generacje brokerów</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<ul class="points side">
+<li><strong>Message Oriented Middleware</strong> (MOM): kolejki, routing, wiadomość znika po potwierdzeniu. RabbitMQ (4.x, od wersji 3.9 także trwałe <em>Streams</em>), Apache ActiveMQ Classic i Apache Artemis (od XI 2025 osobny projekt Apache).</li>
+<li><strong>Platformy logów zdarzeń</strong> (event streaming): bardzo wydajne, przechowują historię, którą można odczytać ponownie. Apache Kafka, Redpanda, Apache Pulsar.</li>
+<li><strong>Usługi chmurowe:</strong> Amazon Kinesis Data Streams, Google Cloud Pub/Sub, Azure Event Hubs (zgodny z protokołem Kafki), Azure IoT Hub dla urządzeń IoT.</li>
+<li><strong>Brokery IoT</strong> (protokół MQTT): Eclipse Mosquitto, EMQX, HiveMQ.</li>
+</ul>
+</div>
+<img class="pic" src="images/image-nHEDfHhK.jpg" alt="ActiveMQ kontra RabbitMQ">
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Procesor strumieni (stream processor)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<ul class="points">
+<li>Procesor strumieni (stream processing framework, streaming ETL): strumienie z brokera trzeba zagregować, przekształcić i ustrukturyzować, zanim będzie można je analizować narzędziami opartymi na SQL.</li>
+<li>Robią to procesory strumieni: pobierają zdarzenia z kolejek, a następnie łączą, przekształcają lub agregują dane.</li>
+<li>Wynikiem może być wywołanie API, akcja, wizualizacja, alert albo <strong>nowy strumień</strong> zapisany z powrotem do brokera.</li>
+</ul>
+<div class="pipe">
+  <div class="st">źródło<small>temat w brokerze</small></div><span class="ar">→</span>
+  <div class="st">filter<small>bezstanowe</small></div><span class="ar">→</span>
+  <div class="st">keyBy(czujnik)<small>podział na klucze</small></div><span class="ar">→</span>
+  <div class="st">okno 1 min, avg<small>stanowe</small></div><span class="ar">→</span>
+  <div class="st">ujście<small>nowy temat, baza</small></div>
+</div>
+<p class="small">To ten sam model co potok generatorów z wykładu 2 i Streamz z wykładu 9. Silniki rozproszone dodają równoległość na wielu maszynach, stan odporny na awarie i obsługę czasu zdarzeń.</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie strumieni w chmurze</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th>Dostawca</th><th>Usługi do przetwarzania strumieni (stan na 2026)</th></tr>
+<tr><td><strong>open source</strong></td><td>Apache Flink, Spark Structured Streaming, Kafka Streams, Apache Beam. Apache Storm wciąż jest rozwijany, ale stracił popularność.</td></tr>
+<tr><td><strong>AWS</strong></td><td>Amazon Managed Service for Apache Flink (dawniej Kinesis Data Analytics), Spark na Amazon EMR. Kinesis Data Analytics for SQL wyłączono w styczniu 2026 r.</td></tr>
+<tr><td><strong>Microsoft Azure</strong></td><td>Azure Stream Analytics, Microsoft Fabric Real-Time Intelligence, Spark w Azure Databricks i HDInsight. Storm nie jest już dostępny w HDInsight.</td></tr>
+<tr><td><strong>Google Cloud</strong></td><td>Dataflow (Apache Beam), Dataproc (Spark, Flink), Managed Service for Apache Kafka</td></tr>
+</table>
+<div class="note warn"><p>Nazwy i oferta usług chmurowych zmieniają się co rok. Warto znać silniki open source (Flink, Spark, Beam), bo na nich opiera się większość usług zarządzanych.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Analityka i BI</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<ul class="points">
+<li>Po przetworzeniu przez procesor dane można dalej analizować: zapytaniami SQL, w bazach NoSQL, kolejnymi transformacjami.</li>
+<li><strong>Zapytania i hurtownie:</strong> Amazon Athena, Amazon Redshift, Google BigQuery.</li>
+<li><strong>Analityka czasu rzeczywistego:</strong> ClickHouse, Apache Druid, Apache Pinot, Elasticsearch / OpenSearch.</li>
+<li><strong>Bazy NoSQL:</strong> Cassandra (duży strumień zapisów).</li>
+<li><strong>Szeregi czasowe</strong> (dane z czujników): InfluxDB, TimescaleDB, wizualizacja w Grafanie.</li>
+<li><strong>BI i raporty:</strong> Power BI, Tableau, Sisense.</li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przechowywanie danych: data lake</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<ul class="points side">
+<li><strong>Data lake</strong> (jezioro danych) to najtańsza i najbardziej elastyczna opcja przechowywania zdarzeń: pliki w magazynie obiektowym (S3, Azure Blob, GCS). Poprawna konfiguracja i utrzymanie są jednak trudne.</li>
+<li><strong>Schema-on-read:</strong> strukturę nadajemy danym dopiero przy odczycie. W hurtowni (schema-on-write) schemat sprawdzany jest przy zapisie.</li>
+<li>Dziś dane w jeziorze zapisuje się zwykle w kolumnowym formacie <strong>Parquet</strong>, a tabele opisują formaty <strong>Apache Iceberg</strong> lub <strong>Delta Lake</strong> (tzw. lakehouse: transakcje i SQL na plikach).</li>
+<li>Wszyscy dostawcy chmury oferują odpowiednie komponenty.</li>
+</ul>
+</div>
+<img class="pic" src="images/image-18iPCDKU.png" alt="Schema-on-write: szybkie odczyty, wolny zapis, SQL; schema-on-read: wolniejsze odczyty, szybki zapis, NoSQL">
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Architektura Lambda i Kappa</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<svg class="diagram" viewBox="0 0 1180 230" role="img" aria-label="Lambda: dwie ścieżki, wsadowa i strumieniowa, łączone w warstwie serwującej. Kappa: jedna ścieżka strumieniowa z logu zdarzeń">
+<defs><marker id="arL" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs>
+<text x="10" y="22" font-weight="bold">Lambda</text>
+<rect x="10" y="60" width="110" height="50" rx="8" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="65" y="91" text-anchor="middle">dane</text>
+<path d="M120,75 L150,40 L178,40" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arL)"/><path d="M120,95 L150,130 L178,130" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arL)"/>
+<rect x="180" y="18" width="200" height="44" rx="8" fill="#f1f3f4" stroke="#999" stroke-width="2"/><text x="280" y="46" text-anchor="middle">wsad (Spark)</text>
+<rect x="180" y="108" width="200" height="44" rx="8" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="280" y="136" text-anchor="middle">strumień (Flink)</text>
+<path d="M380,40 L410,40 L438,75" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arL)"/><path d="M380,130 L410,130 L438,98" fill="none" stroke="#666" stroke-width="2" marker-end="url(#arL)"/>
+<rect x="440" y="60" width="120" height="50" rx="8" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="500" y="91" text-anchor="middle">wyniki</text>
+<text x="280" y="185" text-anchor="middle" fill="#666" style="font-size:15px">dwa kody tej samej logiki</text>
+<text x="640" y="22" font-weight="bold">Kappa</text>
+<rect x="640" y="85" width="110" height="50" rx="8" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="695" y="116" text-anchor="middle">dane</text>
+<line x1="750" y1="110" x2="788" y2="110" stroke="#666" stroke-width="2" marker-end="url(#arL)"/>
+<rect x="790" y="85" width="120" height="50" rx="8" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="850" y="116" text-anchor="middle">log (Kafka)</text>
+<line x1="910" y1="110" x2="948" y2="110" stroke="#666" stroke-width="2" marker-end="url(#arL)"/>
+<rect x="950" y="85" width="110" height="50" rx="8" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="1005" y="116" text-anchor="middle">strumień</text>
+<line x1="1060" y1="110" x2="1088" y2="110" stroke="#666" stroke-width="2" marker-end="url(#arL)"/>
+<rect x="1090" y="85" width="85" height="50" rx="8" fill="#f1f3f4" stroke="#999" stroke-width="2"/><text x="1132" y="116" text-anchor="middle">wyniki</text>
+<path d="M850,135 C850,190 1005,190 1005,140" fill="none" stroke="#d93025" stroke-width="2" stroke-dasharray="6 5" marker-end="url(#arL)"/><text x="928" y="208" text-anchor="middle" fill="#d93025" style="font-size:15px">ponowne odtworzenie logu (replay)</text>
+</svg>
+<div class="cols">
+<ul class="points side">
+<li><strong>Lambda:</strong> ścieżka wsadowa daje dokładne wyniki z opóźnieniem, strumieniowa szybkie przybliżenie. Wadą jest utrzymywanie tej samej logiki w dwóch systemach.</li>
+</ul>
+<ul class="points side">
+<li><strong>Kappa:</strong> wszystko jest strumieniem. Aby przeliczyć historię, odtwarzamy log zdarzeń od początku tym samym kodem. Wymaga brokera, który przechowuje historię (Kafka).</li>
+</ul>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="quiz multi compact"><p class="q">Które z poniższych to <b>brokery wiadomości</b>? (zaznacz wszystkie)</p><div class="opts"><button class="opt" data-ok="1">Apache Kafka</button><button class="opt" data-ok="1">RabbitMQ</button><button class="opt" data-ok="0">Apache Flink</button><button class="opt" data-ok="1">Eclipse Mosquitto</button><button class="opt" data-ok="0">Grafana</button><button class="opt" data-ok="1">Amazon Kinesis Data Streams</button><button class="opt" data-ok="0">InfluxDB</button></div><button class="btn check">Sprawdź</button><p class="explain">Flink to procesor strumieni, Grafana służy do wizualizacji, a InfluxDB to baza szeregów czasowych (magazyn).</p></div>
+<div class="quiz compact"><p class="q">Który element architektury liczy średnią temperaturę każdego czujnika w oknach 1-minutowych?</p><div class="opts"><button class="opt" data-ok="0">broker wiadomości</button><button class="opt" data-ok="1">procesor strumieni</button><button class="opt" data-ok="0">data lake</button></div><p class="explain">Agregacja w oknie to zadanie procesora strumieni (Flink, Kafka Streams, Quix Streams). Broker tylko przechowuje i przekazuje zdarzenia.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="MQTT">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>MQTT: protokół dla IoT</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<ul class="points side">
+<li><strong>MQTT</strong> to lekki protokół publish/subscribe działający nad TCP, standard OASIS (wersje 3.1.1 i 5.0). Nagłówek wiadomości ma zaledwie 2 bajty, więc protokół nadaje się do słabych urządzeń i niestabilnych łączy.</li>
+<li>Klienci <strong>publikują</strong> wiadomości w <strong>tematach</strong> (topics), np. <code>szklarnia/A/czujnik17/temp</code>, i <strong>subskrybują</strong> tematy. Broker przekazuje każdą wiadomość wszystkim subskrybentom tematu.</li>
+<li>Brokery: Eclipse Mosquitto, EMQX, HiveMQ, a także RabbitMQ (wtyczka MQTT) oraz Azure IoT Hub i AWS IoT Core.</li>
+<li>Typowo: MQTT od urządzeń do brokera, a dalej most (bridge, Kafka Connect) do Kafki i procesora strumieni.</li>
+</ul>
+</div>
+<svg class="diagram" viewBox="0 0 420 330" role="img" aria-label="Dwa czujniki publikują do brokera MQTT, broker przekazuje wiadomości subskrybentom: dashboardowi i usłudze alarmów">
+<defs><marker id="arM" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs>
+<rect x="5" y="40" width="120" height="50" rx="8" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="65" y="71" text-anchor="middle" style="font-size:16px">czujnik 17</text>
+<rect x="5" y="230" width="120" height="50" rx="8" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="65" y="261" text-anchor="middle" style="font-size:16px">czujnik 18</text>
+<rect x="160" y="120" width="110" height="90" rx="10" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="215" y="160" text-anchor="middle" font-weight="bold">broker</text><text x="215" y="185" text-anchor="middle" style="font-size:15px">MQTT</text>
+<line x1="125" y1="70" x2="168" y2="125" stroke="#666" stroke-width="2" marker-end="url(#arM)"/><line x1="125" y1="250" x2="168" y2="205" stroke="#666" stroke-width="2" marker-end="url(#arM)"/>
+<text x="95" y="120" text-anchor="middle" fill="#666" style="font-size:14px">publish</text>
+<rect x="300" y="40" width="115" height="50" rx="8" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="357" y="71" text-anchor="middle" style="font-size:16px">dashboard</text>
+<rect x="300" y="230" width="115" height="50" rx="8" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="357" y="261" text-anchor="middle" style="font-size:16px">alarmy</text>
+<line x1="270" y1="130" x2="320" y2="94" stroke="#666" stroke-width="2" marker-end="url(#arM)"/><line x1="270" y1="200" x2="320" y2="226" stroke="#666" stroke-width="2" marker-end="url(#arM)"/>
+<text x="335" y="165" text-anchor="middle" fill="#666" style="font-size:14px">subscribe</text>
+<text x="210" y="320" text-anchor="middle" fill="#666" style="font-size:14px">push: broker wysyła do klientów</text>
+</svg>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Tematy MQTT i symbole wieloznaczne</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wr">
+<div>
+<ul class="points side">
+<li>Temat to ścieżka z poziomami oddzielonymi <code>/</code>. Tematów nie trzeba wcześniej tworzyć.</li>
+<li><code>+</code> pasuje do <strong>jednego</strong> poziomu.</li>
+<li><code>#</code> pasuje do <strong>dowolnej liczby</strong> poziomów (także zera). Musi stać na końcu filtra.</li>
+<li>Tematy zaczynające się od <code>$</code> (statystyki brokera) nie pasują do filtrów zaczynających się od <code>+</code> lub <code>#</code>.</li>
+</ul>
+</div>
+<div class="sim" id="topicsim">
+  <div class="simctl">
+    <label>filtr subskrypcji: <input type="text" class="flt" value="szklarnia/+/czujnik17/temp" size="26" spellcheck="false"></label>
+  </div>
+  <div class="simctl presets">
+    <button class="btn ghost">szklarnia/A/#</button><button class="btn ghost">szklarnia/+/+/wilg</button><button class="btn ghost">#</button><button class="btn ghost">szklarnia/A/czujnik17</button><button class="btn ghost">szklarnia/#/temp</button>
+  </div>
+  <ul class="topics"></ul>
+  <p class="hint tverdict"></p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Ćwiczenie: subskrypcje MQTT</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="blanks">
+<p class="lead">Tematy mają postać <code>szklarnia/&lt;hala&gt;/&lt;czujnik&gt;/&lt;wielkość&gt;</code>. Podaj filtry subskrypcji:</p>
+<pre class="exo"><span class="c"># 1. wszystkie wielkości z hali A</span>
+client.subscribe("<input class="blank" size="22" data-re="^szklarnia/A/(#|\+/\+|\+/#)$" data-sol="szklarnia/A/#" aria-label="filtr 1">")
+<span class="c"># 2. temperatura ze wszystkich czujników we wszystkich halach</span>
+client.subscribe("<input class="blank" size="22" data-re="^szklarnia/\+/\+/temp$" data-sol="szklarnia/+/+/temp" aria-label="filtr 2">")
+<span class="c"># 3. wszystko z czujnika 17 w dowolnej hali</span>
+client.subscribe("<input class="blank" size="22" data-re="^szklarnia/\+/czujnik17/(#|\+)$" data-sol="szklarnia/+/czujnik17/#" aria-label="filtr 3">")</pre>
+<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
+<p class="fb"></p>
+<p class="explain">Filtr <code>szklarnia/#/temp</code> jest niepoprawny, bo <code>#</code> musi być ostatni. Filtr 1 można zapisać też jako <code>szklarnia/A/+/+</code>, jeśli wszystkie tematy mają dokładnie 4 poziomy.</p>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>MQTT: QoS, retained, Last Will</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th>Mechanizm</th><th>Znaczenie</th></tr>
+<tr><td><strong>QoS 0</strong></td><td>najwyżej raz (at-most-once): wyślij i zapomnij</td></tr>
+<tr><td><strong>QoS 1</strong></td><td>co najmniej raz (at-least-once): potwierdzenie PUBACK, możliwe duplikaty</td></tr>
+<tr><td><strong>QoS 2</strong></td><td>dokładnie raz (exactly-once): czteroetapowe uzgodnienie, najwolniejsze</td></tr>
+<tr><td><strong>retained</strong></td><td>broker pamięta ostatnią wiadomość w temacie i od razu wysyła ją nowym subskrybentom (np. aktualny stan)</td></tr>
+<tr><td><strong>Last Will (LWT)</strong></td><td>wiadomość, którą broker opublikuje w imieniu klienta, gdy ten rozłączy się nieoczekiwanie (np. <code>offline</code>)</td></tr>
+<tr><td><strong>sesja trwała</strong></td><td>broker przechowuje subskrypcje i wiadomości QoS 1/2 dla klienta, który chwilowo jest offline</td></tr>
+</table>
+<div class="quiz compact"><p class="q">Czujnik wysyła temperaturę co 10 s i strata pojedynczego odczytu nie jest problemem. Jaki QoS wybrać?</p><div class="opts"><button class="opt" data-ok="1">QoS 0</button><button class="opt" data-ok="0">QoS 1</button><button class="opt" data-ok="0">QoS 2</button></div><p class="explain">QoS 0: najmniejszy narzut i najmniejsze zużycie baterii. Za 10 s przyjdzie nowy odczyt. QoS 1 lub 2 wybieramy dla komend (np. „zamknij zawór”) i zdarzeń, których nie wolno zgubić.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>MQTT w Pythonie: publikacja (paho-mqtt 2.x)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols" style="grid-template-columns:1.7fr 1fr">
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|8-9|10-12|14-21">
+import json, random, time
+from datetime import datetime, timezone
+import paho.mqtt.client as mqtt
+
+SENSOR = "czujnik17"
+TOPIC = f"szklarnia/A/{SENSOR}"
+
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=SENSOR)
+client.will_set(f"{TOPIC}/status", "offline", qos=1, retain=True)  # LWT
+client.connect("localhost", 1883)
+client.loop_start()                     # wątek sieciowy w tle
+client.publish(f"{TOPIC}/status", "online", qos=1, retain=True)
+
+for _ in range(3):
+    teraz = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    odczyt = {"ts": teraz, "temp": round(random.gauss(27, 3), 1),
+              "wilg": random.randint(30, 60)}
+    info = client.publish(f"{TOPIC}/odczyt", json.dumps(odczyt), qos=1)
+    info.wait_for_publish()             # QoS 1: czekamy na PUBACK
+    print("wysłano:", odczyt["ts"], odczyt["temp"])
+    time.sleep(1)
+
+client.loop_stop()
+client.disconnect()
+</code></pre>
+<div>
+<pre class="out sm lt">wysłano: 2026-10-10T22:52:48+00:00 30.2
+wysłano: 2026-10-10T22:52:49+00:00 30.1
+wysłano: 2026-10-10T22:52:50+00:00 23.2</pre>
+<div class="note warn"><p><strong>paho-mqtt 2.0</strong> (2024) zmieniło API: pierwszym argumentem <code>Client</code> jest wersja API callbacków. Kod z tutoriali dla 1.x (<code>mqtt.Client("id")</code>) zgłasza dziś błąd.</p></div>
+<ul class="points side">
+<li><code>loop_start()</code> uruchamia osobny <strong>wątek</strong> obsługi sieci (wykład o wątkach).</li>
+<li>Last Will: gdy czujnik zniknie bez <code>disconnect()</code>, broker sam opublikuje <code>offline</code>.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>MQTT w Pythonie: subskrypcja</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|4-6|8-11|13-17">
+import json
+import paho.mqtt.client as mqtt
+
+def on_connect(client, userdata, flags, reason_code, properties):
+    print("połączono:", reason_code)
+    client.subscribe("szklarnia/+/+/odczyt", qos=1)
+
+def on_message(client, userdata, msg):
+    odczyt = json.loads(msg.payload)
+    alarm = "  &lt;- ALARM" if odczyt["temp"] &gt; 30 else ""
+    print(f"{msg.topic}: {odczyt['temp']} °C{alarm}")
+
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+client.on_connect = on_connect
+client.on_message = on_message
+client.connect("localhost", 1883)
+client.loop_forever()                # pętla sieciowa w tym wątku
+</code></pre>
+<pre class="out sm">połączono: Success
+szklarnia/A/czujnik17/odczyt: 30.2 °C  &lt;- ALARM
+szklarnia/A/czujnik17/odczyt: 30.1 °C  &lt;- ALARM
+szklarnia/A/czujnik17/odczyt: 23.2 °C</pre>
+</div>
+<ul class="points side">
+<li>Subskrybujemy w <code>on_connect</code>, więc po automatycznym ponownym połączeniu subskrypcja zostanie odnowiona.</li>
+<li>Callbacki działają w wątku sieciowym: długie przetwarzanie w <code>on_message</code> blokuje odbiór kolejnych wiadomości. Cięższą pracę przekazujemy do kolejki i puli wątków (wykład o executorach).</li>
+<li>To już jest prosty procesor strumienia: filtr <code>temp &gt; 30</code> na każdym zdarzeniu.</li>
+</ul>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Kinesis">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Amazon Kinesis Data Streams</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<img class="pic" style="max-height:9.5em" src="images/image-gZW5rvry.png" alt="Producenci wysyłają dane do strumienia Kinesis podzielonego na shardy, konsumenci na EC2 przekazują je do S3, DynamoDB, Redshift, EMR i Firehose">
+<div class="cols">
+<div>
+<p class="lead">Zarządzana usługa AWS, która nieprzerwanie przyjmuje gigabajty danych na sekundę z setek tysięcy źródeł. Strumień dzieli się na <strong>shardy</strong> (odpowiednik partycji Kafki).</p>
+<ul class="points icons side">
+<li><i class="fa-solid fa-check"></i>łatwa konfiguracja, brak serwerów do utrzymania, tryb on-demand sam się skaluje</li>
+<li><i class="fa-solid fa-check"></i>integracja z AWS: Lambda, Amazon Data Firehose, Managed Service for Apache Flink</li>
+</ul>
+</div>
+<div>
+<ul class="points icons cons side">
+<li><i class="fa-solid fa-xmark"></i>tylko w AWS (vendor lock-in)</li>
+<li><i class="fa-solid fa-xmark"></i>opłata za godzinę pracy sharda (tryb provisioned) albo za ilość danych (on-demand)</li>
+<li><i class="fa-solid fa-xmark"></i>limity na shard (1 MB/s zapisu, 2 MB/s odczytu), domyślna retencja 24 h (maks. 365 dni)</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Kafka">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Apache Kafka</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wr">
+<img class="pic" src="images/image-N52IZs16.png" alt="Producenci wysyłają do klastra Kafki z tematami podzielonymi na partycje, konsumenci odczytują">
+<div>
+<p class="lead">Apache Kafka to otwarta, rozproszona platforma strumieniowania zdarzeń dla wydajnych potoków danych, analityki strumieniowej, integracji danych i aplikacji krytycznych.</p>
+<ul class="points side">
+<li>Powstała w LinkedIn jako system kolejkowania wiadomości. W 2011 r. jej kod został otwarty i przekazany do Apache Software Foundation.</li>
+<li>Kafka 4.0 (2025) całkowicie usunęła ZooKeepera: metadane klastra zarządza wbudowany protokół <strong>KRaft</strong>. W 2026 r. aktualna jest gałąź 4.x.</li>
+<li>Szczegóły: wykład „Kafka, Kafka Streams, connectory”.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Klaster Kafki</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<img class="pic" style="max-height:11em" src="images/image-30KHv9Hd.png" alt="Architektura Kafki: producenci, klaster z brokerem, tematy z partycjami, konsumenci, aplikacja analityczna">
+<ul class="points">
+<li>Kafka działa jako <strong>klaster</strong> w środowisku rozproszonym, które może obejmować wiele centrów danych.</li>
+<li>Klaster składa się z wielu <strong>brokerów</strong> (węzłów). Część węzłów pełni rolę <strong>kontrolerów</strong> KRaft, które przechowują metadane klastra i wybierają liderów partycji.</li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Temat, partycja, offset</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<svg class="diagram" data-gen="part" viewBox="0 0 1180 250" role="img" aria-label="Temat odczyty z trzema partycjami; każda partycja to log z numerowanymi offsetami; producent dopisuje na końcu, grupy konsumentów mają własne pozycje odczytu w partycji 2"><defs><marker id="arK2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs>
+<text x="150" y="47" text-anchor="end" class="mono">partycja 0</text>
+<rect x="165" y="20" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="189" y="47" text-anchor="middle" class="mono">0</text>
+<rect x="217" y="20" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="241" y="47" text-anchor="middle" class="mono">1</text>
+<rect x="269" y="20" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="293" y="47" text-anchor="middle" class="mono">2</text>
+<rect x="321" y="20" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="345" y="47" text-anchor="middle" class="mono">3</text>
+<rect x="373" y="20" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="397" y="47" text-anchor="middle" class="mono">4</text>
+<rect x="425" y="20" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="449" y="47" text-anchor="middle" class="mono">5</text>
+<rect x="477" y="20" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="501" y="47" text-anchor="middle" class="mono">6</text>
+<rect x="529" y="20" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="553" y="47" text-anchor="middle" class="mono">7</text>
+<rect x="581" y="20" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="605" y="47" text-anchor="middle" class="mono">8</text>
+<rect x="633" y="20" width="48" height="40" rx="4" fill="#fff" stroke="#53ae12" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="150" y="109" text-anchor="end" class="mono">partycja 1</text>
+<rect x="165" y="82" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="189" y="109" text-anchor="middle" class="mono">0</text>
+<rect x="217" y="82" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="241" y="109" text-anchor="middle" class="mono">1</text>
+<rect x="269" y="82" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="293" y="109" text-anchor="middle" class="mono">2</text>
+<rect x="321" y="82" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="345" y="109" text-anchor="middle" class="mono">3</text>
+<rect x="373" y="82" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="397" y="109" text-anchor="middle" class="mono">4</text>
+<rect x="425" y="82" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="449" y="109" text-anchor="middle" class="mono">5</text>
+<rect x="477" y="82" width="48" height="40" rx="4" fill="#fff" stroke="#53ae12" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="150" y="171" text-anchor="end" class="mono">partycja 2</text>
+<rect x="165" y="144" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="189" y="171" text-anchor="middle" class="mono">0</text>
+<rect x="217" y="144" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="241" y="171" text-anchor="middle" class="mono">1</text>
+<rect x="269" y="144" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="293" y="171" text-anchor="middle" class="mono">2</text>
+<rect x="321" y="144" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="345" y="171" text-anchor="middle" class="mono">3</text>
+<rect x="373" y="144" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="397" y="171" text-anchor="middle" class="mono">4</text>
+<rect x="425" y="144" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="449" y="171" text-anchor="middle" class="mono">5</text>
+<rect x="477" y="144" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="501" y="171" text-anchor="middle" class="mono">6</text>
+<rect x="529" y="144" width="48" height="40" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><text x="553" y="171" text-anchor="middle" class="mono">7</text>
+<rect x="581" y="144" width="48" height="40" rx="4" fill="#fff" stroke="#53ae12" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="750" y="36" style="font-size:16px" fill="#53ae12">producent dopisuje</text><text x="750" y="56" style="font-size:16px" fill="#53ae12">na końcu (append)</text>
+<line x1="744" y1="40" x2="690" y2="40" stroke="#53ae12" stroke-width="2.5" marker-end="url(#arK2)"/>
+<line x1="345" y1="222" x2="345" y2="188" stroke="#e8710a" stroke-width="2.5" marker-end="url(#arK2)"/><text x="355" y="240" text-anchor="end" fill="#e8710a" style="font-size:15px">grupa „alarmy”: offset 3</text>
+<line x1="501" y1="222" x2="501" y2="188" stroke="#9334e6" stroke-width="2.5" marker-end="url(#arK2)"/><text x="491" y="240" text-anchor="start" fill="#9334e6" style="font-size:15px">grupa „archiwum”: offset 6</text>
+<text x="1010" y="120" style="font-size:15px" fill="#666">stare → nowe</text><line x1="1010" y1="130" x2="1160" y2="130" stroke="#666" stroke-width="2" marker-end="url(#arK2)"/></svg>
+<ul class="points side">
+<li><strong>Temat</strong> (topic) przechowuje strumień rekordów jako uporządkowaną, niezmienną sekwencję podzieloną na <strong>partycje</strong>. Każdy broker przechowuje część partycji.</li>
+<li>Rekordy z tym samym <strong>kluczem</strong> trafiają do tej samej partycji. Kolejność jest gwarantowana tylko w obrębie partycji.</li>
+<li><strong>Offset</strong> to numer rekordu w partycji. Rekord nie znika po odczycie: jest usuwany dopiero po czasie retencji (domyślnie 7 dni) albo nigdy (log compaction zostawia ostatnią wartość dla klucza).</li>
+<li>Partycje są <strong>replikowane</strong>: lider przyjmuje zapisy, a repliki na innych brokerach przejmują jego rolę po awarii.</li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Producenci i konsumenci</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<ul class="points side">
+<li>Aplikacje wysyłają dane do partycji przez <strong>producentów</strong>, a inne aplikacje odczytują je i przetwarzają przez <strong>konsumentów</strong>. Wielu producentów i konsumentów może działać jednocześnie.</li>
+<li>Kafka używa modelu <strong>pull</strong>: konsument sam pobiera partie wiadomości od zapamiętanego offsetu, we własnym tempie.</li>
+<li>Dwóch konsumentów czytających tę samą partycję dostanie dane w tej samej kolejności: wszyscy niezależni konsumenci widzą tę samą „rzeczywistość”.</li>
+<li>Konsument może cofnąć offset i <strong>odtworzyć</strong> historię, np. po poprawieniu błędu w kodzie (architektura Kappa).</li>
+</ul>
+</div>
+<img class="pic" src="images/image-WNtey7Iy.png" alt="Dwóch producentów pisze do tematów 1 i 2, dwóch konsumentów czyta z różnych offsetów">
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Grupy konsumentów (consumer groups)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="groupsim">
+  <div class="simctl">
+    <span>grupa <b>alarmy</b>:</span>
+    <button class="btn" data-act="add">+ konsument</button>
+    <button class="btn ghost" data-act="del">− konsument (awaria)</button>
+    <span class="stat">temat <code>odczyty</code> ma 4 partycje</span>
+  </div>
+  <div class="gview"></div>
+</div>
+<div class="quiz compact"><p class="q">Temat ma 3 partycje, a w grupie uruchomiliśmy 5 konsumentów. Ilu z nich będzie otrzymywać wiadomości?</p><div class="opts"><button class="opt" data-ok="0">5</button><button class="opt" data-ok="1">3</button><button class="opt" data-ok="0">1</button></div><p class="explain">W jednej grupie partycję czyta dokładnie jeden konsument, więc maksymalna równoległość grupy to liczba partycji. Dwóch konsumentów będzie bezczynnych (czekają w rezerwie na awarię innych). Od Kafki 4.2 alternatywą są <strong>share groups</strong> (kolejki w Kafce, KIP-932), w których wielu konsumentów może czytać tę samą partycję.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kafka w Pythonie: producent</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols" style="grid-template-columns:1.6fr 1fr">
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|4|6-11|13-17">
+import json, random
+from confluent_kafka import Producer
+
+p = Producer({"bootstrap.servers": "localhost:9092", "acks": "all"})
+
+def raport(err, msg):                 # wywoływane po potwierdzeniu
+    if err:
+        print("błąd:", err)
+    else:
+        print(f"{msg.key().decode()} -&gt; partycja {msg.partition()}, "
+              f"offset {msg.offset()}")
+
+for i in range(6):
+    czujnik = f"czujnik{i % 3}"
+    odczyt = {"czujnik": czujnik, "temp": round(random.gauss(25, 3), 1)}
+    p.produce("odczyty", key=czujnik, value=json.dumps(odczyt), callback=raport)
+p.flush()                             # czekamy na wszystkie potwierdzenia
+</code></pre>
+<div>
+<pre class="out sm lt">czujnik1 -&gt; partycja 2, offset 0
+czujnik2 -&gt; partycja 2, offset 1
+czujnik1 -&gt; partycja 2, offset 2
+czujnik2 -&gt; partycja 2, offset 3
+czujnik0 -&gt; partycja 1, offset 0
+czujnik0 -&gt; partycja 1, offset 1</pre>
+<ul class="points side">
+<li><code>confluent-kafka</code> to oficjalny klient Pythona oparty na librdkafka.</li>
+<li><code>produce()</code> jest asynchroniczne: wiadomości trafiają do bufora i są wysyłane partiami.</li>
+<li>Ten sam klucz → ta sama partycja. Temat miał 3 partycje: partycja 0 nie dostała żadnego klucza.</li>
+<li><code>acks=all</code>: zapis potwierdzają wszystkie repliki.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kafka w Pythonie: konsument</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols" style="grid-template-columns:1.6fr 1fr">
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|4-7|10-17|18-19">
+import json
+from confluent_kafka import Consumer
+
+c = Consumer({"bootstrap.servers": "localhost:9092",
+              "group.id": "alarmy",              # grupa konsumentów
+              "auto.offset.reset": "earliest"})  # nowa grupa: od początku
+c.subscribe(["odczyty"])
+try:
+    while True:
+        msg = c.poll(1.0)                        # model pull
+        if msg is None:
+            continue
+        if msg.error():
+            print(msg.error())
+            continue
+        o = json.loads(msg.value())
+        print(f"p{msg.partition()}@{msg.offset()}", o["czujnik"], o["temp"])
+finally:
+    c.close()                         # commit offsetów, wyjście z grupy
+</code></pre>
+<div>
+<pre class="out sm lt">p2@0 czujnik1 20.7
+p2@1 czujnik2 23.0
+p2@2 czujnik1 25.9
+p2@3 czujnik2 24.6
+p1@0 czujnik0 26.6
+p1@1 czujnik0 28.0</pre>
+<ul class="points side">
+<li>Kolejność jest zachowana w każdej partycji, ale nie między partycjami.</li>
+<li>Offsety są domyślnie zatwierdzane automatycznie co 5 s (at-least-once).</li>
+<li>Drugie uruchomienie z tym samym <code>group.id</code> nic nie wypisze: grupa zaczyna od zapisanego offsetu.</li>
+</ul>
+</div>
+</div>
+</div>
+<aside class="notes">Wyniki z prawdziwego uruchomienia na Kafce 4.1 w trybie KRaft (apache/kafka-native w Dockerze).</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Dlaczego Kafka jest szybka?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<ul class="points">
+<li><strong>Zapis sekwencyjny:</strong> partycja to log, do którego tylko dopisujemy na końcu. Na dysku jest podzielony na pliki segmentów, a stare segmenty usuwa się w całości.</li>
+<li><strong>Pamięć podręczna systemu (page cache):</strong> Kafka nie trzyma danych we własnej pamięci, korzysta z cache systemu operacyjnego. Przy odczycie jednego rekordu system z wyprzedzeniem wczytuje kolejne bloki pliku (read-ahead), więc następne rekordy są już w RAM.</li>
+<li><strong>Zero-copy:</strong> dane z page cache trafiają do gniazda sieciowego bez kopiowania przez pamięć aplikacji (<code>sendfile</code>).</li>
+<li><strong>Partie i kompresja:</strong> producent wysyła wiadomości partiami, skompresowanymi (lz4, zstd).</li>
+<li><strong>Partycje:</strong> równoległy zapis i odczyt na wielu brokerach i przez wielu konsumentów.</li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kafka nie jest prosta</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<ul class="points side">
+<li>Przygotowanie produkcyjnego środowiska Kafki zajmuje dni lub tygodnie, zależnie od doświadczenia zespołu.</li>
+<li>Jako system rozproszony wymaga własnego klastra, wielu węzłów, replikacji i partycji, aby zapewnić odporność na awarie i wysoką dostępność.</li>
+<li>Potrzebna jest wiedza o systemach rozproszonych, monitorowaniu, skalowaniu, równoważeniu obciążenia i zarządzaniu konfiguracją.</li>
+<li>Pomaga KRaft (brak osobnego klastra ZooKeepera) i usługi zarządzane: Confluent Cloud, Amazon MSK, Aiven. Istnieją też zgodne z protokołem Kafki alternatywy, np. Redpanda.</li>
+</ul>
+</div>
+<img class="pic" src="images/image-pSkGedNC.jpg" alt="Mem: Wasn't Kafka supposed to make things simpler?">
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kafka Streams</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<img class="pic" style="max-height:8.5em" src="images/image-8gOtF3X1.png" alt="Aplikacja z Kafka Streams czyta z tematu 1, przetwarza z lokalnym magazynem stanu i zapisuje do tematu 2">
+<ul class="points">
+<li><strong>Kafka Streams</strong> to biblioteka Javy dostarczana z Apache Kafka: filtrowanie, łączenie, agregacja i grupowanie strumieni.</li>
+<li>To „natywny” sposób przetwarzania danych w Kafce. Nie wymaga osobnego klastra: działa wewnątrz zwykłej aplikacji, a skaluje się przez uruchomienie kolejnych instancji (grupa konsumentów).</li>
+<li>Stan (np. liczniki) trzyma lokalnie w RocksDB i kopiuje do tematów w Kafce, aby odtworzyć go po awarii.</li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kafka: plusy i minusy</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead"><strong>Plusy</strong></p>
+<ul class="points icons side">
+<li><i class="fa-solid fa-check"></i>bardzo duża przepustowość i opóźnienia rzędu milisekund</li>
+<li><i class="fa-solid fa-check"></i>trwały log: wielu niezależnych konsumentów i możliwość odtworzenia historii</li>
+<li><i class="fa-solid fa-check"></i>ogromny ekosystem: Kafka Connect (setki konektorów), Kafka Streams, Flink, klienci w wielu językach</li>
+<li><i class="fa-solid fa-check"></i>jeden system zamiast wielu integracji punkt-punkt</li>
+</ul>
+</div>
+<div>
+<p class="lead"><strong>Minusy</strong></p>
+<ul class="points icons cons side">
+<li><i class="fa-solid fa-xmark"></i>złożona konfiguracja i utrzymanie, źle skonfigurowana działa nieoptymalnie</li>
+<li><i class="fa-solid fa-xmark"></i>nie nadaje się do bezpośredniej komunikacji z małymi urządzeniami IoT (do tego MQTT)</li>
+<li><i class="fa-solid fa-xmark"></i>brak routingu wiadomości znanego z RabbitMQ. Kolejki punkt-punkt doszły dopiero w Kafce 4.2 (share groups)</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>MQTT, RabbitMQ czy Kafka?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th></th><th>MQTT (Mosquitto, EMQX)</th><th>RabbitMQ</th><th>Apache Kafka</th></tr>
+<tr><td>Model</td><td>publish/subscribe, push</td><td>kolejki z routingiem, push</td><td>partycjonowany log, pull</td></tr>
+<tr><td>Wiadomość po odczycie</td><td>znika (oprócz retained)</td><td>znika po potwierdzeniu</td><td>zostaje do końca retencji</td></tr>
+<tr><td>Klienci</td><td>tysiące do milionów małych urządzeń</td><td>usługi backendowe</td><td>usługi backendowe, procesory strumieni</td></tr>
+<tr><td>Mocna strona</td><td>lekki protokół, słabe łącza</td><td>elastyczny routing, zadania do wykonania</td><td>przepustowość, historia, odtwarzanie</td></tr>
+<tr><td>Typowe użycie</td><td>czujnik → bramka → broker</td><td>kolejka zadań, mikroserwisy</td><td>centralna magistrala zdarzeń, analityka</td></tr>
+</table>
+<div class="note"><p>W systemie IoT często występują razem: urządzenia rozmawiają po MQTT, most przenosi dane do Kafki, a stamtąd czyta je procesor strumieni (Flink).</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Podsumowanie: dwie klasy technologii</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<img class="pic" style="max-height:11em" src="images/image-0rLJPNHI.png" alt="Zbieranie danych, log w Kafce, analiza we Flinku, serwowanie i przechowywanie w bazach">
+<p class="lead">W środowisku przetwarzania strumieni zdarzeń istnieją dwie główne klasy technologii:</p>
+<ul class="points">
+<li>system <strong>przechowujący</strong> zdarzenia (broker, log: Kafka, Kinesis),</li>
+<li>technologia, która pomaga pisać aplikacje <strong>działające</strong> na zdarzeniach (procesor strumieni: Flink, Spark, Kafka Streams).</li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Biblioteki">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Biblioteki do przetwarzania strumieniowego</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<img class="pic" src="images/image-2FUYaZDJ.png" alt="Logotypy: Apache Flink, Apache Spark, Amazon Kinesis, Apache Storm, Apache Samza">
+<div>
+<ul class="points side">
+<li>Na slajdzie są różne rzeczy: Flink, Spark, Storm i Samza to silniki open source, a Kinesis to usługa AWS.</li>
+<li>Apache Samza (z LinkedIn, ściśle związana z Kafką) jest dziś rzadko używana.</li>
+<li>Do listy trzeba dodać <strong>Kafka Streams</strong> i <strong>Apache Beam</strong> (jedno API, różne silniki wykonawcze, m.in. Flink, Spark, Google Dataflow).</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Apache Flink</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<ul class="points side">
+<li>Rozproszony silnik obliczeń na <strong>nieograniczonych</strong> i ograniczonych strumieniach danych. Wsad traktuje jako szczególny przypadek strumienia.</li>
+<li>Przetwarza zdarzenie po zdarzeniu z opóźnieniem rzędu milisekund i dużą przepustowością.</li>
+<li><strong>Stan</strong> operatorów (np. sumy w oknach) jest częścią silnika. Okresowe <strong>checkpointy</strong> pozwalają po awarii wznowić pracę bez utraty danych, z gwarancją exactly-once dla stanu.</li>
+<li>Obsługuje <strong>czas zdarzeń</strong> i znaczniki postępu czasu (watermarks), czyli zdarzenia spóźnione i nie po kolei.</li>
+<li>API: Java, Python (PyFlink) i SQL. API Scali usunięto we Flinku 2.0 (2025). Aktualna wersja: 2.x.</li>
+</ul>
+</div>
+<div>
+<img class="pic" src="images/image-wbPBVxiT.png" alt="Flink: źródło, zdarzenie, operator stanowy z funkcją użytkownika i oknem, stan, ujście">
+<p class="small">Dane wchodzą przez źródło (source), przechodzą przez operatory i wychodzą przez ujście (sink). Szczegóły na trzech wykładach o Apache Flink.</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Apache Spark</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<ul class="points side">
+<li>Otwarta platforma przetwarzania danych w klastrze, znana z szybkości i łatwości użycia. Trzyma dane w pamięci RAM węzłów (z możliwością zapisu na dysk).</li>
+<li>Jedna platforma do przetwarzania wsadowego, SQL na dużą skalę, uczenia maszynowego (MLlib) i strumieni.</li>
+<li><strong>Structured Streaming</strong> przetwarza strumień w <strong>mikrowsadach</strong> (opóźnienie rzędu sekund). Spark 4.1 (XII 2025) dodał tryb real-time o opóźnieniu milisekundowym, na razie tylko dla zapytań bezstanowych.</li>
+<li>API: Python (PySpark), SQL, Scala, Java, R.</li>
+</ul>
+</div>
+<img class="pic" src="images/image-gAx8uxYr.png" alt="Spark: program sterujący (driver) ze SparkContext, menedżer klastra i węzły robocze z zadaniami i cache">
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Apache Storm</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<ul class="points side">
+<li>Jeden z pierwszych silników strumieniowych (BackType, potem Twitter; open source od 2011 r.). Przetwarza nieograniczone strumienie zdarzenie po zdarzeniu.</li>
+<li>Aplikacja to <strong>topologia</strong>: <strong>spouty</strong> (źródła) i <strong>bolty</strong> (operatory).</li>
+<li>Komponenty można pisać w dowolnym języku (protokół multi-lang). Silnik jest odporny na błędy i skalowalny.</li>
+<li>Projekt wciąż wydaje nowe wersje (2.8.x w 2026 r.), ale stracił znaczenie na rzecz Flinka. Domyślnie daje at-least-once. Stan, okna i exactly-once (warstwa Trident) dodano później i są uboższe niż we Flinku. Twitter zastąpił go w 2015 r. własnym silnikiem Heron.</li>
+</ul>
+</div>
+<img class="pic" src="images/image-gNSuo1Vo.png" alt="Topologia Storm: dwa spouty pobierają dane ze źródeł, bolty przetwarzają je i przekazują do celu">
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Porównanie silników</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th></th><th>Apache Flink</th><th>Spark Structured Streaming</th><th>Kafka Streams</th><th>Apache Storm</th></tr>
+<tr><td>Model</td><td>zdarzenie po zdarzeniu</td><td>mikrowsady (+ tryb real-time)</td><td>zdarzenie po zdarzeniu</td><td>zdarzenie po zdarzeniu</td></tr>
+<tr><td>Opóźnienie</td><td>milisekundy</td><td>sekundy</td><td>milisekundy</td><td>milisekundy</td></tr>
+<tr><td>Stan, exactly-once</td><td>tak (checkpointy)</td><td>tak</td><td>tak (w obrębie Kafki)</td><td>at-least-once, exactly-once tylko w Trident</td></tr>
+<tr><td>Wdrożenie</td><td>własny klaster</td><td>klaster Spark</td><td>biblioteka w aplikacji</td><td>własny klaster</td></tr>
+<tr><td>Języki</td><td>Java, Python, SQL</td><td>Python, SQL, Scala, Java, R</td><td>Java (Kotlin, Scala)</td><td>Java, dowolny (multi-lang)</td></tr>
+<tr><td>Słabe strony</td><td>krzywa uczenia, operacje na klastrze</td><td>wyższe opóźnienie, zużycie pamięci</td><td>tylko Kafka jako źródło i cel</td><td>uboższe API stanu i okien, malejąca społeczność</td></tr>
+</table>
+<p class="small">Wszystkie są odporne na awarie i skalują się poziomo. Dawne zarzuty z tabel porównawczych, np. „Flink: ograniczone wsparcie społeczności” czy „Spark: brak buforowania” (jest <code>cache()</code>/<code>persist()</code>), są nieaktualne.</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie strumieni w Pythonie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th>Biblioteka</th><th>Do czego</th><th>Uwagi (2026)</th></tr>
+<tr><td><strong>Streamz</strong></td><td>lekkie potoki strumieni w jednym procesie</td><td>wykład 9</td></tr>
+<tr><td><strong>Quix Streams</strong></td><td>aplikacje na Kafce: filtry, okna, stan, łączenia</td><td>aktywnie rozwijana, czysty Python</td></tr>
+<tr><td><strong>PyFlink</strong></td><td>Python API do Apache Flink (DataStream, Table/SQL)</td><td>wymaga klastra Flinka (lub trybu lokalnego)</td></tr>
+<tr><td><strong>PySpark</strong></td><td>Spark Structured Streaming z Pythona</td><td>wymaga Sparka</td></tr>
+<tr><td><strong>Apache Beam</strong></td><td>jedno API, wykonanie na Flinku, Sparku lub Dataflow</td><td>Python SDK</td></tr>
+<tr><td><strong>Bytewax</strong></td><td>dataflow w Pythonie z rdzeniem w Ruście</td><td>od 2025 r. rozwijany tylko przez społeczność</td></tr>
+<tr><td><strong>Faust</strong></td><td>strumienie na Kafce w stylu asyncio</td><td>oryginał porzucony, fork <code>faust-streaming</code> mało aktywny</td></tr>
+</table>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Quix Streams: okno czasowe w Pythonie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols" style="grid-template-columns:1.6fr 1fr">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|5-8|10-11|12-15|16-17">
+from datetime import timedelta
+from quixstreams import Application
+from quixstreams.dataframe.windows import Mean, Max
+
+app = Application(broker_address="localhost:9092",
+                  consumer_group="szklarnia")
+odczyty = app.topic("odczyty", value_deserializer="json")
+alarmy = app.topic("alarmy", value_serializer="json")
+
+sdf = app.dataframe(odczyty)
+sdf = sdf.filter(lambda o: o["temp"] &gt; -40)         # odrzuć błędne odczyty
+sdf = (sdf.tumbling_window(timedelta(minutes=1))    # okna 1-minutowe
+          .agg(srednia=Mean("temp"), maks=Max("temp"))
+          .final())                                  # wynik po zamknięciu okna
+sdf = sdf.filter(lambda w: w["srednia"] &gt; 30)
+sdf.print(metadata=True)
+sdf.to_topic(alarmy)
+
+if __name__ == "__main__":
+    app.run()
+</code></pre>
+</div>
+<div>
+<pre class="out sm lt">{ 'value': { 'srednia': 30.666666666666668,
+             'maks': 33.0,
+             'start': 1791672180000,
+             'end': 1791667380000},
+  'key': b's1',
+  'timestamp': 1791672180000,
+  'headers': None}</pre>
+<ul class="points side">
+<li>Okna liczone są osobno dla każdego <strong>klucza</strong> (czujnika), według znacznika czasu zdarzenia.</li>
+<li>Stan okien jest w lokalnej bazie RocksDB z kopią w Kafce.</li>
+<li>Zastosowane pojęcia (okna, czas zdarzeń, stan) zobaczymy we Flinku.</li>
+</ul>
+</div>
+</div>
+</div>
+<aside class="notes">Wynik z uruchomienia na Kafce 4.1: odczyty s1 z jednej minuty 28, 33, 31 dają średnią 30,67, więc trafiają do tematu alarmy. Okno s2 (średnia 22,5) jest odfiltrowane.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się: które narzędzie?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="quiz compact"><p class="q">10 000 czujników na baterie w szklarniach przesyła odczyty przez sieć komórkową. Czym połączyć je z serwerem?</p><div class="opts"><button class="opt" data-ok="1">MQTT</button><button class="opt" data-ok="0">bezpośrednio Kafka</button><button class="opt" data-ok="0">Apache Spark</button></div><p class="explain">MQTT: lekki protokół dla słabych urządzeń i niestabilnych łączy. Dalej dane można przenieść do Kafki.</p></div>
+<div class="quiz compact"><p class="q">Chcemy po poprawieniu błędu przeliczyć ponownie zdarzenia z ostatniego tygodnia. Który broker na to pozwala?</p><div class="opts"><button class="opt" data-ok="0">RabbitMQ (klasyczna kolejka)</button><button class="opt" data-ok="1">Kafka</button><button class="opt" data-ok="0">MQTT z QoS 2</button></div><p class="explain">Kafka przechowuje log przez czas retencji, więc wystarczy cofnąć offset grupy konsumentów. W klasycznej kolejce wiadomość znika po potwierdzeniu.</p></div>
+<div class="quiz compact"><p class="q">Potrzebujemy średniej temperatury w oknach 1-minutowych, liczonej według czasu zdarzenia, z gwarancją exactly-once dla stanu. Który silnik?</p><div class="opts"><button class="opt" data-ok="0">Apache Storm</button><button class="opt" data-ok="1">Apache Flink</button><button class="opt" data-ok="0">Amazon Data Firehose</button></div><p class="explain">Flink ma wbudowany stan, checkpointy, czas zdarzeń i watermarks. Storm ma znacznie uboższą obsługę stanu i czasu zdarzeń (exactly-once tylko w mikrowsadowej warstwie Trident), a Firehose tylko dostarcza dane do magazynu.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Podsumowanie wykładu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<ul class="points side">
+<li><strong>Strumień</strong> to nieograniczony ciąg zdarzeń (klucz, wartość, czas). Przetwarzanie strumieniowe daje wynik od razu, wsadowe po zebraniu danych.</li>
+<li><strong>Sensory</strong> wysyłają małe, częste wiadomości przez bramki. Bajty dekodujemy (<code>struct</code>), czas zapisujemy w UTC, a skala szybko rośnie do milionów zdarzeń dziennie.</li>
+<li><strong>Architektura:</strong> broker → procesor strumieni → magazyn → analityka. ETL może działać w sposób ciągły.</li>
+<li><strong>Broker</strong> rozprzęga producentów i konsumentów: kolejka albo pub/sub, push albo pull, gwarancje at-most/at-least/exactly-once, backpressure.</li>
+<li><strong>MQTT</strong> łączy urządzenia (tematy, wildcardy, QoS). <strong>Kafka</strong> to partycjonowany, trwały log z grupami konsumentów.</li>
+<li><strong>Silniki:</strong> Flink (zdarzenie po zdarzeniu, stan), Spark (mikrowsady), Kafka Streams (biblioteka), Storm (historyczny). W Pythonie: Streamz, Quix Streams, PyFlink.</li>
+</ul>
+<div class="note"><p><strong>Laboratorium:</strong> problem zaawansowanego przetwarzania równoległego (projekt).</p>
+<p><strong>Następny wykład (13.01):</strong> przetwarzanie danych strumieniowych w Apache Flink, API i model danych.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Referencje</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<ul class="points side" style="word-break:break-all">
+<li>https://www.altexsoft.com/blog/real-time-analytics/</li>
+<li>https://hazelcast.com/glossary/stream-processing/</li>
+<li>https://www.upsolver.com/blog/streaming-data-architecture-key-components</li>
+<li>https://www.upsolver.com/blog/comparing-apache-kafka-amazon-kinesis</li>
+<li>https://datacadamia.com/data/processing/stream_vs_batch</li>
+<li>https://www.grodan.com/</li>
+<li>https://www.informatica.com/se/resources/articles/what-is-etl.html</li>
+<li>https://luminousmen.com/post/schema-on-read-vs-schema-on-write</li>
+<li>https://softwareskill.pl/apache-kafka-wprowadzenie</li>
+</ul>
+<ul class="points side" style="word-break:break-all">
+<li>https://kafka.apache.org/documentation/</li>
+<li>https://mqtt.org/ oraz https://eclipse.dev/paho/files/paho.mqtt.python/html/migrations.html</li>
+<li>https://bleak.readthedocs.io/</li>
+<li>https://flink.apache.org/</li>
+<li>https://spark.apache.org/docs/latest/streaming/</li>
+<li>https://quix.io/docs/quix-streams/</li>
+<li>https://docs.aws.amazon.com/streams/latest/dev/introduction.html</li>
+<li>https://docs.confluent.io/kafka-clients/python/current/overview.html</li>
+</ul>
+</div>
+</div>
+</section>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/plugin.js"></script>
+<script>
+// ---------- copy buttons (raw text is captured before highlighting adds line numbers) ----------
+document.querySelectorAll('pre.code-wrap > code').forEach(code => {
+  const lines = code.textContent.replace(/^\s*\n/, '').replace(/\s+$/, '').split('\n');
+  const indent = Math.min(...lines.filter(l => l.trim()).map(l => l.match(/^ */)[0].length));
+  const raw = lines.map(l => l.slice(indent)).join('\n') + '\n';
+  const btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'copy-btn'; btn.textContent = 'Kopiuj';
+  btn.addEventListener('click', () => {
+    const done = ok => {
+      btn.textContent = ok ? 'Skopiowano!' : 'Błąd kopiowania'; btn.classList.toggle('copied', ok);
+      clearTimeout(btn._t); btn._t = setTimeout(() => { btn.textContent = 'Kopiuj'; btn.classList.remove('copied'); }, 1500);
+    };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(raw).then(() => done(true), () => done(false));
+    else {
+      const ta = document.createElement('textarea'); ta.value = raw; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { done(document.execCommand('copy')); } catch (e) { done(false); } finally { ta.remove(); }
+    }
+  });
+  code.parentNode.appendChild(btn);
+});
+</script>
+<script>
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.02,
+    center: false, hash: true, slideNumber: 'c/t',
+    transition: 'slide',
+    chalkboard: { boardmarkerWidth: 4, chalkWidth: 5 },
+    plugins: [RevealNotes, RevealHighlight, RevealChalkboard]
+  });
+</script>
+<script>
+// ---------- quizzes ----------
+document.querySelectorAll('.quiz').forEach(q => {
+  const opts = [...q.querySelectorAll('.opt')];
+  const reveal = () => {
+    opts.forEach(o => {
+      if (o.dataset.ok === '1') o.classList.add('good');
+      else if (o.classList.contains('sel')) o.classList.add('bad');
+    });
+    q.classList.add('done');
+  };
+  if (q.classList.contains('multi')) {
+    opts.forEach(o => o.addEventListener('click', () => { if (!q.classList.contains('done')) o.classList.toggle('sel'); }));
+    q.querySelector('.check').addEventListener('click', reveal);
+  } else {
+    opts.forEach(o => o.addEventListener('click', () => {
+      if (q.classList.contains('done')) return;
+      o.classList.add('sel'); reveal();
+    }));
+  }
+});
+
+// ---------- fill in the blanks (whitespace is ignored, data-re lists accepted answers) ----------
+document.querySelectorAll('.blanks').forEach(b => {
+  const inputs = [...b.querySelectorAll('input.blank')];
+  const fb = b.querySelector('.fb');
+  const check = () => {
+    let good = 0;
+    inputs.forEach(i => {
+      const ok = new RegExp(i.dataset.re).test(i.value.replace(/\s+/g, ''));
+      i.classList.toggle('good', ok); i.classList.toggle('bad', !ok); good += ok;
+    });
+    const all = good === inputs.length;
+    b.classList.toggle('done', all);
+    fb.textContent = all ? '' : inputs.length > 1 ? `Poprawne: ${good} z ${inputs.length}. Spróbuj jeszcze raz.` : 'Jeszcze nie. Spróbuj ponownie.';
+  };
+  b.querySelector('.check').addEventListener('click', check);
+  b.querySelector('.show').addEventListener('click', () => {
+    inputs.forEach(i => { i.value = i.dataset.sol; });
+    check();
+  });
+  inputs.forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') check(); }));
+});
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+const svgEl = (tag, attrs = {}, text) => {
+  const e = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = text;
+  return e;
+};
+
+// ---------- batch vs stream timeline ----------
+const batchSim = (() => {
+  const root = document.getElementById('batchsim'); if (!root) return null;
+  const svg = root.querySelector('svg'), T = 30, X0 = 150, X1 = 1080;
+  const ROWS = { in: 50, batch: 150, stream: 250 };
+  const xs = t => X0 + (X1 - X0) * t / T;
+  let events, clock, timer = null;
+  const gen = () => {
+    events = []; let t = 0.3;
+    while (true) {
+      t += -Math.log(1 - Math.random()) * 0.7;
+      if (t > T - 0.5) break;
+      const temp = 26 + (Math.random() + Math.random() + Math.random() - 1.5) * 4;
+      events.push({ t, temp, alarm: temp > 30 });
+    }
+    if (!events.some(e => e.alarm)) events[Math.floor(events.length / 2)].alarm = true;
+  };
+  const period = () => +root.querySelector('.period').value;
+  const batchTime = e => Math.ceil(e.t / period()) * period() + 0.3;
+  const streamTime = e => e.t + 0.1;
+  const draw = () => {
+    svg.innerHTML = '';
+    const P = period();
+    Object.entries({ in: 'zdarzenia', batch: 'wsadowo', stream: 'strumieniowo' }).forEach(([k, l]) => {
+      svg.append(svgEl('text', { x: 10, y: ROWS[k] + 6, 'font-weight': 'bold' }, l));
+      svg.append(svgEl('line', { x1: X0, y1: ROWS[k], x2: X1, y2: ROWS[k], stroke: '#ddd', 'stroke-width': 2 }));
+    });
+    for (let b = P; b <= T; b += P) svg.append(svgEl('line', { x1: xs(b), y1: ROWS.batch - 35, x2: xs(b), y2: ROWS.batch + 35, stroke: '#e8710a', 'stroke-dasharray': '4 4', 'stroke-width': 1.5 }));
+    for (let s = 0; s <= T; s += 5) svg.append(svgEl('text', { x: xs(s), y: 285, 'text-anchor': 'middle', fill: '#999', style: 'font-size:14px' }, s + ' s'));
+    svg.append(svgEl('line', { x1: xs(clock), y1: 20, x2: xs(clock), y2: 270, stroke: '#1a73d9', 'stroke-width': 2 }));
+    const perBatch = {};
+    events.forEach(e => {
+      if (e.t > clock) return;
+      const col = e.alarm ? '#d93025' : '#53ae12';
+      svg.append(svgEl('circle', { cx: xs(e.t), cy: ROWS.in, r: 7, fill: col }));
+      const st = streamTime(e);
+      if (st <= clock) {
+        svg.append(svgEl('line', { x1: xs(e.t), y1: ROWS.in + 7, x2: xs(st), y2: ROWS.stream - 7, stroke: col, 'stroke-opacity': .25 }));
+        svg.append(svgEl('circle', { cx: xs(st), cy: ROWS.stream, r: 7, fill: col }));
+      }
+      const bt = batchTime(e);
+      if (bt <= clock) {
+        const n = perBatch[bt] = (perBatch[bt] || 0) + 1;
+        const y = ROWS.batch - 30 + ((n - 1) % 7) * 10;
+        svg.append(svgEl('line', { x1: xs(e.t), y1: ROWS.in + 7, x2: xs(bt), y2: y, stroke: col, 'stroke-opacity': .25 }));
+        svg.append(svgEl('circle', { cx: xs(bt), cy: y, r: 5, fill: col }));
+      }
+    });
+    const stats = (fn, el, name) => {
+      const done = events.filter(e => fn(e) <= clock);
+      const lat = done.map(e => fn(e) - e.t);
+      const avg = lat.length ? lat.reduce((a, b) => a + b, 0) / lat.length : 0;
+      const al = done.find(e => e.alarm);
+      root.querySelector(el).innerHTML = `<strong>${name}:</strong> przetworzono <b>${done.length}</b> z ${events.filter(e => e.t <= clock).length}, ` +
+        `średnie opóźnienie <b>${avg.toFixed(1)} s</b>, maks. <b>${(lat.length ? Math.max(...lat) : 0).toFixed(1)} s</b>` +
+        (al ? `, pierwszy alarm po <b>${(fn(al) - al.t).toFixed(1)} s</b>` : '');
+    };
+    stats(batchTime, '.bs-batch', 'Wsadowo');
+    stats(streamTime, '.bs-stream', 'Strumieniowo');
+    root.querySelector('.clock').textContent = clock.toFixed(1);
+    root.querySelector('.pv').textContent = P;
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const tick = () => { clock = Math.min(T, clock + 0.15); draw(); if (clock >= T) stop(); };
+  const reset = () => { stop(); gen(); clock = 0; draw(); };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'play') { if (timer) stop(); else { if (clock >= T) clock = 0; timer = setInterval(tick, 50); } }
+    if (a === 'reset') reset();
+  });
+  root.querySelector('.period').addEventListener('input', draw);
+  reset();
+  return { stop };
+})();
+
+// ---------- broker: queue vs publish/subscribe ----------
+const brokerSim = (() => {
+  const root = document.getElementById('brokersim'); if (!root) return null;
+  const svg = root.querySelector('svg'), info = root.querySelector('.info');
+  const TOPICS = [{ name: 'temperatura', y: 95, col: '#e8710a' }, { name: 'wilgotność', y: 205, col: '#1a73d9' }];
+  const PRODS = [{ name: 'czujnik T', y: 95 }, { name: 'czujnik W', y: 205 }];
+  const CONS = [{ name: 'alarmy', y: 50, subs: [0] }, { name: 'dashboard', y: 150, subs: [0, 1] }, { name: 'archiwum', y: 250, subs: [0, 1] }];
+  let mode = 'pubsub', counts, rr, autoT = null, seq;
+  const box = (x, y, w, h, fill, stroke, label, sub) => {
+    svg.append(svgEl('rect', { x, y: y - h / 2, width: w, height: h, rx: 8, fill, stroke, 'stroke-width': 2 }));
+    svg.append(svgEl('text', { x: x + w / 2, y: y + (sub ? -2 : 6), 'text-anchor': 'middle', style: 'font-size:17px' }, label));
+    if (sub) svg.append(svgEl('text', { x: x + w / 2, y: y + 18, 'text-anchor': 'middle', fill: '#666', style: 'font-size:13px' }, sub));
+  };
+  const drawStatic = () => {
+    svg.innerHTML = '';
+    PRODS.forEach(p => box(10, p.y, 150, 50, '#e6f4da', '#53ae12', p.name));
+    svg.append(svgEl('rect', { x: 380, y: 20, width: 330, height: 260, rx: 12, fill: '#fafafa', stroke: '#999', 'stroke-width': 2 }));
+    svg.append(svgEl('text', { x: 545, y: 45, 'text-anchor': 'middle', fill: '#666', style: 'font-size:15px' }, mode === 'pubsub' ? 'broker: tematy' : 'broker: kolejki'));
+    TOPICS.forEach(t => {
+      svg.append(svgEl('rect', { x: 410, y: t.y - 22, width: 270, height: 44, rx: 22, fill: '#fff', stroke: t.col, 'stroke-width': 2 }));
+      svg.append(svgEl('text', { x: 545, y: t.y + 6, 'text-anchor': 'middle', style: 'font-size:16px' }, t.name));
+    });
+    CONS.forEach((c, i) => box(870, c.y, 225, 60, '#e8f0fe', '#1a73d9', `${c.name}: ${counts[i]}`, c.subs.map(s => TOPICS[s].name).join(', ')));
+  };
+  const fly = (x1, y1, x2, y2, col, dur) => new Promise(res => {
+    const c = svgEl('circle', { cx: x1, cy: y1, r: 9, fill: col, stroke: '#fff', 'stroke-width': 2 });
+    svg.append(c);
+    const t0 = Date.now();
+    const step = () => {
+      const k = Math.min(1, (Date.now() - t0) / dur), e = k * k * (3 - 2 * k);
+      c.setAttribute('cx', x1 + (x2 - x1) * e); c.setAttribute('cy', y1 + (y2 - y1) * e);
+      if (k < 1) setTimeout(step, 16); else { c.remove(); res(); }
+    };
+    step();
+  });
+  const send = async p => {
+    const t = TOPICS[p], id = ++seq[p], label = `${p ? 'W' : 'T'}${id}`;
+    const subs = CONS.map((c, i) => i).filter(i => CONS[i].subs.includes(p));
+    let targets;
+    if (mode === 'pubsub') targets = subs;
+    else { targets = [subs[rr[p] % subs.length]]; rr[p]++; }
+    await fly(160, PRODS[p].y, 410, t.y, t.col, 450);
+    await Promise.all(targets.map(i => fly(680, t.y, 870, CONS[i].y, t.col, 500)));
+    targets.forEach(i => counts[i]++);
+    drawStatic();
+    info.innerHTML = mode === 'pubsub'
+      ? `Wiadomość <b>${label}</b> z tematu <i>${t.name}</i> dostali <b>wszyscy</b> subskrybenci: ${targets.map(i => CONS[i].name).join(', ')}. Każdy ma własną kopię.`
+      : `Wiadomość <b>${label}</b> z kolejki <i>${t.name}</i> trafiła tylko do: <b>${CONS[targets[0]].name}</b>. Konsumenci konkurują o wiadomości (round-robin), co dzieli pracę między nich.`;
+  };
+  const stopAuto = () => { clearInterval(autoT); autoT = null; };
+  const reset = () => { stopAuto(); counts = [0, 0, 0]; rr = [0, 0]; seq = [0, 0]; drawStatic(); info.textContent = 'Wybierz tryb i wyślij kilka wiadomości.'; };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'p0') send(0);
+    if (a === 'p1') send(1);
+    if (a === 'auto') { if (autoT) stopAuto(); else { send(0); autoT = setInterval(() => send(Math.random() < .6 ? 0 : 1), 1300); } }
+    if (a === 'reset') reset();
+  });
+  root.querySelectorAll('input[name=bmode]').forEach(r => r.addEventListener('change', () => { mode = r.value; reset(); }));
+  reset();
+  return { stop: stopAuto };
+})();
+
+// ---------- backpressure ----------
+const bpSim = (() => {
+  const root = document.getElementById('bpsim'); if (!root) return null;
+  const CAP = 20, $ = c => root.querySelector(c);
+  let buf, made, done, dropped, blocked, tp, tc, t, timer = null;
+  const mode = () => root.querySelector('input[name=bpmode]:checked').value;
+  const render = () => {
+    const m = mode(), rc = +$('.rc').value;
+    $('.rpv').textContent = $('.rp').value; $('.rcv').textContent = rc;
+    let cells = '<span class="lbl">bufor:</span>';
+    for (let i = 0; i < CAP; i++) cells += `<i class="${i < buf ? (buf > CAP ? 'over' : 'on') : ''}"></i>`;
+    if (buf > CAP) cells += `<span class="more">+${buf - CAP} ponad limit</span>`;
+    $('.bpbuf').innerHTML = cells;
+    $('.bpstat').innerHTML = `czas <b>${t.toFixed(1)} s</b> | wysłane <b>${made}</b> | przetworzone <b>${done}</b> | odrzucone <b>${dropped}</b> | ` +
+      `w buforze <b>${buf}</b> | opóźnienie ≈ <b>${(buf / rc).toFixed(1)} s</b>` + (m === 'block' ? ` | producent zablokowany <b>${blocked.toFixed(1)} s</b>` : '');
+    const over = +$('.rp').value > rc;
+    $('.bpverdict').innerHTML = !over ? 'Konsument nadąża: bufor tylko wygładza chwilowe skoki.' :
+      m === 'grow' ? 'Bufor rośnie bez końca, a z nim opóźnienie i zużycie pamięci. W końcu proces zabraknie pamięci (OOM). W Kafce bufor jest na dysku, ale opóźnienie (consumer lag) i tak rośnie.' :
+      m === 'drop' ? 'Pamięć i opóźnienie są ograniczone, ale tracimy dane. Bywa to dopuszczalne dla częstych odczytów czujnika (QoS 0), ale nie dla transakcji.' :
+      'Producent musi zwolnić do tempa konsumenta: nic nie ginie, a opóźnienie jest ograniczone. Tak działa backpressure we Flinku i w kolejkach z limitem (<code>queue.Queue(maxsize)</code> z wykładu o wątkach).';
+  };
+  const tick = () => {
+    const dt = 0.1, m = mode();
+    t += dt; tp += +$('.rp').value * dt; tc += +$('.rc').value * dt;
+    while (tp >= 1) {
+      if (m === 'block' && buf >= CAP) { blocked += dt; tp = Math.min(tp, 1); break; }
+      tp -= 1; made++;
+      if (m === 'drop' && buf >= CAP) dropped++; else buf++;
+    }
+    while (tc >= 1) { tc -= 1; if (buf > 0) { buf--; done++; } else tc = 0; }
+    render();
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const reset = () => { stop(); buf = made = done = dropped = 0; blocked = tp = tc = t = 0; render(); };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'play') { if (timer) stop(); else timer = setInterval(tick, 100); }
+    if (a === 'reset') reset();
+  });
+  root.addEventListener('input', render);
+  root.querySelectorAll('input[name=bpmode]').forEach(r => r.addEventListener('change', reset));
+  reset();
+  return { stop };
+})();
+
+// ---------- MQTT topic filter matcher ----------
+(() => {
+  const root = document.getElementById('topicsim'); if (!root) return;
+  const TOPICS = ['szklarnia/A/czujnik17/temp', 'szklarnia/A/czujnik17/wilg', 'szklarnia/A/czujnik17/status', 'szklarnia/A/czujnik18/temp',
+    'szklarnia/B/czujnik17/temp', 'szklarnia/B/czujnik03/wilg', 'magazyn/chlodnia1/temp', '$SYS/broker/clients/connected'];
+  const inp = root.querySelector('.flt'), ul = root.querySelector('.topics'), out = root.querySelector('.tverdict');
+  const validate = f => {
+    if (!f) return 'Pusty filtr.';
+    const lv = f.split('/');
+    for (let i = 0; i < lv.length; i++) {
+      if (lv[i].includes('#') && (lv[i] !== '#' || i !== lv.length - 1)) return 'Niepoprawny filtr: # musi zajmować cały, ostatni poziom.';
+      if (lv[i].includes('+') && lv[i] !== '+') return 'Niepoprawny filtr: + musi zajmować cały poziom.';
+    }
+    return '';
+  };
+  const match = (f, topic) => {
+    const fl = f.split('/'), tl = topic.split('/');
+    if (topic.startsWith('$') && (fl[0] === '+' || fl[0] === '#')) return false;
+    for (let i = 0; i < fl.length; i++) {
+      if (fl[i] === '#') return true;
+      if (i >= tl.length) return false;
+      if (fl[i] !== '+' && fl[i] !== tl[i]) return false;
+    }
+    return fl.length === tl.length;
+  };
+  const render = () => {
+    const f = inp.value.trim(), err = validate(f);
+    ul.innerHTML = TOPICS.map(t => `<li class="${!err && match(f, t) ? 'hit' : ''}">${t}</li>`).join('');
+    out.classList.toggle('err', !!err);
+    out.textContent = err || `Pasuje ${TOPICS.filter(t => match(f, t)).length} z ${TOPICS.length} tematów.` +
+      (f === '#' ? ' Uwaga: # nie obejmuje tematów $SYS.' : '');
+  };
+  inp.addEventListener('input', render);
+  root.querySelectorAll('.presets .btn').forEach(b => b.addEventListener('click', () => { inp.value = b.textContent; render(); }));
+  render();
+})();
+
+// ---------- Kafka consumer groups ----------
+(() => {
+  const root = document.getElementById('groupsim'); if (!root) return;
+  const COLS = ['#1a73d9', '#53ae12', '#e8710a', '#9334e6', '#d93025', '#00897b'];
+  const NP = 4, LEN = [7, 5, 6, 4];
+  let n = 2;
+  const render = () => {
+    const owner = [];
+    const per = Math.floor(NP / n), extra = NP % n;   // range assignor
+    let p = 0;
+    for (let c = 0; c < n; c++) { const k = per + (c < extra ? 1 : 0); for (let j = 0; j < k; j++) owner[p++] = c; }
+    let parts = '<h4>temat odczyty</h4>';
+    for (let i = 0; i < NP; i++) {
+      const col = COLS[owner[i]];
+      parts += `<div class="part"><span class="pn">P${i}</span>` + Array.from({ length: LEN[i] }, (_, k) => `<i style="background:${col}">${k}</i>`).join('') +
+        `<span class="who" style="color:${col}">→ K${owner[i] + 1}</span></div>`;
+    }
+    let cons = '<h4>grupa alarmy</h4>';
+    for (let c = 0; c < n; c++) {
+      const mine = owner.map((o, i) => o === c ? 'P' + i : null).filter(Boolean);
+      cons += `<span class="cons ${mine.length ? '' : 'idle'}" style="border-color:${COLS[c]}">K${c + 1}: ${mine.length ? mine.join(', ') : 'bezczynny'}</span>`;
+    }
+    cons += '<h4>grupa archiwum</h4><span class="cons" style="border-color:#666">A1: P0, P1, P2, P3</span>';
+    cons += `<p class="small">${n > NP ? 'Konsumentów jest więcej niż partycji: nadmiarowi czekają bezczynnie.' : n === 1 ? 'Jeden konsument czyta wszystkie partycje.' : 'Partycje rozdzielone między konsumentów grupy (rebalance).'} Grupa archiwum niezależnie dostaje wszystkie wiadomości.</p>`;
+    root.querySelector('.gview').innerHTML = `<div>${parts}</div><div>${cons}</div>`;
+  };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'add' && n < 6) n++;
+    if (a === 'del' && n > 1) n--;
+    render();
+  });
+  render();
+})();
+
+Reveal.on('slidechanged', () => {
+  [batchSim, brokerSim, bpSim].forEach(s => s && s.stop());
+});
+</script>
+</body>
+</html>

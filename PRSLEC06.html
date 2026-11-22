@@ -1,0 +1,1627 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Przetwarzanie równoległe i strumieniowe - Wykład 6</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+<style>
+  /* Slide = 1280x720; base font scaled to match H5P text metrics */
+  .reveal { font-size: 24px; font-family: "Open Sans", Arial, sans-serif; color: #000; }
+  .reveal .slides section { position: absolute; width: 100%; height: 100%; padding: 0; text-align: left; }
+  .reveal .el { position: absolute; box-sizing: border-box; overflow: visible; }
+  .reveal .el.text { padding: .375em .5em; line-height: 1.25; }
+  .reveal .el.text p, .reveal .el.text li { margin: 0 0 .5em 0; line-height: 1.25; }
+  .reveal .el.text ul { display: block; margin: 0 0 .5em 1.25em; padding: 0; }
+  .reveal .el.text h3 { font-size: 1em; text-transform: none; margin: 0 0 .5em; color: #000; font-family: inherit; }
+  .reveal .el.img img { width: 100%; height: 100%; object-fit: contain; margin: 0; max-width: none; max-height: none; }
+  .reveal .el.shape { display: flex; flex-direction: column; justify-content: center; }
+  .reveal .el.link { display: flex; align-items: center; justify-content: center; font-size: 1.5em; }
+  .reveal a { color: #1a73d9; }
+  /* ---------- interactive slides (as in lecture 1) ---------- */
+  :root { --green: rgb(83, 174, 18); --blue: #1a73d9; --red: #d93025; --orange: #e8710a; --muted: #666; --line: #ccc; }
+  .reveal .el.box { padding: 0 .5em; line-height: 1.3; }
+  .reveal .el.box p { margin: 0 0 .5em; }
+  .reveal .small, .reveal .hint { font-size: .7em; color: var(--muted); }
+  .reveal .btn, .reveal .opt {
+    font: inherit; font-size: .75em; padding: .3em .8em; margin: 0 .3em .3em 0; cursor: pointer;
+    border: 2px solid var(--green); background: var(--green); color: #fff; border-radius: .3em;
+  }
+  .reveal .btn.ghost { background: #fff; color: var(--green); }
+  .reveal .btn:disabled { opacity: .4; cursor: default; }
+  .reveal .simctl { display: flex; flex-wrap: wrap; align-items: center; gap: .3em .8em; font-size: .8em; margin-bottom: .5em; }
+  .reveal .simctl .btn { font-size: .9em; margin: 0; }
+  .reveal .simctl select, .reveal .simctl input[type=text] { font: inherit; padding: .1em .3em; }
+  .reveal .stat { font-size: .8em; }
+  .reveal h4 { font-size: .8em; margin: 0 0 .3em; text-transform: none; color: #000; font-family: inherit; }
+  .reveal code { font-family: Consolas, Menlo, monospace; }
+  @keyframes pop { from { transform: scale(.3); opacity: 0; } }
+
+  /* quiz */
+  .reveal .quiz .q { font-size: 1.1em; margin-bottom: .8em; }
+  .reveal .quiz .opts { display: flex; flex-wrap: wrap; gap: .5em; margin-bottom: .6em; }
+  .reveal .quiz .opt { background: #fff; color: #000; border-color: var(--line); font-size: .9em; margin: 0; }
+  .reveal .quiz .opt.sel { border-color: var(--blue); background: #e8f0fe; }
+  .reveal .quiz .opt.good { border-color: var(--green); background: #e6f4da; }
+  .reveal .quiz .opt.bad { border-color: var(--red); background: #fce8e6; }
+  .reveal .quiz .explain { visibility: hidden; font-size: .85em; border-left: 4px solid var(--green); padding-left: .6em; margin-top: .6em; }
+  .reveal .quiz.done .explain { visibility: visible; }
+  .reveal .quiz.compact .q { font-size: .9em; margin-bottom: .5em; }
+  .reveal .quiz.compact .opt { font-size: .75em; }
+  .reveal .quiz.compact .explain { font-size: .7em; margin-top: .3em; }
+  .reveal .quiz + .quiz { margin-top: .8em; }
+
+  /* ---------- lecture 2: layout, code listings, output ---------- */
+  .reveal .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.2em; align-items: start; }
+  .reveal .cols.wl { grid-template-columns: 1.35fr 1fr; }
+  .reveal .cols.wr { grid-template-columns: 1fr 1.35fr; }
+  /* type scale: .lead / ul.points = body text, .note = callouts, .small = captions, code .78em */
+  .reveal .lead { font-size: 1.1em; margin: 0 0 .5em; line-height: 1.35; }
+  .reveal ul.points { font-size: 1.1em; line-height: 1.35; margin: 0 0 .5em 1.1em; padding: 0; }
+  .reveal ul.points li { margin: 0 0 .45em; }
+  .reveal ul.points.side { font-size: .9em; }
+  .reveal ul.points.icons { list-style: none; margin-left: 0; }
+  .reveal ul.points.icons li { padding-left: 1.5em; text-indent: -1.5em; }
+  .reveal ul.points.icons i { width: 1.5em; text-indent: 0; color: var(--green); }
+  .reveal ul.points.icons.cons i { color: var(--red); }
+  .reveal img.pic { display: block; width: 100%; max-height: 20em; object-fit: contain; margin: 0 auto; }
+  .reveal svg.diagram { display: block; width: 100%; height: auto; margin: .2em 0 .6em; font-family: "Open Sans", Arial, sans-serif; }
+  .reveal svg.diagram text { font-size: 18px; }
+  .reveal svg.diagram .mono { font-family: Consolas, Menlo, monospace; }
+  .reveal .chain { display: flex; flex-wrap: wrap; align-items: center; gap: .3em; font-size: .8em; margin: .3em 0 .6em; }
+  .reveal .chain .op { color: var(--muted); font-family: Consolas, Menlo, monospace; font-size: .85em; }
+  .reveal .zipviz { font: .75em Consolas, Menlo, monospace; margin: 0 0 .6em; }
+  .reveal .zipviz > div { display: flex; gap: .4em; margin: .25em 0; align-items: center; }
+  .reveal .zipviz .lbl { width: 4.5em; color: var(--muted); font-family: "Open Sans", Arial, sans-serif; }
+  .reveal .chip.alt { background: #fef3c7; }
+  .reveal .chip.pair { background: #e6f4da; }
+  .reveal .lanes { font-size: .75em; }
+  .reveal .lanes .lane { display: flex; align-items: center; gap: 3px; height: 1.5em; margin: .15em 0; }
+  .reveal .lanes .lane span { width: 2.2em; color: var(--muted); }
+  .reveal .lanes .lane i { display: block; width: 10.5%; height: 1.1em; border-radius: 3px; background: var(--blue); }
+  .reveal .lanes .lane i.p { background: var(--green); }
+  .reveal .lanes h4 { margin: .5em 0 .1em; }
+  .reveal p code, .reveal li code, .reveal td code, .reveal .note code { background: #f1f3f4; padding: 0 .2em; border-radius: .2em; font-size: .9em; }
+  .reveal pre.code-wrap { position: relative; width: 100%; margin: 0 0 .5em; box-shadow: none; font-size: .78em; }
+  .reveal pre.code-wrap code { max-height: none; padding: .6em .8em; border-radius: .3em; }
+  .reveal pre.code-wrap.sm { font-size: .66em; }
+  .reveal pre.out { position: relative; width: 100%; box-sizing: border-box; margin: 0 0 .6em; padding: .45em .8em; font-size: .78em; line-height: 1.35;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #f4f6f8; color: #1f2a30; border: 1px solid #c9d1d9; border-left: 5px solid #586e75; border-radius: .3em; box-shadow: none; }
+  .reveal pre.out::before { content: "Wynik"; position: absolute; top: .3em; right: .6em; font: bold .7em "Open Sans", Arial, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #8a99a6; }
+  .reveal pre.code-wrap + pre.out { margin-top: -.5em; border-top: none; border-radius: 0 0 .3em .3em; }
+  .reveal pre.out.sm, .reveal pre.code-wrap.sm + pre.out { font-size: .66em; }
+  .reveal .copy-btn { position: absolute; top: .4em; right: .4em; z-index: 2; font: .8em "Open Sans", Arial, sans-serif; padding: .1em .6em; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, .3); border-radius: .3em; background: rgba(255, 255, 255, .1); color: #f8f8f2; opacity: 0; transition: opacity .15s; }
+  .reveal pre.code-wrap:hover .copy-btn, .reveal .copy-btn:focus-visible { opacity: 1; }
+  .reveal .copy-btn.copied { background: var(--green); border-color: var(--green); opacity: 1; }
+  .reveal .note { font-size: .75em; line-height: 1.35; border-left: 4px solid var(--green); background: #f3faee; padding: .35em .7em; margin: .2em 0 .6em; }
+  .reveal .note.warn { border-left-color: var(--orange); background: #fff4e5; }
+  .reveal .note.bad { border-left-color: var(--red); background: #fce8e6; }
+  .reveal .note p { margin: 0 0 .3em; }
+  .reveal .note p:last-child { margin: 0; }
+  .reveal table.simple { border-collapse: collapse; font-size: .75em; margin: .2em 0 .8em; width: 100%; }
+  .reveal table.simple th, .reveal table.simple td { border: 1px solid var(--line); padding: .3em .5em; vertical-align: top; text-align: left; }
+  .reveal table.simple th { background: #eef7e6; }
+  .reveal .textflow ul { margin: 0 0 .5em 1.2em; }
+  .reveal .textflow li { margin-bottom: .4em; }
+
+  /* agenda */
+  .reveal .agenda { display: grid; grid-template-columns: 1fr 1fr; gap: .7em; margin-bottom: .8em; }
+  .reveal .agenda .ag { border: 2px solid var(--line); border-radius: .4em; padding: .4em .7em; }
+  .reveal .agenda .ag b { display: inline-block; width: 1.6em; height: 1.6em; line-height: 1.6em; text-align: center; border-radius: 50%; background: var(--green); color: #fff; margin-right: .4em; }
+  .reveal .agenda .ag p { font-size: .75em; margin: .3em 0 0; color: #333; }
+
+  /* fill in the blanks */
+  .reveal pre.exo { width: 100%; box-sizing: border-box; margin: 0 0 .5em; padding: .6em .8em; font-size: .78em; line-height: 1.6; box-shadow: none;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #272822; color: #f8f8f2; border-radius: .3em; }
+  .reveal pre.exo .c { color: #75715e; }
+  .reveal pre.exo .k { color: #f92672; }
+  .reveal input.blank { font: inherit; color: #e6db74; background: #3e3d32; border: none; border-bottom: 2px dashed #e6db74; padding: 0 .3em; outline: none; }
+  .reveal input.blank:focus { background: #49483e; }
+  .reveal input.blank.good { color: #a6e22e; border-bottom: 2px solid #a6e22e; }
+  .reveal input.blank.bad { color: #f92672; border-bottom: 2px solid #f92672; }
+  .reveal .blanks .fb { font-size: .7em; min-height: 1.2em; margin: .2em 0; color: var(--red); }
+  .reveal .blanks .explain { visibility: hidden; font-size: .75em; border-left: 4px solid var(--green); padding-left: .6em; margin-top: .3em; }
+  .reveal .blanks.done .explain { visibility: visible; }
+
+  /* pure / impure cards */
+  .reveal .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8em; }
+  .reveal .quiz.card { border: 2px solid var(--line); border-radius: .4em; padding: .5em .6em; }
+  .reveal .quiz.card pre.code-wrap { font-size: .7em; margin-bottom: .6em; }
+  .reveal .quiz.card .opts { margin-bottom: 0; }
+  .reveal .quiz.card .opt { font-size: .75em; }
+  .reveal .quiz.card .explain { font-size: .7em; }
+  .reveal .chip { display: inline-block; min-width: 1.6em; text-align: center; padding: .1em .45em; border-radius: .3em; background: #e8f0fe; animation: pop .25s; }
+  .reveal .chip.drop { background: #f1f3f4; color: #aaa; text-decoration: line-through; }
+  .reveal .chip.acc { background: #fef3c7; }
+  .reveal .chip.fin { background: var(--green); color: #fff; font-weight: bold; }
+  .reveal .chip.err { background: #fce8e6; color: var(--red); font-family: Consolas, Menlo, monospace; }
+
+  /* ---------- lecture 6: formulas, metrics, simulations ---------- */
+  .reveal .formula { font: 1.1em "Cambria Math", "Latin Modern Math", "STIX Two Math", "Times New Roman", serif; text-align: center; margin: .2em 0 .5em; padding: .25em .6em; border: 2px solid var(--line); border-radius: .4em; background: #fafafa; }
+  .reveal .formula small { font: .7em "Open Sans", Arial, sans-serif; color: var(--muted); display: block; }
+  .reveal .simctl label { white-space: nowrap; }
+  .reveal .simctl input[type=range] { vertical-align: middle; width: 8em; }
+  .reveal .simctl output { display: inline-block; min-width: 2.6em; font-weight: bold; color: var(--blue); }
+  .reveal .kpi { display: flex; gap: .5em; flex-wrap: wrap; margin: .2em 0 .5em; }
+  .reveal .kpi > div { border: 2px solid var(--line); border-radius: .4em; padding: .15em .6em; font-size: .7em; min-width: 6.5em; }
+  .reveal .kpi b { display: block; font-size: 1.45em; color: var(--blue); }
+  .reveal .kpi .g b { color: var(--green); }
+  .reveal .kpi .o b { color: var(--orange); }
+  .reveal svg.sim-svg { display: block; width: 100%; height: auto; font-family: "Open Sans", Arial, sans-serif; }
+  .reveal svg.sim-svg text { font-size: 18px; }
+  .reveal svg.sim-svg .mono { font-family: Consolas, Menlo, monospace; }
+  .reveal svg.sim-svg .node { cursor: pointer; }
+  .reveal .legend { display: flex; flex-wrap: wrap; gap: .3em 1em; font-size: .7em; color: #333; margin: .2em 0 .4em; }
+  .reveal .legend i { display: inline-block; width: .9em; height: .9em; border-radius: 50%; vertical-align: -.1em; margin-right: .3em; }
+  .reveal .legend i.sq { border-radius: .15em; }
+
+  /* merge sort levels */
+  .reveal #mssim .lvl { display: flex; align-items: center; gap: .5em; margin: .25em 0; font-size: .7em; min-height: 1.7em; }
+  .reveal #mssim .lvl .lbl { width: 6.5em; flex: none; color: var(--muted); }
+  .reveal #mssim .seg { display: inline-flex; gap: 2px; padding: 2px; border-radius: .3em; border: 2px solid transparent; }
+  .reveal #mssim .seg .chip { min-width: 1.5em; padding: .05em .2em; animation: none; }
+  .reveal #mssim .lvl .cost { flex: none; margin-left: auto; font-family: Consolas, Menlo, monospace; color: var(--muted); }
+
+  /* matrix multiplication */
+  .reveal #matsim .mats { display: flex; align-items: center; gap: .6em; font: .8em Consolas, Menlo, monospace; margin: .2em 0 .5em; }
+  .reveal #matsim table.m { border-collapse: separate; border-spacing: 3px; border-left: 3px solid #333; border-right: 3px solid #333; border-radius: .3em; padding: 0 2px; }
+  .reveal #matsim table.m td { width: 2.1em; height: 1.7em; text-align: center; border-radius: .25em; background: #f1f3f4; padding: 0; }
+  .reveal #matsim table.m td.hl { background: #fef3c7; box-shadow: inset 0 0 0 2px var(--orange); }
+  .reveal #matsim table.c td { cursor: pointer; color: #000; }
+  .reveal #matsim table.c td.sel { box-shadow: inset 0 0 0 3px #000; font-weight: bold; }
+  .reveal #matsim .op { font-size: 1.3em; color: var(--muted); }
+  .reveal #matsim .calc { font: .72em Consolas, Menlo, monospace; min-height: 1.5em; margin: 0 0 .4em; }
+  .reveal .zipviz.big { font-size: .95em; }
+  .reveal .zipviz.big .lbl { width: 3.5em; }
+  .reveal #matsim table.m td { border: none; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section data-background-color="#ffffff" data-keywords="PRS">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie równoległe i strumieniowe</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:23.733%;width:61.002%;height:40%;"><p><span style="font-size:1.5em"><strong>Wykład 6</strong></span></p>
+
+<p><span style="font-size:1.5em"><strong>Algorytmy równoległe</strong></span></p>
+</div>
+<div class="el img" style="left:64.270%;top:21.576%;width:23.125%;height:40.000%;"><img src="images/image-BbDCi3xd.jpg" alt="UAM"></div>
+<div class="el img" style="left:47.930%;top:66.885%;width:19.608%;height:25.820%;"><img src="images/image-FLV54gsM.png" alt=""></div>
+<div class="el img" style="left:82.438%;top:71.200%;width:17.564%;height:18.215%;"><img src="images/image-FO1hl82g.png" alt=""></div>
+<div class="el img" style="left:67.538%;top:73.357%;width:16.340%;height:16.944%;"><img src="images/image-ZbMdJcpn.png" alt=""></div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Plan">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Plan wykładu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="agenda">
+  <div class="ag"><b>1</b>Miary i modele<p>przyspieszenie, efektywność, prawo Amdahla i Gustafsona, praca i rozpiętość</p></div>
+  <div class="ag"><b>2</b>Projektowanie algorytmów równoległych<p>dekompozycja danych i funkcjonalna, metodologia Fostera (PCAM), ziarnistość zadań</p></div>
+  <div class="ag"><b>3</b>Wzorce: redukcja i suma prefiksowa<p>drzewo redukcji, scan Hillisa-Steele'a</p></div>
+  <div class="ag"><b>4</b>Sortowanie<p>bąbelkowe odd-even, merge sort, scalanie odd-even</p></div>
+  <div class="ag"><b>5</b>Przeszukiwanie<p>wyszukiwanie binarne i p-arne, BFS warstwami, DFS i kradzież pracy</p></div>
+  <div class="ag"><b>6</b>Macierze i grafy<p>mnożenie macierzy, kolorowanie grafów (Jones-Plassmann)</p></div>
+</div>
+<div class="note"><p>Przykłady w Pythonie 3.13. Czasy zmierzono na komputerze z 12 rdzeniami logicznymi, więc u Ciebie będą inne, ale proporcje podobne.</p></div>
+</div>
+<aside class="notes">Wykład zdalny: pytania ze slajdów "Sprawdź się" i quizy w treści zadawaj na czacie Teams, zanim klikniesz odpowiedź. Symulacje warto przeklikać na żywo i pytać o następny krok przed kliknięciem.</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="Algorytmy równoległe">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Algorytmy równoległe</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:54%;height:72%">
+<p class="lead">Algorytm <strong>równoległy</strong> wykonuje obliczenia <strong>równocześnie</strong> na wielu procesorach lub rdzeniach, żeby rozwiązać problem <strong>szybciej</strong> albo rozwiązać <strong>większy</strong> problem w tym samym czasie.</p>
+<p class="lead">Opłaca się przy dużych problemach: dużo danych albo kosztowne operacje, które da się <strong>podzielić</strong> na mniejsze, niezależne kroki.</p>
+<div class="note"><p>Wykłady 1-5: jak uruchamiać i synchronizować wątki i procesy. Dziś: jak <strong>podzielić samo obliczenie</strong>, ile można zyskać i gdzie leżą ograniczenia.</p></div>
+</div>
+<div class="el text" style="left:39.216%;top:92.776%;width:60.784%;height:7.201%;"><p><span style="font-size:0.75em">https://ifunny.co/picture/the-prof-me-my-parallel-algorithm-that-should-not-work-CjPopSk19</span></p>
+</div>
+<div class="el img" style="left:57.734%;top:19.418%;width:29.412%;height:74.032%;"><img src="images/image-2TJ15caJ.png" alt="Mem: kocięta jedzą z wielu misek naraz"></div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Miary">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przyspieszenie (speedup) i efektywność</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead"><i>T</i><sub>1</sub> to czas najlepszego algorytmu <strong>sekwencyjnego</strong>, a <i>T<sub>p</sub></i> czas na <i>p</i> procesorach.</p>
+<div class="formula">S(p) = T<sub>1</sub> / T<sub>p</sub> &nbsp;&nbsp;&nbsp; E(p) = S(p) / p</div>
+<ul class="points side">
+<li>Ideał to przyspieszenie <strong>liniowe</strong>: S(p) = p, E(p) = 1. W praktyce przeszkadza narzut na tworzenie zadań, komunikację i synchronizację.</li>
+<li class="fragment">Zdarza się przyspieszenie <strong>superliniowe</strong> (S &gt; p), gdy fragmenty danych mieszczą się w pamięci podręcznej rdzeni.</li>
+</ul>
+<p class="lead fragment"><strong>Prawo Amdahla</strong> (1967): jeśli tylko ułamek <i>f</i> programu da się zrównoleglić, to</p>
+<div class="formula fragment">S(p) = 1 / ((1 − f) + f / p) &nbsp;≤&nbsp; 1 / (1 − f)</div>
+</div>
+<div>
+<div class="quiz fragment"><p class="q">90% czasu programu da się zrównoleglić. Jakie jest <strong>maksymalne</strong> przyspieszenie, nawet przy nieskończenie wielu procesorach?</p><div class="opts"><button class="opt" data-ok="0">9×</button><button class="opt" data-ok="1">10×</button><button class="opt" data-ok="0">90×</button><button class="opt" data-ok="0">nieograniczone</button></div><p class="explain">1 / (1 − 0,9) = 10. Sekwencyjne 10% zawsze zostaje: nawet gdy reszta trwa zero, program trwa co najmniej 10% pierwotnego czasu.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Prawo Amdahla i prawo Gustafsona</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="amdahl">
+  <div class="simctl">
+    <label>część równoległa f = <input type="range" class="f" min="0" max="100" step="1" value="90"> <output class="fv">90%</output></label>
+    <label>procesory p = <input type="range" class="p" min="0" max="10" step="1" value="4"> <output class="pv">16</output></label>
+  </div>
+  <div class="cols wr">
+    <div>
+      <div class="kpi">
+        <div><span>Amdahl S(p)</span><b class="sa">6,4</b></div>
+        <div class="g"><span>Gustafson S(p)</span><b class="sg">14,5</b></div>
+      </div>
+      <div class="kpi">
+        <div><span>efektywność (Amdahl)</span><b class="ea">40%</b></div>
+        <div class="o"><span>granica Amdahla</span><b class="lim">10</b></div>
+      </div>
+      <p class="hint"><b>Amdahl</b>: stały rozmiar problemu, liczymy go szybciej.<br><b>Gustafson</b> (1988): rozmiar rośnie z liczbą procesorów, a f mierzymy na maszynie równoległej: S = (1 − f) + f·p.</p>
+    </div>
+    <svg class="sim-svg chart" viewBox="0 0 560 330" role="img" aria-label="Wykres przyspieszenia od liczby procesorów"></svg>
+  </div>
+</div>
+</div>
+<aside class="notes">Pokaż f = 50%, 90%, 99%. Przy f = 99% i p = 1024 Amdahl daje tylko ok. 91. Gustafson jest optymistyczny, bo zakłada, że dokładamy pracy proporcjonalnie do procesorów (np. większa siatka w symulacji).</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Praca i rozpiętość (work &amp; span)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Obliczenie to graf zależności (DAG). <strong>Praca</strong> <i>T</i><sub>1</sub> to liczba wszystkich operacji, a <strong>rozpiętość</strong> <i>T</i><sub>∞</sub> (span, ścieżka krytyczna) to najdłuższy łańcuch zależnych operacji.</p>
+<div class="cols wl">
+<div>
+<svg class="diagram" viewBox="0 0 940 335" role="img" aria-label="Suma 8 liczb: łańcuch ma rozpiętość 7, drzewo ma rozpiętość 3; praca w obu przypadkach wynosi 7"><defs><marker id="arW" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#888"/></marker></defs><line x1="37.4" y1="33.4" x2="62.9" y2="50.5" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="77.0" y1="40.0" x2="77.0" y2="43.0" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="89.4" y1="68.4" x2="114.9" y2="85.5" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="129.0" y1="40.0" x2="129.0" y2="78.0" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="141.4" y1="103.4" x2="166.9" y2="120.5" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="181.0" y1="40.0" x2="181.0" y2="113.0" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="193.4" y1="138.4" x2="218.9" y2="155.5" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="233.0" y1="40.0" x2="233.0" y2="148.0" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="245.4" y1="173.4" x2="270.9" y2="190.5" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="285.0" y1="40.0" x2="285.0" y2="183.0" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="297.4" y1="208.4" x2="322.9" y2="225.5" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="337.0" y1="40.0" x2="337.0" y2="218.0" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="349.4" y1="243.4" x2="374.9" y2="260.5" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="389.0" y1="40.0" x2="389.0" y2="253.0" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><circle cx="25" cy="25" r="15" fill="#fff" stroke="#999" stroke-width="2"/><text x="25.0" y="31.0" text-anchor="middle" class="mono">3</text><circle cx="77" cy="25" r="15" fill="#fff" stroke="#999" stroke-width="2"/><text x="77.0" y="31.0" text-anchor="middle" class="mono">1</text><circle cx="129" cy="25" r="15" fill="#fff" stroke="#999" stroke-width="2"/><text x="129.0" y="31.0" text-anchor="middle" class="mono">7</text><circle cx="181" cy="25" r="15" fill="#fff" stroke="#999" stroke-width="2"/><text x="181.0" y="31.0" text-anchor="middle" class="mono">0</text><circle cx="233" cy="25" r="15" fill="#fff" stroke="#999" stroke-width="2"/><text x="233.0" y="31.0" text-anchor="middle" class="mono">4</text><circle cx="285" cy="25" r="15" fill="#fff" stroke="#999" stroke-width="2"/><text x="285.0" y="31.0" text-anchor="middle" class="mono">1</text><circle cx="337" cy="25" r="15" fill="#fff" stroke="#999" stroke-width="2"/><text x="337.0" y="31.0" text-anchor="middle" class="mono">6</text><circle cx="389" cy="25" r="15" fill="#fff" stroke="#999" stroke-width="2"/><text x="389.0" y="31.0" text-anchor="middle" class="mono">3</text><circle cx="77" cy="60" r="15" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="77.0" y="66.0" text-anchor="middle" fill="#000" font-weight="bold">+</text><circle cx="129" cy="95" r="15" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="129.0" y="101.0" text-anchor="middle" fill="#000" font-weight="bold">+</text><circle cx="181" cy="130" r="15" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="181.0" y="136.0" text-anchor="middle" fill="#000" font-weight="bold">+</text><circle cx="233" cy="165" r="15" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="233.0" y="171.0" text-anchor="middle" fill="#000" font-weight="bold">+</text><circle cx="285" cy="200" r="15" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="285.0" y="206.0" text-anchor="middle" fill="#000" font-weight="bold">+</text><circle cx="337" cy="235" r="15" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="337.0" y="241.0" text-anchor="middle" fill="#000" font-weight="bold">+</text><circle cx="389" cy="270" r="15" fill="#53ae12" stroke="#53ae12" stroke-width="2"/><text x="389.0" y="276.0" text-anchor="middle" fill="#fff" font-weight="bold">+</text><text x="210.0" y="320.0" text-anchor="middle" style="font-size:24px" font-weight="bold">pętla: praca 7, rozpiętość 7</text><circle cx="520" cy="25" r="15" fill="#fff" stroke="#999" stroke-width="2"/><text x="520.0" y="31.0" text-anchor="middle" class="mono">3</text><circle cx="575" cy="25" r="15" fill="#fff" stroke="#999" stroke-width="2"/><text x="575.0" y="31.0" text-anchor="middle" class="mono">1</text><circle cx="630" cy="25" r="15" fill="#fff" stroke="#999" stroke-width="2"/><text x="630.0" y="31.0" text-anchor="middle" class="mono">7</text><circle cx="685" cy="25" r="15" fill="#fff" stroke="#999" stroke-width="2"/><text x="685.0" y="31.0" text-anchor="middle" class="mono">0</text><circle cx="740" cy="25" r="15" fill="#fff" stroke="#999" stroke-width="2"/><text x="740.0" y="31.0" text-anchor="middle" class="mono">4</text><circle cx="795" cy="25" r="15" fill="#fff" stroke="#999" stroke-width="2"/><text x="795.0" y="31.0" text-anchor="middle" class="mono">1</text><circle cx="850" cy="25" r="15" fill="#fff" stroke="#999" stroke-width="2"/><text x="850.0" y="31.0" text-anchor="middle" class="mono">6</text><circle cx="905" cy="25" r="15" fill="#fff" stroke="#999" stroke-width="2"/><text x="905.0" y="31.0" text-anchor="middle" class="mono">3</text><line x1="524.6" y1="39.3" x2="542.3" y2="93.8" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="570.4" y1="39.3" x2="552.7" y2="93.8" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="634.6" y1="39.3" x2="652.3" y2="93.8" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="680.4" y1="39.3" x2="662.7" y2="93.8" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="744.6" y1="39.3" x2="762.3" y2="93.8" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="790.4" y1="39.3" x2="772.7" y2="93.8" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="854.6" y1="39.3" x2="872.3" y2="93.8" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="900.4" y1="39.3" x2="882.7" y2="93.8" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><circle cx="547.5" cy="110" r="15" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="547.5" y="116.0" text-anchor="middle" fill="#000" font-weight="bold">+</text><circle cx="657.5" cy="110" r="15" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="657.5" y="116.0" text-anchor="middle" fill="#000" font-weight="bold">+</text><circle cx="767.5" cy="110" r="15" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="767.5" y="116.0" text-anchor="middle" fill="#000" font-weight="bold">+</text><circle cx="877.5" cy="110" r="15" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="877.5" y="116.0" text-anchor="middle" fill="#000" font-weight="bold">+</text><line x1="555.6" y1="122.6" x2="593.3" y2="180.7" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="649.4" y1="122.6" x2="611.7" y2="180.7" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="775.6" y1="122.6" x2="813.3" y2="180.7" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="869.4" y1="122.6" x2="831.7" y2="180.7" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><circle cx="602.5" cy="195" r="15" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="602.5" y="201.0" text-anchor="middle" fill="#000" font-weight="bold">+</text><circle cx="822.5" cy="195" r="15" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="822.5" y="201.0" text-anchor="middle" fill="#000" font-weight="bold">+</text><line x1="614.4" y1="204.2" x2="699.0" y2="269.6" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><line x1="810.6" y1="204.2" x2="726.0" y2="269.6" stroke="#888" stroke-width="1.8" marker-end="url(#arW)"/><circle cx="712.5" cy="280" r="15" fill="#53ae12" stroke="#53ae12" stroke-width="2"/><text x="712.5" y="286.0" text-anchor="middle" fill="#fff" font-weight="bold">+</text><text x="712.0" y="320.0" text-anchor="middle" style="font-size:24px" font-weight="bold">drzewo: praca 7, rozpiętość 3</text></svg>
+<div class="formula">T<sub>p</sub> ≥ max(T<sub>1</sub> / p, T<sub>∞</sub>) &nbsp;&nbsp; T<sub>p</sub> ≤ T<sub>1</sub> / p + T<sub>∞</sub><small>dolna granica &nbsp;·&nbsp; twierdzenie Brenta (dobry planista)</small></div>
+</div>
+<div>
+<p class="lead">Rozpiętość to granica: nawet nieskończenie wiele procesorów nie policzy szybciej niż T<sub>∞</sub>.</p>
+<div class="quiz compact"><p class="q">Suma <i>n</i> liczb drzewem: jaka jest rozpiętość?</p><div class="opts"><button class="opt" data-ok="0">O(1)</button><button class="opt" data-ok="1">O(log n)</button><button class="opt" data-ok="0">O(n)</button></div><p class="explain">Każdy poziom drzewa połowi liczbę elementów, więc poziomów jest log₂ n. Praca pozostaje O(n), a <b>równoległość</b> T₁/T∞ = n / log n.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Projektowanie">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Jak dzielić: dane czy operacje?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Równoległe wersje znanych algorytmów korzystają z dwóch sposobów podziału pracy:</p>
+<svg class="diagram" viewBox="0 0 1000 250" role="img" aria-label="Dekompozycja danych: tablica podzielona na 4 części, każdą przetwarza inny procesor tą samą funkcją. Dekompozycja funkcjonalna: potok etapów, każdy etap na innym procesorze."><defs><marker id="arD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs><text x="230.0" y="22.0" text-anchor="middle" style="font-size:20px" font-weight="bold">dekompozycja danych</text><rect x="20" y="40" width="33" height="33" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="55" y="40" width="33" height="33" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="90" y="40" width="33" height="33" rx="4" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="125" y="40" width="33" height="33" rx="4" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><rect x="160" y="40" width="33" height="33" rx="4" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><rect x="195" y="40" width="33" height="33" rx="4" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><rect x="230" y="40" width="33" height="33" rx="4" fill="#fef0e1" stroke="#e8710a" stroke-width="2"/><rect x="265" y="40" width="33" height="33" rx="4" fill="#fef0e1" stroke="#e8710a" stroke-width="2"/><rect x="300" y="40" width="33" height="33" rx="4" fill="#fef0e1" stroke="#e8710a" stroke-width="2"/><rect x="335" y="40" width="33" height="33" rx="4" fill="#f3e8fd" stroke="#9334e6" stroke-width="2"/><rect x="370" y="40" width="33" height="33" rx="4" fill="#f3e8fd" stroke="#9334e6" stroke-width="2"/><rect x="405" y="40" width="33" height="33" rx="4" fill="#f3e8fd" stroke="#9334e6" stroke-width="2"/><line x1="70.0" y1="76.0" x2="70.0" y2="122.0" stroke="#666" stroke-width="2" marker-end="url(#arD)"/><rect x="26" y="125" width="88" height="44" rx="8" fill="#1a73d9"/><text x="70.0" y="154.0" text-anchor="middle" fill="#fff" font-weight="bold">P1: f</text><line x1="175.0" y1="76.0" x2="175.0" y2="122.0" stroke="#666" stroke-width="2" marker-end="url(#arD)"/><rect x="131" y="125" width="88" height="44" rx="8" fill="#53ae12"/><text x="175.0" y="154.0" text-anchor="middle" fill="#fff" font-weight="bold">P2: f</text><line x1="280.0" y1="76.0" x2="280.0" y2="122.0" stroke="#666" stroke-width="2" marker-end="url(#arD)"/><rect x="236" y="125" width="88" height="44" rx="8" fill="#e8710a"/><text x="280.0" y="154.0" text-anchor="middle" fill="#fff" font-weight="bold">P3: f</text><line x1="385.0" y1="76.0" x2="385.0" y2="122.0" stroke="#666" stroke-width="2" marker-end="url(#arD)"/><rect x="341" y="125" width="88" height="44" rx="8" fill="#9334e6"/><text x="385.0" y="154.0" text-anchor="middle" fill="#fff" font-weight="bold">P4: f</text><text x="230.0" y="205.0" text-anchor="middle" style="font-size:16px" fill="#666">ta sama operacja, różne fragmenty danych</text><text x="230.0" y="228.0" text-anchor="middle" style="font-size:16px" fill="#666">np. map po kawałkach tablicy, wiersze macierzy</text><line x1="480.0" y1="10.0" x2="480.0" y2="240.0" stroke="#ddd" stroke-width="2"/><text x="745.0" y="22.0" text-anchor="middle" style="font-size:20px" font-weight="bold">dekompozycja funkcjonalna</text><text x="528.0" y="103.0" text-anchor="middle" style="font-size:16px" fill="#666">dane</text><line x1="550.0" y1="98.0" x2="570.0" y2="98.0" stroke="#666" stroke-width="2" marker-end="url(#arD)"/><rect x="572" y="70" width="86" height="56" rx="8" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="615.0" y="95.0" text-anchor="middle" style="font-size:17px">wczytaj</text><text x="615.0" y="116.0" text-anchor="middle" style="font-size:15px" fill="#1a73d9" font-weight="bold">P1</text><line x1="658.0" y1="98.0" x2="674.0" y2="98.0" stroke="#666" stroke-width="2" marker-end="url(#arD)"/><rect x="676" y="70" width="86" height="56" rx="8" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="719.0" y="95.0" text-anchor="middle" style="font-size:17px">parsuj</text><text x="719.0" y="116.0" text-anchor="middle" style="font-size:15px" fill="#53ae12" font-weight="bold">P2</text><line x1="762.0" y1="98.0" x2="778.0" y2="98.0" stroke="#666" stroke-width="2" marker-end="url(#arD)"/><rect x="780" y="70" width="86" height="56" rx="8" fill="#fef0e1" stroke="#e8710a" stroke-width="2"/><text x="823.0" y="95.0" text-anchor="middle" style="font-size:17px">filtruj</text><text x="823.0" y="116.0" text-anchor="middle" style="font-size:15px" fill="#e8710a" font-weight="bold">P3</text><line x1="866.0" y1="98.0" x2="882.0" y2="98.0" stroke="#666" stroke-width="2" marker-end="url(#arD)"/><rect x="884" y="70" width="86" height="56" rx="8" fill="#f3e8fd" stroke="#9334e6" stroke-width="2"/><text x="927.0" y="95.0" text-anchor="middle" style="font-size:17px">agreguj</text><text x="927.0" y="116.0" text-anchor="middle" style="font-size:15px" fill="#9334e6" font-weight="bold">P4</text><text x="745.0" y="205.0" text-anchor="middle" style="font-size:16px" fill="#666">różne operacje, dane płyną przez etapy</text><text x="745.0" y="228.0" text-anchor="middle" style="font-size:16px" fill="#666">np. potok generatorów, operatory Flink</text></svg>
+<div class="cols">
+<ul class="points side">
+<li><strong>Dekompozycja danych</strong> (domain decomposition): dzielimy dane na <i>p</i> części, każdy procesor liczy swoją, na końcu łączymy wyniki. Nie zawsze się da, gdy części zależą od siebie.</li>
+</ul>
+<ul class="points side">
+<li><strong>Dekompozycja funkcjonalna</strong> (functional decomposition): dzielimy operacje między procesory. Wspólne dane wymagają synchronizacji (wykłady 3-5).</li>
+</ul>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Metodologia Fostera (PCAM)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Ian Foster, <i>Designing and Building Parallel Programs</i> (1995), opisuje cztery kroki projektowania algorytmu równoległego:</p>
+<svg class="diagram" viewBox="0 0 1000 250" role="img" aria-label="Metodologia PCAM: podział na drobne zadania, komunikacja między nimi, aglomeracja w większe grupy, mapowanie grup na procesory"><defs><marker id="arP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs><circle cx="45" cy="30" r="7" fill="#1a73d9"/><circle cx="95" cy="30" r="7" fill="#1a73d9"/><circle cx="145" cy="30" r="7" fill="#1a73d9"/><circle cx="195" cy="30" r="7" fill="#1a73d9"/><circle cx="45" cy="75" r="7" fill="#1a73d9"/><circle cx="95" cy="75" r="7" fill="#1a73d9"/><circle cx="145" cy="75" r="7" fill="#1a73d9"/><circle cx="195" cy="75" r="7" fill="#1a73d9"/><circle cx="45" cy="120" r="7" fill="#1a73d9"/><circle cx="95" cy="120" r="7" fill="#1a73d9"/><circle cx="145" cy="120" r="7" fill="#1a73d9"/><circle cx="195" cy="120" r="7" fill="#1a73d9"/><circle cx="45" cy="165" r="7" fill="#1a73d9"/><circle cx="95" cy="165" r="7" fill="#1a73d9"/><circle cx="145" cy="165" r="7" fill="#1a73d9"/><circle cx="195" cy="165" r="7" fill="#1a73d9"/><text x="120.0" y="222.0" text-anchor="middle" style="font-size:19px" font-weight="bold">1. podział</text><text x="120.0" y="244.0" text-anchor="middle" style="font-size:15px" fill="#666">partitioning</text><line x1="227.0" y1="98.0" x2="253.0" y2="98.0" stroke="#666" stroke-width="2.5" marker-end="url(#arP)"/><line x1="295.0" y1="30.0" x2="345.0" y2="30.0" stroke="#999" stroke-width="1.5"/><line x1="295.0" y1="30.0" x2="295.0" y2="75.0" stroke="#999" stroke-width="1.5"/><line x1="345.0" y1="30.0" x2="395.0" y2="30.0" stroke="#999" stroke-width="1.5"/><line x1="345.0" y1="30.0" x2="345.0" y2="75.0" stroke="#999" stroke-width="1.5"/><line x1="395.0" y1="30.0" x2="445.0" y2="30.0" stroke="#999" stroke-width="1.5"/><line x1="395.0" y1="30.0" x2="395.0" y2="75.0" stroke="#999" stroke-width="1.5"/><line x1="445.0" y1="30.0" x2="445.0" y2="75.0" stroke="#999" stroke-width="1.5"/><line x1="295.0" y1="75.0" x2="345.0" y2="75.0" stroke="#999" stroke-width="1.5"/><line x1="295.0" y1="75.0" x2="295.0" y2="120.0" stroke="#999" stroke-width="1.5"/><line x1="345.0" y1="75.0" x2="395.0" y2="75.0" stroke="#999" stroke-width="1.5"/><line x1="345.0" y1="75.0" x2="345.0" y2="120.0" stroke="#999" stroke-width="1.5"/><line x1="395.0" y1="75.0" x2="445.0" y2="75.0" stroke="#999" stroke-width="1.5"/><line x1="395.0" y1="75.0" x2="395.0" y2="120.0" stroke="#999" stroke-width="1.5"/><line x1="445.0" y1="75.0" x2="445.0" y2="120.0" stroke="#999" stroke-width="1.5"/><line x1="295.0" y1="120.0" x2="345.0" y2="120.0" stroke="#999" stroke-width="1.5"/><line x1="295.0" y1="120.0" x2="295.0" y2="165.0" stroke="#999" stroke-width="1.5"/><line x1="345.0" y1="120.0" x2="395.0" y2="120.0" stroke="#999" stroke-width="1.5"/><line x1="345.0" y1="120.0" x2="345.0" y2="165.0" stroke="#999" stroke-width="1.5"/><line x1="395.0" y1="120.0" x2="445.0" y2="120.0" stroke="#999" stroke-width="1.5"/><line x1="395.0" y1="120.0" x2="395.0" y2="165.0" stroke="#999" stroke-width="1.5"/><line x1="445.0" y1="120.0" x2="445.0" y2="165.0" stroke="#999" stroke-width="1.5"/><line x1="295.0" y1="165.0" x2="345.0" y2="165.0" stroke="#999" stroke-width="1.5"/><line x1="345.0" y1="165.0" x2="395.0" y2="165.0" stroke="#999" stroke-width="1.5"/><line x1="395.0" y1="165.0" x2="445.0" y2="165.0" stroke="#999" stroke-width="1.5"/><circle cx="295" cy="30" r="7" fill="#1a73d9"/><circle cx="345" cy="30" r="7" fill="#1a73d9"/><circle cx="395" cy="30" r="7" fill="#1a73d9"/><circle cx="445" cy="30" r="7" fill="#1a73d9"/><circle cx="295" cy="75" r="7" fill="#1a73d9"/><circle cx="345" cy="75" r="7" fill="#1a73d9"/><circle cx="395" cy="75" r="7" fill="#1a73d9"/><circle cx="445" cy="75" r="7" fill="#1a73d9"/><circle cx="295" cy="120" r="7" fill="#1a73d9"/><circle cx="345" cy="120" r="7" fill="#1a73d9"/><circle cx="395" cy="120" r="7" fill="#1a73d9"/><circle cx="445" cy="120" r="7" fill="#1a73d9"/><circle cx="295" cy="165" r="7" fill="#1a73d9"/><circle cx="345" cy="165" r="7" fill="#1a73d9"/><circle cx="395" cy="165" r="7" fill="#1a73d9"/><circle cx="445" cy="165" r="7" fill="#1a73d9"/><text x="370.0" y="222.0" text-anchor="middle" style="font-size:19px" font-weight="bold">2. komunikacja</text><text x="370.0" y="244.0" text-anchor="middle" style="font-size:15px" fill="#666">communication</text><line x1="477.0" y1="98.0" x2="503.0" y2="98.0" stroke="#666" stroke-width="2.5" marker-end="url(#arP)"/><rect x="527" y="13" width="86" height="79" rx="12" fill="#f4f4f4" stroke="#888" stroke-width="2"/><rect x="627" y="13" width="86" height="79" rx="12" fill="#f4f4f4" stroke="#888" stroke-width="2"/><rect x="527" y="103" width="86" height="79" rx="12" fill="#f4f4f4" stroke="#888" stroke-width="2"/><rect x="627" y="103" width="86" height="79" rx="12" fill="#f4f4f4" stroke="#888" stroke-width="2"/><line x1="595.0" y1="30.0" x2="645.0" y2="30.0" stroke="#555" stroke-width="2.5"/><line x1="545.0" y1="75.0" x2="545.0" y2="120.0" stroke="#555" stroke-width="2.5"/><line x1="595.0" y1="75.0" x2="645.0" y2="75.0" stroke="#555" stroke-width="2.5"/><line x1="595.0" y1="75.0" x2="595.0" y2="120.0" stroke="#555" stroke-width="2.5"/><line x1="645.0" y1="75.0" x2="645.0" y2="120.0" stroke="#555" stroke-width="2.5"/><line x1="695.0" y1="75.0" x2="695.0" y2="120.0" stroke="#555" stroke-width="2.5"/><line x1="595.0" y1="120.0" x2="645.0" y2="120.0" stroke="#555" stroke-width="2.5"/><line x1="595.0" y1="165.0" x2="645.0" y2="165.0" stroke="#555" stroke-width="2.5"/><circle cx="545" cy="30" r="7" fill="#1a73d9"/><circle cx="595" cy="30" r="7" fill="#1a73d9"/><circle cx="645" cy="30" r="7" fill="#1a73d9"/><circle cx="695" cy="30" r="7" fill="#1a73d9"/><circle cx="545" cy="75" r="7" fill="#1a73d9"/><circle cx="595" cy="75" r="7" fill="#1a73d9"/><circle cx="645" cy="75" r="7" fill="#1a73d9"/><circle cx="695" cy="75" r="7" fill="#1a73d9"/><circle cx="545" cy="120" r="7" fill="#1a73d9"/><circle cx="595" cy="120" r="7" fill="#1a73d9"/><circle cx="645" cy="120" r="7" fill="#1a73d9"/><circle cx="695" cy="120" r="7" fill="#1a73d9"/><circle cx="545" cy="165" r="7" fill="#1a73d9"/><circle cx="595" cy="165" r="7" fill="#1a73d9"/><circle cx="645" cy="165" r="7" fill="#1a73d9"/><circle cx="695" cy="165" r="7" fill="#1a73d9"/><text x="620.0" y="222.0" text-anchor="middle" style="font-size:19px" font-weight="bold">3. aglomeracja</text><text x="620.0" y="244.0" text-anchor="middle" style="font-size:15px" fill="#666">agglomeration</text><line x1="727.0" y1="98.0" x2="753.0" y2="98.0" stroke="#666" stroke-width="2.5" marker-end="url(#arP)"/><rect x="777" y="13" width="86" height="79" rx="12" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="820.0" y="57.0" text-anchor="middle" style="font-size:17px" fill="#1a73d9" font-weight="bold">P1</text><rect x="877" y="13" width="86" height="79" rx="12" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="920.0" y="57.0" text-anchor="middle" style="font-size:17px" fill="#53ae12" font-weight="bold">P2</text><rect x="777" y="103" width="86" height="79" rx="12" fill="#fef0e1" stroke="#e8710a" stroke-width="2"/><text x="820.0" y="147.0" text-anchor="middle" style="font-size:17px" fill="#e8710a" font-weight="bold">P3</text><rect x="877" y="103" width="86" height="79" rx="12" fill="#f3e8fd" stroke="#9334e6" stroke-width="2"/><text x="920.0" y="147.0" text-anchor="middle" style="font-size:17px" fill="#9334e6" font-weight="bold">P4</text><text x="870.0" y="222.0" text-anchor="middle" style="font-size:19px" font-weight="bold">4. mapowanie</text><text x="870.0" y="244.0" text-anchor="middle" style="font-size:15px" fill="#666">mapping</text></svg>
+<ul class="points side">
+<li>Kroki 1-2 nie zależą od maszyny: szukamy <strong>całej</strong> dostępnej równoległości.</li>
+<li>Kroki 3-4 dopasowują algorytm do <strong>konkretnej</strong> liczby procesorów i kosztu komunikacji.</li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>PCAM krok po kroku</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th>Etap</th><th>Co robimy</th><th>Pytanie kontrolne</th></tr>
+<tr><td><strong>Podział</strong><br>(partitioning)</td><td>Dzielimy obliczenia <strong>i</strong> dane na jak najwięcej małych zadań: dekompozycja <strong>drobnoziarnista</strong> (fine-grained).</td><td>Czy zadań jest o rząd wielkości więcej niż procesorów?</td></tr>
+<tr><td><strong>Komunikacja</strong><br>(communication)</td><td>Zadania rzadko są niezależne: obliczenie jednego potrzebuje danych innego. Ustalamy, co i między kim musi przepływać.</td><td>Czy każde zadanie komunikuje się z niewieloma sąsiadami? Czy komunikacja może iść równolegle?</td></tr>
+<tr><td><strong>Aglomeracja</strong><br>(agglomeration)</td><td>Tysiące drobnych zadań na kilku rdzeniach to głównie narzut. Łączymy zadania w większe (gruboziarniste), by mniej tworzyć i mniej komunikować.</td><td>Czy obliczenia w zadaniu wyraźnie przeważają nad kosztem jego utworzenia i przesłania danych?</td></tr>
+<tr><td><strong>Mapowanie</strong><br>(mapping)</td><td>Przypisujemy zadania do procesorów: niezależne na <strong>różne</strong> procesory (współbieżność), często komunikujące się na <strong>ten sam</strong> (lokalność).</td><td>Czy obciążenie jest zrównoważone? Statycznie czy dynamicznie (pula zadań)?</td></tr>
+</table>
+<div class="note"><p>Na zwykłym komputerze mapowanie robi za nas system operacyjny albo pula wątków lub procesów (<code>concurrent.futures</code>, wykład 7). Ręczne mapowanie wraca w klastrach: MPI, Spark, Flink.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Fibonacci: jak nie zrównoleglać</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import threading, time
+
+def fib_watki(n, wynik, i):
+    if n &lt; 2:
+        wynik[i] = n
+        return
+    w = [0, 0]                    # tu wątki potomne zapiszą wyniki
+    t1 = threading.Thread(target=fib_watki, args=(n - 1, w, 0))
+    t2 = threading.Thread(target=fib_watki, args=(n - 2, w, 1))
+    t1.start(); t2.start()
+    t1.join(); t2.join()
+    wynik[i] = w[0] + w[1]
+
+def fib(n):
+    return n if n &lt; 2 else fib(n - 1) + fib(n - 2)
+
+start = time.perf_counter()
+w = [0]
+fib_watki(18, w, 0)
+print("wątki:       ", w[0], f"{time.perf_counter() - start:.4f} s")
+
+start = time.perf_counter()
+print("sekwencyjnie:", fib(18), f"{time.perf_counter() - start:.4f} s")
+</code></pre>
+</div>
+<div>
+<p class="lead">Pomysł z H5P: każde wywołanie rekurencyjne w osobnym wątku.</p>
+<pre class="out sm">wątki:        2584 1.5925 s
+sekwencyjnie: 2584 0.0011 s</pre>
+<ul class="points side">
+<li class="fragment"><code>fib(18)</code> tworzy <strong>8360 wątków</strong>, a wynik przychodzi ok. <strong>1000 razy wolniej</strong>.</li>
+<li class="fragment">Zadanie (jedno dodawanie) jest o rzędy wielkości tańsze niż utworzenie wątku: to podział bez <strong>aglomeracji</strong>.</li>
+<li class="fragment">W CPythonie z GIL wątki i tak nie liczą równolegle (wykład 1).</li>
+<li class="fragment"><code>Thread</code> nie zwraca wyniku: przekazujemy listę, do której wątek go zapisze.</li>
+</ul>
+</div>
+</div>
+</div>
+<aside class="notes">Oryginalny pseudokod z H5P miał składnię mieszaną z Javą/C (int n, ||) i wywołanie threading.Thread(computeFib(n-1)), które liczy fib w wątku głównym, zanim w ogóle powstanie wątek. Tu wersja działająca.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Fork-join z progiem (aglomeracja)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import time
+from concurrent.futures import ProcessPoolExecutor
+
+def fib(n):
+    return n if n &lt; 2 else fib(n - 1) + fib(n - 2)
+
+def podziel(n, prog):
+    """Rozwija górę drzewa rekursji: fib(n) = suma fib(liść)."""
+    if n &lt; prog:
+        return [n]
+    return podziel(n - 1, prog) + podziel(n - 2, prog)
+
+if __name__ == "__main__":
+    N = 35
+    start = time.perf_counter()
+    print("sekwencyjnie:", fib(N), f"{time.perf_counter() - start:.2f} s")
+
+    for prog in (35, 30, 25, 15):
+        zadania = podziel(N, prog)
+        start = time.perf_counter()
+        with ProcessPoolExecutor() as ex:    # tu: 12 procesów
+            wynik = sum(ex.map(fib, zadania))
+        print(f"próg {prog}: liczba zadań {len(zadania):5},",
+              wynik, f"{time.perf_counter() - start:.2f} s")
+</code></pre>
+</div>
+<div>
+<pre class="out sm">sekwencyjnie: 9227465 1.65 s
+próg 35: liczba zadań     2, 9227465 1.29 s
+próg 30: liczba zadań    21, 9227465 0.64 s
+próg 25: liczba zadań   233, 9227465 0.55 s
+próg 15: liczba zadań 28657, 9227465 5.20 s</pre>
+<ul class="points side">
+<li>Rozwijamy tylko <strong>górę</strong> drzewa rekursji, liście poniżej progu liczą procesy.</li>
+<li class="fragment"><strong>Za grubo</strong> (2 zadania): pracują najwyżej 2 rdzenie.</li>
+<li class="fragment"><strong>Za drobno</strong> (28657 zadań): przesyłanie zadań kosztuje więcej niż liczenie.</li>
+<li class="fragment"><strong>W sam raz</strong>: kilka zadań na rdzeń. Ok. 3×, a nie 12×: start procesów, nierówne zadania.</li>
+</ul>
+<div class="note warn fragment"><p>Nie zlecaj podzadań z wnętrza zadania w tej samej puli i nie czekaj na nie: gdy wszyscy pracownicy czekają, nikt nie liczy (zakleszczenie, wykład 4).</p></div>
+</div>
+</div>
+</div>
+<aside class="notes">Od Pythona 3.13 ProcessPoolExecutor() domyślnie używa os.process_cpu_count() procesów (wcześniej os.cpu_count()). Wyniki czasowe różnią się między uruchomieniami.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="quiz"><p class="q">Dlaczego wersja z progiem 15 (28657 zadań) jest wolniejsza od sekwencyjnej?</p><div class="opts"><button class="opt" data-ok="0">bo GIL blokuje procesy</button><button class="opt" data-ok="1">bo narzut na zadanie przewyższa pracę zadania</button><button class="opt" data-ok="0">bo wynik jest liczony dwa razy</button></div><p class="explain">Każde zadanie trzeba zserializować (pickle), przesłać do procesu i odebrać wynik. <code>fib(14)</code> liczy się w mikrosekundach, więc dominuje komunikacja. Procesy mają osobne interpretery i GIL im nie przeszkadza. Pomaga parametr <code>chunksize</code> w <code>ex.map</code>, który wysyła zadania paczkami.</p></div>
+<div class="quiz"><p class="q">Program działa 100 s, z czego 20 s to wczytanie danych, którego nie da się zrównoleglić. Ile najwyżej potrwa na 8 rdzeniach?</p><div class="opts"><button class="opt" data-ok="0">12,5 s</button><button class="opt" data-ok="1">30 s</button><button class="opt" data-ok="0">20 s</button></div><p class="explain">20 s + 80 s / 8 = 30 s, czyli przyspieszenie 3,3× (prawo Amdahla z f = 0,8). Granica dla nieskończenie wielu rdzeni to 20 s, czyli 5×.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Wzorce">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Redukcja i suma prefiksowa (scan)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="scansim">
+  <div class="simctl">
+    <label><input type="radio" name="scanmode" value="seq" checked> pętla (sekwencyjnie)</label>
+    <label><input type="radio" name="scanmode" value="tree"> redukcja: drzewo</label>
+    <label><input type="radio" name="scanmode" value="hs"> scan: Hillis-Steele</label>
+    <button class="btn" data-act="step">Krok</button>
+    <button class="btn ghost" data-act="all">Do końca</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+  </div>
+  <div class="cols wr">
+    <div>
+      <div class="kpi">
+        <div><span>kroki (rozpiętość)</span><b class="ks">0</b></div>
+        <div class="g"><span>dodawania (praca)</span><b class="kw">0</b></div>
+      </div>
+      <p class="hint desc"></p>
+    </div>
+    <svg class="sim-svg" viewBox="0 0 640 420" role="img" aria-label="Kolejne kroki obliczania sumy"></svg>
+  </div>
+</div>
+</div>
+<aside class="notes">Kolejność: pętla (7 kroków), drzewo (3 kroki, ta sama praca), scan (3 kroki, ale więcej dodawań). Pytanie: czy drzewo zadziała dla odejmowania? Nie, operator musi być łączny.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Redukcja i scan w Pythonie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from itertools import accumulate
+
+def redukcja_drzewo(x):
+    x = list(x)
+    while len(x) &gt; 1:                     # każdy poziom: pary niezależne
+        x = [sum(x[i:i + 2]) for i in range(0, len(x), 2)]
+        print("poziom:", x)
+    return x[0]
+
+def scan_hillis_steele(x):
+    x, d = list(x), 1
+    while d &lt; len(x):                     # log2(n) kroków
+        x = [x[i] + x[i - d] if i &gt;= d else x[i] for i in range(len(x))]
+        print(f"d = {d}:", x)             # w kroku: wszystkie i naraz
+        d *= 2
+    return x
+
+dane = [3, 1, 7, 0, 4, 1, 6, 3]
+redukcja_drzewo(dane)
+scan_hillis_steele(dane)
+print("accumulate:", list(accumulate(dane)))
+</code></pre>
+</div>
+<div>
+<pre class="out sm">poziom: [4, 7, 5, 9]
+poziom: [11, 14]
+poziom: [25]
+d = 1: [3, 4, 8, 7, 4, 5, 7, 9]
+d = 2: [3, 4, 11, 11, 12, 12, 11, 14]
+d = 4: [3, 4, 11, 11, 15, 16, 22, 25]
+accumulate: [3, 4, 11, 11, 15, 16, 22, 25]</pre>
+<ul class="points side">
+<li>Drzewo działa, bo dodawanie jest <strong>łączne</strong>: (a + b) + c = a + (b + c). Tak samo <code>*</code>, <code>max</code>, <code>min</code>, ale nie <code>-</code>.</li>
+<li class="fragment"><code>functools.reduce</code> i <code>itertools.accumulate</code> z wykładu 2 liczą tę samą wartość, tylko <strong>po kolei</strong>.</li>
+<li class="fragment">Hillis-Steele: rozpiętość log₂ n, ale praca O(n log n). Algorytm Blellocha ma pracę O(n) przy rozpiętości 2 log₂ n.</li>
+<li class="fragment">Scan to klocek wielu algorytmów: równoległy filtr (gdzie zapisać element?), radix sort, sumy bieżące w strumieniach.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Sortowanie">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Algorytmy sortujące</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:9.804%;top:93.423%;width:86.057%;height:6.473%;"><p>https://medium.com/@ruth_obe/sorting-array-of-objects-in-javascript-with-sort-c71faeb174ef</p>
+</div>
+<div class="el img" style="left:26.144%;top:19.418%;width:44.662%;height:72.643%;"><img src="images/image-Y8Mo2rWD.png" alt=""></div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sortowanie bąbelkowe równolegle</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead"><strong>Bubble sort</strong> porównuje sąsiednie pary i zamienia je, gdy są w złej kolejności. Złożoność O(n²).</p>
+<p class="lead">Najprostsze zrównoleglenie to <strong>dekompozycja danych</strong>:</p>
+<ol class="points side">
+<li>dzielimy tablicę na <i>p</i> części po n/p elementów,</li>
+<li>każdy procesor sortuje swoją część: O((n/p)²),</li>
+<li>scalamy <i>p</i> posortowanych części: O(n log p) (kopiec, <code>heapq.merge</code>).</li>
+</ol>
+<div class="formula">T<sub>p</sub> = O(n²/p² + n log p)</div>
+<div class="note warn"><p>Wersja H5P podawała max(O(n), O(n²/p)), pomijając koszt scalania. Bez kroku 3 tablica nie jest posortowana.</p></div>
+</div>
+<div>
+<img class="pic" src="images/image-OeDZUnbx.gif" alt="Animacja sortowania bąbelkowego" style="max-height:9em">
+<p class="small">https://pl.wikipedia.org/wiki/Sortowanie_b%C4%85belkowe#/media/Plik:Bubble-sort-example-300px.gif</p>
+<div class="quiz compact"><p class="q">n = 10 000, p = 4. Ile razy mniej porównań w kroku 2 niż w całym bubble sorcie?</p><div class="opts"><button class="opt" data-ok="0">4 razy</button><button class="opt" data-ok="0">8 razy</button><button class="opt" data-ok="1">16 razy</button></div><p class="explain">Każdy procesor robi (n/4)² = n²/16 porównań, a procesory działają równocześnie. Ciekawostka: nawet <b>sekwencyjne</b> posortowanie 4 części i scalenie jest ok. 4× szybsze, bo O(n²) karze za duże n.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Bąbelkowe potokowo („falowo”)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead">Można też zrównoleglić <strong>kolejne przebiegi</strong>: proces P2 zaczyna swój przebieg, gdy P1 przesunie się o dwie pozycje w prawo, potem rusza P3 i tak dalej.</p>
+<ul class="points side">
+<li class="fragment">Żaden proces nie może <strong>wyprzedzić</strong> poprzedniego ani dotknąć jego pary: potrzebna synchronizacja sąsiadów (semafory, wykład 3).</li>
+<li class="fragment">Przebiegi idą jak fale: n − 1 przebiegów, każdy startuje 2 kroki po poprzednim, więc całość trwa O(n) zamiast O(n²), ale przy n procesach.</li>
+<li class="fragment">To <strong>potok</strong> (pipeline): ta sama idea co potok generatorów z wykładu 2 i operatory w systemach strumieniowych.</li>
+</ul>
+</div>
+<img class="pic" src="images/image-DA4dyG7S.png" alt="Dwa procesy P1 i P2 porównują pary w przesuniętych falach">
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sortowanie odd-even (transposition sort)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wr">
+<div>
+<p class="lead">Wariant bąbelkowego z <strong>dwiema naprzemiennymi fazami</strong>:</p>
+<ul class="points side">
+<li><b>parzysta</b>: pary (0,1), (2,3), (4,5), …</li>
+<li><b>nieparzysta</b>: pary (1,2), (3,4), (5,6), …</li>
+</ul>
+<p class="lead">Pary w fazie są <strong>rozłączne</strong>, więc wszystkie porównania fazy idą równolegle. Po <strong>n</strong> fazach tablica jest posortowana.</p>
+<p class="small">Sekwencyjnie nie zyskujemy nic, ale z n/2 procesorami czas spada do O(n). Praca pozostaje O(n²).</p>
+</div>
+<div class="sim" id="oesim">
+  <div class="simctl">
+    <button class="btn" data-act="step">Faza</button>
+    <button class="btn" data-act="play">Odtwarzaj / pauza</button>
+    <button class="btn ghost" data-act="shuffle">Losuj</button>
+    <button class="btn ghost" data-act="reverse">Odwrotna</button>
+  </div>
+  <svg class="sim-svg" viewBox="0 0 640 300" role="img" aria-label="Słupki sortowanej tablicy z zaznaczonymi parami porównywanymi w bieżącej fazie"></svg>
+  <p class="hint status"></p>
+</div>
+</div>
+</div>
+<aside class="notes">Najgorszy przypadek to tablica odwrotnie posortowana: potrzebuje dokładnie n faz. Zapytaj: czy wystarczy n - 1 faz? (Nie zawsze.)</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Odd-even w Pythonie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+def odd_even_sort(a):
+    a = list(a)
+    n = len(a)
+    for faza in range(n):                  # n faz wystarcza zawsze
+        start = faza % 2                   # 0: od pary (0,1), 1: od (1,2)
+        # pary w fazie są rozłączne -&gt; porównania mogą iść równolegle
+        for i in range(start, n - 1, 2):
+            if a[i] &gt; a[i + 1]:
+                a[i], a[i + 1] = a[i + 1], a[i]
+        print(f"faza {faza}:", a)
+    return a
+
+odd_even_sort([6, 5, 3, 1, 8, 7, 2, 4])
+</code></pre>
+</div>
+<div>
+<pre class="out sm">faza 0: [5, 6, 1, 3, 7, 8, 2, 4]
+faza 1: [5, 1, 6, 3, 7, 2, 8, 4]
+faza 2: [1, 5, 3, 6, 2, 7, 4, 8]
+faza 3: [1, 3, 5, 2, 6, 4, 7, 8]
+faza 4: [1, 3, 2, 5, 4, 6, 7, 8]
+faza 5: [1, 2, 3, 4, 5, 6, 7, 8]
+faza 6: [1, 2, 3, 4, 5, 6, 7, 8]
+faza 7: [1, 2, 3, 4, 5, 6, 7, 8]</pre>
+<ul class="points side">
+<li>Przy <i>p</i> &lt; n procesorach każdy dostaje <strong>blok</strong> n/p elementów, a sąsiedzi zamiast zamiany scalają bloki i dzielą je na pół (compare-split).</li>
+<li>Fazy 6 i 7 nic nie zmieniły: można przerwać po dwóch fazach bez zamian.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sortowanie przez scalanie (merge sort)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead"><strong>Merge sort</strong> dzieli listę na pół, rekurencyjnie sortuje obie połowy, a następnie <strong>scala</strong> je w posortowaną listę. Złożoność O(n log n).</p>
+<p class="lead">To klasyczne <strong>dziel i zwyciężaj</strong>: dwie połówki są niezależne, więc można je sortować równolegle (wzorzec <strong>fork-join</strong>).</p>
+<p class="lead fragment">Problem: każde scalanie czeka na oba wyniki, a ostatnie scala <strong>n</strong> elementów jednym procesorem.</p>
+</div>
+<div>
+<img class="pic" src="images/image-p1v4rOYY.png" alt="Drzewo podziału i scalania merge sort dla 7 elementów" style="max-height:17em">
+<p class="small">https://en.wikipedia.org/wiki/Merge_sort#/media/File:Merge_sort_algorithm_diagram.svg</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Merge sort: drzewo procesorów</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Zakładając <strong>nieograniczoną</strong> liczbę procesorów, przypisujemy niezależne operacje każdego poziomu drzewa do <strong>osobnych procesorów</strong>, które równolegle dzielą i scalają.</p>
+<img class="pic" src="images/image-7xNFPhth.gif" alt="Drzewo procesorów: Node 0 przekazuje połowę danych do Node 4, potem do Node 2 i Node 6 i tak dalej" style="max-height:8.5em">
+<p class="small">https://stackoverflow.com/questions/61910607/parallel-merge-sort-using-mpi</p>
+<ul class="points side">
+<li>Proces 0 zatrzymuje lewą połowę, a prawą wysyła do procesu 4. Na kolejnym poziomie 0 → 2 i 4 → 6, potem 0 → 1, 2 → 3, … (typowy schemat w MPI).</li>
+<li>Scalanie wraca w górę drzewa: dzieci odsyłają posortowane części do rodziców.</li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Merge sort: ile naprawdę zyskujemy?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="mssim">
+  <div class="simctl">
+    <button class="btn" data-act="step">Scal poziom</button>
+    <button class="btn ghost" data-act="reset">Losuj od nowa</button>
+    <span class="stat">czas równoległy = suma rozmiarów scalanych list na każdym poziomie</span>
+  </div>
+  <div class="lvls"></div>
+  <div class="kpi">
+    <div><span>praca T₁</span><b class="kw">0</b></div>
+    <div class="g"><span>rozpiętość T∞</span><b class="ks">0</b></div>
+    <div class="o"><span>przyspieszenie T₁/T∞</span><b class="kspd">-</b></div>
+  </div>
+</div>
+<div class="quiz compact"><p class="q">Ile wynosi T₁/T∞ dla n = 1 048 576 (2²⁰) elementów, gdy scalanie jest sekwencyjne?</p><div class="opts"><button class="opt" data-ok="0">ok. 1 000 000</button><button class="opt" data-ok="0">ok. 50 000</button><button class="opt" data-ok="1">ok. 10</button></div><p class="explain">Praca n·log₂ n = 20n, rozpiętość n + n/2 + … ≈ 2n, więc przyspieszenie ok. log₂ n / 2 = 10, niezależnie od liczby procesorów. Wąskim gardłem jest sekwencyjne scalanie. Rozwiązanie: równoległe scalanie, np. odd-even (za chwilę), daje rozpiętość O(log² n).</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Merge sort: podział na p części</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wr">
+<div>
+<p class="lead">Praktyczne podejście: <strong>podział</strong> tablicy na <i>p</i> części, <strong>sortowanie</strong> każdej na osobnym procesorze, a potem <strong>scalanie</strong> posortowanych części.</p>
+<ul class="points side">
+<li>Liczba części = liczba procesorów (aglomeracja), a nie n.</li>
+<li>Scalanie w parach daje log₂ p faz. W każdej fazie pracuje o połowę mniej procesorów, a między fazami potrzebna jest <strong>bariera</strong>.</li>
+</ul>
+</div>
+<div>
+<img class="pic" src="images/image-sH5L6A28.jpg" alt="16 liczb dzielonych na 8 części, sortowanych lokalnie i scalanych w 3 fazach" style="max-height:20em">
+<p class="small">https://devblogs.microsoft.com/pfxteam/parallel-merge-sort-using-barrier/</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Podział na p części w Pythonie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import heapq, random, time
+from concurrent.futures import ProcessPoolExecutor
+
+def merge_sort(a):
+    if len(a) &lt;= 1:
+        return a
+    mid = len(a) // 2
+    return list(heapq.merge(merge_sort(a[:mid]), merge_sort(a[mid:])))
+
+def rownolegle(a, p):
+    k = -(-len(a) // p)                                   # ceil(n / p)
+    czesci = [a[i:i + k] for i in range(0, len(a), k)]   # 1. podział
+    t0 = time.perf_counter()
+    with ProcessPoolExecutor(p) as ex:
+        posortowane = list(ex.map(merge_sort, czesci))   # 2. sortowanie
+    t1 = time.perf_counter()
+    wynik = list(heapq.merge(*posortowane))              # 3. scalanie
+    t2 = time.perf_counter()
+    print(f"p = {p}: sortowanie {t1 - t0:.2f} s + scalanie {t2 - t1:.2f} s")
+    return wynik
+
+if __name__ == "__main__":
+    dane = [random.random() for _ in range(500_000)]
+    for p in (1, 2, 4, 8):
+        assert rownolegle(dane, p) == sorted(dane)
+</code></pre>
+</div>
+<div>
+<pre class="out sm">p = 1: sortowanie 3.10 s + scalanie 0.02 s
+p = 2: sortowanie 1.59 s + scalanie 0.08 s
+p = 4: sortowanie 1.29 s + scalanie 0.18 s
+p = 8: sortowanie 1.12 s + scalanie 0.23 s</pre>
+<ul class="points side">
+<li class="fragment">Z 2 procesami prawie 2× szybciej, z 8 już tylko ok. 2,8×.</li>
+<li class="fragment">Scalanie jest <strong>sekwencyjne</strong> i rośnie z <i>p</i> (prawo Amdahla w praktyce).</li>
+<li class="fragment">Każda część jest serializowana i wysyłana do procesu: to koszt <strong>komunikacji</strong>.</li>
+</ul>
+<div class="note fragment"><p>Wbudowany <code>sorted(dane)</code> (Timsort w C) robi to samo w ok. 0,1 s. Zrównoleglaj dopiero najlepszy algorytm sekwencyjny.</p></div>
+</div>
+</div>
+</div>
+<aside class="notes">Czasy są z jednego uruchomienia przy obciążonej maszynie, przy ponownym uruchomieniu będą trochę inne.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Scalanie odd-even (odd-even merge)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead">Scalanie posortowanych list <strong>A</strong> i <strong>B</strong> (pozycje liczymy od 1):</p>
+<ol class="points side">
+<li>Podziel <b>A</b> na <b>A<sub>n</sub></b> (pozycje nieparzyste) i <b>A<sub>p</sub></b> (parzyste). Tak samo <b>B</b> na <b>B<sub>n</sub></b> i <b>B<sub>p</sub></b>.</li>
+<li>Scal <b>A<sub>p</sub></b> z <b>B<sub>n</sub></b> w <b>C</b>, a <b>A<sub>n</sub></b> z <b>B<sub>p</sub></b> w <b>D</b>. Oba scalenia są <strong>niezależne</strong>.</li>
+<li>Elementy 2i−1 i 2i wyniku to C<sub>i</sub> i D<sub>i</sub> w pewnej kolejności: wystarczy jedno porównanie na parę, <strong>wszystkie pary naraz</strong>.</li>
+</ol>
+<p class="small">Krok 2 stosujemy rekurencyjnie, więc scalanie ma rozpiętość O(log n), a sortowanie oparte na nim O(log² n). To idea sieci sortujących Batchera (1968), używanych m.in. na GPU.</p>
+</div>
+<div>
+<div class="zipviz big">
+<div><span class="lbl">A</span><span class="chip">1</span><span class="chip alt">4</span><span class="chip">6</span><span class="chip alt">7</span></div>
+<div><span class="lbl">B</span><span class="chip">2</span><span class="chip alt">3</span><span class="chip">8</span><span class="chip alt">9</span></div>
+<div class="fragment"><span class="lbl">C</span><span class="chip alt">4 7</span><span class="op">+</span><span class="chip">2 8</span><span class="op">→</span><span class="chip acc">2</span><span class="chip acc">4</span><span class="chip acc">7</span><span class="chip acc">8</span></div>
+<div class="fragment"><span class="lbl">D</span><span class="chip">1 6</span><span class="op">+</span><span class="chip alt">3 9</span><span class="op">→</span><span class="chip acc">1</span><span class="chip acc">3</span><span class="chip acc">6</span><span class="chip acc">9</span></div>
+<div class="fragment"><span class="lbl">pary</span><span class="chip pair">(2,1)</span><span class="chip pair">(4,3)</span><span class="chip pair">(7,6)</span><span class="chip pair">(8,9)</span></div>
+<div class="fragment"><span class="lbl">wynik</span><span class="chip fin">1</span><span class="chip fin">2</span><span class="chip fin">3</span><span class="chip fin">4</span><span class="chip fin">6</span><span class="chip fin">7</span><span class="chip fin">8</span><span class="chip fin">9</span></div>
+</div>
+<p class="small">niebieskie: pozycje nieparzyste, żółte: parzyste</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Scalanie odd-even w Pythonie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import random
+from heapq import merge
+
+def odd_even_merge(A, B):
+    # pozycje liczone od 1, jak na slajdzie: A_n = A[0::2], A_p = A[1::2]
+    C = list(merge(A[1::2], B[0::2]))      # A_p z B_n
+    D = list(merge(A[0::2], B[1::2]))      # A_n z B_p
+    wynik = []
+    for c, d in zip(C, D):                 # każda para niezależnie -&gt; równolegle
+        wynik += [min(c, d), max(c, d)]
+    return C, D, wynik
+
+print(odd_even_merge([1, 4, 6, 7], [2, 3, 8, 9]))
+
+for _ in range(100_000):                   # test na losowych danych
+    n = random.randint(1, 8)
+    A = sorted(random.choices(range(20), k=n))
+    B = sorted(random.choices(range(20), k=n))
+    assert odd_even_merge(A, B)[2] == sorted(A + B)
+print("OK")
+</code></pre>
+<pre class="out sm">([2, 4, 7, 8], [1, 3, 6, 9], [1, 2, 3, 4, 6, 7, 8, 9])
+OK</pre>
+</div>
+<div>
+<p class="lead">Na pierwszy rzut oka nic nie zyskujemy: zamiast jednego scalenia mamy trzy kroki.</p>
+<ul class="points side">
+<li class="fragment">Ale C i D liczą się <strong>równolegle</strong>, każde z połową danych.</li>
+<li class="fragment">Ostatni krok to n/2 niezależnych porównań: jeden procesor na parę.</li>
+<li class="fragment">Zamiast dowodu: test na 100 000 losowych par list. Taki test własności (property-based testing) warto pisać dla każdego algorytmu równoległego.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Przeszukiwanie">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wyszukiwanie binarne równolegle</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead"><strong>Binary search</strong> połowi przedział w każdym kroku: O(log₂ n) porównań w posortowanej tablicy.</p>
+<p class="lead">Naiwnie: dzielimy tablicę na <i>p</i> części i każdy procesor szuka binarnie w swojej.</p>
+<ul class="points side">
+<li class="fragment">Kroków jest log₂(n/p) = log₂ n − log₂ p. Dla n = 10⁶ i p = 4 to 18 zamiast 20, a tylko jeden procesor coś znajdzie.</li>
+<li class="fragment">Potrzebny <strong>równy podział</strong> tablicy i <strong>komunikacja</strong>: kto znalazł, musi powiadomić pozostałych.</li>
+</ul>
+</div>
+<div>
+<img class="pic" src="images/image-HHBJidev.png" alt="Drzewo wyszukiwania binarnego dla n = 15 podzielone na 4 części dla 4 procesorów">
+<p class="small">na podstawie https://en.wikipedia.org/wiki/Binary_search_algorithm#/media/File:Binary_search_complexity.svg</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wyszukiwanie p-arne (p-ary search)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Lepiej, gdy wszystkie <i>p</i> procesory pracują nad <strong>tym samym</strong> przedziałem: każdy porównuje klucz z innym punktem podziału.</p>
+<svg class="diagram" viewBox="0 0 1000 190" role="img" aria-label="Wyszukiwanie p-arne: 3 procesory porównują klucz z 3 punktami podziału, przedział zmniejsza się 4 razy w jednym kroku"><defs><marker id="arQ" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs><rect x="120" y="30" width="860" height="34" rx="4" fill="#f1f3f4" stroke="#999" stroke-width="1.5"/><text x="110.0" y="53.0" text-anchor="end" style="font-size:16px" fill="#666">krok 1</text><line x1="335.0" y1="24.0" x2="335.0" y2="70.0" stroke="#1a73d9" stroke-width="3"/><text x="335.0" y="20.0" text-anchor="middle" style="font-size:15px" fill="#1a73d9" font-weight="bold">P1</text><line x1="550.0" y1="24.0" x2="550.0" y2="70.0" stroke="#53ae12" stroke-width="3"/><text x="550.0" y="20.0" text-anchor="middle" style="font-size:15px" fill="#53ae12" font-weight="bold">P2</text><line x1="765.0" y1="24.0" x2="765.0" y2="70.0" stroke="#e8710a" stroke-width="3"/><text x="765.0" y="20.0" text-anchor="middle" style="font-size:15px" fill="#e8710a" font-weight="bold">P3</text><rect x="550.0" y="30" width="215.0" height="34" fill="#fef3c7" stroke="#e8710a" stroke-width="2.5"/><text x="657.5" y="53.0" text-anchor="middle" style="font-size:15px">klucz tu</text><line x1="550.0" y1="66.0" x2="120.0" y2="118.0" stroke="#bbb" stroke-width="1.5" stroke-dasharray="5 4"/><line x1="765.0" y1="66.0" x2="980.0" y2="118.0" stroke="#bbb" stroke-width="1.5" stroke-dasharray="5 4"/><rect x="120" y="125" width="860" height="34" rx="4" fill="#f1f3f4" stroke="#999" stroke-width="1.5"/><text x="110.0" y="148.0" text-anchor="end" style="font-size:16px" fill="#666">krok 2</text><line x1="335.0" y1="119.0" x2="335.0" y2="165.0" stroke="#1a73d9" stroke-width="3"/><text x="335.0" y="115.0" text-anchor="middle" style="font-size:15px" fill="#1a73d9" font-weight="bold">P1</text><line x1="550.0" y1="119.0" x2="550.0" y2="165.0" stroke="#53ae12" stroke-width="3"/><text x="550.0" y="115.0" text-anchor="middle" style="font-size:15px" fill="#53ae12" font-weight="bold">P2</text><line x1="765.0" y1="119.0" x2="765.0" y2="165.0" stroke="#e8710a" stroke-width="3"/><text x="765.0" y="115.0" text-anchor="middle" style="font-size:15px" fill="#e8710a" font-weight="bold">P3</text><rect x="335.0" y="125" width="215.0" height="34" fill="#fef3c7" stroke="#e8710a" stroke-width="2.5"/><text x="442.5" y="148.0" text-anchor="middle" style="font-size:15px">klucz tu</text><text x="560.0" y="185.0" text-anchor="middle" style="font-size:16px" fill="#666">p = 3 procesory: każdy krok zawęża przedział (p + 1) = 4 razy</text></svg>
+<div class="cols">
+<div>
+<div class="formula">log<sub>p+1</sub> n &nbsp;kroków zamiast&nbsp; log<sub>2</sub> n</div>
+<p class="small">Zysk to tylko czynnik log₂(p + 1). Wyszukiwanie jest już tak szybkie, że w praktyce równolegle obsługujemy <strong>wiele zapytań naraz</strong> (każde zapytanie to osobne zadanie).</p>
+</div>
+<div class="quiz compact"><p class="q">n = 10⁶, p = 4. Ile kroków wyszukiwania p-arnego?</p><div class="opts"><button class="opt" data-ok="0">5</button><button class="opt" data-ok="1">9</button><button class="opt" data-ok="0">18</button><button class="opt" data-ok="0">20</button></div><p class="explain">Przedział maleje 5 razy na krok: log₅ 10⁶ ≈ 8,6, czyli 9 kroków. Binarnie 20, a naiwny podział na 4 części daje 18.</p></div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przeszukiwanie wszerz (BFS)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead"><strong>BFS</strong> (breadth-first search) zaczyna od wierzchołka startowego i przeszukuje graf <strong>warstwami</strong>: najpierw sąsiedzi, potem sąsiedzi sąsiadów, aż odwiedzi wszystkie osiągalne wierzchołki.</p>
+<p class="lead">Wierzchołki odkryte, ale jeszcze nieprzetworzone, czekają w kolejce <strong>FIFO</strong>.</p>
+<p class="lead">BFS znajduje <strong>najkrótsze ścieżki</strong> (liczbę krawędzi) w grafie nieważonym.</p>
+</div>
+<div>
+<img class="pic" src="images/image-0t3Y4V27.gif" alt="Animacja BFS na drzewie" style="max-height:12em;image-rendering:auto">
+<p class="small">https://pl.wikipedia.org/wiki/Przeszukiwanie_wszerz#/media/Plik:Animated_BFS.gif</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>BFS warstwami (level-synchronous BFS)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wr">
+<div>
+<p class="lead">Wszystkie wierzchołki <strong>jednej warstwy</strong> można przetwarzać równolegle. Warstwy idą <strong>po kolei</strong>.</p>
+<ul class="points side">
+<li>granica (frontier): bieżąca warstwa,</li>
+<li>następna: wierzchołki odkryte w tym kroku,</li>
+<li>między warstwami <strong>bariera</strong>.</li>
+</ul>
+<p class="hint">Kliknij wierzchołek, by zacząć od niego. Pomarańczowa obwódka: wierzchołek odkryty naraz przez kilku rodziców.</p>
+</div>
+<div class="sim" id="bfssim">
+  <div class="simctl">
+    <button class="btn" data-act="step">Warstwa</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+    <span class="stat lvl"></span>
+  </div>
+  <svg class="sim-svg" viewBox="0 0 640 330" role="img" aria-label="Graf przeszukiwany warstwami"></svg>
+  <p class="hint status"></p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>BFS równolegle: które wyścigi szkodzą?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead">Wierzchołki <b>v</b> i <b>w</b> z warstwy <i>i</i> mogą jednocześnie odkryć tego samego sąsiada <b>x</b>.</p>
+<ul class="points side">
+<li><strong>Łagodny wyścig</strong>: obaj zapiszą <code>poziom[x] = i + 1</code>, więc wynik jest ten sam, a <code>rodzic[x]</code> = v albo w jest równie poprawny. W C/C++/Javie to jednak formalnie data race: wierzchołek „zajmuje się” atomowym compare-and-swap.</li>
+<li class="fragment"><strong>Szkodliwy wyścig</strong>: dopisywanie do wspólnej, niesynchronizowanej kolejki. Kolejność w warstwie nie ma znaczenia, ale dwa równoczesne zapisy mogą <strong>zgubić</strong> element.</li>
+</ul>
+<div class="note warn fragment"><p>H5P twierdził, że wyścig o kolejkę „nie jest problemem”. Problemem nie jest kolejność, ale utrata danych (wykład 4).</p></div>
+</div>
+<div>
+<div class="quiz multi compact"><p class="q">Które operacje wątków przetwarzających jedną warstwę wymagają synchronizacji? (zaznacz wszystkie)</p><div class="opts"><button class="opt" data-ok="0">poziom[x] = i + 1</button><button class="opt" data-ok="1">dopisanie x do wspólnej tablicy w C, bez blokady</button><button class="opt" data-ok="1">odwiedzone += 1</button><button class="opt" data-ok="0">odczyt graf[v]</button></div><button class="btn check">Sprawdź</button><p class="explain">Wspólny licznik <code>+=</code> to klasyczny wyścig (odczyt-modyfikacja-zapis). Niesynchronizowana lista w C może zgubić element. Sam odczyt niezmiennego grafu jest bezpieczny, a zapis tej samej wartości poziomu jest łagodny.</p></div>
+<p class="lead fragment">Rozwiązanie: <strong>dwie struktury</strong> (bieżąca i następna warstwa), lokalne listy każdego wątku scalane po warstwie, potem bariera i zamiana ról.</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>BFS warstwami w Pythonie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from concurrent.futures import ThreadPoolExecutor
+
+graf = {0: [1, 2, 3], 1: [0, 4], 2: [0, 4, 5], 3: [0, 5, 6], 4: [1, 2, 7],
+        5: [2, 3, 7, 8], 6: [3, 8], 7: [4, 5, 9], 8: [5, 6, 9], 9: [7, 8]}
+
+def sasiedzi(v):                       # praca jednego zadania
+    return [(v, u) for u in graf[v]]
+
+def bfs_warstwami(start, ex):
+    poziom, rodzic = {start: 0}, {start: None}
+    granica = [start]                  # bieżąca warstwa (frontier)
+    while granica:
+        nastepna = []
+        for lista in ex.map(sasiedzi, granica):   # 1. równolegle
+            for v, u in lista:         # 2. scalanie w jednym wątku
+                if u not in poziom:
+                    poziom[u], rodzic[u] = poziom[v] + 1, v
+                    nastepna.append(u)
+        print(f"warstwa {poziom[granica[0]]}: {granica} -&gt; {nastepna}")
+        granica = nastepna             # 3. bariera: następna warstwa
+    return poziom, rodzic
+
+with ThreadPoolExecutor(4) as ex:
+    poziom, rodzic = bfs_warstwami(0, ex)
+sciezka = [9]                          # najkrótsza ścieżka po rodzicach
+while rodzic[sciezka[-1]] is not None:
+    sciezka.append(rodzic[sciezka[-1]])
+print("ścieżka 0 -&gt; 9:", sciezka[::-1])
+</code></pre>
+</div>
+<div>
+<pre class="out sm">warstwa 0: [0] -&gt; [1, 2, 3]
+warstwa 1: [1, 2, 3] -&gt; [4, 5, 6]
+warstwa 2: [4, 5, 6] -&gt; [7, 8]
+warstwa 3: [7, 8] -&gt; [9]
+warstwa 4: [9] -&gt; []
+ścieżka 0 -&gt; 9: [0, 1, 4, 7, 9]</pre>
+<ul class="points side">
+<li class="fragment">Równolegle tylko <strong>czytamy</strong> graf, a zapis robi jeden wątek: brak wyścigów.</li>
+<li class="fragment">Ten sam schemat (map po warstwie, scalenie, bariera) stosują Spark GraphX i Pregel.</li>
+<li class="fragment">Z GIL wątki pomagają, gdy praca to I/O. Np. crawler WWW: „sąsiedzi” to linki pobranej strony.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przeszukiwanie w głąb (DFS)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead"><strong>DFS</strong> (depth-first search) idzie od wierzchołka startowego jak najgłębiej, a gdy nie ma nieodwiedzonych sąsiadów, <strong>wraca</strong>. Używa <strong>stosu</strong> (jawnego albo stosu wywołań w rekurencji).</p>
+<ul class="points side">
+<li>Zbiór <strong>odwiedzonych</strong> jest obowiązkowy: bez niego DFS w grafie z cyklem zapętli się w nieskończoność.</li>
+<li>Nie gwarantuje najkrótszych ścieżek.</li>
+<li>Zastosowania: sortowanie topologiczne, wykrywanie cykli (np. zakleszczeń w grafie oczekiwania, wykład 4), spójne składowe, przeszukiwanie z nawrotami (sudoku, gry, AI).</li>
+</ul>
+</div>
+<div>
+<img class="pic" src="images/image-6ITpZAmh.gif" alt="Animacja DFS na drzewie" style="max-height:15em">
+<p class="small">https://en.wikipedia.org/wiki/File:Depth-First-Search.gif</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>DFS: kradzież pracy (work stealing)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead">Dzielimy przestrzeń przeszukiwania na <strong>rozłączne poddrzewa</strong>. Każdy procesor przeszukuje swoje w głąb, asynchronicznie i bez komunikacji.</p>
+<ul class="points side">
+<li class="fragment">Poddrzewa mają różne rozmiary, więc ktoś skończy wcześniej. Wtedy <strong>kradnie</strong> nieprzeszukane poddrzewo innemu procesorowi.</li>
+<li class="fragment">Właściciel bierze zadania z dołu swojej kolejki (LIFO, jak DFS), a złodziej z góry: najstarsze zadania to zwykle największe poddrzewa, więc kradzieży jest mało.</li>
+<li class="fragment">Tak działają <code>ForkJoinPool</code> w Javie, Intel TBB, Rayon w Ruście i planista Go (więcej o pulach na wykładzie 7).</li>
+</ul>
+<p class="small fragment">Uwaga: DFS w ściśle określonej kolejności jest z natury sekwencyjny (P-zupełny). Równoległy DFS odwiedza wierzchołki w innej kolejności, co przy przeszukiwaniu nie przeszkadza.</p>
+</div>
+<svg class="diagram" viewBox="0 0 600 360" role="img" aria-label="Kradzież pracy: każdy procesor ma własną kolejkę dwustronną; bezczynny procesor kradnie najstarsze zadanie z drugiego końca kolejki innego procesora"><defs><marker id="arS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#d93025"/></marker></defs><rect x="20" y="80" width="150" height="214" rx="6" fill="#fafafa" stroke="#bbb" stroke-width="2"/><rect x="30" y="88" width="130" height="42" rx="6" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="95.0" y="116.0" text-anchor="middle" style="font-size:19px">poddrzewo A</text><rect x="30" y="138" width="130" height="42" rx="6" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="95.0" y="166.0" text-anchor="middle" style="font-size:19px">poddrzewo B</text><rect x="30" y="188" width="130" height="42" rx="6" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="95.0" y="216.0" text-anchor="middle" style="font-size:19px">poddrzewo C</text><rect x="30" y="238" width="130" height="42" rx="6" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="95.0" y="266.0" text-anchor="middle" style="font-size:19px">poddrzewo D</text><rect x="20" y="304" width="150" height="46" rx="8" fill="#1a73d9"/><text x="95.0" y="335.0" text-anchor="middle" style="font-size:22px" fill="#fff" font-weight="bold">P1</text><rect x="220" y="80" width="150" height="214" rx="6" fill="#fafafa" stroke="#bbb" stroke-width="2"/><rect x="230" y="188" width="130" height="42" rx="6" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="295.0" y="216.0" text-anchor="middle" style="font-size:19px">poddrzewo E</text><rect x="230" y="238" width="130" height="42" rx="6" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="295.0" y="266.0" text-anchor="middle" style="font-size:19px">poddrzewo F</text><rect x="220" y="304" width="150" height="46" rx="8" fill="#53ae12"/><text x="295.0" y="335.0" text-anchor="middle" style="font-size:22px" fill="#fff" font-weight="bold">P2</text><rect x="420" y="80" width="150" height="214" rx="6" fill="#fafafa" stroke="#bbb" stroke-width="2"/><rect x="420" y="304" width="150" height="46" rx="8" fill="#e8710a"/><text x="495.0" y="335.0" text-anchor="middle" style="font-size:22px" fill="#fff" font-weight="bold">P3</text><text x="95.0" y="72.0" text-anchor="middle" style="font-size:17px" fill="#666">góra: najstarsze</text><path d="M 162 110 C 260 20, 420 20, 492 150" fill="none" stroke="#d93025" stroke-width="3.5" marker-end="url(#arS)"/><text x="330.0" y="30.0" text-anchor="middle" style="font-size:21px" fill="#d93025" font-weight="bold">kradzież A</text><text x="495.0" y="190.0" text-anchor="middle" style="font-size:18px" fill="#666">P3 bez pracy</text></svg>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Macierze">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Mnożenie macierzy</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead">Macierz A (n × m) razy B (m × k) daje C (n × k):</p>
+<div class="formula">c<sub>ij</sub> = Σ<sub>t</sub> a<sub>it</sub> · b<sub>tj</sub></div>
+<p class="lead">Każdy z <strong>n·k</strong> elementów to <strong>niezależny</strong> iloczyn skalarny wiersza A i kolumny B: korzysta z niezmienianych danych, wyniki na siebie nie wpływają, kolejność jest dowolna.</p>
+<p class="small">Przykład z H5P (z poprawionym wynikiem): [[2, 3], [1, 4]] · [[5, 6], [7, 8]] = [[2·5 + 3·7, 2·6 + 3·8], [1·5 + 4·7, 1·6 + 4·8]] = <b>[[31, 36], [33, 38]]</b></p>
+</div>
+<div class="sim" id="matsim">
+  <div class="simctl">
+    <label>zadanie = <select class="gran"><option value="cell">komórka</option><option value="row">wiersz</option><option value="block">blok 2×2</option></select></label>
+    <span class="stat ntask"></span>
+  </div>
+  <div class="mats"></div>
+  <p class="calc">Kliknij komórkę C.</p>
+  <p class="hint">Kolor komórki C = zadanie (procesor), które ją liczy.</p>
+</div>
+</div>
+</div>
+<aside class="notes">W wersji H5P wynik był błędny ([[19, 24], [33, 46]]), a gwiazdki mnożenia zniknęły przy formatowaniu.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Mnożenie macierzy równolegle</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import random, time
+from concurrent.futures import ProcessPoolExecutor
+from functools import partial
+
+def wiersz_razy(BT, wiersz):             # jedno zadanie = jeden wiersz wyniku
+    return [sum(a * b for a, b in zip(wiersz, kol)) for kol in BT]
+
+def matmul(A, B, ex=None):
+    f = partial(wiersz_razy, list(zip(*B)))   # kolumny B = wiersze B^T
+    wiersze = ex.map(f, A, chunksize=16) if ex else map(f, A)
+    return list(wiersze)
+
+if __name__ == "__main__":
+    print(matmul([[2, 3], [1, 4]], [[5, 6], [7, 8]]))
+
+    n = 300
+    A = [[random.random() for _ in range(n)] for _ in range(n)]
+    B = [[random.random() for _ in range(n)] for _ in range(n)]
+    start = time.perf_counter()
+    C1 = matmul(A, B)
+    print(f"sekwencyjnie: {time.perf_counter() - start:.2f} s")
+    start = time.perf_counter()
+    with ProcessPoolExecutor() as ex:
+        C2 = matmul(A, B, ex)
+    print(f"równolegle:   {time.perf_counter() - start:.2f} s")
+    assert C1 == C2
+</code></pre>
+</div>
+<div>
+<pre class="out sm">[[31, 36], [33, 38]]
+sekwencyjnie: 1.89 s
+równolegle:   0.84 s</pre>
+<ul class="points side">
+<li class="fragment">Zadanie na <strong>komórkę</strong> (90 000 zadań) to za drobne ziarno. Zadanie na <strong>wiersz</strong>, wysyłane paczkami po 16 (<code>chunksize</code>), to aglomeracja.</li>
+<li class="fragment">Każdy proces dostaje kopię B: przy dużych macierzach dzielimy na <strong>bloki</strong> (algorytmy Cannona, SUMMA), by ograniczyć komunikację.</li>
+</ul>
+<div class="note fragment"><p>NumPy: <code>A @ B</code> dla 300 × 300 to ok. 0,006 s. BLAS używa instrukcji wektorowych (SIMD), wielu wątków i zwalnia GIL.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Grafy">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kolorowanie grafów</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead">Kolorowanie wierzchołków grafu G = (V, E) to funkcja f: V → C taka, że f(u) ≠ f(v) dla każdej krawędzi {u, v} ∈ E: <strong>sąsiedzi mają różne kolory</strong>.</p>
+<p class="lead">Szukamy jak najmniejszej liczby kolorów (to problem NP-trudny), więc w praktyce używamy heurystyk zachłannych.</p>
+<ul class="points side">
+<li>Zastosowania: plan egzaminów bez kolizji, przydział rejestrów w kompilatorze, częstotliwości nadajników.</li>
+<li>W obliczeniach równoległych: wierzchołki jednego koloru tworzą <strong>zbiór niezależny</strong>, więc można je aktualizować jednocześnie bez wyścigów.</li>
+</ul>
+</div>
+<div>
+<img class="pic" src="images/image-dfHD2a40.png" alt="Graf Petersena pokolorowany trzema kolorami" style="max-height:15em">
+<p class="small">https://en.wikipedia.org/wiki/Graph_coloring#/media/File:Petersen_graph_3-coloring.svg</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Algorytm Jonesa-Plassmanna</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Klasyczne heurystyki zachłanne, np. największy stopień najpierw (largest-first) czy najmniejszy stopień na końcu (smallest-last), kolorują wierzchołki <strong>po kolei</strong>. Jones i Plassmann (1993) zauważyli, że każdy <strong>zbiór niezależny</strong> można pokolorować naraz, bez konfliktów:</p>
+<ol class="points side">
+<li>Przypisz wierzchołkom losowe, różne liczby (wagi).</li>
+<li>W każdej rundzie <strong>niepokolorowany</strong> wierzchołek, którego waga jest większa niż wagi wszystkich jego <strong>niepokolorowanych</strong> sąsiadów, dostaje najniższy kolor niezajęty przez sąsiadów. Te wierzchołki tworzą zbiór niezależny, więc działają równolegle.</li>
+<li>Powtarzaj, aż wszystkie wierzchołki będą pokolorowane.</li>
+</ol>
+<img class="pic" src="images/image-TK4UOpjI.png" alt="Trzy etapy algorytmu Jonesa-Plassmanna na przykładowym grafie" style="max-height:8.5em">
+<p class="small">https://ireneli.eu/2015/10/26/parallel-graph-coloring-algorithms/</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Jones-Plassmann: symulacja</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wr">
+<div>
+<p class="lead">Graf Petersena, w wierzchołkach losowe wagi.</p>
+<ul class="points side">
+<li>Czarna obwódka: wierzchołki wybrane w bieżącej rundzie, czyli lokalne maksima.</li>
+<li>Kolor = najniższy wolny numer koloru.</li>
+</ul>
+<div class="kpi">
+<div><span>rundy</span><b class="kr">0</b></div>
+<div class="g"><span>kolory</span><b class="kc">0</b></div>
+</div>
+<p class="hint status"></p>
+</div>
+<div class="sim" id="jpsim">
+  <div class="simctl">
+    <button class="btn" data-act="step">Runda</button>
+    <button class="btn ghost" data-act="reset">Losuj wagi</button>
+  </div>
+  <svg class="sim-svg" viewBox="0 0 560 380" role="img" aria-label="Graf Petersena kolorowany algorytmem Jonesa-Plassmanna"></svg>
+  <div class="legend"><span><i style="background:#d93025"></i>kolor 0</span><span><i style="background:#1a73d9"></i>kolor 1</span><span><i style="background:#53ae12"></i>kolor 2</span><span><i style="background:#e8710a"></i>kolor 3</span></div>
+</div>
+</div>
+</div>
+<aside class="notes">Losowe wagi gwarantują, że oczekiwana liczba rund jest mała (O(log n / log log n) dla grafów o ograniczonym stopniu). Liczba kolorów to co najwyżej maksymalny stopień + 1.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Jones-Plassmann w Pythonie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import random
+
+def jones_plassmann(graf, seed=None):
+    rnd = random.Random(seed)
+    waga = {v: rnd.random() for v in graf}       # 1. losowe wagi
+    kolor, runda = {}, 0
+    while len(kolor) &lt; len(graf):
+        # 2. lokalne maksima wśród niepokolorowanych: zbiór niezależny
+        wybrane = [v for v in graf if v not in kolor and
+                   all(waga[v] &gt; waga[u] for u in graf[v] if u not in kolor)]
+        for v in wybrane:                         # 3. może iść równolegle
+            zajete = {kolor[u] for u in graf[v] if u in kolor}
+            kolor[v] = min(set(range(len(graf))) - zajete)
+        print(f"runda {runda}: {wybrane}")
+        runda += 1
+    return kolor
+
+# graf Petersena: pięciokąt 0-4, pentagram 5-9 i szprychy i-(i+5)
+E = [(i, (i + 1) % 5) for i in range(5)] + [(i, i + 5) for i in range(5)] \
+    + [(5 + i, 5 + (i + 2) % 5) for i in range(5)]
+graf = {v: [] for v in range(10)}
+for a, b in E:
+    graf[a].append(b); graf[b].append(a)
+
+kolor = jones_plassmann(graf, seed=1)
+assert all(kolor[a] != kolor[b] for a, b in E)
+print("kolory:", [kolor[v] for v in graf])
+</code></pre>
+</div>
+<div>
+<pre class="out sm">runda 0: [1, 4, 7]
+runda 1: [2, 5, 6]
+runda 2: [0, 3, 9]
+runda 3: [8]
+kolory: [2, 0, 1, 2, 0, 1, 1, 0, 0, 2]</pre>
+<ul class="points side">
+<li>Pętla <code>for v in wybrane</code> może być równoległa: wierzchołki w <code>wybrane</code> nie sąsiadują, więc nie czytają nawzajem swoich kolorów.</li>
+<li>Graf Petersena ma stopień 3, więc wystarczą co najwyżej 4 kolory. Tu wyszły 3, a mniej się nie da (graf ma cykl nieparzysty).</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="quiz compact"><p class="q">Ile faz potrzebuje sortowanie odd-even dla n elementów w najgorszym przypadku?</p><div class="opts"><button class="opt" data-ok="0">log₂ n</button><button class="opt" data-ok="1">n</button><button class="opt" data-ok="0">n²</button></div><p class="explain">n faz (np. tablica posortowana odwrotnie). Przy n/2 procesorach każda faza trwa O(1), więc czas to O(n).</p></div>
+<div class="quiz compact"><p class="q">Co ogranicza przyspieszenie merge sort, gdy dzielimy równolegle, ale scalamy jednym procesorem?</p><div class="opts"><button class="opt" data-ok="0">liczba procesorów</button><button class="opt" data-ok="1">ostatnie scalanie O(n)</button><button class="opt" data-ok="0">rekurencja</button></div><p class="explain">Rozpiętość to ok. 2n przez sekwencyjne scalanie, więc T₁/T∞ ≈ log₂ n / 2.</p></div>
+<div class="quiz compact"><p class="q">Który algorytm z wykładu przetwarza równolegle wierzchołki jednej warstwy, a warstwy po kolei?</p><div class="opts"><button class="opt" data-ok="0">DFS</button><button class="opt" data-ok="1">BFS</button><button class="opt" data-ok="0">Jones-Plassmann</button></div><p class="explain">BFS warstwami (level-synchronous). Jones-Plassmann też działa w rundach, ale runda to zbiór niezależny, a nie warstwa odległości.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Ćwiczenia</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="blanks">
+<p class="lead">Uzupełnij prawo Amdahla (<code>f</code>: część równoległa, <code>p</code>: procesory):</p>
+<pre class="exo"><span class="k">def</span> amdahl(f, p):
+    <span class="k">return</span> 1 / (<input class="blank" size="16" data-re="^(?:\(?1-f\)?\+f/p|f/p\+\(?1-f\)?|\(?1-f\)?\+\(?f/p\)?|\(?f/p\)?\+\(?1-f\)?)$" data-sol="(1 - f) + f / p" aria-label="mianownik prawa Amdahla">)
+
+amdahl(0.9, 16)   <span class="c"># 6.4</span></pre>
+<p class="lead">Uzupełnij sortowanie odd-even:</p>
+<pre class="exo"><span class="k">for</span> faza <span class="k">in</span> range(<input class="blank" size="6" data-re="^(?:n|len\(a\))$" data-sol="n" aria-label="liczba faz">):
+    <span class="k">for</span> i <span class="k">in</span> range(<input class="blank" size="8" data-re="^faza%2$" data-sol="faza % 2" aria-label="pierwszy indeks pary">, n - 1, 2):
+        <span class="k">if</span> a[i] &gt; a[i + 1]:
+            a[i], a[i + 1] = a[i + 1], a[i]</pre>
+<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
+<p class="fb"></p>
+<p class="explain">n faz wystarcza zawsze. Faza parzysta zaczyna od pary (0, 1), nieparzysta od (1, 2), czyli od <code>faza % 2</code>. Druga pętla w każdej fazie może być równoległa.</p>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Podsumowanie wykładu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<ul class="points">
+<li>Przyspieszenie S = T₁/Tₚ ogranicza część sekwencyjna (Amdahl) i <strong>rozpiętość</strong> grafu zależności: Tₚ ≥ max(T₁/p, T∞).</li>
+<li>Projektowanie wg Fostera: <strong>podział</strong>, komunikacja, <strong>aglomeracja</strong>, mapowanie. Zbyt drobne zadania zjada narzut, zbyt grube nie wykorzystują rdzeni.</li>
+<li>Redukcja i scan liczą się drzewem w log n krokach, jeśli operator jest łączny.</li>
+<li>Sortowanie: odd-even w O(n) z n procesorami, merge sort ogranicza sekwencyjne scalanie, scalanie odd-even je zrównolegla.</li>
+<li>Grafy: BFS warstwami z barierą, DFS z kradzieżą pracy, kolorowanie przez zbiory niezależne. Uwaga na wyścigi: łagodne vs szkodliwe.</li>
+</ul>
+<div class="note"><p><strong>Laboratorium:</strong> sprawdzenie Projektu I.</p>
+<p><strong>Następny wykład (25.11, zdalny):</strong> Thread Pool, Executory w Python. Tam pule, które dziś mapowały nasze zadania na procesory.</p></div>
+</div>
+</section>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/plugin.js"></script>
+<script>
+// ---------- copy buttons (raw text is captured before highlighting adds line numbers) ----------
+document.querySelectorAll('pre.code-wrap > code').forEach(code => {
+  const lines = code.textContent.replace(/^\s*\n/, '').replace(/\s+$/, '').split('\n');
+  const indent = Math.min(...lines.filter(l => l.trim()).map(l => l.match(/^ */)[0].length));
+  const raw = lines.map(l => l.slice(indent)).join('\n') + '\n';
+  const btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'copy-btn'; btn.textContent = 'Kopiuj';
+  btn.addEventListener('click', () => {
+    const done = ok => {
+      btn.textContent = ok ? 'Skopiowano!' : 'Błąd kopiowania'; btn.classList.toggle('copied', ok);
+      clearTimeout(btn._t); btn._t = setTimeout(() => { btn.textContent = 'Kopiuj'; btn.classList.remove('copied'); }, 1500);
+    };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(raw).then(() => done(true), () => done(false));
+    else {
+      const ta = document.createElement('textarea'); ta.value = raw; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { done(document.execCommand('copy')); } catch (e) { done(false); } finally { ta.remove(); }
+    }
+  });
+  code.parentNode.appendChild(btn);
+});
+</script>
+<script>
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.02,
+    center: false, hash: true, slideNumber: 'c/t',
+    transition: 'slide',
+    chalkboard: { boardmarkerWidth: 4, chalkWidth: 5 },
+    plugins: [RevealNotes, RevealHighlight, RevealChalkboard]
+  });
+</script>
+<script>
+// ---------- quizzes ----------
+document.querySelectorAll('.quiz').forEach(q => {
+  const opts = [...q.querySelectorAll('.opt')];
+  const reveal = () => {
+    opts.forEach(o => {
+      if (o.dataset.ok === '1') o.classList.add('good');
+      else if (o.classList.contains('sel')) o.classList.add('bad');
+    });
+    q.classList.add('done');
+  };
+  if (q.classList.contains('multi')) {
+    opts.forEach(o => o.addEventListener('click', () => { if (!q.classList.contains('done')) o.classList.toggle('sel'); }));
+    q.querySelector('.check').addEventListener('click', reveal);
+  } else {
+    opts.forEach(o => o.addEventListener('click', () => {
+      if (q.classList.contains('done')) return;
+      o.classList.add('sel'); reveal();
+    }));
+  }
+});
+
+// ---------- fill in the blanks (whitespace is ignored, data-re lists accepted answers) ----------
+document.querySelectorAll('.blanks').forEach(b => {
+  const inputs = [...b.querySelectorAll('input.blank')];
+  const fb = b.querySelector('.fb');
+  const check = () => {
+    let good = 0;
+    inputs.forEach(i => {
+      const ok = new RegExp(i.dataset.re).test(i.value.replace(/\s+/g, ''));
+      i.classList.toggle('good', ok); i.classList.toggle('bad', !ok); good += ok;
+    });
+    const all = good === inputs.length;
+    b.classList.toggle('done', all);
+    fb.textContent = all ? '' : inputs.length > 1 ? `Poprawne: ${good} z ${inputs.length}. Spróbuj jeszcze raz.` : 'Jeszcze nie. Spróbuj ponownie.';
+  };
+  b.querySelector('.check').addEventListener('click', check);
+  b.querySelector('.show').addEventListener('click', () => {
+    inputs.forEach(i => { i.value = i.dataset.sol; });
+    check();
+  });
+  inputs.forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') check(); }));
+});
+
+
+// ================= lecture 6 simulations =================
+const NS = 'http://www.w3.org/2000/svg';
+const fmtPL = (x, d = 1) => x.toLocaleString('pl-PL', { maximumFractionDigits: d });
+const PCOL = ['#d93025', '#1a73d9', '#53ae12', '#e8710a', '#9334e6', '#00897b', '#c2185b', '#795548'];
+
+// ---------- Amdahl / Gustafson ----------
+(() => {
+  const root = document.getElementById('amdahl'); if (!root) return;
+  const $ = c => root.querySelector(c);
+  const svg = $('.chart');
+  const X0 = 60, X1 = 540, Y0 = 295, Y1 = 20;            // plot area (log2 p, log2 S: 0..10)
+  const sx = v => X0 + (X1 - X0) * v / 10, sy = v => Y0 - (Y0 - Y1) * v / 10;
+  const am = (f, p) => 1 / ((1 - f) + f / p), gu = (f, p) => (1 - f) + f * p;
+  const path = (fn, f) => {
+    let d = '';
+    for (let k = 0; k <= 100; k++) { const lp = k / 10, s = Math.max(1, fn(f, 2 ** lp)); d += (k ? 'L' : 'M') + sx(lp).toFixed(1) + ',' + sy(Math.log2(s)).toFixed(1); }
+    return d;
+  };
+  const render = () => {
+    const f = +$('.f').value / 100, lp = +$('.p').value, p = 2 ** lp;
+    $('.fv').textContent = $('.f').value + '%'; $('.pv').textContent = p;
+    const a = am(f, p), g = gu(f, p);
+    $('.sa').textContent = fmtPL(a); $('.sg').textContent = fmtPL(g);
+    $('.ea').textContent = Math.round(100 * a / p) + '%';
+    $('.lim').textContent = f >= 1 ? '∞' : fmtPL(1 / (1 - f));
+    let h = '';
+    [0, 2, 4, 6, 8, 10].forEach(v => {
+      h += `<line x1="${sx(v)}" y1="${Y0}" x2="${sx(v)}" y2="${Y1}" stroke="#eee"/><text x="${sx(v)}" y="${Y0 + 22}" text-anchor="middle" style="font-size:15px" fill="#666">${2 ** v}</text>`;
+      h += `<line x1="${X0}" y1="${sy(v)}" x2="${X1}" y2="${sy(v)}" stroke="#eee"/><text x="${X0 - 8}" y="${sy(v) + 5}" text-anchor="end" style="font-size:15px" fill="#666">${2 ** v}</text>`;
+    });
+    h += `<line x1="${X0}" y1="${Y0}" x2="${X1}" y2="${Y0}" stroke="#999"/><line x1="${X0}" y1="${Y0}" x2="${X0}" y2="${Y1}" stroke="#999"/>`;
+    h += `<path d="M${sx(0)},${sy(0)}L${sx(10)},${sy(10)}" stroke="#999" stroke-width="2" stroke-dasharray="6 5" fill="none"/>`;
+    h += `<path d="${path(gu, f)}" stroke="#53ae12" stroke-width="3" fill="none"/>`;
+    h += `<path d="${path(am, f)}" stroke="#1a73d9" stroke-width="3" fill="none"/>`;
+    h += `<circle cx="${sx(lp)}" cy="${sy(Math.log2(Math.max(1, g)))}" r="7" fill="#53ae12"/><circle cx="${sx(lp)}" cy="${sy(Math.log2(a))}" r="7" fill="#1a73d9"/>`;
+    h += `<text x="${X0 + 10}" y="${Y1 + 16}" style="font-size:15px" fill="#666">przyspieszenie S (skala log)</text>`;
+    h += `<text x="${X1}" y="${Y0 - 8}" text-anchor="end" style="font-size:15px" fill="#666">p</text>`;
+    h += `<g style="font-size:15px"><line x1="75" y1="96" x2="100" y2="96" stroke="#999" stroke-width="2" stroke-dasharray="6 5"/><text x="107" y="101">idealne S = p</text>`
+      + `<line x1="75" y1="74" x2="100" y2="74" stroke="#53ae12" stroke-width="3"/><text x="107" y="79">Gustafson</text>`
+      + `<line x1="75" y1="52" x2="100" y2="52" stroke="#1a73d9" stroke-width="3"/><text x="107" y="57">Amdahl</text></g>`;
+    svg.innerHTML = h;
+  };
+  root.addEventListener('input', render);
+  render();
+})();
+
+// ---------- reduction / scan stepper ----------
+(() => {
+  const root = document.getElementById('scansim'); if (!root) return;
+  const $ = c => root.querySelector(c), svg = root.querySelector('svg');
+  const DATA = [3, 1, 7, 0, 4, 1, 6, 3], n = DATA.length;
+  const DESC = {
+    seq: 'Pętla <code>acc += x</code>: każde dodawanie czeka na poprzednie. 7 kroków, 7 dodawań. Przy okazji powstają sumy prefiksowe.',
+    tree: 'Drzewo: w kroku dodajemy rozłączne pary, wszystkie naraz. log₂ 8 = 3 kroki, nadal tylko 7 dodawań. Suma w ostatniej komórce.',
+    hs: 'Hillis-Steele: w kroku d każdy element i ≥ d dodaje element o d w lewo, wszystkie naraz. 3 kroki, ale 7 + 6 + 4 = 17 dodawań. Wynik: wszystkie sumy prefiksowe.'
+  };
+  let mode = 'seq', steps, pos;
+  const build = () => {
+    const rows = [DATA.slice()], ops = [];
+    const add = (fn) => { const prev = rows[rows.length - 1], cur = prev.slice(), st = fn(prev, cur); rows.push(cur); ops.push(st); };
+    if (mode === 'seq') for (let k = 1; k < n; k++) add((p, c) => { c[k] = p[k - 1] + p[k]; return [{ d: k, a: k - 1, b: k }]; });
+    if (mode === 'tree') for (let s = 1; s < n; s *= 2) add((p, c) => { const o = []; for (let i = 2 * s - 1; i < n; i += 2 * s) { c[i] = p[i - s] + p[i]; o.push({ d: i, a: i - s, b: i }); } return o; });
+    if (mode === 'hs') for (let d = 1; d < n; d *= 2) add((p, c) => { const o = []; for (let i = d; i < n; i++) { c[i] = p[i - d] + p[i]; o.push({ d: i, a: i - d, b: i }); } return o; });
+    return { rows, ops };
+  };
+  const render = () => {
+    const { rows, ops } = steps, R = rows.length, rh = Math.min(85, 380 / (R - 1 || 1));
+    const cx = i => 50 + i * 77, cy = r => 25 + r * rh;
+    let h = '';
+    for (let r = 1; r <= pos; r++) ops[r - 1].forEach(o => {
+      [o.a, o.b].forEach(s => { h += `<line x1="${cx(s)}" y1="${cy(r - 1) + 14}" x2="${cx(o.d)}" y2="${cy(r) - 14}" stroke="${r === pos ? '#e8710a' : '#bbb'}" stroke-width="${r === pos ? 2.5 : 1.5}"/>`; });
+    });
+    for (let r = 0; r <= pos; r++) rows[r].forEach((v, i) => {
+      const changed = r > 0 && ops[r - 1].some(o => o.d === i);
+      const fill = !changed ? (r === 0 ? '#fff' : '#f7f7f7') : r === pos ? '#fef3c7' : '#e8f0fe';
+      const fin = r === R - 1 && (mode === 'hs' || i === n - 1);
+      h += `<rect x="${cx(i) - 27}" y="${cy(r) - 14}" width="54" height="28" rx="5" fill="${fin ? '#53ae12' : fill}" stroke="${changed ? '#1a73d9' : '#ccc'}" stroke-width="1.5"/>`
+        + `<text x="${cx(i)}" y="${cy(r) + 6}" text-anchor="middle" class="mono" fill="${fin ? '#fff' : changed || r === 0 ? '#000' : '#aaa'}">${v}</text>`;
+    });
+    svg.innerHTML = h;
+    $('.ks').textContent = pos;
+    $('.kw').textContent = ops.slice(0, pos).reduce((s, o) => s + o.length, 0);
+    $('.desc').innerHTML = DESC[mode] + (pos === ops.length ? ' <b>Koniec.</b>' : '');
+  };
+  const reset = () => { steps = build(); pos = 0; render(); };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'step' && pos < steps.ops.length) { pos++; render(); }
+    if (a === 'all') { pos = steps.ops.length; render(); }
+    if (a === 'reset') reset();
+  });
+  root.querySelectorAll('input[name=scanmode]').forEach(r => r.addEventListener('change', () => { mode = r.value; reset(); }));
+  reset();
+})();
+
+// ---------- odd-even transposition sort ----------
+const oeSim = (() => {
+  const root = document.getElementById('oesim'); if (!root) return null;
+  const svg = root.querySelector('svg'), status = root.querySelector('.status');
+  const n = 8, W = 78, BASE = 240;
+  let arr, phase, timer = null, groups, lastPairs = [];
+  const x = i => 22 + i * W;
+  const init = vals => {
+    arr = vals.map((v, id) => ({ v, id })); phase = 0; lastPairs = [];
+    svg.innerHTML = '<g class="br"></g>';
+    groups = arr.map(e => {
+      const g = document.createElementNS(NS, 'g');
+      g.style.transition = 'transform .45s';
+      g.innerHTML = `<rect x="0" y="${BASE - e.v * 11}" width="58" height="${e.v * 11}" rx="4" fill="#1a73d9"/><text x="29" y="${BASE - e.v * 11 - 8}" text-anchor="middle" class="mono">${e.v}</text>`;
+      svg.appendChild(g); return g;
+    });
+    status.textContent = 'Kliknij „Faza”. Najpierw faza parzysta: pary (0,1), (2,3), (4,5), (6,7).';
+    render();
+  };
+  const render = () => {
+    arr.forEach((e, i) => { groups[e.id].style.transform = `translateX(${x(i)}px)`; });
+    svg.querySelector('.br').innerHTML = lastPairs.map(([i, sw]) =>
+      `<path d="M${x(i) + 8},${BASE + 12} v12 H${x(i + 1) + 50} v-12" fill="none" stroke="${sw ? '#d93025' : '#53ae12'}" stroke-width="3"/>`
+      + `<text x="${x(i) + 68}" y="${BASE + 46}" text-anchor="middle" style="font-size:15px" fill="${sw ? '#d93025' : '#53ae12'}">${sw ? 'zamiana' : 'ok'}</text>`).join('')
+      + `<text x="320" y="${BASE + 70}" text-anchor="middle" style="font-size:15px" fill="#666">faz wykonanych: ${phase} z ${n}</text>`;
+  };
+  const sorted = () => arr.every((e, i) => i === 0 || arr[i - 1].v <= e.v);
+  const step = () => {
+    if (phase >= n) { stop(); return; }
+    const start = phase % 2; lastPairs = []; let sw = 0;
+    for (let i = start; i < n - 1; i += 2) {
+      const s = arr[i].v > arr[i + 1].v;
+      if (s) { [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]]; sw++; }
+      lastPairs.push([i, s]);
+    }
+    phase++;
+    status.textContent = `Faza ${phase - 1} (${start ? 'nieparzysta' : 'parzysta'}): liczba porównań naraz ${lastPairs.length}, zamian ${sw}.`
+      + (phase === n ? ' Po n = 8 fazach tablica jest posortowana.' : sorted() ? ' Już posortowane, ale algorytm o tym nie wie.' : '');
+    render();
+    if (phase >= n) stop();
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const rnd = () => { const a = []; while (a.length < n) { const v = 2 + Math.floor(Math.random() * 18); if (!a.includes(v)) a.push(v); } return a; };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'step') { stop(); step(); }
+    if (a === 'play') { if (timer) stop(); else { if (phase >= n) init(arr.map(e => e.v)); timer = setInterval(step, 800); } }
+    if (a === 'shuffle') { stop(); init(rnd()); }
+    if (a === 'reverse') { stop(); init([19, 17, 15, 13, 11, 9, 7, 5]); }
+  });
+  init([6, 5, 3, 1, 8, 7, 2, 4].map(v => v * 2));
+  return { stop };
+})();
+
+// ---------- merge sort levels ----------
+(() => {
+  const root = document.getElementById('mssim'); if (!root) return;
+  const $ = c => root.querySelector(c), n = 16, L = 4;
+  let lv, work, span;
+  const segHtml = (segs, k) => segs.map((s, j) => `<span class="seg" style="border-color:${k ? PCOL[j % PCOL.length] : 'transparent'}">${s.map(v => `<span class="chip">${v}</span>`).join('')}</span>`).join('');
+  const render = () => {
+    $('.lvls').innerHTML = lv.map((segs, k) => `<div class="lvl"><span class="lbl">${k ? 'poziom ' + k : 'dane'}</span>${segHtml(segs, k)}`
+      + `<span class="cost">${k ? `${segs.length} × scal(${2 ** k}): czas ${2 ** k}` : ''}</span></div>`).join('');
+    $('.kw').textContent = work; $('.ks').textContent = span;
+    $('.kspd').textContent = span ? fmtPL(work / span, 2) : '-';
+  };
+  const reset = () => {
+    const a = []; while (a.length < n) { const v = 1 + Math.floor(Math.random() * 99); if (!a.includes(v)) a.push(v); }
+    lv = [a.map(v => [v])]; work = 0; span = 0; render();
+  };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'step' && lv.length <= L) {
+      const prev = lv[lv.length - 1], next = [];
+      for (let i = 0; i < prev.length; i += 2) next.push([...prev[i], ...prev[i + 1]].sort((x, y) => x - y));
+      lv.push(next); work += n; span += 2 ** (lv.length - 1); render();
+    }
+    if (a === 'reset') reset();
+  });
+  reset();
+})();
+
+// ---------- BFS by levels ----------
+(() => {
+  const root = document.getElementById('bfssim'); if (!root) return;
+  const svg = root.querySelector('svg'), status = root.querySelector('.status'), lvlEl = root.querySelector('.lvl');
+  const P = [[320, 35], [140, 105], [320, 112], [500, 105], [200, 180], [420, 180], [580, 180], [280, 250], [500, 250], [390, 305]];
+  const E = [[0, 1], [0, 2], [0, 3], [1, 4], [2, 4], [2, 5], [3, 5], [3, 6], [4, 7], [5, 7], [5, 8], [6, 8], [7, 9], [8, 9]];
+  const adj = P.map((_, v) => E.filter(e => e.includes(v)).map(e => e[0] === v ? e[1] : e[0]).sort((a, b) => a - b));
+  const LV = ['#9fd3ea', '#7aa7f0', '#f6d44a', '#f4a7c0', '#b5e08f', '#d7b5f5'];
+  let level, parent, disc, frontier, d, start = 0;
+  const reset = s => {
+    start = s; level = { [s]: 0 }; parent = { [s]: null }; disc = {}; frontier = [s]; d = 0;
+    status.innerHTML = `Start: ${s}. Granica = [${s}].`; render();
+  };
+  const step = () => {
+    if (!frontier.length) return;
+    const next = []; disc = {};
+    frontier.forEach(v => adj[v].forEach(u => {
+      if (!(u in level)) { if (!disc[u]) { disc[u] = []; next.push(u); } disc[u].push(v); }
+    }));
+    next.forEach(u => { level[u] = d + 1; parent[u] = disc[u][0]; });
+    const multi = next.filter(u => disc[u].length > 1);
+    status.innerHTML = `Warstwa ${d}: [${frontier.join(', ')}] → następna [${next.join(', ')}].`
+      + (multi.length ? ` Łagodny wyścig: ${multi.map(u => `${u} odkryli ${disc[u].join(' i ')}`).join('; ')}. Rodzicem zostaje którykolwiek.` : '')
+      + (next.length ? '' : ' Koniec: granica pusta.');
+    frontier = next; d++; render();
+  };
+  const render = () => {
+    let h = '';
+    E.forEach(([a, b]) => {
+      const tree = parent[a] === b || parent[b] === a;
+      const extra = (disc[a] && disc[a].includes(b) && parent[a] !== b) || (disc[b] && disc[b].includes(a) && parent[b] !== a);
+      h += `<line x1="${P[a][0]}" y1="${P[a][1]}" x2="${P[b][0]}" y2="${P[b][1]}" stroke="${extra ? '#e8710a' : tree ? '#53ae12' : '#ccc'}" stroke-width="${tree || extra ? 4 : 2}"${extra ? ' stroke-dasharray="7 5"' : ''}/>`;
+    });
+    P.forEach(([x, y], v) => {
+      const lv = level[v], inF = frontier.includes(v), multi = disc[v] && disc[v].length > 1;
+      h += `<g class="node" data-v="${v}"><circle cx="${x}" cy="${y}" r="21" fill="${lv === undefined ? '#fff' : LV[lv % LV.length]}" stroke="${multi ? '#e8710a' : inF ? '#000' : '#888'}" stroke-width="${multi || inF ? 4 : 2}"/>`
+        + `<text x="${x}" y="${y + 6}" text-anchor="middle" font-weight="bold">${v}</text>`
+        + (lv !== undefined ? `<text x="${x + 27}" y="${y - 14}" style="font-size:14px" fill="#666">p${lv}</text>` : '') + '</g>';
+    });
+    svg.innerHTML = h;
+    lvlEl.textContent = `granica: [${frontier.join(', ')}]`;
+  };
+  svg.addEventListener('click', e => { const g = e.target.closest('.node'); if (g) reset(+g.dataset.v); });
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'step') step();
+    if (a === 'reset') reset(start);
+  });
+  reset(0);
+})();
+
+// ---------- matrix multiplication ----------
+(() => {
+  const root = document.getElementById('matsim'); if (!root) return;
+  const A = [[1, 2, 0], [3, 1, 2], [0, 1, 1], [2, 0, 3]];
+  const B = [[1, 0, 2, 1], [2, 1, 0, 3], [1, 2, 1, 0]];
+  const C = A.map(r => B[0].map((_, j) => r.reduce((s, a, t) => s + a * B[t][j], 0)));
+  let sel = null;
+  const task = (i, j, g) => g === 'cell' ? i * 4 + j : g === 'row' ? i : (i >> 1) * 2 + (j >> 1);
+  const render = () => {
+    const g = root.querySelector('.gran').value, nt = g === 'cell' ? 16 : 4;
+    const tbl = (M, cls, hl) => `<table class="m ${cls}">` + M.map((r, i) => '<tr>' + r.map((v, j) => {
+      let st = '', c = hl(i, j) ? 'hl' : '';
+      if (cls === 'c') { st = ` style="background:hsl(${Math.round(task(i, j, g) * 360 / nt)},70%,${nt > 4 ? 85 : 80}%)"`; c = sel && sel[0] === i && sel[1] === j ? 'sel' : ''; }
+      return `<td class="${c}" data-i="${i}" data-j="${j}"${st}>${v}</td>`;
+    }).join('') + '</tr>').join('') + '</table>';
+    root.querySelector('.mats').innerHTML = tbl(A, 'a', i => sel && sel[0] === i) + '<span class="op">×</span>'
+      + tbl(B, 'b', (i, j) => sel && sel[1] === j) + '<span class="op">=</span>' + tbl(C, 'c', () => false);
+    root.querySelector('.ntask').textContent = `liczba zadań: ${nt}`;
+    root.querySelector('.calc').innerHTML = sel ? `c[${sel[0]}][${sel[1]}] = ` + A[sel[0]].map((a, t) => `${a}·${B[t][sel[1]]}`).join(' + ') + ` = <b>${C[sel[0]][sel[1]]}</b>` : 'Kliknij komórkę macierzy C.';
+  };
+  root.addEventListener('click', e => { const td = e.target.closest('table.c td'); if (td) { sel = [+td.dataset.i, +td.dataset.j]; render(); } });
+  root.querySelector('.gran').addEventListener('change', render);
+  render();
+})();
+
+// ---------- Jones-Plassmann ----------
+(() => {
+  const root = document.getElementById('jpsim'); if (!root) return;
+  const slide = root.closest('section'), svg = root.querySelector('svg');
+  const COL = ['#d93025', '#1a73d9', '#53ae12', '#e8710a'];
+  const P = [];
+  for (let i = 0; i < 5; i++) { const a = (-90 + 72 * i) * Math.PI / 180; P[i] = [280 + 165 * Math.cos(a), 195 + 165 * Math.sin(a)]; P[i + 5] = [280 + 75 * Math.cos(a), 195 + 75 * Math.sin(a)]; }
+  const E = [];
+  for (let i = 0; i < 5; i++) E.push([i, (i + 1) % 5], [i, i + 5], [5 + i, 5 + (i + 2) % 5]);
+  const adj = P.map((_, v) => E.filter(e => e.includes(v)).map(e => e[0] === v ? e[1] : e[0]));
+  let w, color, chosen, rounds;
+  const reset = () => {
+    const pool = []; while (pool.length < 10) { const v = 10 + Math.floor(Math.random() * 90); if (!pool.includes(v)) pool.push(v); }
+    w = pool; color = {}; chosen = []; rounds = 0;
+    slide.querySelector('.status').textContent = 'Kliknij „Runda”: kto jest lokalnym maksimum wśród niepokolorowanych sąsiadów?';
+    render();
+  };
+  const step = () => {
+    if (Object.keys(color).length === 10) return;
+    chosen = P.map((_, v) => v).filter(v => !(v in color) && adj[v].every(u => u in color || w[v] > w[u]));
+    chosen.forEach(v => { const used = new Set(adj[v].filter(u => u in color).map(u => color[u])); let c = 0; while (used.has(c)) c++; color[v] = c; });
+    rounds++;
+    const done = Object.keys(color).length === 10;
+    slide.querySelector('.status').textContent = `Runda ${rounds - 1}: równolegle kolorujemy wierzchołki o wagach ${chosen.map(v => w[v]).join(', ')}.`
+      + (done ? ` Gotowe po ${rounds} rundach.` + (new Set(Object.values(color)).size > 3 ? ' Wyszły 4 kolory: heurystyka nie gwarantuje minimum (temu grafowi wystarczą 3).' : '') : '');
+    render();
+  };
+  const render = () => {
+    let h = '';
+    E.forEach(([a, b]) => { h += `<line x1="${P[a][0].toFixed(1)}" y1="${P[a][1].toFixed(1)}" x2="${P[b][0].toFixed(1)}" y2="${P[b][1].toFixed(1)}" stroke="#333" stroke-width="3"/>`; });
+    P.forEach(([x, y], v) => {
+      const c = color[v], ch = chosen.includes(v);
+      h += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="24" fill="${c === undefined ? '#fff' : COL[c]}" stroke="${ch ? '#000' : '#888'}" stroke-width="${ch ? 5 : 2}"/>`
+        + `<text x="${x.toFixed(1)}" y="${(y + 6).toFixed(1)}" text-anchor="middle" font-weight="bold" fill="${c === undefined ? '#000' : '#fff'}">${w[v]}</text>`;
+    });
+    svg.innerHTML = h;
+    slide.querySelector('.kr').textContent = rounds;
+    slide.querySelector('.kc').textContent = new Set(Object.values(color)).size;
+  };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'step') step();
+    if (a === 'reset') reset();
+  });
+  reset();
+})();
+
+Reveal.on('slidechanged', () => { if (oeSim) oeSim.stop(); });
+</script>
+</body>
+</html>

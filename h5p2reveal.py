@@ -3,7 +3,7 @@
 Usage: python3 h5p2reveal.py LECTURE.h5p OUTPUT_DIR [NAME.html]
 Writes OUTPUT_DIR/NAME.html (default index.html) and copies images to OUTPUT_DIR/images/.
 """
-import json, html, sys, os, zipfile
+import json, html, sys, os, re, zipfile
 src, outdir = sys.argv[1], sys.argv[2]
 z = zipfile.ZipFile(src)
 c = json.loads(z.read('content/content.json'))
@@ -46,6 +46,18 @@ def element(e):
         w = p['linkWidget']; url = w['protocol'] + w['url']
         return (f'<div class="el text link" style="{box(e)}">'
                 f'<a href="{html.escape(url, quote=True)}" target="_blank">{p.get("title") or url}</a></div>')
+    if lib == 'H5P.Blanks':
+        # *answer* marks a blank; "/" separates accepted answers, ":" starts a tip
+        answers = [m.split(':')[0].replace('/', ' / ') for q in p['questions'] for m in re.findall(r'\*([^*]+)\*', q)]
+        qs = ''.join(re.sub(r'\*[^*]+\*', '<span class="blank">______</span>', q) for q in p['questions'])
+        return (f'<div class="el text exercise" style="{box(e)}">{p["text"]}{qs}'
+                f'<details><summary>Pokaż odpowiedź</summary>{"; ".join(answers)}</details></div>')
+    if lib == 'H5P.TrueFalse':
+        ok = p.get('correct') == 'true'
+        why = p.get('behaviour', {}).get('feedbackOnCorrect' if ok else 'feedbackOnWrong', '')
+        return (f'<div class="el text exercise" style="{box(e)}">{p.get("question", "")}'
+                f'<details><summary>Prawda czy fałsz?</summary>{"Prawda" if ok else "Fałsz"}'
+                f'{". " + why if why else ""}</details></div>')
     raise ValueError(lib)
 
 parts = []
@@ -87,6 +99,8 @@ page = f'''<!doctype html>
   .reveal .el.table table {{ margin: 0 auto; border-collapse: collapse; font-size: 1em; }}
   .reveal .el.table td {{ border: 1px solid #555; padding: .3em .5em; vertical-align: top; }}
   .reveal a {{ color: #1a73d9; }}
+  .reveal .el.exercise details {{ margin-top: .5em; }}
+  .reveal .el.exercise summary {{ cursor: pointer; color: rgb(83, 174, 18); font-weight: bold; }}
 </style>
 </head>
 <body>

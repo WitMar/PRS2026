@@ -1,0 +1,1719 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Przetwarzanie równoległe i strumieniowe - Wykład 8: korutyny i async</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+<style>
+  /* Slide = 1280x720; base font scaled to match H5P text metrics */
+  .reveal { font-size: 24px; font-family: "Open Sans", Arial, sans-serif; color: #000; }
+  .reveal .slides section { position: absolute; width: 100%; height: 100%; padding: 0; text-align: left; }
+  .reveal .el { position: absolute; box-sizing: border-box; overflow: visible; }
+  .reveal .el.text { padding: .375em .5em; line-height: 1.25; }
+  .reveal .el.text p, .reveal .el.text li { margin: 0 0 .5em 0; line-height: 1.25; }
+  .reveal .el.text ul { display: block; margin: 0 0 .5em 1.25em; padding: 0; }
+  .reveal .el.text h3 { font-size: 1em; text-transform: none; margin: 0 0 .5em; color: #000; font-family: inherit; }
+  .reveal .el.img img { width: 100%; height: 100%; object-fit: contain; margin: 0; max-width: none; max-height: none; }
+  .reveal .el.shape { display: flex; flex-direction: column; justify-content: center; }
+  .reveal .el.link { display: flex; align-items: center; justify-content: center; font-size: 1.5em; }
+  .reveal a { color: #1a73d9; }
+  /* ---------- interactive slides (as in lecture 1) ---------- */
+  :root { --green: rgb(83, 174, 18); --blue: #1a73d9; --red: #d93025; --orange: #e8710a; --muted: #666; --line: #ccc; }
+  .reveal .el.box { padding: 0 .5em; line-height: 1.3; }
+  .reveal .el.box p { margin: 0 0 .5em; }
+  .reveal .small, .reveal .hint { font-size: .7em; color: var(--muted); }
+  .reveal .btn, .reveal .opt {
+    font: inherit; font-size: .75em; padding: .3em .8em; margin: 0 .3em .3em 0; cursor: pointer;
+    border: 2px solid var(--green); background: var(--green); color: #fff; border-radius: .3em;
+  }
+  .reveal .btn.ghost { background: #fff; color: var(--green); }
+  .reveal .btn:disabled { opacity: .4; cursor: default; }
+  .reveal .simctl { display: flex; flex-wrap: wrap; align-items: center; gap: .3em .8em; font-size: .8em; margin-bottom: .5em; }
+  .reveal .simctl .btn { font-size: .9em; margin: 0; }
+  .reveal .simctl select, .reveal .simctl input[type=text] { font: inherit; padding: .1em .3em; }
+  .reveal .stat { font-size: .8em; }
+  .reveal h4 { font-size: .8em; margin: 0 0 .3em; text-transform: none; color: #000; font-family: inherit; }
+  .reveal code { font-family: Consolas, Menlo, monospace; }
+  @keyframes pop { from { transform: scale(.3); opacity: 0; } }
+
+  /* quiz */
+  .reveal .quiz .q { font-size: 1.1em; margin-bottom: .8em; }
+  .reveal .quiz .opts { display: flex; flex-wrap: wrap; gap: .5em; margin-bottom: .6em; }
+  .reveal .quiz .opt { background: #fff; color: #000; border-color: var(--line); font-size: .9em; margin: 0; }
+  .reveal .quiz .opt.sel { border-color: var(--blue); background: #e8f0fe; }
+  .reveal .quiz .opt.good { border-color: var(--green); background: #e6f4da; }
+  .reveal .quiz .opt.bad { border-color: var(--red); background: #fce8e6; }
+  .reveal .quiz .explain { visibility: hidden; font-size: .85em; border-left: 4px solid var(--green); padding-left: .6em; margin-top: .6em; }
+  .reveal .quiz.done .explain { visibility: visible; }
+  .reveal .quiz.compact .q { font-size: .9em; margin-bottom: .5em; }
+  .reveal .quiz.compact .opt { font-size: .75em; }
+  .reveal .quiz.compact .explain { font-size: .7em; margin-top: .3em; }
+  .reveal .quiz + .quiz { margin-top: .8em; }
+
+  /* ---------- lecture 2: layout, code listings, output ---------- */
+  .reveal .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.2em; align-items: start; }
+  .reveal .cols.wl { grid-template-columns: 1.35fr 1fr; }
+  .reveal .cols.wr { grid-template-columns: 1fr 1.35fr; }
+  /* type scale: .lead / ul.points = body text, .note = callouts, .small = captions, code .78em */
+  .reveal .lead { font-size: 1.1em; margin: 0 0 .5em; line-height: 1.35; }
+  .reveal ul.points { font-size: 1.1em; line-height: 1.35; margin: 0 0 .5em 1.1em; padding: 0; }
+  .reveal ul.points li { margin: 0 0 .45em; }
+  .reveal ul.points.side { font-size: .9em; }
+  .reveal ul.points.icons { list-style: none; margin-left: 0; }
+  .reveal ul.points.icons li { padding-left: 1.5em; text-indent: -1.5em; }
+  .reveal ul.points.icons i { width: 1.5em; text-indent: 0; color: var(--green); }
+  .reveal ul.points.icons.cons i { color: var(--red); }
+  .reveal img.pic { display: block; width: 100%; max-height: 20em; object-fit: contain; margin: 0 auto; }
+  .reveal svg.diagram { display: block; width: 100%; height: auto; margin: .2em 0 .6em; font-family: "Open Sans", Arial, sans-serif; }
+  .reveal svg.diagram text { font-size: 18px; }
+  .reveal svg.diagram .mono { font-family: Consolas, Menlo, monospace; }
+  .reveal .chain { display: flex; flex-wrap: wrap; align-items: center; gap: .3em; font-size: .8em; margin: .3em 0 .6em; }
+  .reveal .chain .op { color: var(--muted); font-family: Consolas, Menlo, monospace; font-size: .85em; }
+  .reveal .zipviz { font: .75em Consolas, Menlo, monospace; margin: 0 0 .6em; }
+  .reveal .zipviz > div { display: flex; gap: .4em; margin: .25em 0; align-items: center; }
+  .reveal .zipviz .lbl { width: 4.5em; color: var(--muted); font-family: "Open Sans", Arial, sans-serif; }
+  .reveal .chip.alt { background: #fef3c7; }
+  .reveal .chip.pair { background: #e6f4da; }
+  .reveal .lanes { font-size: .75em; }
+  .reveal .lanes .lane { display: flex; align-items: center; gap: 3px; height: 1.5em; margin: .15em 0; }
+  .reveal .lanes .lane span { width: 2.2em; color: var(--muted); }
+  .reveal .lanes .lane i { display: block; width: 10.5%; height: 1.1em; border-radius: 3px; background: var(--blue); }
+  .reveal .lanes .lane i.p { background: var(--green); }
+  .reveal .lanes h4 { margin: .5em 0 .1em; }
+  .reveal p code, .reveal li code, .reveal td code, .reveal .note code { background: #f1f3f4; padding: 0 .2em; border-radius: .2em; font-size: .9em; }
+  .reveal pre.code-wrap { position: relative; width: 100%; margin: 0 0 .5em; box-shadow: none; font-size: .78em; }
+  .reveal pre.code-wrap code { max-height: none; padding: .6em .8em; border-radius: .3em; }
+  .reveal pre.code-wrap.sm { font-size: .66em; }
+  .reveal pre.out { position: relative; width: 100%; box-sizing: border-box; margin: 0 0 .6em; padding: .45em .8em; font-size: .78em; line-height: 1.35;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #f4f6f8; color: #1f2a30; border: 1px solid #c9d1d9; border-left: 5px solid #586e75; border-radius: .3em; box-shadow: none; }
+  .reveal pre.out::before { content: "Wynik"; position: absolute; top: .3em; right: .6em; font: bold .7em "Open Sans", Arial, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #8a99a6; }
+  .reveal pre.code-wrap + pre.out { margin-top: -.5em; border-top: none; border-radius: 0 0 .3em .3em; }
+  .reveal pre.out.sm, .reveal pre.code-wrap.sm + pre.out { font-size: .66em; }
+  .reveal .copy-btn { position: absolute; top: .4em; right: .4em; z-index: 2; font: .8em "Open Sans", Arial, sans-serif; padding: .1em .6em; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, .3); border-radius: .3em; background: rgba(255, 255, 255, .1); color: #f8f8f2; opacity: 0; transition: opacity .15s; }
+  .reveal pre.code-wrap:hover .copy-btn, .reveal .copy-btn:focus-visible { opacity: 1; }
+  .reveal .copy-btn.copied { background: var(--green); border-color: var(--green); opacity: 1; }
+  .reveal .note { font-size: .75em; line-height: 1.35; border-left: 4px solid var(--green); background: #f3faee; padding: .35em .7em; margin: .2em 0 .6em; }
+  .reveal .note.warn { border-left-color: var(--orange); background: #fff4e5; }
+  .reveal .note.bad { border-left-color: var(--red); background: #fce8e6; }
+  .reveal .note p { margin: 0 0 .3em; }
+  .reveal .note p:last-child { margin: 0; }
+  .reveal table.simple { border-collapse: collapse; font-size: .75em; margin: .2em 0 .8em; width: 100%; }
+  .reveal table.simple th, .reveal table.simple td { border: 1px solid var(--line); padding: .3em .5em; vertical-align: top; text-align: left; }
+  .reveal table.simple th { background: #eef7e6; }
+  .reveal .textflow ul { margin: 0 0 .5em 1.2em; }
+  .reveal .textflow li { margin-bottom: .4em; }
+
+  /* agenda */
+  .reveal .agenda { display: grid; grid-template-columns: 1fr 1fr; gap: .7em; margin-bottom: .8em; }
+  .reveal .agenda .ag { border: 2px solid var(--line); border-radius: .4em; padding: .4em .7em; }
+  .reveal .agenda .ag b { display: inline-block; width: 1.6em; height: 1.6em; line-height: 1.6em; text-align: center; border-radius: 50%; background: var(--green); color: #fff; margin-right: .4em; }
+  .reveal .agenda .ag p { font-size: .75em; margin: .3em 0 0; color: #333; }
+
+  /* fill in the blanks */
+  .reveal pre.exo { width: 100%; box-sizing: border-box; margin: 0 0 .5em; padding: .6em .8em; font-size: .78em; line-height: 1.6; box-shadow: none;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #272822; color: #f8f8f2; border-radius: .3em; }
+  .reveal pre.exo .c { color: #75715e; }
+  .reveal pre.exo .k { color: #f92672; }
+  .reveal input.blank { font: inherit; color: #e6db74; background: #3e3d32; border: none; border-bottom: 2px dashed #e6db74; padding: 0 .3em; outline: none; }
+  .reveal input.blank:focus { background: #49483e; }
+  .reveal input.blank.good { color: #a6e22e; border-bottom: 2px solid #a6e22e; }
+  .reveal input.blank.bad { color: #f92672; border-bottom: 2px solid #f92672; }
+  .reveal .blanks .fb { font-size: .7em; min-height: 1.2em; margin: .2em 0; color: var(--red); }
+  .reveal .blanks .explain { visibility: hidden; font-size: .75em; border-left: 4px solid var(--green); padding-left: .6em; margin-top: .3em; }
+  .reveal .blanks.done .explain { visibility: visible; }
+
+  /* pure / impure cards */
+  .reveal .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8em; }
+  .reveal .quiz.card { border: 2px solid var(--line); border-radius: .4em; padding: .5em .6em; }
+  .reveal .quiz.card pre.code-wrap { font-size: .7em; margin-bottom: .6em; }
+  .reveal .quiz.card .opts { margin-bottom: 0; }
+  .reveal .quiz.card .opt { font-size: .75em; }
+  .reveal .quiz.card .explain { font-size: .7em; }
+
+  /* generator step by step */
+  .reveal ol.steps { list-style: none; margin: 0 0 .5em; padding: .5em 0; background: #272822; color: #f8f8f2; border-radius: .3em; font: .75em/1.6 Consolas, Menlo, monospace; counter-reset: ln; }
+  .reveal ol.steps li { padding: 0 .8em; white-space: pre; border-left: 4px solid transparent; }
+  .reveal ol.steps li::before { counter-increment: ln; content: counter(ln); display: inline-block; width: 1.8em; color: #75715e; }
+  .reveal ol.steps li.ran { background: rgba(166, 226, 46, .18); }
+  .reveal ol.steps li.next { background: rgba(230, 219, 116, .28); border-left-color: #e6db74; }
+  .reveal ol.steps li.next::after { content: "   \23F8  tu wstrzymany"; color: #e6db74; }
+  .reveal pre.console { width: 100%; box-sizing: border-box; height: 15em; overflow: auto; margin: 0 0 .5em; padding: .5em .8em; font-size: .72em; line-height: 1.4;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #1e1e1e; color: #e0e0e0; border-radius: .3em; box-shadow: none; }
+  .reveal .chip { display: inline-block; min-width: 1.6em; text-align: center; padding: .1em .45em; border-radius: .3em; background: #e8f0fe; animation: pop .25s; }
+  .reveal .chip.drop { background: #f1f3f4; color: #aaa; text-decoration: line-through; }
+  .reveal .chip.acc { background: #fef3c7; }
+  .reveal .chip.fin { background: var(--green); color: #fff; font-weight: bold; }
+  .reveal .chip.err { background: #fce8e6; color: var(--red); font-family: Consolas, Menlo, monospace; }
+
+  /* ---------- lecture 8a: history timeline ---------- */
+  .reveal .tl { display: grid; grid-template-columns: repeat(7, 1fr); gap: .4em; font-size: .62em; line-height: 1.3; margin: 0 0 .8em; }
+  .reveal .tl > div { border-top: 5px solid var(--green); background: #f3faee; padding: .3em .45em; border-radius: 0 0 .3em .3em; }
+  .reveal .tl b { display: block; font-size: 1.4em; color: var(--green); }
+  .reveal .tl code { font-size: .95em; }
+
+  /* event loop step by step */
+  .reveal ol.steps li.hl { background: rgba(230, 219, 116, .28); border-left-color: #e6db74; }
+  .reveal ol.steps li.blk { background: rgba(249, 38, 114, .3); border-left-color: #f92672; }
+  .reveal #loopsim .msg { font-size: .7em; border-left: 4px solid var(--blue); padding-left: .6em; min-height: 4.2em; margin: 0; }
+  .reveal #loopsim .lstate { font-size: .75em; margin-bottom: .4em; }
+  .reveal #loopsim .row { display: flex; align-items: center; gap: .3em; min-height: 1.9em; }
+  .reveal #loopsim .row .lbl { width: 7.5em; flex: none; color: var(--muted); }
+  .reveal #loopsim .clock { font-family: Consolas, Menlo, monospace; }
+  .reveal #loopsim .lstat { font-size: .85em; padding: .05em .5em; border-radius: .3em; background: #e6f4da; color: #2d6a0a; }
+  .reveal #loopsim .lstat.sleep { background: #e8f0fe; color: var(--blue); }
+  .reveal #loopsim .lstat.block { background: #fce8e6; color: var(--red); font-weight: bold; }
+  .reveal .chip.tA { background: #1a73d9; color: #fff; }
+  .reveal .chip.tB { background: #e8710a; color: #fff; }
+  .reveal .chip.tM { background: #666; color: #fff; }
+  .reveal .chip small { font-size: .8em; opacity: .9; }
+  .reveal #loopsim pre.console { height: 7.5em; }
+
+  /* sequential vs concurrent timeline */
+  .reveal #gsim .simctl { font-size: .75em; }
+  .reveal #gsim pre.exo { font-size: .66em; line-height: 1.45; }
+  .reveal #gsim .glane { display: flex; align-items: center; gap: .5em; height: 1.9em; font-size: .8em; }
+  .reveal #gsim .glane > span { width: 4.8em; flex: none; white-space: nowrap; font-family: Consolas, Menlo, monospace; }
+  .reveal #gsim .gtrack { position: relative; flex: 1; height: 1.25em; background: #f1f3f4; border-radius: .2em; }
+  .reveal #gsim .gbar { position: absolute; top: 0; bottom: 0; background: var(--blue); border-radius: .2em; }
+  .reveal #gsim .gbar.blk { background: var(--red); }
+  .reveal #gsim .glane.gax { height: 1.4em; }
+  .reveal #gsim .gtrack.gaxis { background: none; font-size: .75em; color: var(--muted); }
+  .reveal #gsim .gaxis span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+  .reveal #gsim .glanes { position: relative; }
+  .reveal #gsim .gcur { position: absolute; top: 0; bottom: 1.2em; width: 2px; background: var(--red); }
+  .reveal #gsim .gtotal { font-size: .9em; margin: .3em 0 0; }
+  .reveal #gsim .verdict { min-height: 2.6em; }
+
+  /* heartbeat */
+  .reveal #hbsim .simctl .btn code { background: none; padding: 0; font-size: 1em; }
+  .reveal #hbsim .btn.ghost.on { background: #e6f4da; }
+  .reveal #hbsim .hrow { display: flex; align-items: center; gap: .5em; height: 2.2em; font-size: .75em; }
+  .reveal #hbsim .hrow .lbl { width: 10em; flex: none; color: #333; }
+  .reveal #hbsim .htrack { position: relative; flex: 1; height: 1.6em; background: #f6f7f8; border-radius: .2em; overflow: hidden; }
+  .reveal #hbsim .htrack i { position: absolute; top: 0; bottom: 0; border-radius: .2em; font-style: normal; font-size: .75em; color: #fff; white-space: nowrap; overflow: hidden; padding-left: .3em; line-height: 2.1em; }
+  .reveal #hbsim .htrack i.wait { background: #e8f0fe; border: 1px solid var(--blue); color: var(--blue); box-sizing: border-box; }
+  .reveal #hbsim .htrack i.blk { background: var(--red); }
+  .reveal #hbsim .htrack i.thr { background: var(--orange); }
+  .reveal #hbsim .htrack i.run { background: var(--green); }
+  .reveal #hbsim .htrack i.idle { background: #e6f4da; color: #2d6a0a; }
+  .reveal #hbsim .htrack b { position: absolute; top: .1em; transform: translateX(-50%); color: var(--red); font-size: 1.1em; }
+  .reveal #hbsim .verdict { min-height: 2.6em; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<body>
+<div class="reveal">
+<div class="slides">
+<section data-background-color="#ffffff" data-keywords="PRS">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie równoległe i strumieniowe</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:23.733%;width:61.002%;height:40%;"><p><span style="font-size:1.5em"><strong>Wykład 8</strong></span></p>
+
+<p><span style="font-size:1.5em"><strong>Korutyny i async w Python</strong></span></p>
+</div>
+<div class="el img" style="left:64.270%;top:21.576%;width:23.125%;height:40.000%;"><img src="images/image-4As6sF9G.jpg" alt="UAM"></div>
+<div class="el img" style="left:47.930%;top:66.885%;width:19.608%;height:25.820%;"><img src="images/image-TTaVdj85.png" alt=""></div>
+<div class="el img" style="left:82.438%;top:71.200%;width:17.564%;height:18.215%;"><img src="images/image-A2hwxGME.png" alt=""></div>
+<div class="el img" style="left:67.538%;top:73.357%;width:16.340%;height:16.944%;"><img src="images/image-cGoUH6A1.png" alt=""></div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Plan">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Plan wykładu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="agenda">
+  <div class="ag"><b>1</b>Od generatorów do korutyn<p>yield, send(), yield from, krótka historia async/await</p></div>
+  <div class="ag"><b>2</b>async / await i pętla zdarzeń<p>korutyna, awaitable, event loop, wielozadaniowość kooperacyjna</p></div>
+  <div class="ag"><b>3</b>Zadania współbieżne<p>create_task, gather, TaskGroup, timeout, anulowanie</p></div>
+  <div class="ag"><b>4</b>Pułapki i ekosystem<p>blokowanie pętli, wyścigi, Lock / Semaphore / Queue, async for, biblioteki, Future vs Promise</p></div>
+</div>
+<div class="note"><p><strong>Dlaczego to na tym przedmiocie?</strong></p>
+<p class="fragment">Wątki (wykład 3) i pule wątków (wykład 7) dobrze działają dla kilkudziesięciu zadań. Serwer obsługujący tysiące połączeń albo klient czytający setki strumieni czujników potrzebuje lżejszego mechanizmu.</p>
+<p class="fragment">Na pętli zdarzeń działają biblioteki strumieniowe z dalszej części semestru: Streamz (pętla Tornado / asyncio) i asynchroniczni klienci Kafki.</p></div>
+</div>
+<aside class="notes">Wykład zdalny: pytania ze slajdów "Sprawdź się" (i quizy na slajdach z kodem) zadawaj na czacie Teams, zanim klikniesz odpowiedź. Symulacje warto uruchamiać na udostępnionym ekranie krok po kroku, pytając, co stanie się w następnym kroku.</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="Generatory">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przypomnienie: generatory (wykład 2)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+def find_letter_occurrences(words, letter):
+    for word in words:
+        yield word.count(letter)
+
+output = find_letter_occurrences(["apple", "banana", "cherry"], "a")
+print(output)
+print(next(output))
+print(next(output))
+print(next(output))
+print(next(output))
+</code></pre>
+<pre class="out">&lt;generator object find_letter_occurrences at 0x7f80397857e0&gt;
+1
+3
+0
+Traceback (most recent call last):
+  ...
+StopIteration</pre>
+</div>
+<div>
+<ul class="points side">
+<li>Funkcja z <code>yield</code> po wywołaniu zwraca <strong>obiekt generatora</strong>, a jej ciało jeszcze się nie wykonuje.</li>
+<li><code>next()</code> uruchamia ciało do najbliższego <code>yield</code>. Generator zostaje <strong>wstrzymany</strong> razem ze zmiennymi lokalnymi.</li>
+<li>Koniec ciała (albo <code>return</code>) zgłasza <code>StopIteration</code>; pętla <code>for</code> obsługuje go za nas.</li>
+</ul>
+<div class="note fragment"><p>Funkcję, którą można <strong>wstrzymać i wznowić</strong> w środku, nazywamy <strong>korutyną</strong> (coroutine, współprogram). Generator to już prawie korutyna: brakuje mu tylko możliwości przyjmowania danych przy wznowieniu.</p></div>
+</div>
+</div>
+</div>
+<aside class="notes">Oryginalnie 5 slajdów o yield; scalone w jeden, bo generatory były szczegółowo na wykładzie 2 (symulacja "Generator krok po kroku").</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Generator, który przyjmuje dane: send()</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape data-line-numbers="|4|9|10-12|13">
+def srednia():
+    suma, n, avg = 0, 0, None
+    while True:
+        x = yield avg          # yield zwraca avg i ODBIERA x
+        suma, n = suma + x, n + 1
+        avg = suma / n
+
+s = srednia()
+next(s)                        # "rozruch": dojdź do pierwszego yield
+print(s.send(10))
+print(s.send(20))
+print(s.send(60))
+s.close()                      # GeneratorExit wewnątrz generatora
+</code></pre>
+<pre class="out">10.0
+15.0
+30.0</pre>
+</div>
+<div>
+<ul class="points side">
+<li><code>x = yield avg</code>: <code>yield</code> jest <strong>wyrażeniem</strong> (PEP 342). Oddaje <code>avg</code> i przy wznowieniu zwraca wartość z <code>send()</code>.</li>
+<li><code>send(v)</code> = wznów i podstaw <code>v</code>; <code>next(g)</code> to <code>g.send(None)</code>. <code>close()</code> i <code>throw()</code> wstrzykują wyjątek w miejscu wstrzymania.</li>
+</ul>
+<div class="quiz compact"><p class="q">Co się stanie, gdy pominiemy <code>next(s)</code> i od razu wywołamy <code>s.send(10)</code>?</p><div class="opts"><button class="opt" data-ok="0">zwróci 10.0</button><button class="opt" data-ok="1">TypeError</button><button class="opt" data-ok="0">zwróci None</button></div><p class="explain">Świeży generator nie stoi jeszcze na żadnym <code>yield</code>, więc nie ma gdzie podstawić wartości: <code>TypeError: can't send non-None value to a just-started generator</code>. Stąd „rozruch” przez <code>next()</code>.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Funkcja a korutyna (subroutine vs coroutine)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wr">
+<div>
+<p class="lead">Korutyny (Conway, 1963) <strong>uogólniają podprogramy</strong>: oprócz wejścia na początku i wyjścia przez <code>return</code> mają dowolnie wiele punktów <strong>wstrzymania i wznowienia</strong>.</p>
+<ul class="points side">
+<li class="fragment">To, kiedy oddać sterowanie, wybiera <strong>sama korutyna</strong> (<code>await</code>, <code>yield</code>). To wielozadaniowość <strong>bez wywłaszczania</strong> (kooperacyjna).</li>
+<li class="fragment">Wątki z wykładów 1 i 3 przełącza <strong>system operacyjny</strong> w dowolnym momencie.</li>
+</ul>
+</div>
+<svg class="diagram" viewBox="0 0 680 300" role="img" aria-label="Funkcja wykonuje się od wywołania do return. Korutyna wraca do wywołującego przy każdym await lub yield i jest później wznawiana.">
+<defs><marker id="arC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c00000"/></marker></defs>
+<text x="145" y="18" text-anchor="middle" font-weight="bold">Funkcja (podprogram)</text>
+<text x="455" y="18" text-anchor="middle" font-weight="bold">Korutyna</text>
+<g fill="#666" style="font-size:14px" text-anchor="middle"><text x="70" y="42">wywołujący</text><text x="220" y="42">funkcja</text><text x="370" y="42">wywołujący</text><text x="540" y="42">korutyna</text></g>
+<g stroke="#1a73d9" stroke-width="2" stroke-dasharray="4 5" opacity=".5"><line x1="70" y1="48" x2="70" y2="292"/><line x1="220" y1="48" x2="220" y2="292"/><line x1="370" y1="48" x2="370" y2="292"/><line x1="540" y1="48" x2="540" y2="292"/></g>
+<polyline points="70,52 70,80 220,68 220,236 70,254 70,288" fill="none" stroke="#c00000" stroke-width="3" marker-end="url(#arC)"/>
+<polyline points="370,52 370,80 540,66 540,96 370,96 370,136 540,122 540,152 370,152 370,192 540,178 540,222 370,222 370,288" fill="none" stroke="#c00000" stroke-width="3" marker-end="url(#arC)"/>
+<g style="font-size:14px"><text x="78" y="100">wywołanie</text><text x="228" y="250">return</text>
+<text x="362" y="86" text-anchor="end">start</text><text x="362" y="142" text-anchor="end">wznowienie</text><text x="362" y="198" text-anchor="end">wznowienie</text>
+<text x="548" y="100">await / yield</text><text x="548" y="156">await / yield</text><text x="548" y="226">return</text></g>
+</svg>
+</div>
+</div>
+<aside class="notes">Diagram przerysowany z oryginalnego slajdu (obraz Caller/Function/Coroutine) z nazwami z Pythona zamiast "suspend/resume/destroy".</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Od yield from do async/await</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="tl">
+<div><b>2.5</b>PEP 342<br><code>send()</code>, <code>yield</code> jako wyrażenie</div>
+<div><b>3.3</b>PEP 380<br><code>yield from</code></div>
+<div><b>3.4</b><code>asyncio</code> i <code>@asyncio.coroutine</code></div>
+<div><b>3.5</b>PEP 492<br><code>async def</code>, <code>await</code></div>
+<div><b>3.6</b>PEP 525<br>generatory asynchroniczne</div>
+<div><b>3.7</b><code>asyncio.run()</code>, <code>create_task()</code></div>
+<div><b>3.11</b><code>TaskGroup</code>, <code>timeout()</code>; usunięto <code>@asyncio.coroutine</code></div>
+</div>
+<div class="cols">
+<div>
+<p class="small">Styl Pythona 3.4 (korutyny oparte na generatorach):</p>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+import asyncio
+
+@asyncio.coroutine             # styl Pythona 3.4
+def stary():
+    yield from asyncio.sleep(1)
+</code></pre>
+<pre class="out sm">AttributeError: module 'asyncio' has no
+attribute 'coroutine'. Did you mean: 'coroutines'?</pre>
+</div>
+<div>
+<p class="small">Styl współczesny:</p>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+import asyncio
+
+async def nowy():
+    await asyncio.sleep(1)
+</code></pre>
+<div class="note warn"><p>Korutyny oparte na generatorach były przestarzałe od 3.8 i zostały <strong>usunięte w Pythonie 3.11</strong>. W starszych tutorialach wciąż je spotkamy, razem z <code>loop.run_until_complete()</code>.</p></div>
+</div>
+</div>
+</div>
+<aside class="notes">Na oryginalnym slajdzie był cytat z dokumentacji 3.8 ("scheduled for removal in Python 3.10"). Faktycznie usunięto je w 3.11.</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="Asynchroniczność">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie asynchroniczne</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el img" style="left:14.446%;top:19.065%;width:69.021%;height:79.261%;"><img src="images/image-RvmsVxNs.jpeg" alt=""></div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Synchronicznie i asynchronicznie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<svg class="diagram" viewBox="0 0 985 262" role="img" aria-label="Synchronicznie: ciasto, zupa i sałatka po kolei, 100 minut. Asynchronicznie: kucharz pracuje, gdy coś się piecze lub gotuje, 50 minut."><defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#e8f0fe"/><line x1="0" y1="0" x2="0" y2="8" stroke="#1a73d9" stroke-width="2" opacity=".35"/></pattern></defs><text x="0" y="18" font-weight="bold">Synchronicznie: 100 min</text><text x="130" y="47" text-anchor="end" style="font-size:15px">kucharz</text><rect x="140" y="28" width="80" height="26" rx="3" fill="#53ae12" stroke="#2d6a0a" stroke-width="1.5"/><text x="180.0" y="47" text-anchor="middle" style="font-size:14px" fill="#fff">ciasto</text><rect x="220" y="28" width="320" height="26" rx="3" fill="url(#hatch)" stroke="#1a73d9" stroke-width="1.5"/><text x="380.0" y="47" text-anchor="middle" style="font-size:14px" fill="#1f2a30">pieczenie (czekanie)</text><rect x="540" y="28" width="80" height="26" rx="3" fill="#53ae12" stroke="#2d6a0a" stroke-width="1.5"/><text x="580.0" y="47" text-anchor="middle" style="font-size:14px" fill="#fff">zupa</text><rect x="620" y="28" width="240" height="26" rx="3" fill="url(#hatch)" stroke="#1a73d9" stroke-width="1.5"/><text x="740.0" y="47" text-anchor="middle" style="font-size:14px" fill="#1f2a30">gotowanie</text><rect x="860" y="28" width="80" height="26" rx="3" fill="#53ae12" stroke="#2d6a0a" stroke-width="1.5"/><text x="900.0" y="47" text-anchor="middle" style="font-size:14px" fill="#fff">sałatka</text><text x="0" y="96" font-weight="bold">Asynchronicznie: 50 min</text><text x="130" y="125" text-anchor="end" style="font-size:15px">ciasto</text><rect x="140" y="106" width="80" height="26" rx="3" fill="#53ae12" stroke="#2d6a0a" stroke-width="1.5"/><text x="180.0" y="125" text-anchor="middle" style="font-size:14px" fill="#fff">praca</text><rect x="220" y="106" width="320" height="26" rx="3" fill="url(#hatch)" stroke="#1a73d9" stroke-width="1.5"/><text x="380.0" y="125" text-anchor="middle" style="font-size:14px" fill="#1f2a30">pieczenie</text><text x="130" y="159" text-anchor="end" style="font-size:15px">zupa</text><rect x="220" y="140" width="80" height="26" rx="3" fill="#53ae12" stroke="#2d6a0a" stroke-width="1.5"/><text x="260.0" y="159" text-anchor="middle" style="font-size:14px" fill="#fff">praca</text><rect x="300" y="140" width="240" height="26" rx="3" fill="url(#hatch)" stroke="#1a73d9" stroke-width="1.5"/><text x="420.0" y="159" text-anchor="middle" style="font-size:14px" fill="#1f2a30">gotowanie</text><text x="130" y="193" text-anchor="end" style="font-size:15px">sałatka</text><rect x="300" y="174" width="80" height="26" rx="3" fill="#53ae12" stroke="#2d6a0a" stroke-width="1.5"/><text x="340.0" y="193" text-anchor="middle" style="font-size:14px" fill="#fff">praca</text><line x1="540" y1="24" x2="540" y2="212" stroke="#666" stroke-dasharray="4 4"/><text x="540" y="228" text-anchor="middle" fill="#666" style="font-size:14px">50 min</text><line x1="940" y1="24" x2="940" y2="212" stroke="#666" stroke-dasharray="4 4"/><text x="940" y="228" text-anchor="middle" fill="#666" style="font-size:14px">100 min</text><rect x="140" y="240" width="22" height="16" fill="#53ae12"/><text x="170" y="254" style="font-size:14px">praca kucharza (procesor)</text><rect x="400" y="240" width="22" height="16" fill="url(#hatch)" stroke="#1a73d9"/><text x="430" y="254" style="font-size:14px">czekanie (wejście/wyjście): kucharz może robić coś innego</text></svg>
+<div class="cols">
+<p class="lead fragment"><strong>Synchronicznie</strong> zadania wykonują się <strong>po kolei</strong>: czekając na piekarnik, kucharz stoi i patrzy.</p>
+<p class="lead fragment"><strong>Asynchronicznie</strong> zadanie, które <strong>czeka</strong>, oddaje sterowanie, a „dzwonek piekarnika” (zdarzenie) mówi, kiedy do niego wrócić.</p>
+</div>
+<p class="small fragment">Uwaga: kucharz jest <strong>jeden</strong> i nigdy nie robi dwóch rzeczy naraz (zielone bloki się nie nakładają). Zysk biorą się wyłącznie z nakładania się czekania, więc asyncio przyspiesza programy, które głównie <strong>czekają</strong> (sieć, dysk, baza danych: <em>I/O-bound</em>), a nie liczą (<em>CPU-bound</em>).</p>
+</div>
+<aside class="notes">Scalone dwa oryginalne slajdy tekstowe (definicja + analogia z pieczeniem ciasta) i dodany diagram osi czasu.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wielozadaniowość kooperacyjna</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<svg class="diagram" viewBox="0 0 960 250" role="img" aria-label="Wątki przełączane przez system w dowolnym miejscu; korutyny przełączają się tylko w punktach await."><text x="0" y="18" font-weight="bold">Wątki: wywłaszczanie (preemptive)</text><text x="110" y="46" text-anchor="end" class="mono" style="font-size:15px">T1</text><rect x="120" y="28" width="95" height="24" rx="3" fill="#1a73d9"/><rect x="280" y="28" width="140" height="24" rx="3" fill="#1a73d9"/><rect x="540" y="28" width="50" height="24" rx="3" fill="#1a73d9"/><rect x="710" y="28" width="170" height="24" rx="3" fill="#1a73d9"/><text x="110" y="78" text-anchor="end" class="mono" style="font-size:15px">T2</text><rect x="215" y="60" width="65" height="24" rx="3" fill="#e8710a"/><rect x="420" y="60" width="120" height="24" rx="3" fill="#e8710a"/><rect x="590" y="60" width="120" height="24" rx="3" fill="#e8710a"/><rect x="880" y="60" width="70" height="24" rx="3" fill="#e8710a"/><text x="215" y="104" text-anchor="middle" fill="#d93025" style="font-size:16px">⚡</text><text x="280" y="104" text-anchor="middle" fill="#d93025" style="font-size:16px">⚡</text><text x="420" y="104" text-anchor="middle" fill="#d93025" style="font-size:16px">⚡</text><text x="540" y="104" text-anchor="middle" fill="#d93025" style="font-size:16px">⚡</text><text x="590" y="104" text-anchor="middle" fill="#d93025" style="font-size:16px">⚡</text><text x="710" y="104" text-anchor="middle" fill="#d93025" style="font-size:16px">⚡</text><text x="880" y="104" text-anchor="middle" fill="#d93025" style="font-size:16px">⚡</text><text x="960" y="18" text-anchor="end" fill="#666" style="font-size:14px">⚡ system przełącza w dowolnej instrukcji</text><text x="0" y="140" font-weight="bold">Korutyny: kooperacja (cooperative)</text><text x="110" y="168" text-anchor="end" class="mono" style="font-size:15px">A</text><rect x="120" y="150" width="140" height="24" rx="3" fill="#1a73d9"/><rect x="450" y="150" width="90" height="24" rx="3" fill="#1a73d9"/><rect x="720" y="150" width="230" height="24" rx="3" fill="#1a73d9"/><text x="110" y="200" text-anchor="end" class="mono" style="font-size:15px">B</text><rect x="260" y="182" width="190" height="24" rx="3" fill="#e8710a"/><rect x="540" y="182" width="180" height="24" rx="3" fill="#e8710a"/><text x="260" y="226" text-anchor="middle" class="mono" fill="#2d6a0a" style="font-size:13px">await</text><text x="450" y="226" text-anchor="middle" class="mono" fill="#2d6a0a" style="font-size:13px">await</text><text x="540" y="226" text-anchor="middle" class="mono" fill="#2d6a0a" style="font-size:13px">await</text><text x="720" y="226" text-anchor="middle" class="mono" fill="#2d6a0a" style="font-size:13px">await</text><text x="960" y="140" text-anchor="end" fill="#666" style="font-size:14px">przełączenie tylko w miejscach oznaczonych await</text></svg>
+<div class="cols">
+<ul class="points side">
+<li class="fragment"><strong>asyncio</strong> działa w <strong>jednym wątku</strong>. Przełączenia są widoczne w kodzie: każde <code>await</code> to miejsce, w którym może ruszyć inne zadanie.</li>
+<li class="fragment">Między dwoma <code>await</code> nikt nam nie przerwie, więc wiele wyścigów z wykładu 4 po prostu znika.</li>
+</ul>
+<ul class="points side">
+<li class="fragment">Korutyna, która długo nie dochodzi do <code>await</code> (pętla obliczeń, <code>time.sleep</code>), <strong>zatrzymuje wszystkie</strong> pozostałe.</li>
+<li class="fragment">Korutyna kosztuje ok. 1–2 KB pamięci, wątek ma osobny stos (domyślnie do 8 MB wirtualnej pamięci w Linuksie). Sto tysięcy korutyn to nic niezwykłego.</li>
+</ul>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Korutyny - asyncio</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el img" style="left:16.051%;top:19.075%;width:61.454%;height:80.930%;"><img src="images/image-KmXkvcfc.jpg" alt=""></div>
+</section>
+<section data-background-color="#ffffff" data-keywords="async await">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Korutyna: async def</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Korutynę definiujemy przez <code>async def</code>. Tak jak wywołanie generatora zwraca obiekt generatora, wywołanie korutyny zwraca <strong>obiekt korutyny</strong>, a jej ciało <strong>jeszcze się nie wykonuje</strong>.</p>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+async def coroutine_add(a: int, b: int) -&gt; int:
+    return a + b
+
+def add(a: int, b: int) -&gt; int:
+    return a + b
+
+function_result = add(1, 1)
+coroutine_result = coroutine_add(1, 1)
+
+print(f"Function result is {function_result}, type {type(function_result)}")
+print(f"Coroutine result is {coroutine_result}, type {type(coroutine_result)}")
+</code></pre>
+<pre class="out">Function result is 2, type &lt;class 'int'&gt;
+Coroutine result is &lt;coroutine object coroutine_add at 0x7f3fe68a1b40&gt;, type &lt;class 'coroutine'&gt;
+&lt;sys&gt;:0: RuntimeWarning: coroutine 'coroutine_add' was never awaited</pre>
+<div class="cols">
+<div class="note fragment"><p>Funkcja zdefiniowana przez <code>async def</code> jest korutyną <strong>zawsze</strong>, nawet jeśli w środku nie ma żadnego <code>await</code>.</p></div>
+<div class="note warn fragment"><p>Ostrzeżenie <code>was never awaited</code> prawie zawsze oznacza błąd: zapomniany <code>await</code>. Korutyna, której nikt nie uruchomił, po cichu nic nie zrobiła.</p></div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>await i obiekty awaitable</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import asyncio
+
+async def nested():
+    return 42
+
+async def main():
+    nested()               # tylko tworzy obiekt korutyny, NIC się nie wykona
+    print(await nested())  # await uruchamia korutynę i czeka na wynik
+
+asyncio.run(main())
+</code></pre>
+<pre class="out sm">nested.py:7: RuntimeWarning: coroutine 'nested' was never awaited
+  nested()               # tylko tworzy obiekt korutyny, NIC się nie wykona
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+42</pre>
+<div class="note warn"><p><code>await</code> wolno pisać tylko wewnątrz <code>async def</code>. Instrukcja <code>await main()</code> na najwyższym poziomie skryptu to <code>SyntaxError: 'await' outside function</code>. Działa tylko w Jupyterze i w REPL <code>python -m asyncio</code>, które mają już uruchomioną pętlę zdarzeń.</p></div>
+</div>
+<div>
+<p class="lead"><code>await x</code> wstrzymuje bieżącą korutynę do chwili, gdy <code>x</code> będzie gotowe, i zwraca jego wynik.</p>
+<p class="lead">Obiekt jest <strong>awaitable</strong>, jeśli można go użyć w <code>await</code>. Trzy główne rodzaje:</p>
+<ul class="points side">
+<li><strong>korutyny</strong> (<code>async def</code>),</li>
+<li><strong>zadania</strong> (<code>asyncio.Task</code>): korutyny zaplanowane w pętli zdarzeń,</li>
+<li><strong>future</strong> (<code>asyncio.Future</code>): „miejsce” na wynik, który pojawi się później.</li>
+</ul>
+</div>
+</div>
+</div>
+<aside class="notes">Oryginalny przykład kończył się "await main()" na najwyższym poziomie, co w zwykłym skrypcie jest błędem składni (działa tylko w Jupyterze). Poprawione na asyncio.run(main()).</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="quiz multi compact"><p class="q">Które z poniższych można użyć w <code>await ...</code>? (zaznacz wszystkie)</p><div class="opts"><button class="opt" data-ok="1"><code>asyncio.sleep(1)</code></button><button class="opt" data-ok="0"><code>asyncio.sleep</code></button><button class="opt" data-ok="1"><code>asyncio.create_task(f())</code></button><button class="opt" data-ok="0"><code>(x for x in range(3))</code></button><button class="opt" data-ok="1"><code>loop.create_future()</code></button><button class="opt" data-ok="0"><code>concurrent.futures.Future()</code></button></div><button class="btn check">Sprawdź</button><p class="explain"><code>asyncio.sleep(1)</code> to obiekt korutyny, <code>create_task</code> zwraca <code>Task</code>, a <code>create_future</code> zwraca <code>asyncio.Future</code>. Sama funkcja <code>asyncio.sleep</code> (bez wywołania) i zwykły generator nie są awaitable. <code>Future</code> z <code>concurrent.futures</code> (wykład 7) też nie: trzeba go opakować przez <code>asyncio.wrap_future()</code>.</p></div>
+<div class="cols wr">
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import asyncio
+
+async def f(x):
+    print("start", x)
+    await asyncio.sleep(0)
+    print("koniec", x)
+
+async def main():
+    await asyncio.gather(f(1), f(2))
+
+asyncio.run(main())
+</code></pre>
+<div class="quiz compact"><p class="q">Co wypisze ten program?</p><div class="opts"><button class="opt" data-ok="0">start 1, koniec 1, start 2, koniec 2</button><button class="opt" data-ok="1">start 1, start 2, koniec 1, koniec 2</button><button class="opt" data-ok="0">kolejność jest losowa</button></div><p class="explain"><code>await asyncio.sleep(0)</code> nie czeka, ale <strong>oddaje sterowanie</strong> pętli zdarzeń, więc rusza drugie zadanie. Kolejność jest deterministyczna: pętla obsługuje gotowe zadania w kolejności FIFO.</p></div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Event loop">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Pętla zdarzeń (event loop)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wr">
+<div>
+<p class="lead">Pętla zdarzeń to rdzeń asyncio: w <strong>jednym wątku</strong> uruchamia zadania, obsługuje sieć i podprocesy.</p>
+<ul class="points side">
+<li class="fragment">Zadanie działa, aż dojdzie do <code>await</code> na czymś, co nie jest gotowe. Wtedy wraca do pętli.</li>
+<li class="fragment">Gdy nic nie jest gotowe, pętla śpi w <code>epoll</code> do najbliższego zdarzenia lub budzika.</li>
+<li class="fragment"><code>asyncio.run(main())</code> tworzy pętlę, uruchamia <code>main()</code> i zamyka pętlę.</li>
+</ul>
+</div>
+<div>
+<svg class="diagram" viewBox="0 0 520 330" role="img" aria-label="Pętla zdarzeń: bierze zadanie z kolejki gotowych, uruchamia je do najbliższego await, zadanie czeka na budzik lub gniazdo, selector budzi je i wraca do kolejki gotowych.">
+<defs><marker id="arL" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#53ae12"/></marker></defs>
+<rect x="150" y="8" width="220" height="74" rx="10" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/>
+<text x="260" y="32" text-anchor="middle" font-weight="bold" style="font-size:16px">kolejka gotowych</text>
+<rect x="190" y="44" width="40" height="28" rx="4" fill="#1a73d9"/><text x="210" y="64" text-anchor="middle" fill="#fff">A</text>
+<rect x="240" y="44" width="40" height="28" rx="4" fill="#e8710a"/><text x="260" y="64" text-anchor="middle" fill="#fff">B</text>
+<rect x="290" y="44" width="40" height="28" rx="4" fill="#999"/><text x="310" y="64" text-anchor="middle" fill="#fff">C</text>
+<rect x="330" y="128" width="185" height="76" rx="10" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/>
+<text x="422" y="156" text-anchor="middle" style="font-size:16px">uruchom zadanie</text><text x="422" y="180" text-anchor="middle" style="font-size:16px">do najbliższego <tspan class="mono">await</tspan></text>
+<rect x="150" y="248" width="220" height="74" rx="10" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/>
+<text x="260" y="276" text-anchor="middle" style="font-size:16px">czekające: budziki (sleep),</text><text x="260" y="300" text-anchor="middle" style="font-size:16px">gniazda, potoki, procesy</text>
+<rect x="5" y="128" width="185" height="76" rx="10" fill="#f1f3f4" stroke="#666" stroke-width="2"/>
+<text x="97" y="156" text-anchor="middle" style="font-size:16px">selector (epoll):</text><text x="97" y="180" text-anchor="middle" style="font-size:16px">co jest już gotowe?</text>
+<path d="M372,50 Q430,60 425,124" fill="none" stroke="#53ae12" stroke-width="3" marker-end="url(#arL)"/>
+<path d="M425,206 Q430,280 374,285" fill="none" stroke="#53ae12" stroke-width="3" marker-end="url(#arL)"/>
+<path d="M148,285 Q90,280 95,208" fill="none" stroke="#53ae12" stroke-width="3" marker-end="url(#arL)"/>
+<path d="M95,126 Q90,55 146,50" fill="none" stroke="#53ae12" stroke-width="3" marker-end="url(#arL)"/>
+<text x="448" y="252" class="mono" style="font-size:15px">await</text>
+<text x="84" y="104" text-anchor="end" style="font-size:15px">zdarzenie</text>
+<text x="260" y="170" text-anchor="middle" fill="#666" style="font-size:15px">1 wątek</text>
+</svg>
+<div class="note warn fragment"><p>W korutynie pętlę pobieramy przez <code>asyncio.get_running_loop()</code>. Stary wzorzec <code>asyncio.get_event_loop()</code> + <code>run_until_complete()</code> bez działającej pętli daje <code>DeprecationWarning</code> (3.12–3.13), a od 3.14 <code>RuntimeError</code>.</p></div>
+</div>
+</div>
+</div>
+<aside class="notes">Oryginalny slajd zalecał get_event_loop(), co jest przestarzałe. Jupyter (laboratoria) ma już działającą pętlę: tam piszemy "await main()", a asyncio.run() zgłosi "cannot be called from a running event loop".</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Pętla zdarzeń krok po kroku</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="loopsim">
+  <div class="simctl">
+    <button class="btn" data-act="step">Krok</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+    <label><input type="radio" name="loopmode" value="async" checked> <code>await asyncio.sleep(czas)</code></label>
+    <label><input type="radio" name="loopmode" value="block"> <code>time.sleep(czas)</code></label>
+  </div>
+  <div class="cols">
+    <div>
+      <ol class="steps"></ol>
+      <p class="msg"></p>
+    </div>
+    <div>
+      <div class="lstate">
+        <div class="row"><span class="lbl">zegar</span><b class="clock">t = 0 s</b> <span class="lstat"></span></div>
+        <div class="row"><span class="lbl">wykonuje się</span><span class="run"></span></div>
+        <div class="row"><span class="lbl">gotowe</span><span class="ready"></span></div>
+        <div class="row"><span class="lbl">czekają</span><span class="wait"></span></div>
+      </div>
+      <pre class="console"></pre>
+    </div>
+  </div>
+</div>
+</div>
+<aside class="notes">Najpierw wariant z asyncio.sleep, przed każdym krokiem pytanie: które zadanie ruszy teraz? Potem przełącz na time.sleep: całość trwa 3 s zamiast 2 s.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>asyncio.run i await po kolei</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|14-17|15|16|19-21">
+import asyncio
+import time
+
+async def fetch_data(data_id: int) -&gt; str:
+    print(f"Fetching data for ID {data_id}")
+    await asyncio.sleep(2)      # symulacja zapytania sieciowego
+    print(f"Data fetched for ID {data_id}")
+    return f"Data {data_id}"
+
+async def compute_result(value: int) -&gt; int:
+    await asyncio.sleep(1)      # symulacja innej operacji I/O
+    return value * 2
+
+async def process_data() -&gt; None:
+    data = await fetch_data(1)
+    result = await compute_result(5)
+    print(f"Result: {result}, processed: {data}")
+
+start = time.perf_counter()
+asyncio.run(process_data())
+print(f"Total time {time.perf_counter() - start:.2f} s")
+</code></pre>
+</div>
+<div>
+<pre class="out sm">Fetching data for ID 1
+Data fetched for ID 1
+Result: 10, processed: Data 1
+Total time 3.01 s</pre>
+<ul class="points side">
+<li><code>asyncio.run(process_data())</code> uruchamia pętlę zdarzeń i główną korutynę.</li>
+<li>Na <code>await</code> korutyna się zatrzymuje, a pętla może wykonywać inne zadania. Po zakończeniu oczekiwanej operacji wraca dokładnie w to samo miejsce.</li>
+</ul>
+<div class="note warn fragment"><p>Czas to <strong>3 s = 2 + 1</strong>. Dwa <code>await</code> jeden po drugim wykonują się <strong>sekwencyjnie</strong>, choć <code>compute_result(5)</code> wcale nie potrzebuje wyniku <code>fetch_data</code>. Samo <code>async</code> nic nie przyspiesza: potrzebujemy <strong>zadań</strong>.</p></div>
+</div>
+</div>
+</div>
+<aside class="notes">Kod i wynik były zrzutami ekranu z PyCharma. Dodany pomiar czasu, żeby pokazać, że kolejne await są sekwencyjne.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zadania (create_task)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|10-15|17">
+import asyncio
+import time
+
+async def fetch_data(data_id: int) -&gt; str:
+    print(f"Fetching data for ID {data_id}")
+    await asyncio.sleep(3)      # czekanie na odpowiedź serwera
+    print(f"Finished fetching data for ID {data_id}")
+    return f"Data {data_id}"
+
+async def main() -&gt; None:
+    # create_task: korutyna trafia do pętli zdarzeń i rusza
+    # przy najbliższym await
+    task1 = asyncio.create_task(fetch_data(1))
+    task2 = asyncio.create_task(fetch_data(2))
+    task3 = asyncio.create_task(fetch_data(3))
+
+    print(await task1, await task2, await task3)
+
+start = time.perf_counter()
+asyncio.run(main())
+print(f"Total time {time.perf_counter() - start:.4f} s")
+</code></pre>
+</div>
+<div>
+<pre class="out sm">Fetching data for ID 1
+Fetching data for ID 2
+Fetching data for ID 3
+Finished fetching data for ID 1
+Finished fetching data for ID 2
+Finished fetching data for ID 3
+Data 1 Data 2 Data 3
+Total time 3.0045 s</pre>
+<ul class="points side">
+<li><code>asyncio.create_task()</code> przekazuje korutynę pętli zdarzeń do uruchomienia „w tle” i zwraca uchwyt <code>Task</code>, którym można poczekać na wynik albo anulować zadanie.</li>
+<li class="fragment">3 zadania po 3 s trwają razem 3 s, a nie 9 s. Działają <strong>współbieżnie</strong> (concurrently), a nie <strong>równolegle</strong>: przez cały czas pracuje jeden wątek.</li>
+</ul>
+</div>
+</div>
+<div class="note warn fragment"><p>Pętla trzyma tylko <strong>słabe referencje</strong> do zadań. Zadanie utworzone przez samo <code>asyncio.create_task(f())</code>, bez przypisania, może zostać usunięte przez garbage collector w trakcie działania. Zachowujmy referencje (albo używajmy <code>TaskGroup</code>).</p></div>
+</div>
+<aside class="notes">Na oryginalnym slajdzie było "zarządzać wieloma operacjami równolegle"; poprawione na "współbieżnie". Kod był zrzutem ekranu bez pomiaru czasu, a wynik "Total time 3.0033" był wpisany obok.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sekwencyjnie czy współbieżnie? Symulacja</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="gsim">
+  <div class="simctl">
+    <label>wariant: <select class="mode">
+      <option value="seq">await po kolei</option>
+      <option value="task">create_task + await</option>
+      <option value="gather" selected>asyncio.gather</option>
+      <option value="tg">asyncio.TaskGroup</option>
+      <option value="block">gather + time.sleep</option>
+    </select></label>
+    <label>A: <select class="dA"><option>1</option><option>2</option><option selected>3</option><option>4</option></select> s</label>
+    <label>B: <select class="dB"><option selected>1</option><option>2</option><option>3</option><option>4</option></select> s</label>
+    <label>C: <select class="dC"><option>1</option><option selected>2</option><option>3</option><option>4</option></select> s</label>
+    <button class="btn" data-act="run">Uruchom</button>
+  </div>
+  <div class="cols wr">
+    <pre class="exo pycode"></pre>
+    <div>
+      <div class="glanes"></div>
+      <p class="gtotal"></p>
+    </div>
+  </div>
+  <p class="hint verdict"></p>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się: ile to potrwa?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cards">
+<div class="quiz card"><pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+async def a():
+    await asyncio.sleep(1)
+    await asyncio.sleep(2)
+</code></pre><div class="opts"><button class="opt" data-ok="0">1 s</button><button class="opt" data-ok="0">2 s</button><button class="opt" data-ok="1">3 s</button></div><p class="explain">3 s: dwa <code>await</code> po kolei to 1 + 2.</p></div>
+<div class="quiz card"><pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+async def b():
+    t = asyncio.create_task(
+        asyncio.sleep(2))
+    await asyncio.sleep(1)
+    await t
+</code></pre><div class="opts"><button class="opt" data-ok="0">1 s</button><button class="opt" data-ok="1">2 s</button><button class="opt" data-ok="0">3 s</button></div><p class="explain">2 s: zadanie <code>t</code> śpi już od początku, a <code>await t</code> po 1 s czeka tylko na pozostałą sekundę.</p></div>
+<div class="quiz card"><pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+async def c():
+    await asyncio.gather(
+        asyncio.sleep(1),
+        asyncio.sleep(2))
+</code></pre><div class="opts"><button class="opt" data-ok="0">1 s</button><button class="opt" data-ok="1">2 s</button><button class="opt" data-ok="0">3 s</button></div><p class="explain">2 s: <code>gather</code> uruchamia obie korutyny jako zadania współbieżnie, więc czas to maksimum, a nie suma.</p></div>
+</div>
+<p class="small">Zmierzone w Pythonie 3.13: <code>a</code> 3.0 s, <code>b</code> 2.0 s, <code>c</code> 2.0 s.</p>
+</div>
+<aside class="notes">Najpierw głosowanie na czacie, potem klikamy.</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="Zadania">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>asyncio.gather</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import asyncio
+import time
+
+async def pobierz(nazwa: str, czas: float) -&gt; str:
+    await asyncio.sleep(czas)
+    if nazwa == "c":
+        raise ConnectionError(f"{nazwa}: brak połączenia")
+    return f"{nazwa}: OK po {czas} s"
+
+async def main():
+    t0 = time.perf_counter()
+    wyniki = await asyncio.gather(pobierz("a", 2), pobierz("b", 1))
+    print(wyniki, f"{time.perf_counter() - t0:.2f} s")
+
+    wyniki = await asyncio.gather(pobierz("a", 1), pobierz("c", 0.5),
+                                  return_exceptions=True)
+    print(wyniki)
+
+asyncio.run(main())
+</code></pre>
+<pre class="out sm">['a: OK po 2 s', 'b: OK po 1 s'] 2.00 s
+['a: OK po 1 s', ConnectionError('c: brak połączenia')]</pre>
+</div>
+<div>
+<ul class="points side">
+<li><code>gather(*aws)</code> opakowuje korutyny w zadania, uruchamia je współbieżnie i zwraca listę wyników w <strong>kolejności argumentów</strong>, a nie zakończenia.</li>
+<li class="fragment">Domyślnie pierwszy wyjątek trafia do <code>await gather(...)</code>, ale <strong>pozostałe zadania działają dalej</strong>.</li>
+<li class="fragment"><code>return_exceptions=True</code>: wyjątki wracają jako elementy listy.</li>
+<li class="fragment">Wyniki w kolejności zakończenia daje <code>asyncio.as_completed()</code> (od 3.13 także jako <code>async for</code>).</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>TaskGroup (Python 3.11+)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|14-17|19-25">
+import asyncio
+
+async def pobierz(nazwa: str, czas: float) -&gt; str:
+    try:
+        await asyncio.sleep(czas)
+        if nazwa == "c":
+            raise ConnectionError(f"{nazwa}: brak połączenia")
+        return f"{nazwa}: OK"
+    except asyncio.CancelledError:
+        print(f"{nazwa}: anulowane")
+        raise
+
+async def main():
+    async with asyncio.TaskGroup() as tg:          # Python 3.11+
+        ta = tg.create_task(pobierz("a", 1))
+        tb = tg.create_task(pobierz("b", 2))
+    print(ta.result(), tb.result())                # tu wszystkie są gotowe
+
+    try:
+        async with asyncio.TaskGroup() as tg:
+            tg.create_task(pobierz("a", 1))
+            tg.create_task(pobierz("c", 0.5))      # błąd po 0,5 s
+    except* ConnectionError as eg:
+        print("błędy:", eg.exceptions)
+
+asyncio.run(main())
+</code></pre>
+</div>
+<div>
+<pre class="out sm">a: OK b: OK
+a: anulowane
+błędy: (ConnectionError('c: brak połączenia'),)</pre>
+<ul class="points side">
+<li>Wyjście z bloku <code>async with</code> czeka na <strong>wszystkie</strong> zadania grupy. Żadne nie „ucieknie” poza blok.</li>
+<li class="fragment">Gdy jedno zadanie zgłosi wyjątek, grupa <strong>anuluje pozostałe</strong> i zgłasza <code>ExceptionGroup</code>, które łapiemy przez <code>except*</code>.</li>
+<li class="fragment">To <strong>współbieżność strukturalna</strong> (structured concurrency), wzorowana na „nurseries” z biblioteki Trio. W nowym kodzie zalecana zamiast luźnych <code>create_task</code> i <code>gather</code>.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Limity czasu i anulowanie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|3-8|11-15|17-23">
+import asyncio
+
+async def wolna_usluga():
+    try:
+        await asyncio.sleep(10)
+        return "odpowiedź"
+    finally:
+        print("sprzątanie (finally)")     # wykona się także przy anulowaniu
+
+async def main():
+    try:
+        async with asyncio.timeout(1):    # Python 3.11+
+            print(await wolna_usluga())
+    except TimeoutError:
+        print("przekroczono limit 1 s")
+
+    task = asyncio.create_task(wolna_usluga())
+    await asyncio.sleep(0.5)
+    task.cancel()                         # wstrzykuje CancelledError w await
+    try:
+        await task
+    except asyncio.CancelledError:
+        print("anulowane:", task.cancelled())
+
+asyncio.run(main())
+</code></pre>
+</div>
+<div>
+<pre class="out sm">sprzątanie (finally)
+przekroczono limit 1 s
+sprzątanie (finally)
+anulowane: True</pre>
+<ul class="points side">
+<li><code>async with asyncio.timeout(s)</code> (3.11+) anuluje kod w bloku po <code>s</code> sekundach i zgłasza <code>TimeoutError</code>. Starszy odpowiednik: <code>asyncio.wait_for(aw, s)</code>.</li>
+<li class="fragment"><code>task.cancel()</code> wstrzykuje <code>CancelledError</code> w miejscu, w którym zadanie czeka (podobnie jak <code>throw()</code> w generatorze), więc <code>finally</code> i <code>async with</code> sprzątają zasoby.</li>
+<li class="fragment">Nie „połykajmy” <code>CancelledError</code>: po sprzątaniu trzeba go zgłosić dalej (<code>raise</code>).</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Pułapki">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Nie blokuj pętli zdarzeń</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|6-9|11-15">
+import asyncio
+import time
+
+T0 = time.perf_counter()
+
+async def serce():                       # "bicie serca" co 0,25 s
+    for _ in range(8):
+        print(f"{time.perf_counter() - T0:4.2f} s  ♥")
+        await asyncio.sleep(0.25)
+
+async def blokujaca():
+    await asyncio.sleep(0.5)
+    print(f"{time.perf_counter() - T0:4.2f} s  time.sleep(1) start")
+    time.sleep(1)                        # BŁĄD: blokuje cały wątek pętli
+    print(f"{time.perf_counter() - T0:4.2f} s  time.sleep(1) koniec")
+
+async def main():
+    await asyncio.gather(serce(), blokujaca())
+
+asyncio.run(main())
+</code></pre>
+</div>
+<div>
+<div class="cols">
+<div><p class="small"><code>time.sleep(1)</code></p>
+<pre class="out sm">0.00 s  ♥
+0.25 s  ♥
+0.50 s  start
+1.50 s  koniec
+1.50 s  ♥
+1.75 s  ♥
+2.00 s  ♥
+...</pre></div>
+<div><p class="small"><code>await asyncio.to_thread(time.sleep, 1)</code></p>
+<pre class="out sm">0.00 s  ♥
+0.25 s  ♥
+0.50 s  start
+0.50 s  ♥
+0.75 s  ♥
+1.00 s  ♥
+1.25 s  ♥
+1.50 s  koniec</pre></div>
+</div>
+<p class="small">Wynik skrócony: „time.sleep(1) start” zapisane jako „start”.</p>
+<div class="note bad fragment"><p>Przez całą sekundę <code>time.sleep</code> serce nie bije: pętla zdarzeń stoi, bo jedyny wątek śpi. Tak samo działa <code>requests.get()</code>, czytanie dużego pliku czy długa pętla obliczeń.</p></div>
+<div class="note fragment"><p>Tryb debug (<code>asyncio.run(main(), debug=True)</code> albo <code>python -X dev</code>) ostrzega o takich miejscach:<br><code>Executing &lt;Task ... blokujaca() ... serce.py:11&gt; took 1.000 seconds</code></p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zablokowana pętla: symulacja</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="hbsim">
+  <div class="simctl">
+    <button class="btn" data-act="start">Start / stop</button>
+    <span>zadanie 2 wywołuje:</span>
+    <button class="btn ghost" data-act="async"><code>await asyncio.sleep(1)</code></button>
+    <button class="btn ghost" data-act="block"><code>time.sleep(1)</code></button>
+    <button class="btn ghost" data-act="thread"><code>await asyncio.to_thread(time.sleep, 1)</code></button>
+  </div>
+  <div class="hb">
+    <div class="hrow"><span class="lbl">serce() ♥ co 0,25 s</span><div class="htrack t0"></div></div>
+    <div class="hrow"><span class="lbl">zadanie 2</span><div class="htrack t1"></div></div>
+    <div class="hrow"><span class="lbl">wątek z puli</span><div class="htrack t2"></div></div>
+    <div class="hrow"><span class="lbl">pętla zdarzeń</span><div class="htrack t3"></div></div>
+  </div>
+  <p class="small">oś czasu: ostatnie 6 sekund, „teraz” po prawej</p>
+  <p class="hint verdict">Kliknij Start, a potem wywołaj w zadaniu 2 każdą z trzech operacji.</p>
+</div>
+</div>
+<aside class="notes">Symulacja w czasie rzeczywistym: ta sama sytuacja co w kodzie serce.py z poprzedniego slajdu.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kod blokujący: to_thread i executory</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|5-6|8-10|15-21">
+import asyncio
+import time
+from concurrent.futures import ProcessPoolExecutor
+
+def ciezka_funkcja(n: int) -&gt; int:      # CPU-bound, czysta funkcja
+    return sum(i * i for i in range(n))
+
+def stare_api(url: str) -&gt; str:         # blokujące I/O (np. requests)
+    time.sleep(1)
+    return f"{url}: 200"
+
+async def main():
+    loop = asyncio.get_running_loop()
+    t0 = time.perf_counter()
+    with ProcessPoolExecutor() as pool:
+        wyniki = await asyncio.gather(
+            asyncio.to_thread(stare_api, "a.pl"),     # wątek (3.9+)
+            asyncio.to_thread(stare_api, "b.pl"),
+            loop.run_in_executor(pool, ciezka_funkcja, 10**7),
+            loop.run_in_executor(pool, ciezka_funkcja, 10**7),
+        )
+    print(wyniki[:2], wyniki[2])
+    print(f"{time.perf_counter() - t0:.2f} s")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+</code></pre>
+</div>
+<div>
+<pre class="out sm">['a.pl: 200', 'b.pl: 200'] 333333283333335000000
+1.86 s</pre>
+<table class="simple">
+<tr><th>Blokuje pętlę</th><th>Zamiast tego</th></tr>
+<tr><td><code>time.sleep(s)</code></td><td><code>await asyncio.sleep(s)</code></td></tr>
+<tr><td><code>requests.get(url)</code></td><td><code>aiohttp</code>, <code>httpx.AsyncClient</code></td></tr>
+<tr><td>stare, blokujące API</td><td><code>await asyncio.to_thread(f, ...)</code></td></tr>
+<tr><td>obliczenia (CPU-bound)</td><td><code>run_in_executor(pool, f, ...)</code> z <code>ProcessPoolExecutor</code></td></tr>
+</table>
+<p class="small">Executory i pule procesów: wykład 7. Sekwencyjnie ten program trwałby ok. 5,6 s (1 + 1 + 2 × 1,8 s). Czasy zależą od maszyny.</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Synchronizacja">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wyścigi w asyncio (race condition)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import asyncio
+
+saldo = 0
+
+async def wplata(kwota: int):
+    global saldo
+    stare = saldo              # odczyt
+    await asyncio.sleep(0)     # przełączenie (np. zapytanie do bazy)
+    saldo = stare + kwota      # zapis na podstawie starego odczytu
+
+async def main():
+    await asyncio.gather(*(wplata(10) for _ in range(100)))
+    print(saldo)
+
+asyncio.run(main())
+</code></pre>
+<div class="quiz compact"><p class="q">Co wypisze program? (100 wpłat po 10)</p><div class="opts"><button class="opt" data-ok="0">1000</button><button class="opt" data-ok="1">10</button><button class="opt" data-ok="0">losowo od 10 do 1000</button></div><p class="explain">Wszystkie 100 zadań odczytuje <code>saldo = 0</code>, zanim którekolwiek zapisze wynik, bo na <code>await</code> pętla przełącza się do kolejnego zadania. Ostatni zapis to 0 + 10. Wynik jest powtarzalny, bo w asyncio przełączenia są deterministyczne.</p></div>
+</div>
+<div class="fragment">
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+saldo = 0
+lock = asyncio.Lock()
+
+async def wplata(kwota: int):
+    global saldo
+    async with lock:           # sekcja krytyczna obejmuje await
+        stare = saldo
+        await asyncio.sleep(0)
+        saldo = stare + kwota
+</code></pre>
+<pre class="out sm">1000</pre>
+<div class="note"><p>Wyścig (wykład 4) w asyncio może się pojawić tylko w miejscu <code>await</code>. Sekcja krytyczna, która obejmuje <code>await</code>, wymaga <code>asyncio.Lock</code>. Kod bez <code>await</code> między odczytem a zapisem jest bezpieczny.</p></div>
+<div class="note warn"><p>Prymitywy z <code>asyncio</code> nie są bezpieczne dla wątków, a <code>threading.Lock</code> w korutynie zablokuje pętlę.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Semafor: limit współbieżności</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|5|10-16">
+import asyncio
+import random
+import time
+
+T0 = time.perf_counter()
+limit = asyncio.Semaphore(3)            # najwyżej 3 pobrania naraz
+aktywne = 0
+
+async def pobierz(i: int) -&gt; int:
+    global aktywne
+    async with limit:
+        aktywne += 1
+        print(f"{time.perf_counter() - T0:4.1f} s  start {i}  (aktywne: {aktywne})")
+        await asyncio.sleep(random.uniform(0.5, 1.5))
+        aktywne -= 1
+        return i
+
+async def main():
+    wyniki = await asyncio.gather(*(pobierz(i) for i in range(8)))
+    print(wyniki)
+
+asyncio.run(main())
+</code></pre>
+</div>
+<div>
+<pre class="out sm"> 0.0 s  start 0  (aktywne: 1)
+ 0.0 s  start 1  (aktywne: 2)
+ 0.0 s  start 2  (aktywne: 3)
+ 0.7 s  start 3  (aktywne: 3)
+ 0.9 s  start 4  (aktywne: 3)
+ 1.2 s  start 5  (aktywne: 3)
+ 1.8 s  start 6  (aktywne: 3)
+ 1.9 s  start 7  (aktywne: 3)
+[0, 1, 2, 3, 4, 5, 6, 7]</pre>
+<ul class="points side">
+<li>Semafor z wykładu 3, wersja dla korutyn: <code>async with</code> czeka (bez blokowania pętli), aż zwolni się miejsce.</li>
+<li>Typowe użycie: najwyżej N jednoczesnych zapytań do serwera lub połączeń z bazą, żeby nie przeciążyć usługi.</li>
+</ul>
+<p class="small">Czasy losowe (<code>random.uniform</code>), więc przy każdym uruchomieniu inne.</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kolejka: producent i konsumenci</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|3-7|9-16|19-23">
+import asyncio
+
+async def producent(q: asyncio.Queue):
+    for i in range(6):
+        await q.put(i)                   # czeka, gdy kolejka pełna
+        print(f"wyprodukowano {i}")
+    q.shutdown()                         # Python 3.13+: koniec danych
+
+async def konsument(nazwa: str, q: asyncio.Queue):
+    while True:
+        try:
+            x = await q.get()            # czeka, gdy kolejka pusta
+        except asyncio.QueueShutDown:
+            return
+        await asyncio.sleep(0.1)         # "przetwarzanie"
+        print(f"  {nazwa} przetworzył {x}")
+
+async def main():
+    q = asyncio.Queue(maxsize=2)         # ograniczony bufor
+    async with asyncio.TaskGroup() as tg:
+        tg.create_task(producent(q))
+        tg.create_task(konsument("K1", q))
+        tg.create_task(konsument("K2", q))
+
+asyncio.run(main())
+</code></pre>
+</div>
+<div>
+<pre class="out sm">wyprodukowano 0
+wyprodukowano 1
+wyprodukowano 2
+wyprodukowano 3
+  K1 przetworzył 0
+  K2 przetworzył 1
+wyprodukowano 4
+wyprodukowano 5
+  K1 przetworzył 2
+  K2 przetworzył 3
+  K1 przetworzył 4
+  K2 przetworzył 5</pre>
+<ul class="points side">
+<li>Producent i konsument (wykład 5) bez zamków: <code>put()</code> czeka na miejsce, <code>get()</code> na dane.</li>
+<li><code>maxsize</code> daje <strong>przeciwciśnienie</strong> (backpressure).</li>
+<li><code>Queue.shutdown()</code> jest nowe w <strong>3.13</strong>; wcześniej używano wartownika (<code>None</code>).</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="quiz multi compact"><p class="q">Które wywołania wewnątrz korutyny <b>zablokują pętlę zdarzeń</b>? (zaznacz wszystkie)</p><div class="opts"><button class="opt" data-ok="1"><code>time.sleep(2)</code></button><button class="opt" data-ok="0"><code>await asyncio.sleep(2)</code></button><button class="opt" data-ok="1"><code>requests.get(url)</code></button><button class="opt" data-ok="1"><code>sum(i * i for i in range(10**8))</code></button><button class="opt" data-ok="0"><code>await asyncio.to_thread(requests.get, url)</code></button><button class="opt" data-ok="0"><code>await q.get()</code> na pustej <code>asyncio.Queue</code></button></div><button class="btn check">Sprawdź</button><p class="explain">Blokuje wszystko, co trwa długo i nie oddaje sterowania przez <code>await</code>: <code>time.sleep</code>, synchroniczne I/O (<code>requests</code>) i długie obliczenia. <code>await</code> na pustej kolejce wstrzymuje tylko tę jedną korutynę.</p></div>
+<div class="quiz compact"><p class="q">Chcesz pobrać 10 000 stron, ale serwer pozwala na najwyżej 20 jednoczesnych połączeń. Czego użyjesz?</p><div class="opts"><button class="opt" data-ok="0"><code>asyncio.Lock()</code></button><button class="opt" data-ok="1"><code>asyncio.Semaphore(20)</code></button><button class="opt" data-ok="0"><code>asyncio.timeout(20)</code></button><button class="opt" data-ok="0">20 wątków</button></div><p class="explain"><code>Semaphore(20)</code> wpuszcza najwyżej 20 korutyn naraz. <code>Lock</code> to semafor binarny (1 naraz), a <code>timeout</code> ogranicza czas, a nie liczbę połączeń.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Strumienie">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>async for i async with</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|4-7|10-11|13">
+import asyncio
+import random
+
+async def czujnik(n: int):                    # asynchroniczny generator
+    for i in range(n):
+        await asyncio.sleep(0.1)              # czekamy na odczyt z sieci
+        yield i, round(random.uniform(25, 35), 1)
+
+async def main():
+    async for nr, temp in czujnik(5):         # async for
+        print(nr, temp, "ALARM" if temp &gt; 30 else "")
+
+    alarmy = [t async for _, t in czujnik(20) if t &gt; 30]   # async comprehension
+    print(len(alarmy), "alarmów")
+
+asyncio.run(main())
+</code></pre>
+<pre class="out sm">0 31.5 ALARM
+1 25.4
+2 30.7 ALARM
+3 25.4
+4 29.3
+9 alarmów</pre>
+</div>
+<div>
+<ul class="points side">
+<li><code>async def</code> + <code>yield</code> = <strong>generator asynchroniczny</strong> (3.6+): między elementami może czekać na sieć. Czytamy go przez <code>async for</code>.</li>
+<li class="fragment">To potok generatorów z wykładu 2, tylko źródło danych nie blokuje programu.</li>
+<li class="fragment"><code>async with</code> to menedżer kontekstu z asynchronicznym wejściem i wyjściem: <code>Lock</code>, <code>TaskGroup</code>, połączenia sieciowe.</li>
+<li class="fragment">Tak czyta się strumienie w praktyce, np. <code>async for msg in consumer:</code> w <code>aiokafka</code> (wykład o Kafce).</li>
+</ul>
+<p class="small">Odczyty są losowe.</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Prawdziwe I/O: serwer TCP w asyncio</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|4-9|11-16|19-24">
+import asyncio
+import time
+
+async def obsluz(reader, writer):            # serwer: korutyna na klienta
+    linia = await reader.readline()
+    await asyncio.sleep(1)                   # "wolna" obsługa żądania
+    writer.write(linia.upper())
+    await writer.drain()
+    writer.close()
+
+async def klient(i: int) -&gt; str:
+    reader, writer = await asyncio.open_connection("127.0.0.1", 8888)
+    writer.write(f"czujnik {i}\n".encode())
+    odp = await reader.readline()
+    writer.close()
+    return odp.decode().strip()
+
+async def main():
+    serwer = await asyncio.start_server(obsluz, "127.0.0.1", 8888)
+    async with serwer:
+        t0 = time.perf_counter()
+        odp = await asyncio.gather(*(klient(i) for i in range(100)))
+        print(odp[:3], "...", odp[-1])
+        print(f"{len(odp)} klientów w {time.perf_counter() - t0:.2f} s")
+
+asyncio.run(main())
+</code></pre>
+</div>
+<div>
+<pre class="out sm">['CZUJNIK 0', 'CZUJNIK 1', 'CZUJNIK 2'] ... CZUJNIK 99
+100 klientów w 1.04 s</pre>
+<ul class="points side">
+<li>Serwer i 100 klientów w <strong>jednym wątku</strong>. Każde połączenie to osobna korutyna <code>obsluz</code>, a każda obsługa trwa 1 s.</li>
+<li class="fragment">Razem nadal ok. 1 s, bo wszystkie korutyny czekają jednocześnie. Wersja „wątek na klienta” potrzebowałaby 100 wątków.</li>
+<li class="fragment">Na tej zasadzie działają serwery i brokery danych z dalszej części semestru.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Biblioteki">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Inne biblioteki asynchroniczne</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">asyncio jest w bibliotece standardowej, ale nie jest jedyną biblioteką do programowania asynchronicznego:</p>
+<table class="simple">
+<tr><th>Biblioteka</th><th>Opis</th></tr>
+<tr><td><strong>Twisted</strong></td><td>Najstarszy (2002) sterowany zdarzeniami framework sieciowy: serwery SMTP, HTTP, SSH, proxy. Obiekty <code>Deferred</code> pełnią rolę obietnic. Może działać na pętli asyncio.</td></tr>
+<tr><td><strong>Tornado</strong></td><td>Asynchroniczny framework WWW i biblioteka sieciowa. Nie korzysta z WSGI, zwykle jeden wątek na proces. Od wersji 5 działa na pętli asyncio. Na Tornado opiera się <strong>Streamz</strong>.</td></tr>
+<tr><td><strong>Trio</strong></td><td>Współczesna biblioteka z <strong>współbieżnością strukturalną</strong> (nurseries), która zainspirowała <code>asyncio.TaskGroup</code>.</td></tr>
+<tr><td><strong>Curio</strong></td><td>Biblioteka D. Beazleya do współbieżnego programowania systemowego na korutynach: zadania, gniazda, pliki, blokady, kolejki. Dziś niszowa, ale jej pomysły przejęły Trio i asyncio.</td></tr>
+<tr><td><strong>AnyIO</strong></td><td>Wspólne API działające na asyncio albo Trio. Używają go m.in. FastAPI / Starlette i httpx.</td></tr>
+<tr><td><strong>uvloop</strong></td><td>Szybsza implementacja pętli zdarzeń asyncio (na libuv, jak Node.js), podmieniana jedną linią.</td></tr>
+</table>
+<p class="small">Klienci: <code>aiohttp</code>, <code>httpx</code> (HTTP), <code>asyncpg</code> (PostgreSQL), <code>aiokafka</code> (Kafka).</p>
+</div>
+<aside class="notes">Scalone dwa oryginalne slajdy (Twisted/Tornado oraz Trio/Curio) i dodane AnyIO, uvloop oraz klienci.</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="Promise">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Promise (JavaScript) a Future (Python)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead"><strong>Promise</strong> to obiekt związany z zadaniem asynchronicznym: funkcja uruchamia pracę w tle i od razu zwraca obietnicę, a wywołujący reaguje na jej spełnienie (<code>then</code>) lub odrzucenie (<code>catch</code>).</p>
+<pre class="code-wrap sm"><code class="language-javascript" data-trim data-noescape>
+let myPromise = new Promise((resolve, reject) =&gt; {
+  // kod, który trwa, np. ładowanie danych
+  let success = true;
+  if (success) resolve("The data has loaded successfully!");
+  else reject("There was an error loading the data.");
+});
+
+myPromise
+  .then(message =&gt; console.log(message))  // spełniona
+  .catch(error =&gt; console.log(error));    // odrzucona
+</code></pre>
+</div>
+<div>
+<p class="lead">W Pythonie tę rolę pełni <strong>Future</strong>: <code>asyncio.Future</code>, a w świecie wątków <code>concurrent.futures.Future</code> (wykład 7).</p>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import asyncio
+
+async def main():
+    loop = asyncio.get_running_loop()
+    fut = loop.create_future()          # pusta "obietnica"
+    fut.add_done_callback(              # ~ then
+        lambda f: print("callback:", f.result()))
+    loop.call_later(1, fut.set_result, "dane gotowe")   # ~ resolve
+    print("czekam...")
+    print("await:", await fut)
+
+asyncio.run(main())
+</code></pre>
+<pre class="out sm">czekam...
+callback: dane gotowe
+await: dane gotowe</pre>
+<p class="small"><code>set_result</code> ≈ <code>resolve</code>, <code>set_exception</code> ≈ <code>reject</code>, <code>add_done_callback</code> ≈ <code>then</code>. Na co dzień zamiast callbacków piszemy <code>await</code>, tak jak w JavaScripcie.</p>
+</div>
+</div>
+</div>
+<aside class="notes">Oryginał: "W Pythonie nie ma promisów!" (z literówką). Odpowiednikiem jest Future, natomiast różnica dotyczy uruchamiania funkcji async (następny slajd).</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>async w JavaScripcie i w Pythonie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead"><strong>JavaScript</strong>: funkcja <code>async</code> po wywołaniu <strong>od razu</strong> wykonuje się do pierwszego <code>await</code> i zwraca Promise.</p>
+<pre class="code-wrap sm"><code class="language-javascript" data-trim data-noescape>
+async function f() {
+  console.log("f: start");
+  return 42;
+}
+const p = f();          // ciało rusza od razu!
+console.log(p);
+p.then(v =&gt; console.log("then:", v));
+console.log("koniec skryptu");
+</code></pre>
+<pre class="out sm">f: start
+Promise { 42 }
+koniec skryptu
+then: 42</pre>
+</div>
+<div>
+<p class="lead"><strong>Python</strong>: wywołanie korutyny tylko tworzy obiekt. Ciało rusza dopiero po <code>await</code> albo po zaplanowaniu w pętli (<code>create_task</code>).</p>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import asyncio
+
+async def f():
+    print("f: start")
+    return 42
+
+async def main():
+    c = f()
+    print(c)
+    t = asyncio.create_task(f())   # zaplanowana, ruszy przy najbliższym await
+    print("main: przed await")
+    print(await c, await t)
+
+asyncio.run(main())
+</code></pre>
+<pre class="out sm">&lt;coroutine object f at 0x7f924ce0a080&gt;
+main: przed await
+f: start
+f: start
+42 42</pre>
+</div>
+</div>
+<p class="small">Wyniki: Node.js i Python 3.13. Od 3.12 można włączyć zachowanie podobne do JavaScriptu: <code>loop.set_task_factory(asyncio.eager_task_factory)</code>.</p>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Porównanie">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wątki, procesy czy asyncio?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th></th><th>wątki (<code>threading</code>)</th><th>procesy (<code>multiprocessing</code>)</th><th>korutyny (<code>asyncio</code>)</th></tr>
+<tr><td>przełączanie</td><td>system operacyjny, w dowolnym momencie</td><td>system operacyjny</td><td>sama korutyna, tylko w <code>await</code></td></tr>
+<tr><td>prawdziwa równoległość</td><td>nie przy GIL (tak w 3.13t free-threaded)</td><td>tak, wiele rdzeni</td><td>nie, jeden wątek</td></tr>
+<tr><td>koszt jednostki</td><td>stos wątku, setki do tysięcy wątków</td><td>osobny proces i pamięć</td><td>ok. 1–2 KB, setki tysięcy</td></tr>
+<tr><td>wyścigi</td><td>w każdej instrukcji, potrzebne zamki</td><td>brak współdzielonej pamięci</td><td>tylko w miejscach <code>await</code></td></tr>
+<tr><td>dobre do</td><td>I/O z blokującymi bibliotekami</td><td>obliczeń (CPU-bound)</td><td>bardzo wielu równoczesnych operacji I/O</td></tr>
+<tr><td>wymagania</td><td>zwykły kod</td><td>dane muszą się serializować (pickle)</td><td>biblioteki asynchroniczne „od góry do dołu”</td></tr>
+</table>
+<div class="note fragment"><p>Rozwiązania się łączą: pętla asyncio obsługuje sieć, <code>asyncio.to_thread</code> przenosi blokujące wywołania do wątków, a <code>run_in_executor</code> z <code>ProcessPoolExecutor</code> przenosi obliczenia do procesów.</p></div>
+</div>
+<aside class="notes">Meme z "distracted boyfriend" (asyncio vs threads) dobrze tu nawiązuje: asyncio nie zastępuje wątków, tylko je uzupełnia.</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="Ćwiczenia">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Ćwiczenia</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="blanks">
+<div class="cols wl">
+<div>
+<p class="lead">Uzupełnij program tak, żeby 5 pobrań trwało razem ok.&nbsp;1&nbsp;s, a nie 5&nbsp;s:</p>
+<pre class="exo"><span class="k">import</span> asyncio
+
+<input class="blank" size="6" data-re="^async$" data-sol="async" aria-label="słowo kluczowe przed def"> <span class="k">def</span> pobierz(i):
+    <input class="blank" size="6" data-re="^await$" data-sol="await" aria-label="słowo kluczowe przed asyncio.sleep"> asyncio.sleep(1)
+    <span class="k">return</span> i * 10
+
+<span class="k">async def</span> main():
+    w = <span class="k">await</span> asyncio.<input class="blank" size="7" data-re="^gather$" data-sol="gather" aria-label="funkcja asyncio">(
+        *(pobierz(i) <span class="k">for</span> i <span class="k">in</span> range(5)))
+    print(w)              <span class="c"># [0, 10, 20, 30, 40]</span>
+
+asyncio.<input class="blank" size="4" data-re="^run$" data-sol="run" aria-label="funkcja uruchamiająca">(main())</pre>
+</div>
+<div>
+<p class="lead">Wywołaj blokującą funkcję <code>stare_api(url)</code> bez blokowania pętli:</p>
+<pre class="exo">wynik = <span class="k">await</span> asyncio.<input class="blank" size="22" data-re="^to_thread\(stare_api,url\)$" data-sol="to_thread(stare_api, url)" aria-label="wywołanie w osobnym wątku"></pre>
+<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
+<p class="fb"></p>
+<div class="explain"><p>Zamiast <code>gather</code> można użyć <code>TaskGroup</code> i <code>tg.create_task(pobierz(i))</code>. Do <code>to_thread</code> przekazujemy funkcję <code>stare_api</code> bez nawiasów, a jej argumenty osobno.</p></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Podsumowanie">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Podsumowanie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el img" style="left:12.841%;top:19.075%;width:70.947%;height:80.930%;"><img src="images/image-SXAu7vt8.jpg" alt=""></div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Podsumowanie wykładu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<ul class="points">
+<li><strong>Korutyna</strong> to funkcja, którą można wstrzymać i wznowić. W Pythonie wyrosła z generatorów (<code>send</code>, <code>yield from</code>), a od 3.5 ma składnię <code>async def</code> / <code>await</code>.</li>
+<li>Wywołanie korutyny tylko tworzy obiekt. Uruchamia ją <code>await</code>, <code>asyncio.run()</code> albo zadanie (<code>create_task</code>, <code>TaskGroup</code>).</li>
+<li><strong>Pętla zdarzeń</strong> w jednym wątku przełącza zadania w miejscach <code>await</code>: współbieżność bez równoległości, idealna dla I/O.</li>
+<li>Kolejne <code>await</code> są sekwencyjne. Współbieżność dają <code>gather</code> i <code>TaskGroup</code>, a limity czasu <code>asyncio.timeout</code>.</li>
+<li>Nigdy nie blokuj pętli: <code>time.sleep</code>, <code>requests</code> i obliczenia przenosimy do <code>to_thread</code> lub executorów.</li>
+<li>Synchronizacja: <code>asyncio.Lock</code>, <code>Semaphore</code>, <code>Queue</code>. Wyścigi są możliwe tylko na <code>await</code>.</li>
+</ul>
+<div class="note"><p><strong>Laboratorium:</strong> korutyny i async w Python.</p>
+<p><strong>Następny wykład (16.12):</strong> dane sensoryczne, serwer i broker danych, biblioteki przetwarzania strumieniowego.</p></div>
+</div>
+</section>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/plugin.js"></script>
+<script>
+// ---------- copy buttons (raw text is captured before highlighting adds line numbers) ----------
+document.querySelectorAll('pre.code-wrap > code').forEach(code => {
+  const lines = code.textContent.replace(/^\s*\n/, '').replace(/\s+$/, '').split('\n');
+  const indent = Math.min(...lines.filter(l => l.trim()).map(l => l.match(/^ */)[0].length));
+  const raw = lines.map(l => l.slice(indent)).join('\n') + '\n';
+  const btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'copy-btn'; btn.textContent = 'Kopiuj';
+  btn.addEventListener('click', () => {
+    const done = ok => {
+      btn.textContent = ok ? 'Skopiowano!' : 'Błąd kopiowania'; btn.classList.toggle('copied', ok);
+      clearTimeout(btn._t); btn._t = setTimeout(() => { btn.textContent = 'Kopiuj'; btn.classList.remove('copied'); }, 1500);
+    };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(raw).then(() => done(true), () => done(false));
+    else {
+      const ta = document.createElement('textarea'); ta.value = raw; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { done(document.execCommand('copy')); } catch (e) { done(false); } finally { ta.remove(); }
+    }
+  });
+  code.parentNode.appendChild(btn);
+});
+</script>
+<script>
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.02,
+    center: false, hash: true, slideNumber: 'c/t',
+    transition: 'slide',
+    chalkboard: { boardmarkerWidth: 4, chalkWidth: 5 },
+    plugins: [RevealNotes, RevealHighlight, RevealChalkboard]
+  });
+</script>
+<script>
+// ---------- quizzes ----------
+document.querySelectorAll('.quiz').forEach(q => {
+  const opts = [...q.querySelectorAll('.opt')];
+  const reveal = () => {
+    opts.forEach(o => {
+      if (o.dataset.ok === '1') o.classList.add('good');
+      else if (o.classList.contains('sel')) o.classList.add('bad');
+    });
+    q.classList.add('done');
+  };
+  if (q.classList.contains('multi')) {
+    opts.forEach(o => o.addEventListener('click', () => { if (!q.classList.contains('done')) o.classList.toggle('sel'); }));
+    q.querySelector('.check').addEventListener('click', reveal);
+  } else {
+    opts.forEach(o => o.addEventListener('click', () => {
+      if (q.classList.contains('done')) return;
+      o.classList.add('sel'); reveal();
+    }));
+  }
+});
+
+// ---------- fill in the blanks (whitespace is ignored, data-re lists accepted answers) ----------
+document.querySelectorAll('.blanks').forEach(b => {
+  const inputs = [...b.querySelectorAll('input.blank')];
+  const fb = b.querySelector('.fb');
+  const check = () => {
+    let good = 0;
+    inputs.forEach(i => {
+      const ok = new RegExp(i.dataset.re).test(i.value.replace(/\s+/g, ''));
+      i.classList.toggle('good', ok); i.classList.toggle('bad', !ok); good += ok;
+    });
+    const all = good === inputs.length;
+    b.classList.toggle('done', all);
+    fb.textContent = all ? '' : inputs.length > 1 ? `Poprawne: ${good} z ${inputs.length}. Spróbuj jeszcze raz.` : 'Jeszcze nie. Spróbuj ponownie.';
+  };
+  b.querySelector('.check').addEventListener('click', check);
+  b.querySelector('.show').addEventListener('click', () => {
+    inputs.forEach(i => { i.value = i.dataset.sol; });
+    check();
+  });
+  inputs.forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') check(); }));
+});
+
+// ---------- event loop step by step ----------
+const loopSim = (() => {
+  const root = document.getElementById('loopsim'); if (!root) return null;
+  const code = sleepLine => ['import asyncio, time', '', 'async def praca(nazwa, czas):', '    print(nazwa, "start")', sleepLine, '    print(nazwa, "koniec")', '',
+    'async def main():', '    a = asyncio.create_task(praca("A", 2))', '    b = asyncio.create_task(praca("B", 1))', '    await a', '    await b', '', 'asyncio.run(main())'];
+  const LINES = { async: code('    await asyncio.sleep(czas)'), block: code('    time.sleep(czas)          # blokuje!') };
+  const W = (id, txt) => ({ id, txt });
+  const S0 = { t: 0, run: null, ready: ['main'], wait: [], out: '', hl: [11], stat: 'run',
+    msg: '<code>asyncio.run()</code> tworzy pętlę zdarzeń i opakowuje <code>main()</code> w zadanie. Nic jeszcze się nie wykonało.' };
+  const S1 = { t: 0, run: 'main', ready: ['A', 'B'], wait: [W('main', 'czeka na A')], out: '', hl: [6, 7, 8], stat: 'run',
+    msg: '<code>main</code> tworzy dwa zadania (trafiają do kolejki gotowych, ale jeszcze nie ruszają) i na <code>await a</code> oddaje sterowanie pętli.' };
+  const STEPS = {
+    async: [S0, S1,
+      { t: 0, run: 'A', ready: ['B'], wait: [W('main', 'czeka na A'), W('A', 'budzik t = 2 s')], out: 'A start', hl: [1, 2], stat: 'run',
+        msg: 'Pętla bierze pierwsze gotowe zadanie. A wypisuje „start”, a na <code>await asyncio.sleep(2)</code> nastawia budzik i oddaje sterowanie.' },
+      { t: 0, run: 'B', ready: [], wait: [W('main', 'czeka na A'), W('A', 'budzik t = 2 s'), W('B', 'budzik t = 1 s')], out: 'B start', hl: [1, 2], stat: 'run',
+        msg: 'B robi to samo. Teraz obie operacje czekają <strong>jednocześnie</strong>.' },
+      { t: 1, run: null, ready: ['B'], wait: [W('main', 'czeka na A'), W('A', 'budzik t = 2 s')], out: '', hl: [], stat: 'sleep',
+        msg: 'Nic nie jest gotowe, więc pętla śpi w <code>epoll</code> do najbliższego budzika. Przy t = 1 s B wraca do kolejki gotowych.' },
+      { t: 1, run: 'B', ready: [], wait: [W('main', 'czeka na A'), W('A', 'budzik t = 2 s')], out: 'B koniec', hl: [3], stat: 'run',
+        msg: 'B kończy pracę. <code>main</code> czeka na A, a nie na B, więc dalej śpi.' },
+      { t: 2, run: null, ready: ['A'], wait: [W('main', 'czeka na A')], out: '', hl: [], stat: 'sleep',
+        msg: 'Pętla śpi do t = 2 s: budzik A.' },
+      { t: 2, run: 'A', ready: ['main'], wait: [], out: 'A koniec', hl: [3], stat: 'run',
+        msg: 'A kończy pracę, więc zadanie, które na nie czekało (<code>main</code>), wraca do kolejki gotowych.' },
+      { t: 2, run: 'main', ready: [], wait: [], out: '', hl: [8, 9], stat: 'done',
+        msg: '<code>await a</code> zwraca wynik, a B jest już zakończone, więc <code>await b</code> nie czeka. Całość trwała <strong>2 s</strong>: tyle, ile najdłuższa operacja, a nie 1 + 2.' }],
+    block: [S0, S1,
+      { t: 2, run: 'A', ready: ['B'], wait: [W('main', 'czeka na A')], out: 'A start', hl: [1, 2], blk: true, stat: 'block',
+        msg: 'A wywołuje <code>time.sleep(2)</code>: zwykłą funkcję, która usypia <strong>cały wątek</strong>. Pętla stoi 2 s, a gotowe zadanie B nie może ruszyć.' },
+      { t: 2, run: 'A', ready: ['B', 'main'], wait: [], out: 'A koniec', hl: [3], stat: 'run',
+        msg: 'Dopiero teraz A kończy pracę i budzi <code>main</code>.' },
+      { t: 3, run: 'B', ready: ['main'], wait: [], out: 'B start', hl: [1, 2], blk: true, stat: 'block',
+        msg: 'B też blokuje wątek, tym razem na 1 s.' },
+      { t: 3, run: 'B', ready: ['main'], wait: [], out: 'B koniec', hl: [3], stat: 'run', msg: 'B kończy pracę.' },
+      { t: 3, run: 'main', ready: [], wait: [], out: '', hl: [8, 9], stat: 'done',
+        msg: 'Całość trwała <strong>3 s = 2 + 1</strong>, jak w kodzie sekwencyjnym. Jedno blokujące wywołanie odbiera korzyści z asyncio wszystkim zadaniom.' }]
+  };
+  const STAT = { run: ['', 'pętla działa'], sleep: ['sleep', 'pętla śpi (epoll)'], block: ['block', 'pętla ZABLOKOWANA'], done: ['', 'main zakończone'] };
+  const chip = id => `<span class="chip t${id === 'main' ? 'M' : id}">${id}</span>`;
+  let mode = 'async', pos;
+  const render = () => {
+    const s = STEPS[mode][pos];
+    root.querySelector('.steps').innerHTML = LINES[mode].map((l, k) =>
+      `<li class="${s.hl.includes(k - 2) ? (s.blk && k === 4 ? 'blk' : 'hl') : ''}">${l.replace(/</g, '&lt;') || ' '}</li>`).join('');
+    root.querySelector('.clock').textContent = `t = ${s.t} s`;
+    const st = root.querySelector('.lstat'); st.className = 'lstat ' + STAT[s.stat][0]; st.textContent = STAT[s.stat][1];
+    root.querySelector('.run').innerHTML = s.run ? chip(s.run) : '<span class="small">nic</span>';
+    root.querySelector('.ready').innerHTML = s.ready.map(chip).join(' ') || '<span class="small">pusto</span>';
+    root.querySelector('.wait').innerHTML = s.wait.map(w => chip(w.id).replace('</span>', ` <small>${w.txt}</small></span>`)).join(' ') || '<span class="small">pusto</span>';
+    const outs = STEPS[mode].slice(0, pos + 1).map(x => x.out).filter(Boolean);
+    const c = root.querySelector('.console');
+    c.textContent = outs.join('\n'); c.scrollTop = c.scrollHeight;
+    root.querySelector('.msg').innerHTML = `<b>Krok ${pos + 1}/${STEPS[mode].length}.</b> ` + s.msg;
+    root.querySelector('[data-act=step]').disabled = pos >= STEPS[mode].length - 1;
+  };
+  const reset = () => { pos = 0; render(); };
+  root.addEventListener('click', e => {
+    const a = e.target.closest('[data-act]')?.dataset.act;
+    if (a === 'step' && pos < STEPS[mode].length - 1) { pos++; render(); }
+    if (a === 'reset') reset();
+  });
+  root.querySelectorAll('input[name=loopmode]').forEach(r => r.addEventListener('change', () => { mode = r.value; reset(); }));
+  reset();
+  return {};
+})();
+
+// ---------- sequential vs concurrent timeline ----------
+const gSim = (() => {
+  const root = document.getElementById('gsim'); if (!root) return null;
+  const $ = c => root.querySelector(c);
+  const K = s => `<span class="k">${s}</span>`;
+  const CODE = {
+    seq: d => `${K('async def')} main():\n    ${K('await')} pobierz("A", ${d[0]})\n    ${K('await')} pobierz("B", ${d[1]})\n    ${K('await')} pobierz("C", ${d[2]})`,
+    task: d => `${K('async def')} main():\n    a = asyncio.create_task(pobierz("A", ${d[0]}))\n    b = asyncio.create_task(pobierz("B", ${d[1]}))\n    c = asyncio.create_task(pobierz("C", ${d[2]}))\n    ${K('await')} a; ${K('await')} b; ${K('await')} c`,
+    gather: d => `${K('async def')} main():\n    ${K('await')} asyncio.gather(pobierz("A", ${d[0]}),\n                         pobierz("B", ${d[1]}),\n                         pobierz("C", ${d[2]}))`,
+    tg: d => `${K('async def')} main():\n    ${K('async with')} asyncio.TaskGroup() ${K('as')} tg:\n        tg.create_task(pobierz("A", ${d[0]}))\n        tg.create_task(pobierz("B", ${d[1]}))\n        tg.create_task(pobierz("C", ${d[2]}))`,
+    block: d => `${K('async def')} main():\n    ${K('await')} asyncio.gather(pobierz("A", ${d[0]}),\n                         pobierz("B", ${d[1]}),\n                         pobierz("C", ${d[2]}))`
+  };
+  const FN = { normal: `${K('async def')} pobierz(nazwa, s):\n    ${K('await')} asyncio.sleep(s)   <span class="c"># np. zapytanie HTTP</span>\n\n`,
+    block: `${K('async def')} pobierz(nazwa, s):\n    time.sleep(s)            <span class="c"># blokuje pętlę!</span>\n\n` };
+  const VERD = {
+    seq: 'Każde <code>await</code> czeka na koniec poprzedniej operacji: czas to <strong>suma</strong>.',
+    task: 'Zadania ruszają przy pierwszym <code>await</code> i czekają jednocześnie: czas to <strong>maksimum</strong>.',
+    gather: '<code>gather</code> sam tworzy zadania: czas to <strong>maksimum</strong>.',
+    tg: '<code>TaskGroup</code> czeka na wszystkie zadania przy wyjściu z bloku: czas to <strong>maksimum</strong>.',
+    block: '<code>gather</code> nie pomoże, gdy korutyna nie oddaje sterowania: <code>time.sleep</code> blokuje jedyny wątek, czas to znów <strong>suma</strong>.'
+  };
+  let timer = null, t = 0, plan = [], total = 0, scale = 1;
+  const build = () => {
+    const mode = $('.mode').value, d = ['A', 'B', 'C'].map(n => +$('.d' + n).value);
+    const sequential = mode === 'seq' || mode === 'block';
+    let s = 0;
+    plan = d.map((x, i) => { const a = sequential ? s : 0; s += x; return { n: 'ABC'[i], a, b: a + x }; });
+    total = Math.max(...plan.map(p => p.b));
+    scale = d.reduce((x, y) => x + y, 0);   // axis = worst case (sum)
+    $('.pycode').innerHTML = FN[mode === 'block' ? 'block' : 'normal'] + CODE[mode](d);
+    $('.verdict').innerHTML = VERD[mode];
+    return mode;
+  };
+  const render = () => {
+    const mode = $('.mode').value, pct = x => (x / scale * 100).toFixed(2) + '%';
+    let h = plan.map(p => {
+      const w = Math.max(0, Math.min(t, p.b) - p.a);
+      return `<div class="glane"><span>${p.n} (${p.b - p.a} s)</span><div class="gtrack">` +
+        (w > 0 ? `<i class="gbar${mode === 'block' ? ' blk' : ''}" style="left:${pct(p.a)};width:${pct(w)}"></i>` : '') + '</div></div>';
+    }).join('');
+    let ax = '';
+    for (let k = 0; k <= scale; k++) ax += `<span style="left:${pct(k)}">${k} s</span>`;
+    h += `<div class="glane gax"><span></span><div class="gtrack gaxis">${ax}</div></div>`;
+    $('.glanes').innerHTML = h;
+    const cur = document.createElement('div'); cur.className = 'gcur';
+    const tr = $('.glanes .gtrack');
+    cur.style.left = `calc(${tr.offsetLeft}px + ${(Math.min(t, total) / scale).toFixed(4)} * ${tr.offsetWidth}px)`;
+    $('.glanes').appendChild(cur);
+    $('.gtotal').innerHTML = t >= total ? `Czas całkowity: <strong>${total} s</strong>` : `t = ${t.toFixed(1)} s`;
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const run = () => {
+    stop(); build(); t = 0; render();
+    timer = setInterval(() => { t = Math.min(total, t + 0.1); render(); if (t >= total) stop(); }, 60);
+  };
+  const reset = () => { stop(); build(); t = total; render(); };
+  root.addEventListener('click', e => { if (e.target.closest('[data-act=run]')) run(); });
+  root.addEventListener('change', reset);
+  reset();
+  return { stop, reset };
+})();
+
+// ---------- heartbeat: blocked event loop (real time) ----------
+const hbSim = (() => {
+  const root = document.getElementById('hbsim'); if (!root) return null;
+  const WIN = 6, tracks = [0, 1, 2, 3].map(i => root.querySelector('.t' + i));
+  let timer = null, t0 = 0, now = 0, nextBeat = 0, beats = [], segs = [], blockedUntil = -1, busyUntil = -1;
+  const verdict = root.querySelector('.verdict');
+  const MSG = {
+    async: '<code>await asyncio.sleep(1)</code>: zadanie 2 czeka, ale oddało sterowanie, więc serce bije dalej.',
+    block: '<code>time.sleep(1)</code>: jedyny wątek śpi, pętla stoi i <strong>serce przestaje bić</strong>. Spóźnione uderzenie nadrabia dopiero po odblokowaniu.',
+    thread: '<code>asyncio.to_thread</code>: sen trwa w osobnym wątku z puli, a pętla i serce działają normalnie.'
+  };
+  const clock = () => performance.now() / 1000 - t0;
+  const tick = () => {
+    now = clock();
+    if (now >= blockedUntil && nextBeat <= now) {   // a beat that fell due during a block fires late
+      const late = now - nextBeat > 0.1;
+      beats.push(now); nextBeat = late ? now + 0.25 : nextBeat + 0.25;
+    }
+    draw();
+  };
+  const x = s => ((s - (now - WIN)) / WIN * 100).toFixed(2) + '%';
+  const draw = () => {
+    const vis = (a, b) => b > now - WIN;
+    tracks[0].innerHTML = beats.filter(b => b > now - WIN).map(b => `<b style="left:${x(b)}">♥</b>`).join('');
+    [1, 2, 3].forEach(k => {
+      tracks[k].innerHTML = segs.filter(s => s.row === k && vis(s.a, s.b)).map(s => {
+        const b = Math.min(s.b, now);
+        return b > s.a ? `<i class="${s.cls}" style="left:${x(s.a)};width:${((b - s.a) / WIN * 100).toFixed(2)}%">${s.label}</i>` : '';
+      }).join('');
+    });
+    const blocked = now < blockedUntil;
+    const last = segs.filter(s => s.row === 3).at(-1);
+    if (!blocked && (!last || last.cls !== 'idle')) segs.push({ row: 3, a: last ? Math.max(last.b, 0) : 0, b: Infinity, cls: 'idle', label: 'działa' });
+    segs = segs.filter(s => s.b > now - WIN - 1);
+  };
+  const start = () => {
+    if (timer) { clearInterval(timer); timer = null; return; }
+    t0 = performance.now() / 1000; now = 0; nextBeat = 0; beats = []; segs = []; blockedUntil = -1; busyUntil = -1;
+    timer = setInterval(tick, 20); tick();
+  };
+  const act = a => {
+    if (!timer) start();
+    if (now < busyUntil) return;
+    {
+      const at = now;
+      busyUntil = at + 1;
+      verdict.innerHTML = MSG[a];
+      if (a === 'async') segs.push({ row: 1, a: at, b: at + 1, cls: 'wait', label: 'await asyncio.sleep(1)' });
+      if (a === 'thread') {
+        segs.push({ row: 1, a: at, b: at + 1, cls: 'wait', label: 'await to_thread(...)' });
+        segs.push({ row: 2, a: at, b: at + 1, cls: 'thr', label: 'time.sleep(1)' });
+      }
+      if (a === 'block') {
+        blockedUntil = at + 1;
+        segs.push({ row: 1, a: at, b: at + 1, cls: 'blk', label: 'time.sleep(1)' });
+        const idle = segs.filter(s => s.row === 3).at(-1); if (idle && idle.b === Infinity) idle.b = at;
+        segs.push({ row: 3, a: at, b: at + 1, cls: 'blk', label: 'ZABLOKOWANA' });
+      }
+    }
+  };
+  root.addEventListener('click', e => {
+    const b = e.target.closest('[data-act]'); if (!b) return;
+    if (b.dataset.act === 'start') start(); else act(b.dataset.act);
+  });
+  return { stop: () => { if (timer) { clearInterval(timer); timer = null; } } };
+})();
+
+Reveal.on('slidechanged', e => {
+  if (gSim) gSim.stop();
+  if (hbSim) hbSim.stop();
+  if (gSim && e.currentSlide.querySelector('#gsim')) gSim.reset();
+});
+Reveal.on('ready', () => { if (gSim) gSim.reset(); });
+
+</script>
+</body>
+</html>

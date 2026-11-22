@@ -1,0 +1,1831 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Przetwarzanie równoległe i strumieniowe - Wykład 4</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+<style>
+  /* Slide = 1280x720; base font scaled to match H5P text metrics */
+  .reveal { font-size: 24px; font-family: "Open Sans", Arial, sans-serif; color: #000; }
+  .reveal .slides section { position: absolute; width: 100%; height: 100%; padding: 0; text-align: left; }
+  .reveal .el { position: absolute; box-sizing: border-box; overflow: visible; }
+  .reveal .el.text { padding: .375em .5em; line-height: 1.25; }
+  .reveal .el.text p, .reveal .el.text li { margin: 0 0 .5em 0; line-height: 1.25; }
+  .reveal .el.text ul { display: block; margin: 0 0 .5em 1.25em; padding: 0; }
+  .reveal .el.text h3 { font-size: 1em; text-transform: none; margin: 0 0 .5em; color: #000; font-family: inherit; }
+  .reveal .el.img img { width: 100%; height: 100%; object-fit: contain; margin: 0; max-width: none; max-height: none; }
+  .reveal .el.shape { display: flex; flex-direction: column; justify-content: center; }
+  .reveal .el.link { display: flex; align-items: center; justify-content: center; font-size: 1.5em; }
+  .reveal a { color: #1a73d9; }
+  /* ---------- interactive slides (as in lecture 1) ---------- */
+  :root { --green: rgb(83, 174, 18); --blue: #1a73d9; --red: #d93025; --orange: #e8710a; --muted: #666; --line: #ccc; }
+  .reveal .el.box { padding: 0 .5em; line-height: 1.3; }
+  .reveal .el.box p { margin: 0 0 .5em; }
+  .reveal .small, .reveal .hint { font-size: .7em; color: var(--muted); }
+  .reveal .btn, .reveal .opt {
+    font: inherit; font-size: .75em; padding: .3em .8em; margin: 0 .3em .3em 0; cursor: pointer;
+    border: 2px solid var(--green); background: var(--green); color: #fff; border-radius: .3em;
+  }
+  .reveal .btn.ghost { background: #fff; color: var(--green); }
+  .reveal .btn:disabled { opacity: .4; cursor: default; }
+  .reveal .simctl { display: flex; flex-wrap: wrap; align-items: center; gap: .3em .8em; font-size: .8em; margin-bottom: .5em; }
+  .reveal .simctl .btn { font-size: .9em; margin: 0; }
+  .reveal .simctl select, .reveal .simctl input[type=text] { font: inherit; padding: .1em .3em; }
+  .reveal .stat { font-size: .8em; }
+  .reveal h4 { font-size: .8em; margin: 0 0 .3em; text-transform: none; color: #000; font-family: inherit; }
+  .reveal code { font-family: Consolas, Menlo, monospace; }
+  @keyframes pop { from { transform: scale(.3); opacity: 0; } }
+
+  /* quiz */
+  .reveal .quiz .q { font-size: 1.1em; margin-bottom: .8em; }
+  .reveal .quiz .opts { display: flex; flex-wrap: wrap; gap: .5em; margin-bottom: .6em; }
+  .reveal .quiz .opt { background: #fff; color: #000; border-color: var(--line); font-size: .9em; margin: 0; }
+  .reveal .quiz .opt.sel { border-color: var(--blue); background: #e8f0fe; }
+  .reveal .quiz .opt.good { border-color: var(--green); background: #e6f4da; }
+  .reveal .quiz .opt.bad { border-color: var(--red); background: #fce8e6; }
+  .reveal .quiz .explain { visibility: hidden; font-size: .85em; border-left: 4px solid var(--green); padding-left: .6em; margin-top: .6em; }
+  .reveal .quiz.done .explain { visibility: visible; }
+  .reveal .quiz.compact .q { font-size: .9em; margin-bottom: .5em; }
+  .reveal .quiz.compact .opt { font-size: .75em; }
+  .reveal .quiz.compact .explain { font-size: .7em; margin-top: .3em; }
+  .reveal .quiz + .quiz { margin-top: .8em; }
+
+  /* ---------- lecture 2: layout, code listings, output ---------- */
+  .reveal .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.2em; align-items: start; }
+  .reveal .cols.wl { grid-template-columns: 1.35fr 1fr; }
+  .reveal .cols.wr { grid-template-columns: 1fr 1.35fr; }
+  /* type scale: .lead / ul.points = body text, .note = callouts, .small = captions, code .78em */
+  .reveal .lead { font-size: 1.1em; margin: 0 0 .5em; line-height: 1.35; }
+  .reveal ul.points { font-size: 1.1em; line-height: 1.35; margin: 0 0 .5em 1.1em; padding: 0; }
+  .reveal ul.points li { margin: 0 0 .45em; }
+  .reveal ul.points.side { font-size: .9em; }
+  .reveal ul.points.icons { list-style: none; margin-left: 0; }
+  .reveal ul.points.icons li { padding-left: 1.5em; text-indent: -1.5em; }
+  .reveal ul.points.icons i { width: 1.5em; text-indent: 0; color: var(--green); }
+  .reveal ul.points.icons.cons i { color: var(--red); }
+  .reveal img.pic { display: block; width: 100%; max-height: 20em; object-fit: contain; margin: 0 auto; }
+  .reveal svg.diagram { display: block; width: 100%; height: auto; margin: .2em 0 .6em; font-family: "Open Sans", Arial, sans-serif; }
+  .reveal svg.diagram text { font-size: 18px; }
+  .reveal svg.diagram .mono { font-family: Consolas, Menlo, monospace; }
+  .reveal .chain { display: flex; flex-wrap: wrap; align-items: center; gap: .3em; font-size: .8em; margin: .3em 0 .6em; }
+  .reveal .chain .op { color: var(--muted); font-family: Consolas, Menlo, monospace; font-size: .85em; }
+  .reveal .zipviz { font: .75em Consolas, Menlo, monospace; margin: 0 0 .6em; }
+  .reveal .zipviz > div { display: flex; gap: .4em; margin: .25em 0; align-items: center; }
+  .reveal .zipviz .lbl { width: 4.5em; color: var(--muted); font-family: "Open Sans", Arial, sans-serif; }
+  .reveal .chip.alt { background: #fef3c7; }
+  .reveal .chip.pair { background: #e6f4da; }
+  .reveal .lanes { font-size: .75em; }
+  .reveal .lanes .lane { display: flex; align-items: center; gap: 3px; height: 1.5em; margin: .15em 0; }
+  .reveal .lanes .lane span { width: 2.2em; color: var(--muted); }
+  .reveal .lanes .lane i { display: block; width: 10.5%; height: 1.1em; border-radius: 3px; background: var(--blue); }
+  .reveal .lanes .lane i.p { background: var(--green); }
+  .reveal .lanes h4 { margin: .5em 0 .1em; }
+  .reveal p code, .reveal li code, .reveal td code, .reveal .note code { background: #f1f3f4; padding: 0 .2em; border-radius: .2em; font-size: .9em; }
+  .reveal pre.code-wrap { position: relative; width: 100%; margin: 0 0 .5em; box-shadow: none; font-size: .78em; }
+  .reveal pre.code-wrap code { max-height: none; padding: .6em .8em; border-radius: .3em; }
+  .reveal pre.code-wrap.sm { font-size: .66em; }
+  .reveal pre.out { position: relative; width: 100%; box-sizing: border-box; margin: 0 0 .6em; padding: .45em .8em; font-size: .78em; line-height: 1.35;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #f4f6f8; color: #1f2a30; border: 1px solid #c9d1d9; border-left: 5px solid #586e75; border-radius: .3em; box-shadow: none; }
+  .reveal pre.out::before { content: "Wynik"; position: absolute; top: .3em; right: .6em; font: bold .7em "Open Sans", Arial, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #8a99a6; }
+  .reveal pre.code-wrap + pre.out { margin-top: -.5em; border-top: none; border-radius: 0 0 .3em .3em; }
+  .reveal pre.out.sm, .reveal pre.code-wrap.sm + pre.out { font-size: .66em; }
+  .reveal .copy-btn { position: absolute; top: .4em; right: .4em; z-index: 2; font: .8em "Open Sans", Arial, sans-serif; padding: .1em .6em; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, .3); border-radius: .3em; background: rgba(255, 255, 255, .1); color: #f8f8f2; opacity: 0; transition: opacity .15s; }
+  .reveal pre.code-wrap:hover .copy-btn, .reveal .copy-btn:focus-visible { opacity: 1; }
+  .reveal .copy-btn.copied { background: var(--green); border-color: var(--green); opacity: 1; }
+  .reveal .note { font-size: .75em; line-height: 1.35; border-left: 4px solid var(--green); background: #f3faee; padding: .35em .7em; margin: .2em 0 .6em; }
+  .reveal .note.warn { border-left-color: var(--orange); background: #fff4e5; }
+  .reveal .note.bad { border-left-color: var(--red); background: #fce8e6; }
+  .reveal .note p { margin: 0 0 .3em; }
+  .reveal .note p:last-child { margin: 0; }
+  .reveal table.simple { border-collapse: collapse; font-size: .75em; margin: .2em 0 .8em; width: 100%; }
+  .reveal table.simple th, .reveal table.simple td { border: 1px solid var(--line); padding: .3em .5em; vertical-align: top; text-align: left; }
+  .reveal table.simple th { background: #eef7e6; }
+  .reveal .textflow ul { margin: 0 0 .5em 1.2em; }
+  .reveal .textflow li { margin-bottom: .4em; }
+
+  /* agenda */
+  .reveal .agenda { display: grid; grid-template-columns: 1fr 1fr; gap: .7em; margin-bottom: .8em; }
+  .reveal .agenda .ag { border: 2px solid var(--line); border-radius: .4em; padding: .4em .7em; }
+  .reveal .agenda .ag b { display: inline-block; width: 1.6em; height: 1.6em; line-height: 1.6em; text-align: center; border-radius: 50%; background: var(--green); color: #fff; margin-right: .4em; }
+  .reveal .agenda .ag p { font-size: .75em; margin: .3em 0 0; color: #333; }
+
+  /* fill in the blanks */
+  .reveal pre.exo { width: 100%; box-sizing: border-box; margin: 0 0 .5em; padding: .6em .8em; font-size: .78em; line-height: 1.6; box-shadow: none;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #272822; color: #f8f8f2; border-radius: .3em; }
+  .reveal pre.exo .c { color: #75715e; }
+  .reveal pre.exo .k { color: #f92672; }
+  .reveal input.blank { font: inherit; color: #e6db74; background: #3e3d32; border: none; border-bottom: 2px dashed #e6db74; padding: 0 .3em; outline: none; }
+  .reveal input.blank:focus { background: #49483e; }
+  .reveal input.blank.good { color: #a6e22e; border-bottom: 2px solid #a6e22e; }
+  .reveal input.blank.bad { color: #f92672; border-bottom: 2px solid #f92672; }
+  .reveal .blanks .fb { font-size: .7em; min-height: 1.2em; margin: .2em 0; color: var(--red); }
+  .reveal .blanks .explain { visibility: hidden; font-size: .75em; border-left: 4px solid var(--green); padding-left: .6em; margin-top: .3em; }
+  .reveal .blanks.done .explain { visibility: visible; }
+
+  /* pure / impure cards */
+  .reveal .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8em; }
+  .reveal .quiz.card { border: 2px solid var(--line); border-radius: .4em; padding: .5em .6em; }
+  .reveal .quiz.card pre.code-wrap { font-size: .7em; margin-bottom: .6em; }
+  .reveal .quiz.card .opts { margin-bottom: 0; }
+  .reveal .quiz.card .opt { font-size: .75em; }
+  .reveal .quiz.card .explain { font-size: .7em; }
+
+  /* generator step by step */
+  .reveal ol.steps { list-style: none; margin: 0 0 .5em; padding: .5em 0; background: #272822; color: #f8f8f2; border-radius: .3em; font: .75em/1.6 Consolas, Menlo, monospace; counter-reset: ln; }
+  .reveal ol.steps li { padding: 0 .8em; white-space: pre; border-left: 4px solid transparent; }
+  .reveal ol.steps li::before { counter-increment: ln; content: counter(ln); display: inline-block; width: 1.8em; color: #75715e; }
+  .reveal ol.steps li.ran { background: rgba(166, 226, 46, .18); }
+  .reveal ol.steps li.next { background: rgba(230, 219, 116, .28); border-left-color: #e6db74; }
+  .reveal ol.steps li.next::after { content: "   \23F8  tu wstrzymany"; color: #e6db74; }
+  .reveal pre.console { width: 100%; box-sizing: border-box; height: 15em; overflow: auto; margin: 0 0 .5em; padding: .5em .8em; font-size: .72em; line-height: 1.4;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #1e1e1e; color: #e0e0e0; border-radius: .3em; box-shadow: none; }
+  .reveal #gensim .state { font-size: .7em; border-left: 4px solid var(--blue); padding-left: .6em; min-height: 2.6em; }
+  .reveal #gensim .state code { background: none; padding: 0; font-weight: bold; }
+
+  /* eager vs lazy */
+  .reveal #lazysim .mode { display: none; }
+  .reveal #lazysim .mode.on { display: block; }
+  .reveal #lazysim table.flow { border-collapse: separate; border-spacing: .25em; font-size: .62em; margin: 0 0 .3em -.25em; }
+  .reveal #lazysim .flow th { text-align: right; font-weight: normal; color: var(--muted); padding-right: .4em; white-space: nowrap; font-family: Consolas, Menlo, monospace; }
+  .reveal #lazysim .flow td { width: 3em; height: 1.8em; text-align: center; border-radius: .3em; background: #f1f3f4; color: #bbb; }
+  .reveal #lazysim .flow td.done { background: #e8f0fe; color: #000; }
+  .reveal #lazysim .flow td.yes { background: #e6f4da; color: #2d6a0a; }
+  .reveal #lazysim .flow td.no { background: #fce8e6; color: var(--red); }
+  .reveal #lazysim .flow td.res { background: var(--green); color: #fff; font-weight: bold; }
+  .reveal #lazysim .flow td.cur { box-shadow: 0 0 0 3px var(--orange); }
+  .reveal #lazysim .counters { font-size: .75em; margin: .2em 0 .4em; }
+  .reveal #lazysim .counters b { color: var(--blue); }
+  .reveal #lazysim .verdict { min-height: 2.6em; }
+
+  /* map / filter / reduce playground */
+  .reveal #mfrsim .simctl { font-size: .75em; }
+  .reveal #mfrsim .stage { display: flex; align-items: center; gap: .3em; margin: .3em 0; font-size: .85em; flex-wrap: wrap; min-height: 1.8em; }
+  .reveal #mfrsim .stage .lbl { width: 11em; flex: none; font-family: Consolas, Menlo, monospace; color: var(--muted); }
+  .reveal .chip { display: inline-block; min-width: 1.6em; text-align: center; padding: .1em .45em; border-radius: .3em; background: #e8f0fe; animation: pop .25s; }
+  .reveal .chip.drop { background: #f1f3f4; color: #aaa; text-decoration: line-through; }
+  .reveal .chip.acc { background: #fef3c7; }
+  .reveal .chip.fin { background: var(--green); color: #fff; font-weight: bold; }
+  .reveal .chip.err { background: #fce8e6; color: var(--red); font-family: Consolas, Menlo, monospace; }
+  .reveal #mfrsim .arrow { color: var(--muted); }
+
+  /* pipeline diagram */
+  .reveal .pipe { display: flex; align-items: center; gap: .35em; font-size: .62em; margin: 0 0 .6em; }
+  .reveal .pipe .st { border: 2px solid var(--blue); border-radius: .4em; padding: .3em .5em; text-align: center; background: #e8f0fe; }
+  .reveal .pipe .st small { display: block; color: var(--muted); font-size: .8em; }
+  .reveal .pipe .ar { color: var(--muted); font-size: 1.4em; }
+
+  /* MapReduce */
+  .reveal #wcsim textarea { width: 100%; box-sizing: border-box; height: 3.6em; font: .65em/1.3 "Open Sans", Arial, sans-serif; padding: .3em .5em; border: 2px solid var(--line); border-radius: .3em; resize: none; }
+  .reveal #wcsim .mr { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: .5em; font-size: .6em; margin-top: .4em; }
+  .reveal #wcsim .mr h4 { font-size: 1.1em; margin: 0 0 .2em; }
+  .reveal #wcsim .col { border: 2px solid var(--line); border-radius: .3em; padding: .3em .4em; height: 13.5em; overflow: auto; }
+  .reveal #wcsim .kv { display: inline-block; background: #e8f0fe; padding: .05em .35em; margin: .1em; border-radius: .25em; font-family: Consolas, Menlo, monospace; }
+  .reveal #wcsim .grp { font-family: Consolas, Menlo, monospace; margin: .1em 0; }
+  .reveal #wcsim .red { display: flex; align-items: center; margin: .15em 0; }
+  .reveal #wcsim .red span { width: 6em; flex: none; }
+  .reveal #wcsim .bar { height: .9em; background: var(--green); border-radius: .2em; margin-right: .4em; }
+
+  /* ---------- lecture 4: anomalies ---------- */
+  .reveal ol.points { font-size: 1.1em; line-height: 1.35; margin: 0 0 .5em 1.4em; padding: 0; }
+  .reveal ol.points li { margin: 0 0 .45em; }
+  .reveal img.pic.sm { max-height: 12em; }
+  .reveal .cards.two { grid-template-columns: 1fr 1fr; }
+  .reveal .quiz.card .q { font-size: .8em; margin-bottom: .5em; min-height: 3.2em; }
+  .reveal .note.verdict { visibility: hidden; min-height: 1.4em; }
+  .reveal .note.verdict.on { visibility: visible; }
+
+  /* lost update stepper */
+  .reveal #racesim .race { display: grid; grid-template-columns: 1fr .75fr 1fr; gap: .8em; align-items: start; }
+  .reveal #racesim ol.code { list-style: none; margin: 0; padding: .4em 0; background: #272822; color: #f8f8f2; border-radius: .3em; font: .7em/1.6 Consolas, Menlo, monospace; min-height: 8.4em; }
+  .reveal #racesim ol.code li { padding: 0 .7em; border-left: 4px solid transparent; white-space: pre; }
+  .reveal #racesim ol.code li.ran { color: #a6e22e; }
+  .reveal #racesim ol.code li.next { background: rgba(230, 219, 116, .28); border-left-color: #e6db74; }
+  .reveal #racesim ol.code li.blocked { background: rgba(217, 48, 37, .45); border-left-color: #f92672; }
+  .reveal #racesim .reg { font: .75em Consolas, Menlo, monospace; margin: .3em 0 0; }
+  .reveal #racesim .mem .cell { border: 2px solid var(--blue); background: #e8f0fe; border-radius: .3em; text-align: center; padding: .5em; font: 1em Consolas, Menlo, monospace; }
+  .reveal #racesim .mem .cell.flash { animation: pop .3s; }
+  .reveal #racesim .lockst { font-size: .7em; text-align: center; margin-top: .4em; }
+  .reveal #racesim ol.log { height: 8.6em; overflow: auto; font: .62em/1.45 Consolas, Menlo, monospace; margin: .5em 0 .4em; padding: .3em .6em .3em 2.6em; background: #f4f6f8; border: 1px solid #c9d1d9; border-radius: .3em; }
+
+  /* deadlock: resource allocation graph */
+  .reveal #dlsim .dl { display: grid; grid-template-columns: 1fr 1.05fr; gap: 1em; align-items: start; }
+  .reveal #dlsim svg { width: 100%; height: auto; font-family: "Open Sans", Arial, sans-serif; }
+  .reveal #dlsim .prog { display: flex; align-items: center; gap: .25em; margin: 0 0 .4em; font-size: .62em; flex-wrap: wrap; }
+  .reveal #dlsim .prog b { width: 2em; }
+  .reveal #dlsim .prog span { font-family: Consolas, Menlo, monospace; padding: .15em .4em; border-radius: .3em; background: #f1f3f4; color: #999; }
+  .reveal #dlsim .prog span.done { background: #e6f4da; color: #2d6a0a; }
+  .reveal #dlsim .prog span.next { background: #fef3c7; color: #000; box-shadow: 0 0 0 2px var(--orange); }
+  .reveal #dlsim .prog span.wait { background: #fce8e6; color: var(--red); box-shadow: 0 0 0 2px var(--red); }
+  .reveal #dlsim .tbtns .btn { margin-right: .3em; }
+
+  /* starvation: priority scheduler */
+  .reveal #starvesim .queue { display: flex; flex-wrap: wrap; gap: .3em; min-height: 1.9em; font-size: .75em; margin-bottom: .5em; }
+  .reveal #starvesim .chip.r { background: #e6f4da; box-shadow: 0 0 0 2px var(--green); }
+  .reveal #starvesim .lane { display: flex; gap: 2px; height: 1.2em; margin: .2em 0 .6em; }
+  .reveal #starvesim .lane i { flex: none; width: 1em; border-radius: 2px; background: var(--blue); }
+  .reveal #starvesim .lane i.r { background: var(--green); }
+
+  /* livelock corridor */
+  .reveal #livesim .corr { display: grid; grid-template-columns: repeat(8, 2.6em); grid-template-rows: repeat(2, 2.6em); gap: 3px; background: #ccc; padding: 3px; border-radius: .3em; width: max-content; margin: .3em 0 .5em; }
+  .reveal #livesim .corr div { background: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2em; }
+  .reveal #livesim .pa { color: var(--blue); }
+  .reveal #livesim .pb { color: var(--orange); }
+  .reveal ol.points, .reveal #racesim ol.code, .reveal #racesim ol.log { display: block; }
+  .reveal .cards .quiz + .quiz { margin-top: 0; }
+  .reveal #starvesim .lane i.idle { background: #e0e0e0; }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section data-background-color="#ffffff" data-keywords="PRS">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie równoległe i strumieniowe</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:23.733%;width:61.002%;height:40%;"><p><span style="font-size:1.5em"><strong>Wykład 4</strong></span></p>
+
+<p><span style="font-size:1.5em"><strong>Anomalie przetwarzania równoległego: race condition, zakleszczenie, zagłodzenie</strong></span></p>
+</div>
+<div class="el img" style="left:64.270%;top:21.576%;width:23.125%;height:40.000%;"><img src="images/image-BdyklWbW.jpg" alt="UAM"></div>
+<div class="el img" style="left:47.930%;top:66.885%;width:19.608%;height:25.820%;"><img src="images/image-TyTCOPKL.png" alt=""></div>
+<div class="el img" style="left:82.438%;top:71.200%;width:17.564%;height:18.215%;"><img src="images/image-TXemp39u.png" alt=""></div>
+<div class="el img" style="left:67.538%;top:73.357%;width:16.340%;height:16.944%;"><img src="images/image-Xi7MeSC1.png" alt=""></div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Plan">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Plan wykładu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="agenda">
+  <div class="ag"><b>1</b>Wyścigi i atomowość<p>race condition, operacje atomowe, GIL, sekcja krytyczna, check-then-act</p></div>
+  <div class="ag"><b>2</b>Widoczność zmian<p>volatile w Javie i dlaczego Python go nie potrzebuje</p></div>
+  <div class="ag"><b>3</b>Zakleszczenie<p>warunki Coffmana, graf oczekiwania, kolejność blokad, timeout, diagnoza</p></div>
+  <div class="ag"><b>4</b>Zagłodzenie i livelock<p>sprawiedliwość blokad, priorytety, postarzanie, inwersja priorytetów, back-off</p></div>
+  <div class="ag"><b>5</b>Ograniczenia przetwarzania równoległego<p>kolejność wyników, dostęp do zasobów, liczba wątków, priorytety</p></div>
+  <div class="ag"><b>6</b>Moduł multiprocessing<p>procesy, metody startu, fork a wątki, pamięć współdzielona, Pool</p></div>
+</div>
+<div class="note"><p><strong>Dlaczego to trudne?</strong></p>
+<p class="fragment">Błędy współbieżności są niedeterministyczne: program przechodzi testy 99 razy, a za setnym razem gubi dane albo się zawiesza.</p>
+<p class="fragment">Na wykładzie 3 poznaliśmy narzędzia (Lock, Condition, Semaphore). Dziś zobaczymy, co się dzieje, gdy ich zabraknie albo gdy użyjemy ich źle.</p></div>
+</div>
+<aside class="notes">Wykład zdalny: pytania ze slajdów "Sprawdź się" i "Rozpoznaj anomalię" zadawaj na czacie Teams, zanim klikniesz odpowiedź. W symulacjach (przeplot wątków, graf oczekiwania, korytarz) poproś na czacie o propozycję kolejnego kroku.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Teoria vs praktyka</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:16.340%;top:92.776%;width:81.481%;height:7.120%;"><p><span style="font-size:1em">https://devrant.com/rants/88296/knock-knock-race-condition-whos-there</span></p>
+</div>
+<div class="el img" style="left:11.983%;top:19.418%;width:69.215%;height:70.586%;"><img src="images/image-34IaI724.jpg" alt=""></div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Race condition">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wyścig (race condition)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead">Wyścig (race condition) występuje, gdy <strong>wynik programu zależy od kolejności</strong>, w jakiej wątki wykonają operacje na <strong>współdzielonych danych</strong>.</p>
+<p class="lead">Planista może przełączyć wątek w dowolnym momencie, więc tej kolejności nie znamy: wątki „ścigają się” o dane, a wynik bywa inny przy każdym uruchomieniu.</p>
+<div class="note fragment"><p><strong>Wyścig o dane</strong> (data race): co najmniej dwa wątki korzystają z tej samej zmiennej, przynajmniej jeden ją zapisuje i nie ma synchronizacji.</p>
+<p><strong>Race condition</strong> to pojęcie szersze: błąd logiki, np. „sprawdź, potem działaj” (check-then-act), zdarza się nawet wtedy, gdy każda pojedyncza operacja jest atomowa.</p></div>
+</div>
+<div>
+<img class="pic sm" src="images/image-hZZyibya.jpg" alt="Mem: Not sure if bug gone or race condition">
+<p class="small">http://www.quickmeme.com/meme/36fvwp</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Atomowość">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Operacje atomowe (atomicity)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Operacja jest <strong>atomowa</strong>, gdy dla innych wątków wykonuje się „w całości albo wcale”: nikt nie zobaczy stanu pośredniego ani nie wejdzie ze swoją zmianą w jej środek. Zmienna atomowa (np. <code>AtomicInteger</code> w Javie) zapewnia to dla odczytu, zapisu i operacji typu „zwiększ o 1”.</p>
+<svg class="diagram" viewBox="0 0 1100 250" role="img" aria-label="Operacja atomowa: inny wątek widzi stan przed albo po. Operacja nieatomowa: zapis innego wątku między odczytem a zapisem przepada">
+<text x="10" y="70" font-weight="bold">atomowa</text>
+<text x="160" y="70" class="mono">T1</text>
+<rect x="200" y="40" width="440" height="50" rx="8" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/>
+<text x="420" y="71" text-anchor="middle" class="mono">odczyt 23 → +1 → zapis 24</text>
+<rect x="680" y="40" width="200" height="50" rx="8" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/>
+<text x="780" y="71" text-anchor="middle" class="mono">T2 czyta: 24</text>
+<text x="900" y="71" fill="#53ae12">✓ stan przed albo po</text>
+<text x="10" y="175" font-weight="bold">nieatomowa</text>
+<text x="160" y="160" class="mono">T1</text>
+<rect x="200" y="135" width="140" height="44" rx="8" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="270" y="163" text-anchor="middle" class="mono">odczyt 23</text>
+<rect x="390" y="135" width="90" height="44" rx="8" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="435" y="163" text-anchor="middle" class="mono">+1</text>
+<rect x="530" y="135" width="140" height="44" rx="8" fill="#e6f4da" stroke="#53ae12" stroke-width="2"/><text x="600" y="163" text-anchor="middle" class="mono">zapis 24</text>
+<text x="160" y="218" class="mono">T2</text>
+<rect x="350" y="192" width="170" height="40" rx="8" fill="#fce8e6" stroke="#d93025" stroke-width="2"/><text x="435" y="218" text-anchor="middle" class="mono">zapis 30</text>
+<text x="700" y="165">T1 nadpisuje wynik T2:</text>
+<text x="700" y="195" fill="#d93025">✗ zmiana T2 przepada (lost update)</text>
+</svg>
+<div class="note fragment"><p>Atomowość nie znaczy, że wątek nie zostanie wywłaszczony: system może go przełączyć także w trakcie, ale żaden inny wątek nie zobaczy „połowy” operacji.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Co jest atomowe w CPython?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">W CPython z GIL pojedyncza operacja na <strong>wbudowanym</strong> typie, wykonywana w całości w C, jest atomowa (lista z FAQ Pythona; <code>L</code> to lista, <code>D</code> słownik):</p>
+<div class="cols">
+<table class="simple">
+<tr><th>Atomowe</th><th>Nieatomowe (kilka kroków)</th></tr>
+<tr><td><code>L.append(x)</code>, <code>L1.extend(L2)</code></td><td><code>i = i + 1</code>, <code>i += 1</code></td></tr>
+<tr><td><code>x = L[i]</code>, <code>x = L.pop()</code></td><td><code>L.append(L[-1])</code></td></tr>
+<tr><td><code>L1[i:j] = L2</code>, <code>L.sort()</code></td><td><code>L[i] = L[j]</code></td></tr>
+<tr><td><code>x = y</code>, <code>x.field = y</code></td><td><code>D[x] = D[x] + 1</code></td></tr>
+<tr><td><code>D[x] = y</code>, <code>D1.update(D2)</code>, <code>D.keys()</code></td><td><code>if x not in D: D[x] = y</code></td></tr>
+</table>
+<div>
+<div class="note warn"><p>Tylko dla typów wbudowanych z wbudowanymi elementami. Gdy w trakcie wykona się kod w Pythonie (<code>__hash__</code>, <code>__eq__</code>, <code>__lt__</code> przy <code>sort()</code>, <code>__del__</code>), operacja przestaje być atomowa.</p></div>
+<div class="note"><p><strong>Python 3.13t</strong> (free-threaded, bez GIL): <code>list</code>, <code>dict</code> i <code>set</code> mają wewnętrzne blokady, więc operacje z lewej kolumny nadal są bezpieczne. Dokumentacja zaznacza jednak, że to opis obecnej implementacji, a nie gwarancja.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Dlaczego counter += 1 nie jest atomowe?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+import dis
+
+def inc():
+    global counter
+    counter += 1
+
+dis.dis(inc)
+</code></pre>
+<pre class="out">  3           RESUME                   0
+
+  5           LOAD_GLOBAL              0 (counter)
+              LOAD_CONST               1 (1)
+              BINARY_OP               13 (+=)
+              STORE_GLOBAL             0 (counter)
+              RETURN_CONST             0 (None)</pre>
+<p class="small">Wynik dla Pythona 3.13. Starsze wersje miały inne nazwy instrukcji (np. <code>INPLACE_ADD</code>), ale te same kroki.</p>
+</div>
+<div>
+<p class="lead">Jedna linia kodu to trzy kroki:</p>
+<ol class="points">
+<li><strong>odczyt</strong> wartości (<code>LOAD_GLOBAL</code>),</li>
+<li><strong>obliczenie</strong> nowej wartości (<code>BINARY_OP</code>),</li>
+<li><strong>zapis</strong> wyniku (<code>STORE_GLOBAL</code>).</li>
+</ol>
+<p class="lead">Między nimi interpreter może przełączyć wątek.</p>
+<div class="note"><p>Tak samo <code>self.value += 1</code> (<code>LOAD_ATTR</code> … <code>STORE_ATTR</code>), <code>d[k] += 1</code> i <code>a[0] = b[0]</code>: odczyt i zapis to osobne instrukcje.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Utracona aktualizacja: symulacja</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="racesim">
+  <div class="simctl">
+    <button class="btn" data-act="t1">Krok T1</button>
+    <button class="btn" data-act="t2">Krok T2</button>
+    <button class="btn ghost" data-act="bad">Zły przeplot</button>
+    <button class="btn ghost" data-act="rand">Losowy przeplot</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+    <label><input type="checkbox" class="uselock"> z blokadą (<code>with lock</code>)</label>
+  </div>
+  <div class="race">
+    <div class="thr" data-t="0"><h4>Wątek T1</h4><ol class="code"></ol><p class="reg"></p></div>
+    <div class="mem"><h4>Pamięć współdzielona</h4><div class="cell"></div><p class="lockst"></p></div>
+    <div class="thr" data-t="1"><h4>Wątek T2</h4><ol class="code"></ol><p class="reg"></p></div>
+  </div>
+  <ol class="log"></ol>
+  <div class="note verdict"></div>
+</div>
+</div>
+<aside class="notes">Najpierw "Zły przeplot" (scenariusz: T1 czyta 23, dodaje 1, T2 czyta 23, T1 zapisuje 24, T2 dodaje 1 i zapisuje 24). Potem zapytaj na czacie: ile wynosi counter? Następnie włącz blokadę i powtórz: T2 musi czekać na lock.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wyścig w praktyce</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import threading, time
+
+counter = 0
+
+def jeden():                      # dowolna funkcja napisana w Pythonie
+    return 1
+
+def inc(n):
+    global counter
+    for _ in range(n):
+        counter = counter + jeden()   # odczyt ... wywołanie ... zapis
+
+start = time.perf_counter()
+threads = [threading.Thread(target=inc, args=(1_000_000,)) for _ in range(4)]
+for t in threads:
+    t.start()
+for t in threads:
+    t.join()
+print(f"counter = {counter:,} w {time.perf_counter() - start:.2f} s")
+</code></pre>
+<pre class="out sm">counter = 1,905,872 w 0.42 s
+counter = 1,307,678 w 0.42 s
+counter = 2,993,032 w 0.46 s</pre>
+<p class="small">Trzy uruchomienia w Pythonie 3.13: za każdym razem inny wynik zamiast 4,000,000.</p>
+</div>
+<div>
+<ul class="points side">
+<li class="fragment">Sam <code>counter += 1</code> w CPython 3.13 z GIL daje 4,000,000, ale <strong>przypadkiem</strong>: GIL przełącza wątki tylko w wybranych miejscach (m.in. skok na początek pętli, wejście do funkcji), a nie między odczytem a zapisem.</li>
+<li class="fragment">Wystarczy wywołanie funkcji między odczytem a zapisem (jak tu) i aktualizacje giną.</li>
+<li class="fragment">W wersji free-threaded (3.13t) wątki działają naprawdę równolegle i gubi się także sam <code>counter += 1</code>.</li>
+</ul>
+<div class="note bad fragment"><p>Kod, który „działa”, nie musi być poprawny. Wynik zależy od wersji interpretera, obciążenia maszyny i szczęścia.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sekcja krytyczna (critical section)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+counter = 0
+lock = threading.Lock()
+
+def inc(n):
+    global counter
+    for _ in range(n):
+        with lock:                    # sekcja krytyczna
+            counter = counter + jeden()
+# reszta jak na poprzednim slajdzie
+</code></pre>
+<pre class="out sm">counter = 4,000,000 w 1.46 s</pre>
+<div class="note"><p>Blokada <strong>nie wstrzymuje przełączania wątków</strong> w środku sekcji krytycznej. Zapobiega temu, by <strong>inny wątek wszedł</strong> do kodu chronionego tą samą blokadą, dopóki ją trzymamy.</p></div>
+</div>
+<div class="fragment">
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import threading, time
+
+counter = 0
+lock = threading.Lock()
+
+def inc(n):
+    global counter
+    lokalnie = 0
+    for _ in range(n):
+        lokalnie += 1              # tylko dane tego wątku
+    with lock:
+        counter += lokalnie        # jedna krótka sekcja krytyczna
+
+start = time.perf_counter()
+threads = [threading.Thread(target=inc, args=(1_000_000,)) for _ in range(4)]
+for t in threads:
+    t.start()
+for t in threads:
+    t.join()
+print(f"counter = {counter:,} w {time.perf_counter() - start:.2f} s")
+</code></pre>
+<pre class="out sm">counter = 4,000,000 w 0.21 s</pre>
+<div class="note warn"><p>Blokada w każdej iteracji kosztuje: cztery wątki walczą o nią milion razy. Szybciej jest nie współdzielić danych w pętli i połączyć wyniki raz, na końcu.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Nie polegaj na atomowości</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Nawet jeśli pojedyncza operacja jest atomowa, nie budujmy na tym poprawności programu:</p>
+<div class="cols wl">
+<ul class="points side">
+<li class="fragment">inny interpreter (PyPy, GraalPy) albo nowa wersja CPython może działać inaczej; wersja free-threaded 3.13t to świeży przykład,</li>
+<li class="fragment">czytelnik kodu nie wie, które operacje są atomowe, i łatwo zepsuje kod drobną zmianą,</li>
+<li class="fragment"><strong>sekwencja</strong> atomowych operacji <strong>nie jest</strong> atomowa.</li>
+</ul>
+<div class="fragment">
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+if key not in cache:            # atomowe
+    cache[key] = compute(key)   # atomowe, ale razem: wyścig!
+
+stack.append(stack[-1])         # odczyt i zapis: dwie operacje
+</code></pre>
+<p class="small">Bezpieczniej: jedna operacja na słowniku (<code>cache.setdefault(key, value)</code>) albo blokada wokół całej sekwencji.</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="quiz multi compact"><p class="q">Które operacje są atomowe w CPython z GIL? <code>L</code> to lista, <code>D</code> słownik z kluczami typu <code>str</code>. (zaznacz wszystkie)</p><div class="opts"><button class="opt" data-ok="1">L.append(x)</button><button class="opt" data-ok="0">counter += 1</button><button class="opt" data-ok="1">D["k"] = v</button><button class="opt" data-ok="0">D["k"] += 1</button><button class="opt" data-ok="1">x = L.pop()</button><button class="opt" data-ok="0">L[i] = L[j]</button></div><button class="btn check">Sprawdź</button><p class="explain">Atomowe są pojedyncze operacje wykonywane w C na typach wbudowanych. <code>+=</code> na zmiennej lub elemencie słownika oraz <code>L[i] = L[j]</code> to osobny odczyt i zapis.</p></div>
+<div class="quiz compact"><p class="q">Dwa wątki wykonują raz <code>counter += 1</code> bez blokady (start: <code>counter = 0</code>). Ile może wynosić <code>counter</code> na końcu?</p><div class="opts"><button class="opt" data-ok="0">tylko 2</button><button class="opt" data-ok="1">1 albo 2</button><button class="opt" data-ok="0">0, 1 albo 2</button></div><p class="explain">2, gdy kroki się nie przeplotą. 1, gdy oba wątki odczytają 0 i oba zapiszą 1 (utracona aktualizacja). 0 nie jest możliwe: ktoś na pewno zapisze 1.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Check-then-act: sprzedaż biletów</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead">Został <strong>jeden bilet</strong>, a dwóch klientów kupuje go w tej samej chwili. Oba wątki widzą, że bilet jest dostępny, i oba go sprzedają.</p>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import threading, time
+
+bilety = 1
+sprzedane = []
+
+def kup(klient):
+    global bilety
+    if bilety &gt; 0:                 # 1. sprawdź (check)
+        time.sleep(0.01)           #    płatność, zapis do bazy...
+        bilety -= 1                # 2. działaj (act)
+        sprzedane.append(klient)
+
+klienci = [threading.Thread(target=kup, args=(k,)) for k in ("Ala", "Olek")]
+for t in klienci:
+    t.start()
+for t in klienci:
+    t.join()
+print("sprzedane:", sprzedane, "| pozostało biletów:", bilety)
+</code></pre>
+<pre class="out sm">sprzedane: ['Ala', 'Olek'] | pozostało biletów: -1</pre>
+</div>
+<div>
+<img class="pic sm" src="images/image-fAE8rbKm.jpg" alt="Mem: Two users booked the same room at the same time">
+<p class="small">https://dev.to/victorhazbun/best-practices-avoid-race-conditions-i31</p>
+<div class="note warn"><p><code>time.sleep(0.01)</code> udaje płatność i poszerza „okno wyścigu”. Bez niego błąd zdarza się rzadko, co jest jeszcze gorsze: przechodzi testy i wychodzi na produkcji.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Check-then-act: poprawka</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead">Sprawdzenie i działanie muszą być w <strong>jednej sekcji krytycznej</strong>:</p>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+lock = threading.Lock()
+
+def kup(klient):
+    global bilety
+    with lock:                     # check i act razem
+        if bilety &gt; 0:
+            time.sleep(0.01)
+            bilety -= 1
+            sprzedane.append(klient)
+</code></pre>
+<pre class="out sm">sprzedane: ['Ala'] | pozostało biletów: 0</pre>
+</div>
+<div>
+<p class="lead">Ten sam wzorzec, inne dane:</p>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+with lock:                  # x współdzielone z innym wątkiem
+    if x == 5:
+        y = x * 2           # x nie zmieni się w międzyczasie: y == 10
+</code></pre>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+with lock:
+    if not alarm_wyslany:   # bez blokady dwa wątki z tym samym
+        alarm_wyslany = True    # odczytem czujnika wyślą dwa alarmy
+        wyslij_alarm(odczyt)
+</code></pre>
+<p class="small">Wielokrotny alarm z jednego odczytu czujnika to klasyczny objaw check-then-act (por. symulacja czujnika z wykładu 1).</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Jak zapobiegać wyścigom?</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<ul class="points icons">
+<li class="fragment"><i class="fa-solid fa-user-lock"></i><strong>Nie współdziel stanu:</strong> każdy wątek pracuje na własnych danych (zmienne lokalne, <code>threading.local()</code>), a wyniki łączymy na końcu, jak w map/reduce (wykład 2).</li>
+<li class="fragment"><i class="fa-solid fa-snowflake"></i><strong>Dane niemutowalne</strong> (<code>tuple</code>, <code>str</code>, <code>frozenset</code>) można czytać z wielu wątków bez blokad (wykład 2).</li>
+<li class="fragment"><i class="fa-solid fa-right-left"></i><strong>Przekazuj komunikaty</strong> zamiast współdzielić zmienne: <code>queue.Queue</code> jest bezpieczna dla wątków (producent-konsument, wykład 5).</li>
+<li class="fragment"><i class="fa-solid fa-lock"></i><strong>Synchronizuj:</strong> sekcja krytyczna (<code>Lock</code>, wykład 3) obejmuje <em>całą</em> sekwencję read-modify-write albo check-then-act.</li>
+<li class="fragment"><i class="fa-solid fa-atom"></i><strong>Operacje atomowe:</strong> w Javie <code>AtomicInteger</code>, <code>ConcurrentHashMap</code>. Biblioteka standardowa Pythona nie ma liczników atomowych, więc zostaje blokada albo kolejka.</li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Volatile">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Widoczność zmian: volatile w Javie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead">Drugi problem to <strong>widoczność</strong>: kompilator JIT i procesor mogą trzymać wartość w rejestrze i przestawiać instrukcje, więc wątek może nigdy nie zobaczyć zmiany zrobionej przez inny wątek.</p>
+<pre class="code-wrap sm"><code class="language-java" data-trim data-noescape>
+public class StopFlag {
+    private static volatile boolean running = true;
+
+    public static void main(String[] args) throws InterruptedException {
+        Thread worker = new Thread(() -&gt; {
+            long n = 0;
+            while (running) n++;
+            System.out.println("worker zatrzymany po " + n + " iteracjach");
+        });
+        worker.start();
+        Thread.sleep(100);
+        running = false;              // zapis widoczny dla workera
+        worker.join();
+    }
+}
+</code></pre>
+<pre class="out sm">worker zatrzymany po 138082989 iteracjach</pre>
+<p class="small">Bez <code>volatile</code> ten program (Java 21, HotSpot) się nie kończy: JIT wyciąga odczyt <code>running</code> przed pętlę.</p>
+</div>
+<div>
+<p class="lead"><code>volatile</code> gwarantuje:</p>
+<ul class="points side">
+<li><strong>widoczność:</strong> zapis jest widoczny dla każdego późniejszego odczytu w innym wątku,</li>
+<li><strong>porządek</strong> (happens-before): operacji sprzed zapisu <code>volatile</code> nie wolno przenieść za niego, a operacji po odczycie <code>volatile</code> przed niego.</li>
+</ul>
+<div class="note warn"><p>Popularne uproszczenie „volatile = czytaj z pamięci głównej, nie z cache” jest nieścisłe: cache procesorów są spójne (koherentne). Problem leży w rejestrach, optymalizacjach kompilatora i przestawianiu instrukcji.</p></div>
+<div class="note"><p>C# ma <code>volatile</code> o podobnym znaczeniu. W C/C++ <code>volatile</code> <strong>nie</strong> służy do synchronizacji wątków (tam: <code>std::atomic</code>).</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Volatile nie wystarczy!</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<img class="pic sm" src="images/image-CtDGpbvt.png" alt="Dwa wątki na dwóch procesorach odczytują counter = 0 i obaj zapisują 0+1">
+<p class="small">https://jenkov.com/tutorials/java-concurrency/volatile.html</p>
+<p class="lead"><code>counter++</code> to nadal trzy kroki. <code>volatile</code> sprawi, że oba wątki zobaczą aktualną wartość w chwili odczytu, ale nie zabroni im obu odczytać 0 i obu zapisać 1.</p>
+</div>
+<div>
+<pre class="code-wrap sm"><code class="language-java" data-trim data-noescape>
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class Licznik {
+    static volatile int zwykly = 0;
+    static final AtomicInteger atomowy = new AtomicInteger();
+
+    public static void main(String[] args) throws InterruptedException {
+        Runnable r = () -&gt; {
+            for (int i = 0; i &lt; 1_000_000; i++) {
+                zwykly++;                     // odczyt, +1, zapis
+                atomowy.incrementAndGet();    // jedna operacja atomowa (CAS)
+            }
+        };
+        Thread a = new Thread(r), b = new Thread(r);
+        a.start(); b.start();
+        a.join(); b.join();
+        System.out.println("volatile int:  " + zwykly);
+        System.out.println("AtomicInteger: " + atomowy.get());
+    }
+}
+</code></pre>
+<pre class="out sm">volatile int:  1377489
+AtomicInteger: 2000000</pre>
+<div class="note"><p><code>volatile</code> daje widoczność, nie atomowość. Rozwiązania: <code>AtomicInteger</code> (sprzętowa instrukcja compare-and-swap) albo <code>synchronized</code>.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>A w Pythonie? volatile i GIL</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<ul class="points side">
+<li>Python <strong>nie ma</strong> <code>volatile</code> i go nie potrzebuje: interpreter nie trzyma zmiennych w rejestrach między instrukcjami, a przejęcie GIL działa jak bariera pamięci.</li>
+<li>W 3.13t (bez GIL) widoczność zapewniają operacje atomowe i blokady wewnątrz interpretera.</li>
+<li><strong>GIL nie chroni przed wyścigami:</strong> chroni stan interpretera, a wątek może zostać przełączony między instrukcjami bajtkodu (prośba o oddanie GIL co <code>sys.getswitchinterval()</code>, domyślnie 5 ms).</li>
+</ul>
+<div class="quiz compact"><p class="q">GIL w CPython…</p><div class="opts"><button class="opt" data-ok="0">chroni program przed race condition</button><button class="opt" data-ok="1">chroni interpreter, ale wątki przełączają się między instrukcjami</button><button class="opt" data-ok="0">sprawia, że x += 1 jest atomowe</button></div><p class="explain">GIL gwarantuje, że naraz wykonuje się jedna instrukcja bajtkodu. Nasze niezmienniki (np. „bilety ≥ 0”) musimy chronić sami.</p></div>
+</div>
+<div>
+<p class="lead">Flaga zatrzymania wątku: zamiast zmiennej globalnej użyjmy <code>threading.Event</code>.</p>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import threading, time
+
+stop = threading.Event()
+
+def worker():
+    n = 0
+    while not stop.is_set():
+        n += 1
+    print(f"worker zatrzymany po {n:,} iteracjach")
+
+t = threading.Thread(target=worker)
+t.start()
+time.sleep(0.1)
+stop.set()
+t.join()
+</code></pre>
+<pre class="out sm">worker zatrzymany po 1,682,042 iteracjach</pre>
+
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><strong><span style="font-size:2.25em">Problemy przetwarzania równoległego</span></strong></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:26.144%;top:94.717%;width:45.748%;height:5.178%;"><p><span style="font-size:0.625em">https://www.reddit.com/r/ProgrammerHumor/comments/bzv8q4/parallelism_be_like/</span></p>
+</div>
+<div class="el img" style="left:29.412%;top:19.418%;width:38.126%;height:73.357%;"><img src="images/image-aaMWKN2Y.jpg" alt=""></div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Zakleszczenie">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zakleszczenie (deadlock)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead">Zakleszczenie występuje, gdy co najmniej dwa wątki <strong>czekają w nieskończoność</strong> na blokady lub zasoby trzymane przez siebie nawzajem.</p>
+<p class="lead">Program nie zgłasza błędu i nie zużywa CPU: po prostu <strong>stoi</strong>. Często stoi tylko część wątków, więc aplikacja „prawie” działa.</p>
+<div class="note"><p>Analogia: na skrzyżowanie równorzędne wjechały naraz cztery samochody i każdy czeka na tego z prawej.</p></div>
+</div>
+<div>
+<img class="pic" src="images/image-uJYLwSJD.jpg" alt="Mem: Explain deadlock and we'll hire you. Hire me and I'll explain it to you.">
+<p class="small">https://devrant.com/rants/1756955/this-is-the-real-deadlock</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zakleszczenie: dwie blokady</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<img class="pic" src="images/image-4ovOVRMZ.png" alt="Wątek X trzyma zasób A i czeka na B, wątek Y trzyma B i czeka na A">
+<p class="small">https://www.geeksforgeeks.org/deadlock-in-java-multithreading/</p>
+<p class="lead">T1 przelewa z konta A na B, a T2 z B na A. Każdy zajmuje najpierw „swoje” konto.</p>
+</div>
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import threading, time
+
+konto_a = threading.Lock()
+konto_b = threading.Lock()
+
+def przelew(nazwa, z, do):
+    with z:
+        print(f"{nazwa}: mam pierwszą blokadę, czekam na drugą...")
+        time.sleep(0.1)
+        with do:
+            print(f"{nazwa}: przelew wykonany")
+
+t1 = threading.Thread(target=przelew, args=("T1", konto_a, konto_b))
+t2 = threading.Thread(target=przelew, args=("T2", konto_b, konto_a))
+t1.start(); t2.start()
+t1.join(); t2.join()
+print("koniec")                    # nigdy się nie wykona
+</code></pre>
+<pre class="out sm">T1: mam pierwszą blokadę, czekam na drugą...
+T2: mam pierwszą blokadę, czekam na drugą...</pre>
+<p class="small">…i nic więcej: program trzeba przerwać (Ctrl+C).</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Warunki Coffmana</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Zakleszczenie jest możliwe tylko wtedy, gdy <strong>jednocześnie</strong> zachodzą cztery warunki (Coffman, 1971). Wystarczy złamać jeden:</p>
+<table class="simple">
+<tr><th>Warunek</th><th>Co oznacza</th><th>Jak go złamać</th></tr>
+<tr><td><strong>Wzajemne wykluczanie</strong> (mutual exclusion)</td><td>zasób może mieć naraz tylko jeden wątek</td><td>dane niemutowalne, zasoby tylko do odczytu</td></tr>
+<tr><td><strong>Trzymanie i oczekiwanie</strong> (hold and wait)</td><td>wątek trzyma blokadę i czeka na kolejną</td><td>bierz wszystkie blokady naraz albo żadnej</td></tr>
+<tr><td><strong>Brak wywłaszczania</strong> (no preemption)</td><td>blokady nie można odebrać siłą</td><td>timeout: <code>acquire(timeout=...)</code>, po porażce oddaj, co masz</td></tr>
+<tr><td><strong>Cykliczne oczekiwanie</strong> (circular wait)</td><td>cykl w grafie oczekiwania: T1 → T2 → … → T1</td><td>globalna kolejność pobierania blokad</td></tr>
+</table>
+<p class="small">Strategie: <strong>zapobieganie</strong> (łamiemy warunek), <strong>unikanie</strong> (np. algorytm bankiera Dijkstry), <strong>wykrywanie i odtwarzanie</strong> (bazy danych wykrywają cykl i wycofują jedną z transakcji).</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Graf oczekiwania: symulator</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="dlsim">
+  <div class="simctl">
+    <span class="tbtns"></span>
+    <button class="btn ghost" data-act="auto">Losowo: start / pauza</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+    <label>wątki: <select class="nthr"><option value="2">2</option><option value="3" selected>3</option></select></label>
+    <label><input type="checkbox" class="order"> globalna kolejność blokad</label>
+  </div>
+  <div class="dl">
+    <svg viewBox="0 0 460 330" role="img" aria-label="Graf przydziału zasobów: wątki, blokady, krawędzie trzyma i czeka"></svg>
+    <div>
+      <div class="progs"></div>
+      <p class="hint">Krawędź <b style="color:#53ae12">blokada → wątek</b>: wątek ją trzyma. Krawędź <b style="color:#e8710a">wątek → blokada</b>: wątek na nią czeka. Cykl oznacza zakleszczenie.</p>
+      <div class="note verdict"></div>
+    </div>
+  </div>
+</div>
+</div>
+<aside class="notes">Najpierw krokami: każdy wątek bierze pierwszą blokadę, potem każdy próbuje wziąć drugą. Zapytaj na czacie, który warunek Coffmana łamie opcja "globalna kolejność blokad" (cykliczne oczekiwanie).</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zapobieganie: kolejność blokad</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import threading, time
+
+class Konto:
+    def __init__(self, nr, saldo):
+        self.nr, self.saldo = nr, saldo
+        self.lock = threading.Lock()
+
+def przelew(z, do, kwota):
+    # zawsze najpierw blokada konta o mniejszym numerze
+    pierwsze, drugie = sorted((z, do), key=lambda k: k.nr)
+    with pierwsze.lock:
+        time.sleep(0.1)
+        with drugie.lock:
+            z.saldo -= kwota
+            do.saldo += kwota
+
+a, b = Konto(1, 100), Konto(2, 100)
+t1 = threading.Thread(target=przelew, args=(a, b, 30))
+t2 = threading.Thread(target=przelew, args=(b, a, 50))
+t1.start(); t2.start()
+t1.join(); t2.join()
+print("saldo A:", a.saldo, "| saldo B:", b.saldo)
+</code></pre>
+<pre class="out sm">saldo A: 120 | saldo B: 80</pre>
+</div>
+<div>
+<ul class="points side">
+<li>Gdy wszystkie wątki pobierają blokady <strong>w tej samej kolejności</strong>, cykl w grafie oczekiwania jest niemożliwy (łamiemy cykliczne oczekiwanie).</li>
+<li>Klucz porządku: numer konta, <code>id()</code> obiektu, poziom w hierarchii (np. najpierw tabela, potem wiersz).</li>
+<li>T2 chce przelać z B na A, ale i tak zaczyna od blokady A, więc czeka, aż T1 skończy.</li>
+<li>Sprawdź w symulatorze: zaznacz „globalna kolejność blokad”.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zapobieganie: timeout i wycofanie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import random, threading, time
+
+konto_a, konto_b = threading.Lock(), threading.Lock()
+
+def przelew(nazwa, z, do):
+    while True:
+        with z:
+            time.sleep(0.1)
+            if do.acquire(timeout=0.5):          # czekaj najwyżej 0,5 s
+                try:
+                    print(f"{nazwa}: przelew wykonany")
+                    return
+                finally:
+                    do.release()
+        print(f"{nazwa}: nie dostałem drugiej blokady, wycofuję się")
+        time.sleep(random.uniform(0, 0.2))       # losowa przerwa
+
+t1 = threading.Thread(target=przelew, args=("T1", konto_a, konto_b))
+t2 = threading.Thread(target=przelew, args=("T2", konto_b, konto_a))
+t1.start(); t2.start()
+t1.join(); t2.join()
+</code></pre>
+<pre class="out sm">T1: nie dostałem drugiej blokady, wycofuję się
+T2: przelew wykonany
+T1: przelew wykonany</pre>
+<p class="small">Przykładowy przebieg: kolejność zależy od planisty.</p>
+</div>
+<div>
+<ul class="points side">
+<li><code>lock.acquire(blocking=False)</code> próbuje zająć blokadę i <strong>od razu</strong> zwraca <code>True</code> albo <code>False</code>.</li>
+<li><code>lock.acquire(timeout=0.5)</code> czeka <strong>najwyżej</strong> 0,5 s.</li>
+<li>Po porażce oddajemy wszystkie zdobyte blokady (łamiemy „trzymanie i oczekiwanie” oraz „brak wywłaszczania”) i próbujemy ponownie.</li>
+</ul>
+<div class="note warn"><p>Przerwa przed ponowną próbą powinna być <strong>losowa</strong>. Gdy wątki wycofują się w tym samym rytmie, grozi livelock (za chwilę).</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Inne źródła zakleszczeń</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead">Ponowne zajęcie tej samej blokady:</p>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import threading
+
+class Magazyn:
+    def __init__(self):
+        self.lock = threading.Lock()      # zamień na threading.RLock()
+        self.stan = {"garnek": 3}
+
+    def wydaj(self, towar):
+        with self.lock:
+            self.stan[towar] -= 1
+
+    def wydaj_wiele(self, towar, n):
+        with self.lock:
+            for _ in range(n):
+                self.wydaj(towar)         # drugi acquire tego samego Lock
+
+m = Magazyn()
+m.wydaj_wiele("garnek", 2)
+print(m.stan)
+</code></pre>
+<p class="small">Z <code>Lock</code> program wisi: wątek czeka sam na siebie. Z <code>threading.RLock()</code> (wykład 3) ten sam wątek może wejść wielokrotnie:</p>
+<pre class="out sm">{'garnek': 1}</pre>
+</div>
+<div>
+<p class="lead">Wątki czekające na siebie przez <code>join()</code>:</p>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from threading import Thread, current_thread
+
+def task(other):
+    ja = current_thread().name
+    print(f"[{ja}] czekam na [{other.name}]...")
+    other.join()
+
+main = current_thread()
+t = Thread(target=task, args=(main,))
+t.start()
+task(t)
+</code></pre>
+<pre class="out sm">[Thread-1 (task)] czekam na [MainThread]...
+[MainThread] czekam na [Thread-1 (task)]...</pre>
+<p class="small">…i program wisi. Zakleszczenie nie wymaga jawnych blokad: wystarczy czekanie w cyklu (także na kolejce czy zdarzeniu).</p>
+<div class="note"><p>Jeszcze jedno źródło: <code>fork()</code> w procesie z wątkami (przy multiprocessing).</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="quiz compact"><p class="q">Wszystkie wątki pobierają blokady w kolejności rosnących numerów kont. Który warunek Coffmana łamiemy?</p><div class="opts"><button class="opt" data-ok="0">wzajemne wykluczanie</button><button class="opt" data-ok="0">trzymanie i oczekiwanie</button><button class="opt" data-ok="0">brak wywłaszczania</button><button class="opt" data-ok="1">cykliczne oczekiwanie</button></div><p class="explain">Przy wspólnej kolejności krawędzie w grafie oczekiwania prowadzą zawsze od „mniejszej” do „większej” blokady, więc nie może powstać cykl.</p></div>
+<pre class="code-wrap" style="width:60%"><code class="language-python" data-trim data-noescape>
+lock = threading.Lock()
+with lock:
+    with lock:
+        print("ok")
+</code></pre>
+<div class="quiz compact"><p class="q">Co zrobi ten kod?</p><div class="opts"><button class="opt" data-ok="0">wypisze ok</button><button class="opt" data-ok="0">zgłosi RuntimeError</button><button class="opt" data-ok="1">zawiesi się na zawsze</button></div><p class="explain"><code>Lock</code> nie pamięta właściciela, więc drugie <code>acquire()</code> czeka, aż ktoś go zwolni, a zwolnić może tylko ten sam, czekający wątek. Z <code>RLock</code> kod wypisze „ok”.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Zagłodzenie">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zagłodzenie (starvation)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead">Zagłodzenie: wątek jest gotowy do pracy, ale <strong>przez bardzo długi (nieograniczony) czas nie dostaje</strong> zasobu, bo ciągle wyprzedzają go inne wątki.</p>
+<p class="lead">W odróżnieniu od zakleszczenia system jako całość robi postęp, tylko nie dla wszystkich.</p>
+<div class="note"><p>Przykład: obiekt ma zsynchronizowaną metodę, która długo trwa. „Chciwy” wątek wywołuje ją bez przerwy, a pozostałe wątki prawie nigdy nie dostają blokady.</p></div>
+</div>
+<div>
+<img class="pic" src="images/image-mYFsa37I.jpg" alt="Mem: Another thread acquires a lock. I'll just wait here">
+<p class="small">https://imgflip.com/i/5gasaq</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przyczyny zagłodzenia</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<ul class="points side">
+<li class="fragment"><strong>Priorytety:</strong> wątki o wysokim priorytecie zajmują CPU, a te o niskim czekają (Java: <code>Thread.setPriority()</code>, system: <code>nice</code>). Python nie ma priorytetów wątków, ale ten sam problem pojawia się w kolejkach priorytetowych zadań.</li>
+<li class="fragment"><strong>Niesprawiedliwe blokady:</strong> dokumentacja <code>Lock.acquire()</code> nie określa, który z czekających wątków dostanie blokadę. Wątek, który właśnie ją oddał, może ją od razu odzyskać (barging).</li>
+<li class="fragment"><strong>Długie sekcje krytyczne</strong> „chciwych” wątków.</li>
+<li class="fragment"><strong>notify()</strong> budzi jeden wątek, bez gwarancji którego (Java: dowolny; Python: <code>Condition.notify()</code> nie obiecuje kolejności), więc pechowy wątek może czekać bez końca.</li>
+<li class="fragment"><strong>Czytelnicy i pisarze:</strong> ciągły strumień czytelników zagładza pisarza (wykład 5).</li>
+</ul>
+<div class="note fragment"><p>Moduł <code>threading</code> jest luźno wzorowany na wątkach Javy, ale nie ma priorytetów ani grup wątków, a wątku nie da się z zewnątrz zatrzymać, wstrzymać ani przerwać. Blokady są osobnymi obiektami (<code>Lock</code>, <code>RLock</code>), a nie cechą każdego obiektu jak w Javie.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawiedliwość blokad w Pythonie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from time import sleep
+from threading import Thread, Lock, Semaphore
+
+def task(lock, nr, kolejnosc):
+    for _ in range(5):
+        with lock:
+            kolejnosc.append(nr)       # kto wszedł do sekcji krytycznej
+            sleep(0.2)
+
+for nazwa, lock in (("Lock", Lock()), ("Semaphore(1)", Semaphore(1))):
+    kolejnosc = []
+    threads = [Thread(target=task, args=(lock, i, kolejnosc)) for i in range(2)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    print(f"{nazwa:13}", kolejnosc)
+</code></pre>
+<pre class="out sm">Lock          [0, 1, 0, 1, 0, 1, 0, 1, 0, 1]
+Semaphore(1)  [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]</pre>
+<p class="small">Python 3.13, Linux, wynik powtarzalny.</p>
+</div>
+<div>
+<ul class="points side">
+<li><code>Lock</code> w 3.13: wątki zmieniają się na przemian.</li>
+<li><code>Semaphore(1)</code>: <code>release()</code> zwiększa licznik i budzi czekający wątek, ale zanim ten się obudzi, wątek 0 wraca do <code>acquire()</code>, widzi wolne miejsce i wchodzi znowu.</li>
+</ul>
+<div class="note bad"><p>Ani <code>Lock</code>, ani <code>Semaphore</code> nie gwarantują kolejności FIFO. Wynik zależy od wersji Pythona i systemu: w starszych wersjach także <code>Lock</code> dawał <code>0, 0, 0, 0, 0, 1, …</code></p></div>
+<div class="note"><p><code>with lock:</code> i ręczne <code>acquire()</code>/<code>release()</code> działają identycznie: menedżer kontekstu nie wpływa na sprawiedliwość, gwarantuje tylko zwolnienie blokady przy wyjątku.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Inwersja priorytetów (priority inversion)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<svg class="diagram" viewBox="0 0 1100 250" role="img" aria-label="Oś czasu: L zajmuje blokadę, H czeka na nią, M wywłaszcza L, więc H czeka na M">
+<text x="10" y="55">H (wysoki)</text><text x="10" y="120">M (średni)</text><text x="10" y="185">L (niski)</text>
+<rect x="120" y="160" width="100" height="40" rx="4" fill="#53ae12"/><text x="170" y="186" text-anchor="middle" fill="#fff" class="mono">lock</text>
+<rect x="320" y="160" width="50" height="40" rx="4" fill="#53ae12"/>
+<rect x="870" y="160" width="100" height="40" rx="4" fill="#53ae12"/><text x="920" y="186" text-anchor="middle" fill="#fff" class="mono">unlock</text>
+<rect x="220" y="30" width="100" height="40" rx="4" fill="#1a73d9"/><text x="270" y="56" text-anchor="middle" fill="#fff" class="mono">lock?</text>
+<rect x="320" y="30" width="650" height="40" rx="4" fill="#fce8e6" stroke="#d93025" stroke-width="2" stroke-dasharray="6 4"/><text x="645" y="56" text-anchor="middle" fill="#d93025">H czeka na blokadę trzymaną przez L</text>
+<rect x="970" y="30" width="120" height="40" rx="4" fill="#1a73d9"/><text x="1030" y="56" text-anchor="middle" fill="#fff">działa</text>
+<rect x="370" y="95" width="500" height="40" rx="4" fill="#e8710a"/><text x="620" y="121" text-anchor="middle" fill="#fff">M pracuje (blokady nie potrzebuje)</text>
+<line x1="170" y1="210" x2="920" y2="210" stroke="#e8710a" stroke-width="3"/><text x="545" y="230" text-anchor="middle" fill="#666" style="font-size:15px">L trzyma blokadę, ale nie dostaje procesora</text>
+<line x1="120" y1="245" x2="1090" y2="245" stroke="#999" stroke-width="1.5"/><text x="1090" y="240" text-anchor="end" fill="#666" style="font-size:15px">czas →</text>
+</svg>
+<div class="cols">
+<p class="lead">Zadanie H czeka na blokadę trzymaną przez L. L nie może jej oddać, bo wywłaszcza je M. W efekcie H czeka na M, choć M ma niższy priorytet.</p>
+<div class="note"><p><strong>Mars Pathfinder (1997):</strong> przez inwersję priorytetów komputer lądownika co chwilę się resetował (watchdog). Naprawiono to zdalnie, włączając w VxWorks <strong>dziedziczenie priorytetów</strong> (priority inheritance): L na czas trzymania blokady dostaje priorytet H.</p></div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Livelock</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead">Livelock: wątki <strong>nie są zablokowane</strong>, cały czas coś robią (i zużywają CPU), ale <strong>nie robią postępu</strong>, bo bez przerwy reagują na siebie nawzajem.</p>
+<p class="lead">Typowo: dwa wątki próbują zdobyć kilka blokad, wykrywają konflikt, oba się wycofują i ponawiają próbę w tym samym rytmie.</p>
+</div>
+<div>
+<img class="pic" src="images/image-3HUNPECR.jpg" alt="Skrzyżowanie: cztery samochody zablokowane, potem wszystkie się wycofały">
+<p class="small">http://15418.courses.cs.cmu.edu/spring2013/article/27</p>
+<p class="small">Po lewej zakleszczenie. Po prawej wszyscy się wycofali… i za chwilę znowu wjadą naraz.</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Livelock: korytarz</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Dwie osoby mijają się na korytarzu: A ustępuje na drugi pas, B też. Nadal stoją naprzeciw siebie, więc obie ustępują z powrotem… i tak w nieskończoność.</p>
+<div class="sim" id="livesim">
+  <div class="simctl">
+    <button class="btn" data-act="step">Krok</button>
+    <button class="btn" data-act="play">Start / pauza</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+    <label><input type="checkbox" class="backoff"> losowe wycofanie (back-off): ustępuj z prawdopodobieństwem 50%</label>
+  </div>
+  <div class="corr"></div>
+  <p class="stat"></p>
+  <div class="note verdict"></div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Livelock w kodzie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import threading, time
+
+def task(nr, lock1, lock2):
+    for _ in range(5):
+        with lock1:
+            time.sleep(0.1)
+            if lock2.locked():
+                print(f"T{nr}: druga blokada zajęta, ustępuję...")
+                continue                 # zwolnij lock1 i spróbuj od nowa
+            with lock2:
+                print(f"T{nr}: udało się!")
+                return
+    print(f"T{nr}: poddaję się")
+
+lock_a, lock_b = threading.Lock(), threading.Lock()
+t1 = threading.Thread(target=task, args=(1, lock_a, lock_b))
+t2 = threading.Thread(target=task, args=(2, lock_b, lock_a))
+t1.start(); t2.start()
+t1.join(); t2.join()
+</code></pre>
+<div class="note warn"><p><code>lock2.locked()</code>, a potem <code>with lock2</code> to też check-then-act: między sprawdzeniem a zajęciem ktoś może zająć blokadę. Poprawna wersja używa <code>acquire(blocking=False)</code>.</p></div>
+</div>
+<pre class="out sm">T1: druga blokada zajęta, ustępuję...
+T2: druga blokada zajęta, ustępuję...
+T1: druga blokada zajęta, ustępuję...
+T2: druga blokada zajęta, ustępuję...
+T1: druga blokada zajęta, ustępuję...
+T2: druga blokada zajęta, ustępuję...
+T1: druga blokada zajęta, ustępuję...
+T2: druga blokada zajęta, ustępuję...
+T1: druga blokada zajęta, ustępuję...
+T1: poddaję się
+T2: udało się!</pre>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Livelock: przeciwdziałanie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import random, threading, time
+
+def task(nr, lock1, lock2):
+    for proba in range(1, 6):
+        with lock1:
+            time.sleep(0.1)
+            if lock2.acquire(blocking=False):    # spróbuj, nie czekaj
+                try:
+                    print(f"T{nr}: udało się w próbie {proba}")
+                    return
+                finally:
+                    lock2.release()
+            print(f"T{nr}: druga blokada zajęta, ustępuję...")
+        time.sleep(random.uniform(0, 0.3))      # losowe wycofanie (back-off)
+    print(f"T{nr}: poddaję się")
+
+lock_a, lock_b = threading.Lock(), threading.Lock()
+t1 = threading.Thread(target=task, args=(1, lock_a, lock_b))
+t2 = threading.Thread(target=task, args=(2, lock_b, lock_a))
+t1.start(); t2.start()
+t1.join(); t2.join()
+</code></pre>
+<pre class="out sm">T1: druga blokada zajęta, ustępuję...
+T2: udało się w próbie 1
+T1: udało się w próbie 2</pre>
+<p class="small">Przykładowy przebieg: liczba prób zależy od losowania.</p>
+</div>
+<div>
+<ul class="points side">
+<li><strong>losowa przerwa</strong> przed ponowną próbą (randomized back-off, jak w Ethernecie),</li>
+<li><strong>asymetria:</strong> z góry wiadomo, kto ustępuje (np. wątek o mniejszym numerze),</li>
+<li><strong>globalna kolejność blokad:</strong> wtedy w ogóle nie trzeba się wycofywać,</li>
+<li><strong>nie gromadź blokad:</strong> bierz wszystkie naraz albo żadnej i oddawaj je przed ponowną próbą.</li>
+</ul>
+<div class="note warn"><p><code>RLock</code> nie pomaga na livelock: to blokada, do której ten sam wątek może wejść wielokrotnie, a nie mechanizm kolejkowania czekających.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Porównanie anomalii</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th>Anomalia</th><th>Stan wątków</th><th>Postęp</th><th>CPU</th><th>Typowe lekarstwo</th></tr>
+<tr><td><strong>Wyścig</strong></td><td>działają</td><td>jest, ale wynik bywa błędny</td><td>normalne</td><td>sekcja krytyczna, brak współdzielenia, kolejki</td></tr>
+<tr><td><strong>Zakleszczenie</strong></td><td>zablokowane, czekają na siebie w cyklu</td><td>brak</td><td>ok. 0%</td><td>kolejność blokad, timeout</td></tr>
+<tr><td><strong>Livelock</strong></td><td>aktywne, ciągle reagują na siebie</td><td>brak</td><td>wysokie</td><td>losowy back-off, asymetria</td></tr>
+<tr><td><strong>Zagłodzenie</strong></td><td>jedne działają, inne czekają</td><td>tylko dla części wątków</td><td>normalne</td><td>sprawiedliwe kolejki (FIFO), postarzanie</td></tr>
+<tr><td><strong>Inwersja priorytetów</strong></td><td>ważny wątek czeka na mniej ważny</td><td>opóźniony</td><td>normalne</td><td>dziedziczenie priorytetów</td></tr>
+</table>
+<p class="small">Wyścig psuje <strong>bezpieczeństwo</strong> (safety: „nic złego się nie stanie”), a zakleszczenie, livelock i zagłodzenie psują <strong>żywotność</strong> (liveness: „coś dobrego w końcu się stanie”).</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Rozpoznaj anomalię</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cards two">
+<div class="quiz card"><p class="q">Dwa wątki zużywają 100% CPU, logi są pełne komunikatów „ustępuję”, ale żadne zadanie się nie kończy.</p><div class="opts"><button class="opt" data-ok="0">zakleszczenie</button><button class="opt" data-ok="1">livelock</button><button class="opt" data-ok="0">zagłodzenie</button><button class="opt" data-ok="0">wyścig</button></div><p class="explain">Livelock: wątki są aktywne, ale bez postępu.</p></div>
+<div class="quiz card"><p class="q">Program wisi, CPU 0%, <code>py-spy dump</code> pokazuje dwa wątki w <code>lock.acquire()</code>.</p><div class="opts"><button class="opt" data-ok="1">zakleszczenie</button><button class="opt" data-ok="0">livelock</button><button class="opt" data-ok="0">zagłodzenie</button><button class="opt" data-ok="0">wyścig</button></div><p class="explain">Zakleszczenie: wątki czekają na siebie i nic nie robią.</p></div>
+<div class="quiz card"><p class="q">Raport o niskim priorytecie czeka od godziny, a serwer cały czas obsługuje pilne zapytania.</p><div class="opts"><button class="opt" data-ok="0">zakleszczenie</button><button class="opt" data-ok="0">livelock</button><button class="opt" data-ok="1">zagłodzenie</button><button class="opt" data-ok="0">wyścig</button></div><p class="explain">Zagłodzenie: system pracuje, ale nie dla wszystkich. Pomoże postarzanie.</p></div>
+<div class="quiz card"><p class="q">Licznik odwiedzin czasem pokazuje mniej wejść, niż jest w logach serwera.</p><div class="opts"><button class="opt" data-ok="0">zakleszczenie</button><button class="opt" data-ok="0">livelock</button><button class="opt" data-ok="0">zagłodzenie</button><button class="opt" data-ok="1">wyścig</button></div><p class="explain">Wyścig: utracone aktualizacje przy <code>licznik += 1</code> bez blokady.</p></div>
+</div>
+</div>
+<aside class="notes">Najpierw głosowanie na czacie, potem klikamy.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Ograniczenia przetwarzania równoległego</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Nie każde zadanie da się dowolnie rozrzucić po wątkach. Typowe ograniczenia i narzędzia:</p>
+<table class="simple">
+<tr><th>Ograniczenie</th><th>Przykład</th><th>Rozwiązanie</th></tr>
+<tr><td><strong>przywrócenie kolejności</strong> po przetworzeniu</td><td>wyniki muszą wyjść w kolejności wejścia</td><td>numery sekwencyjne, <code>Pool.map</code> / <code>Executor.map</code> (wykład 7)</td></tr>
+<tr><td><strong>kolejność w obrębie typu lub klucza</strong></td><td>zdarzenia jednego klienta po kolei</td><td>partycjonowanie po kluczu: jedna kolejka na klucz (partycje w Kafce, wykład 12)</td></tr>
+<tr><td><strong>wyłączny dostęp do zasobu</strong></td><td>jedno urządzenie, jeden plik</td><td>sekcja krytyczna, <code>Lock</code></td></tr>
+<tr><td><strong>ograniczona liczba wątków</strong></td><td>nie tworzymy wątku dla każdego zapytania</td><td>pula wątków (wykład 7), <code>Semaphore</code> (wykład 3)</td></tr>
+<tr><td><strong>priorytety</strong></td><td>pilne zadania najpierw</td><td><code>queue.PriorityQueue</code> + postarzanie (przeciw zagłodzeniu)</td></tr>
+</table>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="multiprocessing">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Moduł multiprocessing</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<ul class="points side">
+<li>Interfejs jak w <code>threading.Thread</code>: <code>Process(target=..., args=...)</code>, <code>start()</code>, <code>join()</code>.</li>
+<li>Każdy proces ma własny interpreter i własny GIL, więc obliczenia CPU działają naprawdę równolegle (wykład 1).</li>
+<li>Procesy <strong>nie współdzielą pamięci</strong>: dane przekazujemy przez kolejki i potoki albo jawnie przez pamięć współdzieloną.</li>
+<li>Działa na Uniksie i Windows; ma też API bez odpowiednika w wątkach, np. <code>Pool</code>.</li>
+</ul>
+</div>
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import os
+from multiprocessing import Process
+
+def f(name):
+    print(f"hello {name} (PID {os.getpid()}, rodzic {os.getppid()})")
+
+if __name__ == "__main__":
+    p = Process(target=f, args=("bob",))
+    p.start()
+    p.join()
+    print("kod wyjścia:", p.exitcode)
+</code></pre>
+<pre class="out sm">hello bob (PID 376732, rodzic 376700)
+kod wyjścia: 0</pre>
+<p class="small"><code>if __name__ == "__main__":</code> jest wymagane przy metodzie spawn: proces potomny importuje moduł główny.</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Metody uruchamiania procesów</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th>Metoda</th><th>Jak działa</th><th>Domyślna</th></tr>
+<tr><td><code>spawn</code></td><td>nowy interpreter Pythona; dziecko dostaje tylko to, co potrzebne do <code>run()</code> (argumenty przez pickle); wolniejszy start</td><td>Windows, macOS</td></tr>
+<tr><td><code>fork</code></td><td><code>os.fork()</code>: dziecko jest kopią rodzica (pamięć, otwarte pliki, stan blokad); szybki start; tylko Unix</td><td>Linux do 3.13</td></tr>
+<tr><td><code>forkserver</code></td><td>osobny, jednowątkowy proces-serwer tworzy nowe procesy przez fork na żądanie</td><td>Linux od 3.14</td></tr>
+</table>
+<div class="cols">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import multiprocessing as mp
+
+if __name__ == "__main__":
+    mp.set_start_method("spawn")         # raz, na początku programu
+    print(mp.get_start_method(), mp.get_all_start_methods())
+</code></pre>
+<pre class="out sm">spawn ['fork', 'spawn', 'forkserver']</pre>
+</div>
+<div class="note warn"><p>Od Pythona 3.12 <code>fork</code> w procesie, który ma kilka wątków, daje <code>DeprecationWarning</code>: „use of fork() may lead to deadlocks in the child”. Dlaczego? Następny slajd.</p></div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>fork() + wątki = zakleszczenie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import multiprocessing as mp, threading, time
+
+lock = threading.Lock()
+
+def trzymaj():
+    with lock:                  # inny wątek trzyma lock w chwili fork()
+        time.sleep(1)
+
+def dziecko():
+    with lock:                  # kopia lock w dziecku jest zajęta na zawsze
+        print("dziecko: mam lock")
+
+if __name__ == "__main__":
+    mp.set_start_method("fork")  # domyślne na Linuksie do 3.13
+    threading.Thread(target=trzymaj).start()
+    time.sleep(0.1)
+    p = mp.Process(target=dziecko)
+    p.start()
+    p.join(timeout=3)
+    print("dziecko żyje po 3 s?", p.is_alive())
+    p.terminate()
+</code></pre>
+<pre class="out sm">dziecko żyje po 3 s? True</pre>
+</div>
+<div>
+<ul class="points side">
+<li><code>fork()</code> kopiuje całą pamięć, ale tylko <strong>jeden</strong> wątek: ten, który wywołał <code>fork()</code>.</li>
+<li>Blokada zajęta w tej chwili przez inny wątek jest w dziecku zajęta na zawsze: nie ma tam wątku, który mógłby ją zwolnić.</li>
+<li>Dotyczy też blokad ukrytych w bibliotekach (np. w kodzie C).</li>
+<li>Z <code>set_start_method("spawn")</code> dziecko ma własną, wolną blokadę:</li>
+</ul>
+<pre class="out sm">dziecko: mam lock
+dziecko żyje po 3 s? False</pre>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Pamięć współdzielona: Value i Array</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from multiprocessing import Process, Value, Array
+
+def f(n, a):
+    n.value = 3.1415927
+    for i in range(len(a)):
+        a[i] = -a[i]
+
+if __name__ == "__main__":
+    num = Value("d", 0.0)          # 'd' = double
+    arr = Array("i", range(10))    # 'i' = int
+    p = Process(target=f, args=(num, arr))
+    p.start()
+    p.join()
+    print(num.value)
+    print(arr[:])
+</code></pre>
+<pre class="out sm">3.1415927
+[0, -1, -2, -3, -4, -5, -6, -7, -8, -9]</pre>
+</div>
+<div>
+<ul class="points side">
+<li><code>Value</code> i <code>Array</code> leżą w pamięci współdzielonej, widocznej dla wszystkich procesów.</li>
+<li>Kody typów jak w <code>array</code>/<code>ctypes</code>: <code>'d'</code> double, <code>'i'</code> int.</li>
+<li>Domyślnie (<code>lock=True</code>) mają wbudowaną blokadę dostępną przez <code>get_lock()</code>, ale chroni ona tylko pojedynczy odczyt albo zapis.</li>
+</ul>
+<div class="note"><p>Alternatywy: <code>multiprocessing.Queue</code> i <code>Pipe</code> (komunikaty), <code>Manager</code> (obiekty pośredniczące), <code>shared_memory</code>.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wyścig między procesami</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from multiprocessing import Process, Value
+
+def dodaj(licznik, n):
+    for _ in range(n):
+        licznik.value += 1                 # odczyt + zapis: NIE atomowe
+
+def dodaj_bezpiecznie(licznik, n):
+    for _ in range(n):
+        with licznik.get_lock():           # blokada wbudowana w Value
+            licznik.value += 1
+
+if __name__ == "__main__":
+    for funkcja in (dodaj, dodaj_bezpiecznie):
+        licznik = Value("i", 0)
+        procesy = [Process(target=funkcja, args=(licznik, 100_000)) for _ in range(4)]
+        for p in procesy:
+            p.start()
+        for p in procesy:
+            p.join()
+        print(f"{funkcja.__name__}: {licznik.value} (oczekiwano 400000)")
+</code></pre>
+<pre class="out sm">dodaj: 145154 (oczekiwano 400000)
+dodaj_bezpiecznie: 400000 (oczekiwano 400000)</pre>
+<p class="small">Pierwsza liczba jest inna przy każdym uruchomieniu (tu: 145154 i 144036 w dwóch próbach).</p>
+</div>
+<div>
+<ul class="points side">
+<li><code>licznik.value += 1</code> to odczyt i zapis. Każdy z osobna jest chroniony blokadą <code>Value</code>, ale razem już nie, dokładnie jak <code>counter += 1</code> w wątkach.</li>
+<li>Procesy nie mają wspólnego GIL i działają na różnych rdzeniach, więc tutaj wyścig widać od razu.</li>
+<li>Rozwiązanie jest takie samo: cała operacja read-modify-write w jednej sekcji krytycznej.</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Pool: równoległość danych</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import time
+from multiprocessing import Pool
+
+def f(x):
+    time.sleep(0.1 * (3 - x))    # zadania kończą się w różnej kolejności
+    return x * x
+
+if __name__ == "__main__":
+    with Pool(4) as p:
+        print(p.map(f, [1, 2, 3]))                    # kolejność wejścia
+        print(list(p.imap_unordered(f, [1, 2, 3])))   # kolejność ukończenia
+</code></pre>
+<pre class="out sm">[1, 4, 9]
+[9, 4, 1]</pre>
+</div>
+<div>
+<ul class="points side">
+<li><code>Pool(n)</code> tworzy <code>n</code> procesów roboczych i rozdziela między nie <strong>dane wejściowe</strong> (równoległość danych).</li>
+<li><code>map</code> zwraca wyniki w kolejności wejścia, choć zadania kończą się w innej: tak rozwiązujemy ograniczenie „przywróć kolejność”.</li>
+<li><code>imap_unordered</code> oddaje wyniki w kolejności ukończenia: szybciej, gdy kolejność nie ma znaczenia.</li>
+<li>Nowocześniejsze API: <code>concurrent.futures.ProcessPoolExecutor</code> (wykład 7).</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/plugin.js"></script>
+<script>
+// ---------- copy buttons (raw text is captured before highlighting adds line numbers) ----------
+document.querySelectorAll('pre.code-wrap > code').forEach(code => {
+  const lines = code.textContent.replace(/^\s*\n/, '').replace(/\s+$/, '').split('\n');
+  const indent = Math.min(...lines.filter(l => l.trim()).map(l => l.match(/^ */)[0].length));
+  const raw = lines.map(l => l.slice(indent)).join('\n') + '\n';
+  const btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'copy-btn'; btn.textContent = 'Kopiuj';
+  btn.addEventListener('click', () => {
+    const done = ok => {
+      btn.textContent = ok ? 'Skopiowano!' : 'Błąd kopiowania'; btn.classList.toggle('copied', ok);
+      clearTimeout(btn._t); btn._t = setTimeout(() => { btn.textContent = 'Kopiuj'; btn.classList.remove('copied'); }, 1500);
+    };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(raw).then(() => done(true), () => done(false));
+    else {
+      const ta = document.createElement('textarea'); ta.value = raw; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { done(document.execCommand('copy')); } catch (e) { done(false); } finally { ta.remove(); }
+    }
+  });
+  code.parentNode.appendChild(btn);
+});
+</script>
+<script>
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.02,
+    center: false, hash: true, slideNumber: 'c/t',
+    transition: 'slide',
+    chalkboard: { boardmarkerWidth: 4, chalkWidth: 5 },
+    plugins: [RevealNotes, RevealHighlight, RevealChalkboard]
+  });
+</script>
+<script>
+// ---------- quizzes ----------
+document.querySelectorAll('.quiz').forEach(q => {
+  const opts = [...q.querySelectorAll('.opt')];
+  const reveal = () => {
+    opts.forEach(o => {
+      if (o.dataset.ok === '1') o.classList.add('good');
+      else if (o.classList.contains('sel')) o.classList.add('bad');
+    });
+    q.classList.add('done');
+  };
+  if (q.classList.contains('multi')) {
+    opts.forEach(o => o.addEventListener('click', () => { if (!q.classList.contains('done')) o.classList.toggle('sel'); }));
+    q.querySelector('.check').addEventListener('click', reveal);
+  } else {
+    opts.forEach(o => o.addEventListener('click', () => {
+      if (q.classList.contains('done')) return;
+      o.classList.add('sel'); reveal();
+    }));
+  }
+});
+
+// ---------- fill in the blanks (whitespace is ignored, data-re lists accepted answers) ----------
+document.querySelectorAll('.blanks').forEach(b => {
+  const inputs = [...b.querySelectorAll('input.blank')];
+  const fb = b.querySelector('.fb');
+  const check = () => {
+    let good = 0;
+    inputs.forEach(i => {
+      const ok = new RegExp(i.dataset.re).test(i.value.replace(/\s+/g, ''));
+      i.classList.toggle('good', ok); i.classList.toggle('bad', !ok); good += ok;
+    });
+    const all = good === inputs.length;
+    b.classList.toggle('done', all);
+    fb.textContent = all ? '' : inputs.length > 1 ? `Poprawne: ${good} z ${inputs.length}. Spróbuj jeszcze raz.` : 'Jeszcze nie. Spróbuj ponownie.';
+  };
+  b.querySelector('.check').addEventListener('click', check);
+  b.querySelector('.show').addEventListener('click', () => {
+    inputs.forEach(i => { i.value = i.dataset.sol; });
+    check();
+  });
+  inputs.forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') check(); }));
+});
+
+const simStops = [];
+
+// ---------- lost update: interleaving stepper ----------
+(() => {
+  const root = document.getElementById('racesim'); if (!root) return;
+  const $ = s => root.querySelector(s);
+  const START = 23;
+  const PLAIN = ['tmp = counter', 'tmp = tmp + 1', 'counter = tmp'];
+  const LOCKED = ['lock.acquire()', 'tmp = counter', 'tmp = tmp + 1', 'counter = tmp', 'lock.release()'];
+  let prog, th, counter, owner, log, flash, timer = null, queue = [];
+  const stop = () => { clearInterval(timer); timer = null; };
+  const done = t => th[t].pc >= prog.length;
+  const render = () => {
+    root.querySelectorAll('.thr').forEach(el => {
+      const t = +el.dataset.t, T = th[t];
+      el.querySelector('.code').innerHTML = prog.map((l, k) =>
+        `<li class="${k < T.pc ? 'ran' : k === T.pc ? (T.blocked ? 'blocked' : 'next') : ''}">${l}</li>`).join('');
+      el.querySelector('.reg').innerHTML = done(t) ? `tmp = ${T.tmp} &nbsp;(zakończony)` : `tmp = ${T.tmp === null ? '?' : T.tmp}`;
+    });
+    const cell = $('.cell');
+    cell.innerHTML = `counter = <b>${counter}</b>`;
+    if (flash) { cell.classList.remove('flash'); void cell.offsetWidth; cell.classList.add('flash'); flash = false; }
+    $('.lockst').textContent = prog === PLAIN ? 'bez blokady' : owner === null ? 'lock: wolny' : `lock: trzyma T${owner + 1}`;
+    const lg = $('.log');
+    lg.innerHTML = log.map(x => `<li>${x}</li>`).join('');
+    lg.scrollTop = lg.scrollHeight;
+    const v = $('.verdict');
+    if (done(0) && done(1)) {
+      const ok = counter === START + 2;
+      v.className = 'note verdict on' + (ok ? '' : ' bad');
+      v.innerHTML = ok
+        ? `Poprawnie: counter = ${counter}. Kroki wątków się nie przeplotły${prog === LOCKED ? ', bo blokada wymusiła kolejność' : ''}.`
+        : `<strong>Utracona aktualizacja (lost update):</strong> counter = ${counter} zamiast ${START + 2}. Oba wątki odczytały tę samą wartość i jeden zapis nadpisał drugi.`;
+    } else v.className = 'note verdict';
+  };
+  const reset = () => {
+    stop(); queue = [];
+    prog = $('.uselock').checked ? LOCKED : PLAIN;
+    th = [0, 1].map(() => ({ pc: 0, tmp: null, blocked: false }));
+    counter = START; owner = null; log = []; flash = false;
+    render();
+  };
+  const step = t => {
+    if (done(t)) return;
+    const T = th[t], name = 'T' + (t + 1), line = prog[T.pc];
+    if (line === 'lock.acquire()') {
+      if (owner !== null && owner !== t) {
+        T.blocked = true; log.push(`${name}: lock.acquire() → blokada zajęta przez T${owner + 1}, ${name} czeka`); render(); return;
+      }
+      owner = t; T.blocked = false; log.push(`${name}: lock.acquire() → ${name} ma blokadę`);
+    } else if (line === 'lock.release()') {
+      owner = null; th.forEach(o => { o.blocked = false; }); log.push(`${name}: lock.release()`);
+    } else if (line === 'tmp = counter') {
+      T.tmp = counter; log.push(`${name}: tmp = counter → tmp = ${T.tmp}`);
+    } else if (line === 'tmp = tmp + 1') {
+      T.tmp += 1; log.push(`${name}: tmp = tmp + 1 → tmp = ${T.tmp}`);
+    } else {
+      counter = T.tmp; flash = true; log.push(`${name}: counter = tmp → counter = ${counter}`);
+    }
+    T.pc++; render();
+  };
+  const tick = () => {
+    if (done(0) && done(1)) { stop(); return; }
+    let t;
+    if (queue === 'rand') { const c = [0, 1].filter(k => !done(k)); t = c[Math.floor(Math.random() * c.length)]; }
+    else if (queue.length) t = queue.shift();
+    else t = done(0) ? 1 : 0;
+    step(t);
+  };
+  const play = q => { reset(); queue = q; timer = setInterval(tick, 650); };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act; if (!a) return;
+    if (a === 't1' || a === 't2') { stop(); step(a === 't1' ? 0 : 1); }
+    if (a === 'bad') play(prog === PLAIN || !$('.uselock').checked ? [0, 0, 1, 0, 1, 1] : [0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1]);
+    if (a === 'rand') play('rand');
+    if (a === 'reset') reset();
+  });
+  $('.uselock').addEventListener('change', reset);
+  reset();
+  simStops.push(stop);
+})();
+
+// ---------- deadlock: resource allocation graph ----------
+(() => {
+  const root = document.getElementById('dlsim'); if (!root) return;
+  const $ = s => root.querySelector(s);
+  const LAYOUT = {
+    2: { T: [[80, 165], [380, 165]], L: { A: [230, 60], B: [230, 270] }, pairs: [['A', 'B'], ['B', 'A']] },
+    3: { T: [[80, 75], [380, 75], [230, 280]], L: { A: [148, 185], B: [230, 75], C: [312, 185] }, pairs: [['A', 'B'], ['B', 'C'], ['C', 'A']] }
+  };
+  let n, lay, progs, pc, owner, waiting, cycle, timer = null;
+  const stop = () => { clearInterval(timer); timer = null; };
+  const findCycle = () => {
+    for (let s = 0; s < n; s++) {
+      const path = []; let t = s;
+      for (let k = 0; k <= n; k++) {
+        if (waiting[t] === null) break;
+        const o = owner[waiting[t]];
+        if (o === null || o === t) break;
+        path.push([t, waiting[t], o]); t = o;
+        if (t === s) return path;
+      }
+    }
+    return null;
+  };
+  const line = (p, q, color, dash, mk) => {
+    const dx = q[0] - p[0], dy = q[1] - p[1], d = Math.hypot(dx, dy), ux = dx / d, uy = dy / d, r = 33;
+    return `<line x1="${p[0] + ux * r}" y1="${p[1] + uy * r}" x2="${q[0] - ux * (r + 2)}" y2="${q[1] - uy * (r + 2)}" stroke="${color}" stroke-width="3.5"${dash ? ' stroke-dasharray="8 6"' : ''} marker-end="url(#${mk})"/>`;
+  };
+  const render = () => {
+    const inCycle = (t, L) => cycle && cycle.some(([a, l]) => a === t && l === L);
+    const heldInCycle = (L, t) => cycle && cycle.some(([, l, o]) => l === L && o === t);
+    let s = '<defs>' + [['dg', '#53ae12'], ['do', '#e8710a'], ['dr', '#d93025']].map(([id, c]) =>
+      `<marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${c}"/></marker>`).join('') + '</defs>';
+    Object.entries(owner).forEach(([L, t]) => {
+      if (t !== null) s += line(lay.L[L], lay.T[t], heldInCycle(L, t) ? '#d93025' : '#53ae12', false, heldInCycle(L, t) ? 'dr' : 'dg');
+    });
+    waiting.forEach((L, t) => {
+      if (L !== null) s += line(lay.T[t], lay.L[L], inCycle(t, L) ? '#d93025' : '#e8710a', true, inCycle(t, L) ? 'dr' : 'do');
+    });
+    Object.entries(lay.L).forEach(([L, [x, y]]) => {
+      s += `<rect x="${x - 28}" y="${y - 22}" width="56" height="44" rx="6" fill="#fff" stroke="#666" stroke-width="2"/><text x="${x}" y="${y + 7}" text-anchor="middle" font-size="20" font-family="Consolas, Menlo, monospace">${L}</text>`;
+    });
+    lay.T.forEach(([x, y], t) => {
+      const fin = pc[t] >= 5, w = waiting[t] !== null;
+      s += `<circle cx="${x}" cy="${y}" r="30" fill="${fin ? '#e6f4da' : w ? '#fce8e6' : '#e8f0fe'}" stroke="${fin ? '#53ae12' : w ? '#d93025' : '#1a73d9'}" stroke-width="2.5"/>` +
+        `<text x="${x}" y="${y + 7}" text-anchor="middle" font-size="20" font-weight="bold">T${t + 1}</text>` +
+        `<text x="${x}" y="${y + (y > 200 ? 50 : -40)}" text-anchor="middle" font-size="15" fill="#666">${fin ? 'koniec' : w ? 'czeka na ' + waiting[t] : 'gotowy'}</text>`;
+    });
+    $('svg').innerHTML = s;
+    $('.progs').innerHTML = progs.map((p, t) => `<div class="prog"><b>T${t + 1}</b>` + p.map((op, k) =>
+      `<span class="${k < pc[t] ? 'done' : k === pc[t] ? (waiting[t] ? 'wait' : 'next') : ''}">${op}</span>`).join('') + '</div>').join('');
+    const v = $('.verdict');
+    if (cycle) {
+      v.className = 'note verdict on bad';
+      v.innerHTML = '<strong>Zakleszczenie!</strong> Cykl: ' + cycle.map(([t, L]) => `T${t + 1} → ${L}`).join(' → ') + ` → T${cycle[0][0] + 1}. Żaden z tych wątków nie ruszy dalej.`;
+    } else if (pc.every(p => p >= 5)) {
+      v.className = 'note verdict on';
+      v.innerHTML = 'Wszystkie przelewy wykonane, bez zakleszczenia.';
+    } else v.className = 'note verdict';
+  };
+  const reset = () => {
+    stop();
+    n = +$('.nthr').value; lay = LAYOUT[n];
+    const ord = $('.order').checked;
+    progs = lay.pairs.slice(0, n).map(pr => {
+      const [f, s] = ord ? [...pr].sort() : pr;
+      return [`acquire(${f})`, `acquire(${s})`, 'przelew', `release(${s})`, `release(${f})`];
+    });
+    pc = Array(n).fill(0); waiting = Array(n).fill(null); cycle = null;
+    owner = Object.fromEntries(Object.keys(lay.L).map(L => [L, null]));
+    $('.tbtns').innerHTML = progs.map((_, t) => `<button class="btn" data-act="step" data-t="${t}">Krok T${t + 1}</button>`).join('');
+    render();
+  };
+  const step = t => {
+    if (cycle || pc[t] >= 5) return;
+    const op = progs[t][pc[t]], L = (op.match(/\((\w)\)/) || [])[1];
+    if (op.startsWith('acquire')) {
+      if (owner[L] === null) { owner[L] = t; waiting[t] = null; pc[t]++; }
+      else waiting[t] = L;
+    } else if (op.startsWith('release')) { owner[L] = null; pc[t]++; }
+    else pc[t]++;
+    cycle = findCycle();
+    render();
+  };
+  const tick = () => {
+    const c = [...Array(n).keys()].filter(t => pc[t] < 5);
+    if (cycle || !c.length) { stop(); return; }
+    step(c[Math.floor(Math.random() * c.length)]);
+  };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act; if (!a) return;
+    if (a === 'step') { stop(); step(+e.target.dataset.t); }
+    if (a === 'auto') { if (timer) stop(); else { if (cycle || pc.every(p => p >= 5)) reset(); timer = setInterval(tick, 500); } }
+    if (a === 'reset') reset();
+  });
+  $('.nthr').addEventListener('change', reset);
+  $('.order').addEventListener('change', reset);
+  reset();
+  simStops.push(stop);
+})();
+
+// ---------- starvation: priority scheduler with aging ----------
+(() => {
+  const root = document.getElementById('starvesim'); if (!root) return;
+  const $ = s => root.querySelector(s);
+  const MAX = 40;
+  let tick, queue, served, nextId, servedAt, timer = null;
+  const stop = () => { clearInterval(timer); timer = null; };
+  const eff = j => $('.aging').checked ? Math.max(0, j.base - Math.floor((tick - j.arr) / 3)) : j.base;
+  const render = () => {
+    $('.queue').innerHTML = queue.map(j => `<span class="chip ${j.kind}">${j.name} (${eff(j)})</span>`).join('') || '<span class="hint">pusta</span>';
+    $('.lane').innerHTML = served.map(k => `<i class="${k}"></i>`).join('');
+    $('.stat').innerHTML = servedAt !== null
+      ? `takt ${tick}: <b>raport obsłużony w takcie ${servedAt}</b>`
+      : tick >= MAX ? `takt ${tick}: raport wciąż czeka (${tick} taktów). To jest <b>zagłodzenie</b>.`
+      : `takt ${tick}: raport czeka ${tick} taktów`;
+  };
+  const reset = () => {
+    stop(); tick = 0; served = []; nextId = 0; servedAt = null;
+    queue = [{ name: 'raport', base: 5, arr: 0, kind: 'r' }];
+    render();
+  };
+  const step = () => {
+    if (tick >= MAX) { stop(); return; }
+    const rate = +$('.rate').value;
+    if (rate === 1 || tick % 3 !== 2) queue.push({ name: 'P' + nextId++, base: 1, arr: tick, kind: 'u' });
+    queue.sort((a, b) => eff(a) - eff(b) || a.arr - b.arr);
+    const j = queue.shift();
+    served.push(j ? j.kind : 'idle');               // pusta kolejka: procesor bezczynny
+    if (j && j.kind === 'r' && servedAt === null) servedAt = tick;
+    tick++;
+    render();
+    if (tick >= MAX) stop();
+  };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act; if (!a) return;
+    if (a === 'step') { stop(); step(); }
+    if (a === 'play') { if (timer) stop(); else { if (tick >= MAX) reset(); timer = setInterval(step, 250); } }
+    if (a === 'reset') reset();
+  });
+  root.querySelectorAll('select, input').forEach(i => i.addEventListener('change', reset));
+  reset();
+  simStops.push(stop);
+})();
+
+// ---------- livelock: corridor ----------
+(() => {
+  const root = document.getElementById('livesim'); if (!root) return;
+  const $ = s => root.querySelector(s);
+  const W = 8, LIMIT = 30;
+  let A, B, steps, yields, timer = null;
+  const stop = () => { clearInterval(timer); timer = null; };
+  const finished = () => A.col === W - 1 && B.col === 0;
+  const render = () => {
+    let h = '';
+    for (let lane = 0; lane < 2; lane++) for (let c = 0; c < W; c++) {
+      h += '<div>' + (A.lane === lane && A.col === c ? '<i class="fa-solid fa-person-walking pa" title="A"></i>' : '') +
+        (B.lane === lane && B.col === c ? '<i class="fa-solid fa-person-walking fa-flip-horizontal pb" title="B"></i>' : '') + '</div>';
+    }
+    $('.corr').innerHTML = h;
+    $('.stat').textContent = `kroki: ${steps} | ustąpienia: ${yields}`;
+    const v = $('.verdict');
+    if (finished()) { v.className = 'note verdict on'; v.innerHTML = `Minęli się po ${steps} krokach.`; }
+    else if (steps >= LIMIT) { v.className = 'note verdict on bad'; v.innerHTML = `<strong>Livelock:</strong> ${steps} kroków i ${yields} ustąpień, a nikt nie przeszedł dalej. Obie osoby są aktywne, ale nie robią postępu.`; }
+    else v.className = 'note verdict';
+  };
+  const reset = () => { stop(); A = { lane: 0, col: 0 }; B = { lane: 0, col: W - 1 }; steps = 0; yields = 0; render(); };
+  const step = () => {
+    if (finished() || steps >= LIMIT) { stop(); return; }
+    const facing = A.lane === B.lane && B.col - A.col === 1;
+    if (facing) {
+      const rnd = $('.backoff').checked;
+      [A, B].forEach(p => { if (!rnd || Math.random() < 0.5) { p.lane = 1 - p.lane; yields++; } });
+    } else {
+      if (A.col < W - 1) A.col++;
+      if (B.col > 0) B.col--;
+    }
+    steps++;
+    render();
+    if (finished() || steps >= LIMIT) stop();
+  };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act; if (!a) return;
+    if (a === 'step') { stop(); step(); }
+    if (a === 'play') { if (timer) stop(); else { if (finished() || steps >= LIMIT) reset(); timer = setInterval(step, 400); } }
+    if (a === 'reset') reset();
+  });
+  $('.backoff').addEventListener('change', reset);
+  reset();
+  simStops.push(stop);
+})();
+
+Reveal.on('slidechanged', () => simStops.forEach(s => s()));
+</script>
+</body>
+</html>

@@ -1,0 +1,1791 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Przetwarzanie równoległe i strumieniowe - Wykład 10</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+<style>
+  /* Slide = 1280x720; base font scaled to match H5P text metrics */
+  .reveal { font-size: 24px; font-family: "Open Sans", Arial, sans-serif; color: #000; }
+  .reveal .slides section { position: absolute; width: 100%; height: 100%; padding: 0; text-align: left; }
+  .reveal .el { position: absolute; box-sizing: border-box; overflow: visible; }
+  .reveal .el.text { padding: .375em .5em; line-height: 1.25; }
+  .reveal .el.text p, .reveal .el.text li { margin: 0 0 .5em 0; line-height: 1.25; }
+  .reveal .el.text ul { display: block; margin: 0 0 .5em 1.25em; padding: 0; }
+  .reveal .el.text h3 { font-size: 1em; text-transform: none; margin: 0 0 .5em; color: #000; font-family: inherit; }
+  .reveal .el.img img { width: 100%; height: 100%; object-fit: contain; margin: 0; max-width: none; max-height: none; }
+  .reveal .el.shape { display: flex; flex-direction: column; justify-content: center; }
+  .reveal .el.link { display: flex; align-items: center; justify-content: center; font-size: 1.5em; }
+  .reveal a { color: #1a73d9; }
+  /* ---------- interactive slides (as in lecture 1) ---------- */
+  :root { --green: rgb(83, 174, 18); --blue: #1a73d9; --red: #d93025; --orange: #e8710a; --muted: #666; --line: #ccc; }
+  .reveal .el.box { padding: 0 .5em; line-height: 1.3; }
+  .reveal .el.box p { margin: 0 0 .5em; }
+  .reveal .small, .reveal .hint { font-size: .7em; color: var(--muted); }
+  .reveal .btn, .reveal .opt {
+    font: inherit; font-size: .75em; padding: .3em .8em; margin: 0 .3em .3em 0; cursor: pointer;
+    border: 2px solid var(--green); background: var(--green); color: #fff; border-radius: .3em;
+  }
+  .reveal .btn.ghost { background: #fff; color: var(--green); }
+  .reveal .btn:disabled { opacity: .4; cursor: default; }
+  .reveal .simctl { display: flex; flex-wrap: wrap; align-items: center; gap: .3em .8em; font-size: .8em; margin-bottom: .5em; }
+  .reveal .simctl .btn { font-size: .9em; margin: 0; }
+  .reveal .simctl select, .reveal .simctl input[type=text] { font: inherit; padding: .1em .3em; }
+  .reveal .stat { font-size: .8em; }
+  .reveal h4 { font-size: .8em; margin: 0 0 .3em; text-transform: none; color: #000; font-family: inherit; }
+  .reveal code { font-family: Consolas, Menlo, monospace; }
+  @keyframes pop { from { transform: scale(.3); opacity: 0; } }
+
+  /* quiz */
+  .reveal .quiz .q { font-size: 1.1em; margin-bottom: .8em; }
+  .reveal .quiz .opts { display: flex; flex-wrap: wrap; gap: .5em; margin-bottom: .6em; }
+  .reveal .quiz .opt { background: #fff; color: #000; border-color: var(--line); font-size: .9em; margin: 0; }
+  .reveal .quiz .opt.sel { border-color: var(--blue); background: #e8f0fe; }
+  .reveal .quiz .opt.good { border-color: var(--green); background: #e6f4da; }
+  .reveal .quiz .opt.bad { border-color: var(--red); background: #fce8e6; }
+  .reveal .quiz .explain { visibility: hidden; font-size: .85em; border-left: 4px solid var(--green); padding-left: .6em; margin-top: .6em; }
+  .reveal .quiz.done .explain { visibility: visible; }
+  .reveal .quiz.compact .q { font-size: .9em; margin-bottom: .5em; }
+  .reveal .quiz.compact .opt { font-size: .75em; }
+  .reveal .quiz.compact .explain { font-size: .7em; margin-top: .3em; }
+  .reveal .quiz + .quiz { margin-top: .8em; }
+
+  /* ---------- lecture 2: layout, code listings, output ---------- */
+  .reveal .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.2em; align-items: start; }
+  .reveal .cols.wl { grid-template-columns: 1.35fr 1fr; }
+  .reveal .cols.wr { grid-template-columns: 1fr 1.35fr; }
+  /* type scale: .lead / ul.points = body text, .note = callouts, .small = captions, code .78em */
+  .reveal .lead { font-size: 1.1em; margin: 0 0 .5em; line-height: 1.35; }
+  .reveal ul.points { font-size: 1.1em; line-height: 1.35; margin: 0 0 .5em 1.1em; padding: 0; }
+  .reveal ul.points li { margin: 0 0 .45em; }
+  .reveal ul.points.side { font-size: .9em; }
+  .reveal ul.points.icons { list-style: none; margin-left: 0; }
+  .reveal ul.points.icons li { padding-left: 1.5em; text-indent: -1.5em; }
+  .reveal ul.points.icons i { width: 1.5em; text-indent: 0; color: var(--green); }
+  .reveal ul.points.icons.cons i { color: var(--red); }
+  .reveal img.pic { display: block; width: 100%; max-height: 20em; object-fit: contain; margin: 0 auto; }
+  .reveal svg.diagram { display: block; width: 100%; height: auto; margin: .2em 0 .6em; font-family: "Open Sans", Arial, sans-serif; }
+  .reveal svg.diagram text { font-size: 18px; }
+  .reveal svg.diagram .mono { font-family: Consolas, Menlo, monospace; }
+  .reveal .chain { display: flex; flex-wrap: wrap; align-items: center; gap: .3em; font-size: .8em; margin: .3em 0 .6em; }
+  .reveal .chain .op { color: var(--muted); font-family: Consolas, Menlo, monospace; font-size: .85em; }
+  .reveal .zipviz { font: .75em Consolas, Menlo, monospace; margin: 0 0 .6em; }
+  .reveal .zipviz > div { display: flex; gap: .4em; margin: .25em 0; align-items: center; }
+  .reveal .zipviz .lbl { width: 4.5em; color: var(--muted); font-family: "Open Sans", Arial, sans-serif; }
+  .reveal .chip.alt { background: #fef3c7; }
+  .reveal .chip.pair { background: #e6f4da; }
+  .reveal .lanes { font-size: .75em; }
+  .reveal .lanes .lane { display: flex; align-items: center; gap: 3px; height: 1.5em; margin: .15em 0; }
+  .reveal .lanes .lane span { width: 2.2em; color: var(--muted); }
+  .reveal .lanes .lane i { display: block; width: 10.5%; height: 1.1em; border-radius: 3px; background: var(--blue); }
+  .reveal .lanes .lane i.p { background: var(--green); }
+  .reveal .lanes h4 { margin: .5em 0 .1em; }
+  .reveal p code, .reveal li code, .reveal td code, .reveal .note code { background: #f1f3f4; padding: 0 .2em; border-radius: .2em; font-size: .9em; }
+  .reveal pre.code-wrap { position: relative; width: 100%; margin: 0 0 .5em; box-shadow: none; font-size: .78em; }
+  .reveal pre.code-wrap code { max-height: none; padding: .6em .8em; border-radius: .3em; }
+  .reveal pre.code-wrap.sm { font-size: .66em; }
+  .reveal pre.out { position: relative; width: 100%; box-sizing: border-box; margin: 0 0 .6em; padding: .45em .8em; font-size: .78em; line-height: 1.35;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #f4f6f8; color: #1f2a30; border: 1px solid #c9d1d9; border-left: 5px solid #586e75; border-radius: .3em; box-shadow: none; }
+  .reveal pre.out::before { content: "Wynik"; position: absolute; top: .3em; right: .6em; font: bold .7em "Open Sans", Arial, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #8a99a6; }
+  .reveal pre.code-wrap + pre.out { margin-top: -.5em; border-top: none; border-radius: 0 0 .3em .3em; }
+  .reveal pre.out.sm, .reveal pre.code-wrap.sm + pre.out { font-size: .66em; }
+  .reveal .copy-btn { position: absolute; top: .4em; right: .4em; z-index: 2; font: .8em "Open Sans", Arial, sans-serif; padding: .1em .6em; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, .3); border-radius: .3em; background: rgba(255, 255, 255, .1); color: #f8f8f2; opacity: 0; transition: opacity .15s; }
+  .reveal pre.code-wrap:hover .copy-btn, .reveal .copy-btn:focus-visible { opacity: 1; }
+  .reveal .copy-btn.copied { background: var(--green); border-color: var(--green); opacity: 1; }
+  .reveal .note { font-size: .75em; line-height: 1.35; border-left: 4px solid var(--green); background: #f3faee; padding: .35em .7em; margin: .2em 0 .6em; }
+  .reveal .note.warn { border-left-color: var(--orange); background: #fff4e5; }
+  .reveal .note.bad { border-left-color: var(--red); background: #fce8e6; }
+  .reveal .note p { margin: 0 0 .3em; }
+  .reveal .note p:last-child { margin: 0; }
+  .reveal table.simple { border-collapse: collapse; font-size: .75em; margin: .2em 0 .8em; width: 100%; }
+  .reveal table.simple th, .reveal table.simple td { border: 1px solid var(--line); padding: .3em .5em; vertical-align: top; text-align: left; }
+  .reveal table.simple th { background: #eef7e6; }
+  .reveal .textflow ul { margin: 0 0 .5em 1.2em; }
+  .reveal .textflow li { margin-bottom: .4em; }
+
+  /* agenda */
+  .reveal .agenda { display: grid; grid-template-columns: 1fr 1fr; gap: .7em; margin-bottom: .8em; }
+  .reveal .agenda .ag { border: 2px solid var(--line); border-radius: .4em; padding: .4em .7em; }
+  .reveal .agenda .ag b { display: inline-block; width: 1.6em; height: 1.6em; line-height: 1.6em; text-align: center; border-radius: 50%; background: var(--green); color: #fff; margin-right: .4em; }
+  .reveal .agenda .ag p { font-size: .75em; margin: .3em 0 0; color: #333; }
+
+  /* fill in the blanks */
+  .reveal pre.exo { width: 100%; box-sizing: border-box; margin: 0 0 .5em; padding: .6em .8em; font-size: .78em; line-height: 1.6; box-shadow: none;
+    font-family: Consolas, Menlo, monospace; white-space: pre; background: #272822; color: #f8f8f2; border-radius: .3em; }
+  .reveal pre.exo .c { color: #75715e; }
+  .reveal pre.exo .k { color: #f92672; }
+  .reveal input.blank { font: inherit; color: #e6db74; background: #3e3d32; border: none; border-bottom: 2px dashed #e6db74; padding: 0 .3em; outline: none; }
+  .reveal input.blank:focus { background: #49483e; }
+  .reveal input.blank.good { color: #a6e22e; border-bottom: 2px solid #a6e22e; }
+  .reveal input.blank.bad { color: #f92672; border-bottom: 2px solid #f92672; }
+  .reveal .blanks .fb { font-size: .7em; min-height: 1.2em; margin: .2em 0; color: var(--red); }
+  .reveal .blanks .explain { visibility: hidden; font-size: .75em; border-left: 4px solid var(--green); padding-left: .6em; margin-top: .3em; }
+  .reveal .blanks.done .explain { visibility: visible; }
+
+  /* pure / impure cards */
+  .reveal .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8em; }
+  .reveal .quiz.card { border: 2px solid var(--line); border-radius: .4em; padding: .5em .6em; }
+  .reveal .quiz.card pre.code-wrap { font-size: .7em; margin-bottom: .6em; }
+  .reveal .quiz.card .opts { margin-bottom: 0; }
+  .reveal .quiz.card .opt { font-size: .75em; }
+  .reveal .quiz.card .explain { font-size: .7em; }
+  .reveal .chip { display: inline-block; min-width: 1.6em; text-align: center; padding: .1em .45em; border-radius: .3em; background: #e8f0fe; animation: pop .25s; }
+  .reveal .chip.drop { background: #f1f3f4; color: #aaa; text-decoration: line-through; }
+  .reveal .chip.acc { background: #fef3c7; }
+  .reveal .chip.fin { background: var(--green); color: #fff; font-weight: bold; }
+  .reveal .chip.err { background: #fce8e6; color: var(--red); font-family: Consolas, Menlo, monospace; }
+
+
+  /* pipeline diagram */
+  .reveal .pipe { display: flex; align-items: center; gap: .35em; font-size: .62em; margin: 0 0 .6em; }
+  .reveal .pipe .st { border: 2px solid var(--blue); border-radius: .4em; padding: .3em .5em; text-align: center; background: #e8f0fe; }
+  .reveal .pipe .st small { display: block; color: var(--muted); font-size: .8em; }
+  .reveal .pipe .ar { color: var(--muted); font-size: 1.4em; }
+
+  /* ---------- lecture 10: Apache Flink ---------- */
+  .reveal ol.points { font-size: 1.1em; line-height: 1.35; margin: 0 0 .5em 1.4em; padding: 0; }
+  .reveal ol.points li { margin: 0 0 .45em; }
+  .reveal ol.points.side { font-size: .9em; }
+  .reveal .agenda .ag { padding: .3em .7em; }
+  .reveal table.simple td code { white-space: nowrap; }
+  .reveal .cols > * { min-width: 0; }
+  .reveal svg.diagram text.small { font-size: 14px; }
+
+  /* keyBy partitioning */
+  .reveal #keysim .kq { font-size: .75em; min-height: 1.8em; margin-bottom: .2em; }
+  .reveal #keysim .queue .chip { margin-right: .25em; font-family: Consolas, Menlo, monospace; }
+  .reveal #keysim .queue .chip:first-child { box-shadow: 0 0 0 3px var(--orange); }
+  .reveal #keysim .route { font-size: .8em; min-height: 1.4em; margin: .2em 0 .5em; font-family: Consolas, Menlo, monospace; color: #333; }
+  .reveal #keysim .subs { display: grid; grid-template-columns: repeat(4, 1fr); gap: .6em; }
+  .reveal #keysim .sub { border: 2px solid var(--blue); border-radius: .4em; padding: .3em .5em; min-height: 6.5em; font-size: .9em; background: #f8fbff; }
+  .reveal #keysim .sub.off { visibility: hidden; }
+  .reveal #keysim .sub.hit { box-shadow: 0 0 0 3px var(--orange); }
+  .reveal #keysim .sub h4 { font-size: 1em; margin: 0 0 .3em; color: var(--blue); }
+  .reveal #keysim .sub .kv { display: inline-block; margin: .15em; padding: .05em .4em; border-radius: .3em; background: #e8f0fe; font-family: Consolas, Menlo, monospace; }
+  .reveal #keysim .sub .kv.dup { background: #fce8e6; color: var(--red); }
+  .reveal #keysim .sub .kv.new { animation: pop .25s; }
+  .reveal #keysim .verdict { min-height: 2.6em; margin-top: .5em; }
+
+  /* watermarks */
+  .reveal #wmsim .arrivals { font-size: .75em; min-height: 1.8em; }
+  .reveal #wmsim .queue .chip { margin-right: .2em; font-family: Consolas, Menlo, monospace; animation: none; }
+  .reveal #wmsim .queue .chip.todo { background: #f1f3f4; color: #999; }
+  .reveal #wmsim .queue .chip.ok { background: #e8f0fe; }
+  .reveal #wmsim .queue .chip.lateok { background: #fef3c7; }
+  .reveal #wmsim .queue .chip.drop { background: #fce8e6; color: var(--red); text-decoration: line-through; }
+  .reveal #wmsim .queue .chip.cur { box-shadow: 0 0 0 3px var(--orange); }
+  .reveal #wmsim svg.wm { margin: .2em 0 .3em; }
+  .reveal #wmsim .stat { min-height: 1.3em; margin: 0; }
+  .reveal #wmsim .verdict { min-height: 2.6em; }
+
+  /* window types */
+  .reveal #winsim svg.win { cursor: crosshair; margin: .2em 0 .3em; }
+  .reveal #winsim .verdict { min-height: 2.6em; }
+
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+<section data-background-color="#ffffff" data-keywords="PRS">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie równoległe i strumieniowe</strong></span></p>
+</div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el text" style="left:2.179%;top:23.733%;width:61.002%;height:40%;"><p><span style="font-size:1.5em"><strong>Wykład 10</strong></span></p>
+
+<p><span style="font-size:1.5em"><strong>Przetwarzanie danych strumieniowych w Apache Flink: API, model danych, okna czasowe</strong></span></p>
+</div>
+<div class="el img" style="left:64.270%;top:21.576%;width:23.125%;height:40.000%;"><img src="images/image-xe37OO4T.jpg" alt="UAM"></div>
+<div class="el img" style="left:47.930%;top:66.885%;width:19.608%;height:25.820%;"><img src="images/image-j8cFbylS.png" alt=""></div>
+<div class="el img" style="left:82.438%;top:71.200%;width:17.564%;height:18.215%;"><img src="images/image-4NvsFIBd.png" alt=""></div>
+<div class="el img" style="left:67.538%;top:73.357%;width:16.340%;height:16.944%;"><img src="images/image-OeICMxV6.png" alt=""></div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Plan">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Plan wykładu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="agenda">
+  <div class="ag"><b>1</b>Czym jest Apache Flink<p>zastosowania, strumienie ograniczone i nieograniczone, architektura klastra, co zmienił Flink 2.x</p></div>
+  <div class="ag"><b>2</b>Model programowania: DataStream API<p>środowisko, źródła, transformacje, keyBy, równoległość, ujścia, tryb STREAMING i BATCH</p></div>
+  <div class="ag"><b>3</b>Table API i SQL<p>TableEnvironment, zapytania, tabele dynamiczne i changelog, konwersje Table ↔ DataStream</p></div>
+  <div class="ag"><b>4</b>Czas i okna czasowe<p>czas zdarzenia i przetwarzania, znaczniki wodne (watermarks), okna tumbling, sliding, session</p></div>
+  <div class="ag"><b>5</b>Stan i odporność na błędy<p>keyed state, ValueState, checkpointy i savepointy, exactly-once</p></div>
+  <div class="ag"><b>6</b>Podsumowanie<p>quizy, ćwiczenia, odniesienie do laboratoriów i do Kafki (wykład 12)</p></div>
+</div>
+<div class="note"><p><strong>Gdzie jesteśmy?</strong> Na wykładzie 2 budowaliśmy potoki generatorów (źródło → map/filter → ujście), na wykładzie 9 okna w Streamz (<code>sliding_window</code>, <code>timed_window</code>). Flink robi to samo, ale <strong>równolegle, na wielu maszynach, z trwałym stanem i czasem zdarzeń</strong>.</p></div>
+</div>
+<aside class="notes">Wykład częściowo zdalny: pytania ze slajdów "Sprawdź się" zadawaj na czacie Teams, zanim klikniesz odpowiedź. Ten sam materiał jest na trzy spotkania. Proponowany podział: (1) części 1-2 do slajdu "Sprawdź się: DataStream", (2) Table API i SQL oraz czas i watermarki, (3) okna, stan, checkpointy i podsumowanie.</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="Apache Flink">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Apache Flink</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead"><strong>Apache Flink</strong> to framework i rozproszony silnik do <strong>stanowych obliczeń</strong> na <strong>nieograniczonych</strong> i <strong>ograniczonych</strong> strumieniach danych.</p>
+<ul class="points side">
+<li>małe opóźnienia (milisekundy) przy dużej przepustowości,</li>
+<li>spójny stan z gwarancją <strong>exactly-once</strong> mimo awarii (checkpointy),</li>
+<li>obsługa <strong>czasu zdarzenia</strong> (event time) i danych spóźnionych,</li>
+<li>skalowanie od laptopa do tysięcy rdzeni (Kubernetes, YARN, standalone),</li>
+<li>API: Java (DataStream, Table API), <strong>Python (PyFlink)</strong>, SQL.</li>
+</ul>
+</div>
+<div>
+<table class="simple">
+<tr><th>Wersja</th><th>Wydana</th><th>Uwagi</th></tr>
+<tr><td><strong>2.3</strong></td><td>czerwiec 2026</td><td>aktualna stabilna</td></tr>
+<tr><td>2.0</td><td>marzec 2025</td><td>pierwsze wydanie 2.x: usunięte stare API</td></tr>
+<tr><td>1.20</td><td>2024 (łatki do 2026)</td><td>ostatnia linia 1.x (LTS)</td></tr>
+</table>
+<div class="note warn"><p>Wiele tutoriali w sieci (i stare materiały z laboratoriów) pisano dla Flink 1.x. Następny slajd pokazuje, czego już nie ma.</p></div>
+</div>
+</div>
+<img class="pic" style="max-height:7.5em" src="images/image-9PRVZ6G2.png" alt="Flink: zdarzenia z transakcji, logów, IoT i kliknięć trafiają do aplikacji Flink, wyniki do aplikacji, logu zdarzeń i baz danych">
+<p class="small">Źródło grafiki: <a href="https://flink.apache.org" target="_blank">https://flink.apache.org</a></p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Flink 2.x: co się zmieniło</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<table class="simple">
+<tr><th>Flink 1.x (spotkacie w starych przykładach)</th><th>Flink 2.x</th></tr>
+<tr><td>DataSet API (<code>ExecutionEnvironment</code>) do przetwarzania wsadowego</td><td><strong>usunięte</strong>: DataStream w trybie BATCH albo Table API / SQL</td></tr>
+<tr><td>Scala API</td><td><strong>usunięte</strong>: API Javy (można je wołać ze Scali)</td></tr>
+<tr><td><code>env.addSource(new FlinkKafkaConsumer(...))</code>, <code>SourceFunction</code></td><td><code>env.fromSource(KafkaSource, WatermarkStrategy, nazwa)</code>: nowe Source API</td></tr>
+<tr><td><code>addSink(SinkFunction)</code>, <code>writeAsText</code>, <code>writeAsCsv</code></td><td><code>sinkTo(...)</code> z Sink V2: <code>FileSink</code>, <code>KafkaSink</code>, …</td></tr>
+<tr><td><code>.timeWindow(Time.seconds(10))</code></td><td><code>.window(TumblingEventTimeWindows.of(Duration.ofSeconds(10)))</code></td></tr>
+<tr><td><code>TableSource</code> / <code>TableSink</code>, <code>toAppendStream</code></td><td>konektory w <code>CREATE TABLE ... WITH (...)</code>, <code>toDataStream</code>, <code>toChangelogStream</code></td></tr>
+<tr><td>Java 8, plik <code>flink-conf.yaml</code>, tryb per-job</td><td>Java 11+ (zalecana 17, wspierana 21), <code>config.yaml</code>, tryb application</td></tr>
+</table>
+<div class="note warn"><p><strong>PyFlink 2.3</strong> (<code>pip install apache-flink==2.3.0</code>) działa na Pythonie <strong>3.9-3.12</strong>, nie na 3.13, i wymaga Javy 11, 17 lub 21. Na laboratoriach używamy osobnego środowiska wirtualnego z Pythonem 3.12.</p></div>
+</div>
+<aside class="notes">Wszystkie przykłady z tego wykładu zostały uruchomione na PyFlink 2.3.0 (Python 3.12, Java 21). Przykłady w Javie skompilowano z Flink 2.3.0.</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="Zastosowania">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Aplikacje sterowane zdarzeniami</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<img class="pic" style="max-height:12.5em" src="images/image-lmi2n084.png" alt="Tradycyjna aplikacja transakcyjna czyta i zapisuje zdalną bazę; aplikacja sterowana zdarzeniami trzyma lokalny stan i zapisuje asynchroniczne checkpointy">
+<ul class="points side">
+<li><strong>Event-driven application</strong> reaguje na zdarzenia (wykrywanie oszustw, alerty, reguły biznesowe), a dane potrzebne do decyzji trzyma w <strong>lokalnym stanie</strong> zamiast pytać zdalną bazę przy każdym zdarzeniu.</li>
+<li>Stan jest okresowo zapisywany (checkpointy) w trwałym magazynie, więc po awarii aplikacja wraca do spójnego punktu.</li>
+</ul>
+<p class="small">Źródło grafiki: <a href="https://flink.apache.org/what-is-flink/use-cases/" target="_blank">https://flink.apache.org/what-is-flink/use-cases/</a></p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Analityka i potoki danych</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl" style="align-items:center">
+<img class="pic" style="max-height:8.5em" src="images/image-B4V8weVX.png" alt="Analityka wsadowa: okresowe zapytanie na zapisanych zdarzeniach; analityka strumieniowa: ciągłe zapytanie aktualizujące raport na żywo">
+<ul class="points side"><li><strong>Analityka:</strong> zamiast raportu liczonego co noc (wsadowo) <strong>zapytanie ciągłe</strong> aktualizuje wynik, np. dashboard, z każdym zdarzeniem.</li></ul>
+</div>
+<div class="cols wl" style="align-items:center">
+<img class="pic" style="max-height:8.5em" src="images/image-nDC88uLi.png" alt="Okresowe ETL kopiuje dane co jakiś czas; potok danych przetwarza zdarzenia na bieżąco i dopisuje je do bazy lub logu">
+<ul class="points side"><li><strong>Potoki danych (ETL):</strong> zamiast okresowego zadania kopiującego dane <strong>ciągły potok</strong> czyści, wzbogaca i przenosi zdarzenia na bieżąco, np. z Kafki do bazy lub hurtowni.</li></ul>
+</div>
+<p class="small">Źródło grafik: <a href="https://flink.apache.org/what-is-flink/use-cases/" target="_blank">https://flink.apache.org/what-is-flink/use-cases/</a></p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przetwarzanie wsadowe i strumieniowe</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<svg class="diagram" viewBox="0 0 1000 210" role="img" aria-label="Strumień ograniczony ma początek i koniec; strumień nieograniczony ma początek, ale nie ma końca, dane z przyszłości jeszcze nie nadeszły">
+<defs><marker id="arT" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs>
+<text x="0" y="45">ograniczony</text><text x="0" y="67" fill="#666" style="font-size:15px">(bounded)</text>
+<rect x="190" y="30" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="232" y="30" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="274" y="30" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="316" y="30" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="358" y="30" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="400" y="30" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="442" y="30" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="484" y="30" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="526" y="30" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="568" y="30" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/>
+<line x1="180" y1="20" x2="180" y2="72" stroke="#53ae12" stroke-width="4"/><text x="180" y="92" text-anchor="middle" style="font-size:15px">start</text>
+<line x1="612" y1="20" x2="612" y2="72" stroke="#d93025" stroke-width="4"/><text x="612" y="92" text-anchor="middle" style="font-size:15px">koniec</text>
+<text x="0" y="145">nieograniczony</text><text x="0" y="167" fill="#666" style="font-size:15px">(unbounded)</text>
+<rect x="190" y="130" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="232" y="130" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="274" y="130" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="316" y="130" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="358" y="130" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="400" y="130" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="442" y="130" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="484" y="130" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="526" y="130" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="568" y="130" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="610" y="130" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="652" y="130" width="32" height="32" rx="5" fill="none" stroke="#999" stroke-width="2" stroke-dasharray="5 4"/><rect x="694" y="130" width="32" height="32" rx="5" fill="none" stroke="#999" stroke-width="2" stroke-dasharray="5 4"/><rect x="736" y="130" width="32" height="32" rx="5" fill="none" stroke="#999" stroke-width="2" stroke-dasharray="5 4"/><rect x="778" y="130" width="32" height="32" rx="5" fill="none" stroke="#999" stroke-width="2" stroke-dasharray="5 4"/>
+<line x1="180" y1="120" x2="180" y2="172" stroke="#53ae12" stroke-width="4"/><text x="180" y="192" text-anchor="middle" style="font-size:15px">start</text>
+<line x1="654" y1="115" x2="654" y2="177" stroke="#e8710a" stroke-width="3" stroke-dasharray="6 4"/><text x="654" y="196" text-anchor="middle" fill="#e8710a" style="font-size:15px">teraz</text>
+<text x="830" y="152" fill="#666">… bez końca</text>
+</svg>
+<div class="cols">
+<ul class="points side">
+<li><strong>Przetwarzanie wsadowe</strong> działa na strumieniu <strong>ograniczonym</strong>: można najpierw wczytać wszystko, a potem sortować, liczyć statystyki globalne i wypisać raport końcowy.</li>
+<li><strong>Przetwarzanie strumieniowe</strong> działa na strumieniu <strong>nieograniczonym</strong>: dane mogą nigdy się nie skończyć, więc wyniki trzeba liczyć <strong>ciągle</strong>, w miarę napływu.</li>
+</ul>
+<div>
+<div class="note"><p>Dla Flinka plik to po prostu strumień, który się kończy. Ten sam program działa na obu rodzajach danych (wsad to szczególny przypadek strumienia).</p></div>
+<div class="quiz compact"><p class="q">Wczorajszy plik z logami serwera WWW to strumień…</p><div class="opts"><button class="opt" data-ok="1">ograniczony</button><button class="opt" data-ok="0">nieograniczony</button></div><p class="explain">Ograniczony: ma znany koniec. Logi spływające <em>na bieżąco</em> z serwera (np. przez Kafkę) to już strumień nieograniczony.</p></div>
+</div>
+</div>
+</div>
+<aside class="notes">Na wykładzie 1 była symulacja "Wsadowo vs strumieniowo".</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="Architektura">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Architektura klastra Flink</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<svg class="diagram" viewBox="0 0 1000 250" role="img" aria-label="Klient wysyła graf zadania do JobManagera, który rozdziela podzadania do slotów w TaskManagerach; TaskManagery wymieniają strumienie danych">
+<defs><marker id="arA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker><marker id="arD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1a73d9"/></marker></defs>
+<rect x="5" y="90" width="150" height="70" rx="8" fill="#fff" stroke="#999" stroke-width="2"/>
+<text x="80" y="120" text-anchor="middle">Klient</text><text x="80" y="143" text-anchor="middle" fill="#666" style="font-size:14px">program → graf</text>
+<line x1="155" y1="125" x2="223" y2="125" stroke="#666" stroke-width="2.5" marker-end="url(#arA)"/>
+<rect x="225" y="5" width="300" height="240" rx="10" fill="#f3faee" stroke="#53ae12" stroke-width="2.5"/>
+<text x="375" y="30" text-anchor="middle" font-weight="bold">JobManager</text>
+<rect x="240" y="42" width="270" height="58" rx="6" fill="#fff" stroke="#53ae12" stroke-width="1.5"/>
+<text x="375" y="66" text-anchor="middle">Dispatcher</text><text x="375" y="88" text-anchor="middle" fill="#666" style="font-size:14px">przyjmuje zadania, Web UI :8081</text>
+<rect x="240" y="108" width="270" height="58" rx="6" fill="#fff" stroke="#53ae12" stroke-width="1.5"/>
+<text x="375" y="132" text-anchor="middle">ResourceManager</text><text x="375" y="154" text-anchor="middle" fill="#666" style="font-size:14px">przydziela sloty</text>
+<rect x="240" y="174" width="270" height="62" rx="6" fill="#fff" stroke="#53ae12" stroke-width="1.5"/>
+<text x="375" y="198" text-anchor="middle">JobMaster (1 na zadanie)</text><text x="375" y="222" text-anchor="middle" fill="#666" style="font-size:14px">harmonogram, checkpointy, awarie</text>
+<line x1="525" y1="80" x2="583" y2="62" stroke="#666" stroke-width="2.5" marker-end="url(#arA)"/>
+<line x1="525" y1="170" x2="583" y2="188" stroke="#666" stroke-width="2.5" marker-end="url(#arA)"/>
+<rect x="585" y="5" width="410" height="110" rx="10" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2.5"/>
+<text x="600" y="30" font-weight="bold">TaskManager 1</text><text x="985" y="30" text-anchor="end" fill="#666" style="font-size:14px">proces JVM</text>
+<rect x="600" y="41" width="118" height="64" rx="6" fill="#fff" stroke="#1a73d9" stroke-width="1.5"/><text x="659" y="61" text-anchor="middle" fill="#666" style="font-size:13px">slot 1</text><text x="659" y="88" text-anchor="middle" class="mono" style="font-size:15px">źródło→map</text><rect x="730" y="41" width="118" height="64" rx="6" fill="#fff" stroke="#1a73d9" stroke-width="1.5"/><text x="789" y="61" text-anchor="middle" fill="#666" style="font-size:13px">slot 2</text><text x="789" y="88" text-anchor="middle" class="mono" style="font-size:15px">okno</text><rect x="860" y="41" width="118" height="64" rx="6" fill="#fff" stroke="#1a73d9" stroke-width="1.5"/><text x="919" y="61" text-anchor="middle" fill="#666" style="font-size:13px">slot 3</text><text x="919" y="88" text-anchor="middle" class="mono" style="font-size:15px">ujście</text><rect x="585" y="135" width="410" height="110" rx="10" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2.5"/>
+<text x="600" y="160" font-weight="bold">TaskManager 2</text><text x="985" y="160" text-anchor="end" fill="#666" style="font-size:14px">proces JVM</text>
+<rect x="600" y="171" width="118" height="64" rx="6" fill="#fff" stroke="#1a73d9" stroke-width="1.5"/><text x="659" y="191" text-anchor="middle" fill="#666" style="font-size:13px">slot 1</text><text x="659" y="218" text-anchor="middle" class="mono" style="font-size:15px">źródło→map</text><rect x="730" y="171" width="118" height="64" rx="6" fill="#fff" stroke="#1a73d9" stroke-width="1.5"/><text x="789" y="191" text-anchor="middle" fill="#666" style="font-size:13px">slot 2</text><text x="789" y="218" text-anchor="middle" class="mono" style="font-size:15px">okno</text><rect x="860" y="171" width="118" height="64" rx="6" fill="#fff" stroke="#1a73d9" stroke-width="1.5"/><text x="919" y="191" text-anchor="middle" fill="#666" style="font-size:13px">slot 3</text><text x="919" y="218" text-anchor="middle" class="mono" style="font-size:15px">(wolny)</text>
+<line x1="760" y1="116" x2="760" y2="133" stroke="#1a73d9" stroke-width="2.5" marker-end="url(#arD)" marker-start="url(#arD)"/>
+<text x="770" y="130" fill="#1a73d9" style="font-size:14px">strumienie danych (sieć)</text>
+</svg>
+<div class="cols">
+<ul class="points side">
+<li><strong>JobManager</strong> koordynuje: przyjmuje zadanie, planuje podzadania, wyzwala checkpointy i odtwarza zadanie po awarii.</li>
+<li><strong>TaskManager</strong> (worker) wykonuje podzadania. Ma stałą liczbę <strong>slotów</strong>, a każde podzadanie działa w <strong>osobnym wątku</strong> (wykład 1 i pule wątków z wykładu 7).</li>
+</ul>
+<ul class="points side">
+<li>Skrypt PyFlink uruchomiony na laptopie startuje lokalny <strong>MiniCluster</strong>: JobManager i TaskManager w jednym procesie JVM.</li>
+<li>Wdrożenia: standalone, Kubernetes (operator Flink), YARN. Od Flink 2.0 tryb <em>session</em> albo <em>application</em> (per-job usunięto).</li>
+</ul>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="DataStream API">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Anatomia programu Flink</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wr">
+<div>
+<p class="lead">Każdy program Flink ma te same części:</p>
+<ol class="points side">
+<li>uzyskaj <strong>środowisko</strong> wykonawcze,</li>
+<li>utwórz <strong>źródło</strong> danych (source),</li>
+<li>określ <strong>transformacje</strong>,</li>
+<li>określ, gdzie trafią wyniki (<strong>ujście</strong>, sink),</li>
+<li><strong>uruchom</strong> program: <code>env.execute()</code>.</li>
+</ol>
+<div class="note"><p>Wywołania <code>map</code>, <code>key_by</code>, <code>print</code> niczego jeszcze nie liczą: budują <strong>graf przepływu danych</strong>. Obliczenia startują dopiero w <code>execute()</code>, podobnie jak generator z wykładu 2 rusza dopiero przy <code>next()</code>.</p></div>
+</div>
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|4-5|7-8|9-13|14|16">
+from pyflink.common import Types
+from pyflink.datastream import StreamExecutionEnvironment
+
+env = StreamExecutionEnvironment.get_execution_environment()  # 1
+env.set_parallelism(1)
+
+tekst = env.from_collection(["to be or not", "to be"],        # 2
+                            type_info=Types.STRING())
+para = Types.TUPLE([Types.STRING(), Types.INT()])
+(tekst.flat_map(lambda s: [(w, 1) for w in s.split()],        # 3
+                output_type=para)
+      .key_by(lambda p: p[0])
+      .reduce(lambda a, b: (a[0], a[1] + b[1]))
+      .print())                                               # 4
+
+env.execute("word count")                                     # 5
+</code></pre><pre class="out sm">(to,1)
+(be,1)
+(or,1)
+(not,1)
+(to,2)
+(be,2)</pre>
+</div>
+</div>
+</div>
+<aside class="notes">Zwróć uwagę na wynik: strumień nie czeka na koniec danych, więc "to" i "be" pojawiają się dwa razy (wynik bieżący, aktualizowany).</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Program jako graf przepływu danych</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<svg class="diagram" viewBox="0 0 1000 140" role="img" aria-label="Graf: źródło Kafka, map z watermarkami, keyBy z oknem i agregacją, ujście print">
+<defs><marker id="arF" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#999"/></marker></defs><rect x="10" y="25" width="150" height="62" rx="31" fill="#ffe082" stroke="#e8a50a" stroke-width="2"/><text x="85.0" y="52" text-anchor="middle" class="mono" style="font-size:15px">fromSource</text><text x="85.0" y="73" text-anchor="middle" class="mono" style="font-size:15px">(Kafka)</text><rect x="235" y="25" width="200" height="62" rx="31" fill="#ffe082" stroke="#e8a50a" stroke-width="2"/><text x="335.0" y="52" text-anchor="middle" class="mono" style="font-size:15px">map(parse)</text><text x="335.0" y="73" text-anchor="middle" class="mono" style="font-size:15px">+ watermarki</text><rect x="510" y="25" width="280" height="62" rx="31" fill="#ffe082" stroke="#e8a50a" stroke-width="2"/><text x="650.0" y="52" text-anchor="middle" class="mono" style="font-size:15px">keyBy → window</text><text x="650.0" y="73" text-anchor="middle" class="mono" style="font-size:15px">→ aggregate</text><rect x="865" y="25" width="125" height="62" rx="31" fill="#ffe082" stroke="#e8a50a" stroke-width="2"/><text x="927.5" y="52" text-anchor="middle" class="mono" style="font-size:15px">print</text><text x="927.5" y="73" text-anchor="middle" class="mono" style="font-size:15px">(ujście)</text><line x1="162" y1="56" x2="230" y2="56" stroke="#999" stroke-width="5" marker-end="url(#arF)"/><line x1="437" y1="56" x2="505" y2="56" stroke="#999" stroke-width="5" marker-end="url(#arF)"/><line x1="792" y1="56" x2="860" y2="56" stroke="#999" stroke-width="5" marker-end="url(#arF)"/>
+<text x="85" y="115" text-anchor="middle" fill="#666" style="font-size:15px">źródło</text>
+<text x="522" y="115" text-anchor="middle" fill="#666" style="font-size:15px">transformacje</text>
+<text x="927" y="115" text-anchor="middle" fill="#666" style="font-size:15px">ujście</text>
+<text x="500" y="136" text-anchor="middle" fill="#666" style="font-size:15px;font-style:italic">strzałki = strumienie; cały graf = streaming dataflow</text>
+</svg>
+<div class="cols">
+<ul class="points side">
+<li><strong>Źródło</strong> (source operator) wczytuje dane: Kafka, pliki, bazy, generatory.</li>
+<li><strong>Transformacje</strong> (transformation operators) tworzą z jednych strumieni kolejne: <code>map</code>, <code>keyBy</code>, <code>window</code>, <code>aggregate</code>.</li>
+<li><strong>Ujście</strong> (sink operator) wysyła wyniki na zewnątrz.</li>
+</ul>
+<div>
+<div class="note"><p>Krawędzie grafu to <strong>strumienie</strong>. Flink może uruchomić każdy wierzchołek w wielu kopiach (podzadaniach) na wielu maszynach: o tym za chwilę.</p></div>
+<div class="note warn"><p>W tutorialach dla Flink 1.x ten przykład używa <code>env.addSource(new FlinkKafkaConsumer&lt;&gt;(…))</code>, <code>.timeWindow(Time.seconds(10))</code>, <code>.apply(…)</code> i <code>addSink(…)</code>. W 2.x tych metod już nie ma. Aktualny kod jest na następnym slajdzie.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Ten sam program w Javie (Flink 2.x)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<pre class="code-wrap"><code class="language-java" data-trim data-noescape data-line-numbers="|3-10|11-14|16-19|21-22">
+StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+
+KafkaSource&lt;String&gt; kafka = KafkaSource.&lt;String&gt;builder()
+        .setBootstrapServers("localhost:9092")
+        .setTopics("odczyty")
+        .setValueOnlyDeserializer(new SimpleStringSchema())
+        .build();
+
+DataStream&lt;Odczyt&gt; odczyty = env
+        .fromSource(kafka, WatermarkStrategy.noWatermarks(), "kafka")  // źródło
+        .map(Odczyt::parse)                                            // transformacja
+        .assignTimestampsAndWatermarks(WatermarkStrategy
+                .&lt;Odczyt&gt;forBoundedOutOfOrderness(Duration.ofSeconds(2))
+                .withTimestampAssigner((o, ts) -&gt; o.czas));
+
+DataStream&lt;Double&gt; srednie = odczyty
+        .keyBy(o -&gt; o.czujnik)                                         // transformacja
+        .window(TumblingEventTimeWindows.of(Duration.ofSeconds(10)))
+        .aggregate(new Srednia());
+
+srednie.print();                                                       // ujście
+env.execute("czujniki");
+</code></pre>
+<p class="small"><code>Odczyt</code>: POJO z polami <code>czujnik</code>, <code>temp</code>, <code>czas</code>; <code>Srednia</code>: slajd „Funkcje okien”. Skompilowane z Flink 2.3.0 i flink-connector-kafka 5.0.</p>
+</div>
+<aside class="notes">Konektor Kafka jest osobnym artefaktem (flink-connector-kafka), wersjonowanym niezależnie od Flinka. Kafka będzie na wykładzie 12.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>DataStream: model danych</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<ul class="points side">
+<li><strong>DataStream</strong> to <strong>niezmienna</strong> (immutable) kolekcja elementów, która może zawierać duplikaty. Nie zmieniamy jej, tylko tworzymy nowe strumienie transformacjami.</li>
+<li>Dane mogą być <strong>ograniczone</strong> albo <strong>nieograniczone</strong>, a API jest <strong>takie samo</strong>.</li>
+<li>Strumień jest <strong>typowany</strong>. Flink musi znać typ elementów, żeby serializować je przy przesyłaniu między wątkami i maszynami oraz zapisywać w stanie.</li>
+</ul>
+</div>
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from pyflink.common import Types
+
+Types.INT(), Types.STRING(), Types.FLOAT()
+Types.TUPLE([Types.STRING(), Types.INT()])    # krotka
+Types.ROW_NAMED(["imie", "kwota"],            # wiersz z nazwami
+                [Types.STRING(), Types.INT()])
+Types.LIST(Types.INT())
+
+ds.map(lambda x: 2 * x, output_type=Types.INT())
+</code></pre>
+<div class="note warn"><p>Bez <code>output_type</code> PyFlink przesyła <strong>spiklowane</strong> obiekty Pythona (<code>PICKLED_BYTE_ARRAY</code>): działa, ale wolniej i nie da się ich użyć w operatorach Javy ani w Table API.</p></div>
+<div class="note"><p>Funkcje Pythona (lambdy, UDF) wykonuje osobny proces Pythona obok JVM (<code>python.execution-mode: process</code>), więc każdy element przekracza granicę JVM ↔ Python.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Środowisko wykonawcze</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead"><strong>StreamExecutionEnvironment</strong> to kontekst programu: tworzy źródła i pozwala sterować wykonaniem (równoległość, checkpointy, tryb).</p>
+<div class="cols wl">
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from pyflink.datastream import (StreamExecutionEnvironment,
+                                RuntimeExecutionMode, CheckpointingMode)
+
+env = StreamExecutionEnvironment.get_execution_environment()
+env.set_parallelism(4)                # domyślna równoległość operatorów
+env.enable_checkpointing(10_000,      # checkpoint co 10 s
+                         CheckpointingMode.EXACTLY_ONCE)
+env.set_runtime_mode(RuntimeExecutionMode.STREAMING)    # domyślny
+
+env.from_collection([1, 2, 3]).print()
+env.execute("moje zadanie")
+</code></pre>
+<div>
+<div class="note"><p><code>get_execution_environment()</code> sam rozpoznaje kontekst: uruchomiony lokalnie startuje MiniCluster, a wysłany na klaster (<code>flink run</code>) łączy się z JobManagerem.</p></div>
+<div class="note"><p>Opcje można też podać w <code>config.yaml</code> albo przy uruchomieniu: <code>flink run -Dexecution.runtime-mode=BATCH …</code>. Dokumentacja zaleca ustawiać tryb właśnie tam, a nie w kodzie.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Tryb STREAMING i BATCH</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<table class="simple">
+<tr><th></th><th>STREAMING (domyślny)</th><th>BATCH</th></tr>
+<tr><td>wejście</td><td>ograniczone lub nieograniczone</td><td>tylko ograniczone</td></tr>
+<tr><td>wykonanie</td><td>wszystkie zadania działają cały czas, rekordy płyną przez cały potok</td><td>etapy po kolei: następny startuje, gdy poprzedni skończy</td></tr>
+<tr><td>wyniki</td><td>bieżące, aktualizowane z każdym rekordem</td><td>tylko końcowe</td></tr>
+<tr><td>po awarii</td><td>powrót do ostatniego checkpointu</td><td>ponowne wykonanie nieudanego etapu</td></tr>
+</table>
+<div>
+<p class="lead">Ten sam word count:</p>
+<div class="cols">
+<div><p class="small">STREAMING</p><pre class="out">(to,1)
+(be,1)
+(or,1)
+(not,1)
+(to,2)
+(be,2)</pre></div>
+<div><p class="small">BATCH</p><pre class="out">(be,2)
+(or,1)
+(to,2)
+(not,1)</pre></div>
+</div>
+</div>
+</div>
+<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
+env.set_runtime_mode(RuntimeExecutionMode.BATCH)   # dodane do programu ze slajdu "Anatomia"
+</code></pre>
+<p class="small">Wiedząc, że dane się skończą, BATCH może sortować i grupować dane zamiast trzymać stan dla każdego klucza i emitować pośrednie wyniki. Kolejność wyników w BATCH nie jest gwarantowana.</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Źródła danych (Source API)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Strumień tworzymy, przekazując obiekt <strong>Source</strong> do środowiska: <code>env.from_source(źródło, strategia_watermarków, nazwa)</code>.</p>
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from pyflink.common import WatermarkStrategy
+from pyflink.datastream import StreamExecutionEnvironment
+from pyflink.datastream.connectors.file_system import (FileSource,
+                                                      StreamFormat)
+from pyflink.datastream.formats.csv import CsvSchema, CsvReaderFormat
+from pyflink.table import DataTypes
+
+env = StreamExecutionEnvironment.get_execution_environment()
+env.set_parallelism(1)
+wm = WatermarkStrategy.no_watermarks()
+
+linie = FileSource.for_record_stream_format(       # plik tekstowy
+    StreamFormat.text_line_format(), "odczyty.csv").build()
+env.from_source(linie, wm, "linie").print()
+
+schemat = (CsvSchema.builder()                     # CSV ze schematem
+           .add_string_column("czujnik")
+           .add_number_column("temp", number_type=DataTypes.DOUBLE())
+           .build())
+csv = FileSource.for_record_stream_format(
+    CsvReaderFormat.for_schema(schemat), "odczyty.csv").build()
+env.from_source(csv, wm, "csv").print()
+env.execute()
+</code></pre>
+</div>
+<div>
+<pre class="out">s1,21.5
+s2,30.0
++I(s1,21.5)
++I(s2,30.0)</pre>
+<ul class="points side">
+<li>Inne źródła: <code>KafkaSource</code> (wykład 12), Kinesis, JDBC, <code>DataGeneratorSource</code>.</li>
+<li>Do testów: <code>env.from_collection([1, 2, 3])</code> (w Javie od 1.19: <code>env.fromData(1, 2, 3)</code>). Takie źródło ma równoległość 1.</li>
+<li>Drugi argument, strategia watermarków, jest <strong>obowiązkowy</strong>. Wrócimy do niego przy czasie zdarzenia.</li>
+</ul>
+</div>
+</div>
+</div>
+<aside class="notes">W oryginalnym slajdzie wywołanie env.from_source(my_source, "my_source_name") nie miało strategii watermarków - w PyFlink to błąd (argument obowiązkowy).</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="Transformacje">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Transformacje</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Operatory zamieniają jeden lub więcej strumieni w nowy strumień. Łańcuch wywołań buduje topologię przepływu danych.</p>
+<table class="simple">
+<tr><th>Operator</th><th>Wejście → wyjście</th><th>Przykład (PyFlink)</th></tr>
+<tr><td><code>map</code></td><td>1 element → 1 element</td><td><code>ds.map(lambda x: 2 * x)</code></td></tr>
+<tr><td><code>flat_map</code></td><td>1 element → 0…n elementów</td><td><code>ds.flat_map(lambda s: s.split(" "))</code></td></tr>
+<tr><td><code>filter</code></td><td>1 element → 0 lub 1</td><td><code>ds.filter(lambda x: x != 0)</code></td></tr>
+<tr><td><code>key_by</code></td><td>DataStream → KeyedStream (partycjonowanie po kluczu)</td><td><code>ds.key_by(lambda r: r[0])</code></td></tr>
+<tr><td><code>reduce</code>, <code>sum</code>, <code>min</code>, <code>max</code></td><td>KeyedStream → bieżący agregat dla każdego klucza</td><td><code>keyed.reduce(lambda a, b: a + b)</code></td></tr>
+<tr><td><code>window</code></td><td>KeyedStream → strumień okien</td><td><code>keyed.window(TumblingEventTimeWindows.of(Time.seconds(10)))</code></td></tr>
+<tr><td><code>union</code>, <code>connect</code></td><td>kilka strumieni → jeden</td><td><code>ds1.union(ds2)</code></td></tr>
+<tr><td><code>process</code></td><td>dowolna logika ze stanem i timerami</td><td><code>keyed.process(MojaKeyedProcessFunction())</code></td></tr>
+</table>
+<p class="small">To te same idee co <code>map</code>, <code>filter</code> i <code>reduce</code> z wykładu 2, ale <code>reduce</code> na strumieniu nieograniczonym nie ma „końca”: emituje wynik bieżący po każdym elemencie.</p>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Transformacje: ćwiczenie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="blanks">
+<p class="lead">Uzupełnij potok, który dla każdego czujnika liczy, ile razy temperatura przekroczyła 30°C:</p>
+<pre class="exo">ds = env.from_collection(["s1;21.5", "s2;35.0", "s1;31.2", "s1;33.0"])
+alarmy = (ds.map(<span class="k">lambda</span> s: s.split(";"))
+            .<input class="blank" size="8" data-re="^filter$" data-sol="filter" aria-label="operator 1">(<span class="k">lambda</span> p: float(p[1]) &gt; 30)
+            .map(<span class="k">lambda</span> p: (p[0], 1))
+            .<input class="blank" size="8" data-re="^key_by$" data-sol="key_by" aria-label="operator 2">(<span class="k">lambda</span> t: t[0])
+            .<input class="blank" size="8" data-re="^reduce$" data-sol="reduce" aria-label="operator 3">(<span class="k">lambda</span> a, b: (a[0], a[1] + b[1])))
+alarmy.print()
+env.<input class="blank" size="8" data-re="^execute$" data-sol="execute" aria-label="uruchomienie">()</pre>
+<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
+<p class="fb"></p>
+<div class="explain"><p>Wynik (PyFlink 2.3, równoległość 1): <code>('s2', 1)</code>, <code>('s1', 1)</code>, <code>('s1', 2)</code>. Krotki wypisują się w stylu Pythona, bo bez <code>output_type</code> elementy są spiklowane.</p></div>
+</div>
+</div>
+<aside class="notes">Kod sprawdzony w PyFlink 2.3.0.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>keyBy i partycjonowanie: symulacja</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="keysim">
+  <div class="simctl">
+    <label>równoległość: <select class="par"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></label>
+    <label><input type="radio" name="keymode" value="key" checked> <code>key_by(czujnik)</code></label>
+    <label><input type="radio" name="keymode" value="rr"> <code>rebalance()</code> (round-robin)</label>
+    <button class="btn" data-act="step">Zdarzenie</button>
+    <button class="btn" data-act="play">Odtwarzaj / pauza</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+  </div>
+  <div class="kq"><span class="small">kolejka źródła:</span> <span class="queue"></span></div>
+  <p class="route"></p>
+  <div class="subs"></div>
+  <p class="hint verdict"></p>
+</div>
+</div>
+<aside class="notes">Pokaż: przy key_by ten sam czujnik zawsze trafia do tego samego podzadania, więc licznik w stanie jest kompletny i nie trzeba zamków. Przy rebalance liczniki jednego czujnika rozjeżdżają się po podzadaniach. Przy 3 podzadaniach rozkład jest nierówny (data skew).</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Równoległość i łańcuchy operatorów</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<svg class="diagram" viewBox="0 0 1000 215" role="img" aria-label="Widok równoległy: źródło i map połączone w łańcuch w jednym wątku, keyBy rozsyła dane do wszystkich podzadań okna, ujście z równoległością 1">
+<defs><marker id="arP" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker><marker id="arQ" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e8710a"/></marker></defs><rect x="10" y="5" width="330" height="70" rx="10" fill="none" stroke="#53ae12" stroke-width="2" stroke-dasharray="7 5"/>
+<rect x="25" y="15" width="135" height="50" rx="25" fill="#ffe082" stroke="#e8a50a" stroke-width="2"/><text x="92" y="46" text-anchor="middle" class="mono" style="font-size:16px">źródło[1]</text>
+<line x1="160" y1="40" x2="188" y2="40" stroke="#666" stroke-width="2.5" marker-end="url(#arP)"/>
+<rect x="190" y="15" width="135" height="50" rx="25" fill="#ffe082" stroke="#e8a50a" stroke-width="2"/><text x="257" y="46" text-anchor="middle" class="mono" style="font-size:16px">map[1]</text>
+<rect x="520" y="15" width="190" height="50" rx="25" fill="#ffe082" stroke="#e8a50a" stroke-width="2"/><text x="615" y="46" text-anchor="middle" class="mono" style="font-size:16px">okno[1]</text>
+<rect x="10" y="115" width="330" height="70" rx="10" fill="none" stroke="#53ae12" stroke-width="2" stroke-dasharray="7 5"/>
+<rect x="25" y="125" width="135" height="50" rx="25" fill="#ffe082" stroke="#e8a50a" stroke-width="2"/><text x="92" y="156" text-anchor="middle" class="mono" style="font-size:16px">źródło[2]</text>
+<line x1="160" y1="150" x2="188" y2="150" stroke="#666" stroke-width="2.5" marker-end="url(#arP)"/>
+<rect x="190" y="125" width="135" height="50" rx="25" fill="#ffe082" stroke="#e8a50a" stroke-width="2"/><text x="257" y="156" text-anchor="middle" class="mono" style="font-size:16px">map[2]</text>
+<rect x="520" y="125" width="190" height="50" rx="25" fill="#ffe082" stroke="#e8a50a" stroke-width="2"/><text x="615" y="156" text-anchor="middle" class="mono" style="font-size:16px">okno[2]</text>
+
+<line x1="325" y1="40" x2="517" y2="40" stroke="#e8710a" stroke-width="2.5" marker-end="url(#arQ)"/>
+<line x1="325" y1="150" x2="517" y2="150" stroke="#e8710a" stroke-width="2.5" marker-end="url(#arQ)"/>
+<line x1="325" y1="40" x2="517" y2="145" stroke="#e8710a" stroke-width="2.5" marker-end="url(#arQ)"/>
+<line x1="325" y1="150" x2="517" y2="45" stroke="#e8710a" stroke-width="2.5" marker-end="url(#arQ)"/>
+<text x="425" y="28" text-anchor="middle" fill="#e8710a" style="font-size:15px">keyBy: redystrybucja</text>
+<rect x="830" y="70" width="150" height="50" rx="25" fill="#ffe082" stroke="#e8a50a" stroke-width="2"/><text x="905" y="101" text-anchor="middle" class="mono" style="font-size:16px">ujście[1]</text>
+<line x1="710" y1="40" x2="828" y2="88" stroke="#666" stroke-width="2.5" marker-end="url(#arP)"/>
+<line x1="710" y1="150" x2="828" y2="103" stroke="#666" stroke-width="2.5" marker-end="url(#arP)"/>
+<text x="175" y="102" text-anchor="middle" fill="#53ae12" style="font-size:15px">łańcuch = 1 wątek</text>
+<text x="905" y="142" text-anchor="middle" fill="#666" style="font-size:14px">równoległość 1</text>
+<text x="500" y="208" text-anchor="middle" fill="#666" style="font-size:15px;font-style:italic">źródło → map → keyBy/okno → ujście przy równoległości 2 (ujście: 1)</text>
+</svg>
+<div class="cols">
+<ul class="points side">
+<li>Programy Flink są z natury <strong>równoległe</strong> i <strong>rozproszone</strong>: strumień dzieli się na <strong>partycje</strong>, a operator na <strong>podzadania</strong> (subtasks), niezależne od siebie, w różnych wątkach i na różnych maszynach.</li>
+</ul>
+<ul class="points side">
+<li><strong>forward (1:1)</strong>: kolejność i partycje zachowane. <strong>Redystrybucja</strong> (<code>key_by</code>, <code>rebalance</code>, <code>broadcast</code>) wysyła dane przez sieć.</li>
+<li>Operatory 1:1 o tej samej równoległości Flink łączy w <strong>łańcuch</strong> (operator chaining): jeden wątek, bez serializacji.</li>
+</ul>
+</div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+ds.map(parsuj).set_parallelism(4)       # równoległość pojedynczego operatora
+ds.map(wolna_funkcja).start_new_chain() # albo disable_chaining(): osobny wątek
+</code></pre>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Ujścia">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Ujścia danych (sinks)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from pyflink.common import Types
+from pyflink.common.serialization import Encoder
+from pyflink.datastream import StreamExecutionEnvironment
+from pyflink.datastream.connectors.file_system import FileSink
+
+env = StreamExecutionEnvironment.get_execution_environment()
+env.set_parallelism(2)
+ds = env.from_collection([1, 2, 3, 4], type_info=Types.INT())
+kwadraty = ds.map(lambda x: x * x, output_type=Types.INT())
+
+kwadraty.print("kw")                          # stdout z prefiksem
+sink = FileSink.for_row_format(
+    "wyniki", Encoder.simple_string_encoder()).build()
+kwadraty.map(str, output_type=Types.STRING()).sink_to(sink)
+env.execute("ujscia")
+
+parzyste = ds.filter(lambda x: x % 2 == 0)
+with parzyste.execute_and_collect() as wyniki:  # do testów
+    print(list(wyniki))
+</code></pre><pre class="out sm">kw:2&gt; 4
+kw:1&gt; 1
+kw:2&gt; 16
+kw:1&gt; 9
+[2, 4]</pre>
+</div>
+<div>
+<ul class="points side">
+<li><code>print()</code>: przy równoległości &gt; 1 każdy wiersz ma numer podzadania (<code>2&gt;</code>). Kolejność między podzadaniami jest dowolna.</li>
+<li><code>sink_to(...)</code> przyjmuje ujścia Sink V2: <code>FileSink</code> (pliki part-… w katalogach czasowych), <code>KafkaSink</code>, JDBC, Elasticsearch.</li>
+<li><code>execute_and_collect()</code> zwraca iterator z wynikami: wygodne w testach.</li>
+</ul>
+<div class="note bad"><p><code>writeAsText</code>, <code>writeAsCsv</code>, <code>writeToSocket</code>, <code>writeUsingOutputFormat</code> i <code>addSink(SinkFunction)</code> z Flink 1.x zostały usunięte w 2.0.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się: DataStream</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="quiz compact"><p class="q">Program buduje potok <code>from_collection → map → print</code>, ale autor zapomniał o <code>env.execute()</code>. Co się stanie?</p><div class="opts"><button class="opt" data-ok="0">wypisze wyniki</button><button class="opt" data-ok="1">nic nie zostanie przetworzone</button><button class="opt" data-ok="0">błąd przy wywołaniu print()</button></div><p class="explain">Transformacje tylko budują graf. Bez <code>execute()</code> zadanie nie zostaje uruchomione i nic się nie wykona, jak generator, z którego nikt nie pobiera elementów.</p></div><div class="quiz multi compact"><p class="q">Które konstrukcje są poprawne we <b>Flink 2.x</b>? (zaznacz wszystkie)</p><div class="opts"><button class="opt" data-ok="1">env.fromSource(src, WatermarkStrategy.noWatermarks(), "src")</button><button class="opt" data-ok="0">env.addSource(new FlinkKafkaConsumer&lt;&gt;(...))</button><button class="opt" data-ok="1">stream.sinkTo(fileSink)</button><button class="opt" data-ok="0">keyed.timeWindow(Time.seconds(10))</button><button class="opt" data-ok="0">stream.writeAsCsv("out.csv")</button><button class="opt" data-ok="1">keyed.window(TumblingEventTimeWindows.of(Duration.ofSeconds(10)))</button></div><button class="btn check">Sprawdź</button><p class="explain">W 2.x zostało nowe Source API (<code>fromSource</code>), Sink V2 (<code>sinkTo</code>) i <code>window(...)</code> z <code>Duration</code>. <code>addSource</code>, <code>timeWindow</code> i <code>writeAsCsv</code> usunięto.</p></div><div class="quiz compact"><p class="q">Dlaczego operacje na <code>KeyedStream</code> nie potrzebują zamków (locków), choć działają w wielu wątkach?</p><div class="opts"><button class="opt" data-ok="0">Flink używa GIL</button><button class="opt" data-ok="1">wszystkie elementy danego klucza trafiają do jednego podzadania</button><button class="opt" data-ok="0">stan jest tylko do odczytu</button></div><p class="explain">Partycjonowanie po kluczu sprawia, że stan danego klucza ma jednego właściciela (jeden wątek). Nie ma współdzielonego, mutowalnego stanu, więc nie ma wyścigów (wykłady 3 i 4).</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Table API i SQL">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Poziomy abstrakcji API</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<img class="pic" src="images/image-Hx1vINGH.png" alt="Trzy poziomy API: SQL / Table API, DataStream API, ProcessFunction; wyżej zwięźlej, niżej większa ekspresywność">
+<p class="small">Źródło grafiki: <a href="https://flink.apache.org/what-is-flink/flink-applications/" target="_blank">https://flink.apache.org/what-is-flink/flink-applications/</a></p>
+</div>
+<ul class="points side">
+<li><strong>SQL / Table API</strong>: relacyjne, deklaratywne zapytania (<code>select</code>, <code>where</code>, <code>join</code>, <code>group_by</code>). Optymalizator sam dobiera plan wykonania. Ten sam kod działa wsadowo i strumieniowo.</li>
+<li><strong>DataStream API</strong>: strumienie, okna, transformacje, większa kontrola.</li>
+<li><strong>ProcessFunction</strong>: najniższy poziom, pojedyncze zdarzenia, <strong>stan</strong> i <strong>timery</strong>.</li>
+<li>W PyFlink dostępne są <strong>PyFlink Table API</strong> i <strong>PyFlink DataStream API</strong>. Można je mieszać w jednym programie i przechodzić między tabelą a strumieniem.</li>
+</ul>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>TableEnvironment</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead"><strong>TableEnvironment</strong> to punkt wejścia Table API i SQL: rejestruje tabele, wykonuje zapytania i konfiguruje zadanie.</p>
+<div class="cols wl">
+<div>
+<p class="small">Tylko Table API / SQL:</p>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from pyflink.table import EnvironmentSettings, TableEnvironment
+
+# albo EnvironmentSettings.in_batch_mode()
+ustawienia = EnvironmentSettings.in_streaming_mode()
+t_env = TableEnvironment.create(ustawienia)
+</code></pre>
+<p class="small">Razem z DataStream API:</p>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from pyflink.datastream import StreamExecutionEnvironment
+from pyflink.table import StreamTableEnvironment
+
+env = StreamExecutionEnvironment.get_execution_environment()
+t_env = StreamTableEnvironment.create(env)
+</code></pre>
+</div>
+<div>
+<div class="note"><p>Środowisko utrzymuje <strong>katalogi</strong> tabel. Pełny identyfikator tabeli ma 3 części: <code>katalog.baza.obiekt</code>, domyślnie <code>default_catalog.default_database.nazwa</code>.</p></div>
+<div class="note"><p>Tabele rejestrujemy przez <code>CREATE TABLE … WITH ('connector' = …)</code> (pliki, Kafka, JDBC, <code>datagen</code>, <code>print</code>) albo jako widoki: <code>t_env.create_temporary_view("nazwa", tabela)</code>.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>PyFlink Table API</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Table API pozwala pisać zapytania relacyjne w Pythonie, podobnie jak w SQL albo w pandas. Kolumny wskazujemy wyrażeniem <code>col("nazwa")</code>.</p>
+<div class="cols wl">
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from pyflink.table import EnvironmentSettings, TableEnvironment, DataTypes
+from pyflink.table.expressions import col
+
+t_env = TableEnvironment.create(EnvironmentSettings.in_batch_mode())
+
+oceny = t_env.from_elements(
+    [(1, "Ola", 4.5), (2, "Jan", 3.0), (3, "Ola", 5.0)],
+    DataTypes.ROW([DataTypes.FIELD("id", DataTypes.INT()),
+                   DataTypes.FIELD("imie", DataTypes.STRING()),
+                   DataTypes.FIELD("ocena", DataTypes.DOUBLE())]))
+
+wynik = (oceny.where(col("ocena") &gt;= 4.0)
+              .group_by(col("imie"))
+              .select(col("imie"), col("ocena").avg.alias("srednia"),
+                      col("id").count.alias("ile")))
+print(wynik.to_pandas())
+</code></pre>
+<div>
+<pre class="out">  imie  srednia  ile
+0  Ola     4.75    2</pre>
+<div class="note"><p>Zapytanie też jest leniwe: dopiero <code>execute()</code> albo <code>to_pandas()</code> uruchamia zadanie. <code>wynik.execute().print()</code> wypisze tabelę w ramce.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>SQL API</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from pyflink.table import EnvironmentSettings, TableEnvironment
+
+t_env = TableEnvironment.create(EnvironmentSettings.in_batch_mode())
+
+t_env.execute_sql("""
+    CREATE TABLE kraje (
+        kod   STRING,
+        nazwa STRING
+    ) WITH (
+        'connector' = 'filesystem',
+        'path'      = 'kraje.csv',
+        'format'    = 'csv'
+    )
+""")
+
+kody = t_env.sql_query("""
+    SELECT kod, nazwa, CHARACTER_LENGTH(nazwa) AS dlugosc
+    FROM kraje
+""")
+print(kody.to_pandas())
+</code></pre><pre class="out sm">  kod   nazwa  dlugosc
+0  PL  Polska        6
+1  DE  Niemcy        6</pre>
+</div>
+<div>
+<ul class="points side">
+<li><code>execute_sql()</code> wykonuje DDL i DML: <code>CREATE TABLE</code>, <code>INSERT INTO</code>, <code>SHOW TABLES</code>.</li>
+<li><code>sql_query()</code> wykonuje <code>SELECT</code> i zwraca obiekt <strong>Table</strong>, którego można dalej używać w Table API, w kolejnych zapytaniach albo zamienić na DataStream.</li>
+<li>Tabela musi być <strong>zarejestrowana</strong> w środowisku, żeby użyć jej nazwy w SQL. Obiekt <code>Table</code> z Pythona rejestrujemy przez <code>create_temporary_view</code>.</li>
+<li>Interaktywnie te same zapytania wpisujemy w <strong>SQL Client</strong> (<code>bin/sql-client.sh</code>).</li>
+</ul>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Tabele dynamiczne i changelog</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<svg class="diagram" viewBox="0 0 1000 175" role="img" aria-label="Strumień zdarzeń zamieniany jest w tabelę dynamiczną, zapytanie ciągłe tworzy tabelę wynikową, a jej zmiany to strumień changelog">
+<defs><marker id="arY" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs>
+<text x="85" y="22" text-anchor="middle" style="font-size:15px">strumień kliknięć</text>
+<rect x="10" y="40" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="48" y="40" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="86" y="40" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><rect x="124" y="40" width="32" height="32" rx="5" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/>
+<line x1="165" y1="56" x2="218" y2="56" stroke="#666" stroke-width="2.5" marker-end="url(#arY)"/>
+<rect x="220" y="25" width="190" height="95" rx="6" fill="#fff" stroke="#1a73d9" stroke-width="2"/>
+<text x="315" y="50" text-anchor="middle">tabela dynamiczna</text><text x="315" y="75" text-anchor="middle" fill="#666" style="font-size:14px">rośnie z każdym</text><text x="315" y="95" text-anchor="middle" fill="#666" style="font-size:14px">zdarzeniem</text>
+<line x1="410" y1="72" x2="468" y2="72" stroke="#666" stroke-width="2.5" marker-end="url(#arY)"/>
+<rect x="470" y="35" width="190" height="75" rx="37" fill="#53ae12"/><text x="565" y="68" text-anchor="middle" fill="#fff" font-weight="bold">zapytanie ciągłe</text><text x="565" y="92" text-anchor="middle" fill="#fff" class="mono" style="font-size:14px">GROUP BY</text>
+<line x1="660" y1="72" x2="718" y2="72" stroke="#666" stroke-width="2.5" marker-end="url(#arY)"/>
+<rect x="720" y="25" width="270" height="95" rx="6" fill="#fff" stroke="#53ae12" stroke-width="2"/>
+<text x="855" y="50" text-anchor="middle">tabela wynikowa</text><text x="855" y="75" text-anchor="middle" fill="#666" style="font-size:14px">wiersze są wstawiane</text><text x="855" y="95" text-anchor="middle" fill="#666" style="font-size:14px">i aktualizowane</text>
+<text x="855" y="155" text-anchor="middle" class="mono" fill="#e8710a">+I  -U  +U  -D</text>
+<text x="565" y="155" text-anchor="middle" fill="#666" style="font-size:15px">zmiany tabeli = strumień zmian (changelog) →</text>
+</svg>
+<div class="cols wl">
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+t_env = TableEnvironment.create(EnvironmentSettings.in_streaming_mode())
+t_env.execute_sql("""
+    CREATE TEMPORARY VIEW kliki(uzytkownik, url) AS VALUES
+        ('Ola', '/home'), ('Jan', '/cart'),
+        ('Ola', '/prod'), ('Ola', '/cart')
+""")
+wynik = t_env.sql_query("""
+    SELECT uzytkownik, COUNT(url) AS ile
+    FROM kliki GROUP BY uzytkownik
+""").execute()
+with wynik.collect() as wiersze:
+    for w in wiersze:
+        print(w.get_row_kind(), w[0], w[1])
+</code></pre>
+<div>
+<pre class="out sm">+I Ola 1
++I Jan 1
+-U Ola 1
++U Ola 2
+-U Ola 2
++U Ola 3</pre>
+<p class="small"><code>+I</code> wstawienie, <code>-U</code>/<code>+U</code> wycofanie starej i wstawienie nowej wersji wiersza, <code>-D</code> usunięcie.</p><p class="small"><code>wynik.execute().print()</code> pokaże to samo w tabeli z kolumną <code>op</code>.</p>
+</div>
+</div>
+</div>
+<aside class="notes">Pełny skrypt: import EnvironmentSettings, TableEnvironment oraz t_env.get_config().set("parallelism.default", "1"). Uruchomiony w PyFlink 2.3.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się: tabele dynamiczne</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="quiz"><p class="q">Wynik zapytania <code>SELECT uzytkownik, COUNT(*) … GROUP BY uzytkownik</code> na nieograniczonym strumieniu chcemy zapisać. Które ujście się nada?</p><div class="opts"><button class="opt" data-ok="0">zwykły plik CSV, do którego tylko dopisujemy wiersze</button><button class="opt" data-ok="1">tabela z kluczem głównym (upsert), np. JDBC albo upsert-kafka</button><button class="opt" data-ok="0">dowolne, bo wynik GROUP BY to zawsze tylko nowe wiersze</button></div><p class="explain">Wynik się <strong>zmienia</strong> (<code>-U</code>/<code>+U</code>), więc ujście musi umieć nadpisać wiersz po kluczu. Ujście „append-only” przyjmie tylko zapytania, które wyłącznie wstawiają wiersze (np. <code>WHERE</code>, okna czasowe).</p></div><div class="quiz compact"><p class="q">Ile zmian wyprodukuje zapytanie ze slajdu, jeśli jako piąte przyjdzie kliknięcie Jana?</p><div class="opts"><button class="opt" data-ok="0">1</button><button class="opt" data-ok="1">2</button><button class="opt" data-ok="0">7</button></div><p class="explain">Dwie zmiany: <code>-U Jan 1</code> i <code>+U Jan 2</code>.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Table ↔ DataStream</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from pyflink.common import Types
+from pyflink.datastream import StreamExecutionEnvironment
+from pyflink.table import StreamTableEnvironment
+from pyflink.table.expressions import col
+
+env = StreamExecutionEnvironment.get_execution_environment()
+env.set_parallelism(1)
+t_env = StreamTableEnvironment.create(env)
+
+ds = env.from_collection(
+    [("Ola", 12), ("Jan", 7), ("Ola", 3)],
+    type_info=Types.ROW_NAMED(["imie", "kwota"],
+                              [Types.STRING(), Types.INT()]))
+tabela = t_env.from_data_stream(ds)          # DataStream -&gt; Table
+
+duze = tabela.where(col("kwota") &gt; 5)
+t_env.to_data_stream(duze).print()           # tylko wstawienia
+
+suma = (tabela.group_by(col("imie"))
+              .select(col("imie"), col("kwota").sum.alias("suma")))
+t_env.to_changelog_stream(suma).print()      # z aktualizacjami
+env.execute()
+</code></pre>
+<div>
+<pre class="out">+I[Ola,12]
++I[Jan,7]
++I[Ola,12]
++I[Jan,7]
+-U[Ola,12]
++U[Ola,15]</pre>
+<ul class="points side">
+<li><code>to_data_stream</code>: tabela, która tylko przyrasta (insert-only).</li>
+<li><code>to_changelog_stream</code>: tabela z aktualizacjami, elementy to <code>Row</code> z rodzajem zmiany.</li>
+</ul>
+<div class="note warn"><p><code>to_append_stream</code> / <code>to_retract_stream</code> to stare API (przestarzałe od Flink 1.13).</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Ujścia tabel</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Wynik tabelaryczny zapisujemy do tabeli zarejestrowanej z konektorem: pliki (CSV, Parquet, Avro), bazy (JDBC, HBase, Elasticsearch), systemy kolejkowe (Kafka).</p>
+<div class="cols">
+<div>
+<p class="small">Java:</p>
+<pre class="code-wrap sm"><code class="language-java" data-trim data-noescape>
+tEnv.executeSql("""
+    CREATE TABLE CsvSinkTable (czujnik STRING, temp DOUBLE)
+    WITH ('connector' = 'filesystem',
+          'path'      = 'file:///tmp/wyniki',
+          'format'    = 'csv')
+    """);
+
+Table result = tEnv.from("odczyty")
+                   .where($("temp").isGreater(30));
+
+TablePipeline pipeline = result.insertInto("CsvSinkTable");
+pipeline.execute();
+// krócej: result.executeInsert("CsvSinkTable");
+</code></pre>
+</div>
+<div>
+<p class="small">Python:</p>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+t_env.execute_sql("""
+    CREATE TABLE alarmy (czujnik STRING, temp DOUBLE)
+    WITH ('connector' = 'print')
+""")
+wynik = t_env.from_path("odczyty").where(col("temp") &gt; 30)
+wynik.execute_insert("alarmy").wait()
+
+# albo w SQL:
+t_env.execute_sql("""INSERT INTO alarmy
+    SELECT * FROM odczyty WHERE temp &gt; 30""").wait()
+</code></pre>
+<div class="note warn"><p>Dawny interfejs <code>TableSink</code> usunięto w Flink 2.0. Konektory implementują teraz <code>DynamicTableSink</code>, a my tylko podajemy <code>'connector' = …</code> w <code>WITH</code>.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Czas i okna">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Czas zdarzenia i czas przetwarzania</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<svg class="diagram" viewBox="0 0 1000 215" role="img" aria-label="Zdarzenia e1, e2, e3 powstają po kolei w czasie zdarzenia, ale e2 dociera później niż e3 w czasie przetwarzania">
+<defs><marker id="arE" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs>
+<line x1="170" y1="45" x2="980" y2="45" stroke="#666" stroke-width="2" marker-end="url(#arE)"/>
+<line x1="170" y1="165" x2="980" y2="165" stroke="#666" stroke-width="2" marker-end="url(#arE)"/>
+<text x="0" y="40">czas zdarzenia</text><text x="0" y="62" fill="#666" style="font-size:14px">(zegar czujnika)</text>
+<text x="0" y="160">czas przetwarzania</text><text x="0" y="182" fill="#666" style="font-size:14px">(zegar operatora)</text>
+<line x1="260" y1="52" x2="360" y2="158" stroke="#1a73d9" stroke-width="2.5"/><circle cx="260" cy="45" r="15" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="260" y="51" text-anchor="middle" style="font-size:14px">e1</text><circle cx="360" cy="165" r="15" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="360" y="171" text-anchor="middle" style="font-size:14px">e1</text><text x="260" y="22" text-anchor="middle" fill="#666" style="font-size:13px">12:00:01</text><line x1="420" y1="52" x2="820" y2="158" stroke="#d93025" stroke-width="2.5" stroke-dasharray="7 5"/><circle cx="420" cy="45" r="15" fill="#fce8e6" stroke="#d93025" stroke-width="2"/><text x="420" y="51" text-anchor="middle" style="font-size:14px">e2</text><circle cx="820" cy="165" r="15" fill="#fce8e6" stroke="#d93025" stroke-width="2"/><text x="820" y="171" text-anchor="middle" style="font-size:14px">e2</text><text x="420" y="22" text-anchor="middle" fill="#666" style="font-size:13px">12:00:02</text><line x1="580" y1="52" x2="640" y2="158" stroke="#1a73d9" stroke-width="2.5"/><circle cx="580" cy="45" r="15" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="580" y="51" text-anchor="middle" style="font-size:14px">e3</text><circle cx="640" cy="165" r="15" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="640" y="171" text-anchor="middle" style="font-size:14px">e3</text><text x="580" y="22" text-anchor="middle" fill="#666" style="font-size:13px">12:00:03</text>
+<text x="842" y="105" fill="#d93025" style="font-size:15px">e2 utknęło w sieci:</text>
+<text x="842" y="125" fill="#d93025" style="font-size:15px">przychodzi po e3</text>
+<text x="575" y="205" text-anchor="middle" fill="#666" style="font-size:15px">kolejność przybycia: e1, e3, e2</text>
+</svg>
+<div class="cols">
+<ul class="points side">
+<li><strong>Czas zdarzenia</strong> (event time): kiedy zdarzenie naprawdę zaszło. Zapisany w samym rekordzie (znacznik czasu pomiaru, transakcji).</li>
+<li><strong>Czas przetwarzania</strong> (processing time): zegar maszyny, na której działa operator.</li>
+</ul>
+<ul class="points side">
+<li>W sieci rozproszonej zdarzenia przychodzą <strong>z opóźnieniem i nie po kolei</strong> (telefon bez zasięgu, kolejka w brokerze, ponowne przetwarzanie archiwum).</li>
+<li>Wyniki liczone w czasie zdarzenia są <strong>powtarzalne</strong>: ten sam strumień da ten sam wynik dziś i za miesiąc.</li>
+</ul>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Znaczniki wodne (watermarks)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<p class="lead"><strong>Watermark</strong> W(t) to wiadomość płynąca w strumieniu, która mówi: „zdarzeń z czasem ≤ t już nie będzie”. Gdy watermark minie koniec okna, okno można zamknąć i policzyć wynik.</p>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from pyflink.common import Duration, WatermarkStrategy
+from pyflink.common.watermark_strategy import TimestampAssigner
+
+class CzasZdarzenia(TimestampAssigner):
+    def extract_timestamp(self, value, record_timestamp):
+        return value[2]                     # znacznik czasu w ms z rekordu
+
+strategia = (WatermarkStrategy
+             .for_bounded_out_of_orderness(Duration.of_seconds(2))
+             .with_idleness(Duration.of_minutes(1))     # przed assignerem!
+             .with_timestamp_assigner(CzasZdarzenia()))
+
+odczyty = ds.assign_timestamps_and_watermarks(strategia)
+</code></pre>
+</div>
+<div>
+<div class="note"><p><code>for_bounded_out_of_orderness(2 s)</code>: W = (największy widziany czas zdarzenia) − 2 s − 1 ms. Flink generuje watermark okresowo, domyślnie co 200 ms.</p></div>
+<div class="note warn"><p><strong>Kompromis:</strong> duże opóźnienie to pełniejsze wyniki, ale później. Małe opóźnienie to szybkie wyniki, ale więcej zdarzeń spóźnionych.</p></div>
+<div class="note"><p><code>with_idleness</code>: partycja, z której nic nie przychodzi, nie blokuje postępu watermarku. Watermark operatora to <strong>minimum</strong> watermarków wejść. W PyFlink 2.3 wywołaj je <em>przed</em> <code>with_timestamp_assigner</code>, inaczej znaczniki czasu giną.</p></div>
+<p class="small">Inne strategie: <code>for_monotonous_timestamps()</code> (dane uporządkowane), <code>no_watermarks()</code> (tylko czas przetwarzania).</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Watermarki i spóźnione zdarzenia: symulacja</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="wmsim">
+  <div class="simctl">
+    <label>maks. opóźnienie: <select class="delay"><option value="0">0 s</option><option value="2" selected>2 s</option><option value="5">5 s</option><option value="10">10 s</option></select></label>
+    <label>allowed lateness: <select class="late"><option value="0" selected>0 s</option><option value="5">5 s</option></select></label>
+    <button class="btn" data-act="step">Krok</button>
+    <button class="btn" data-act="play">Odtwarzaj / pauza</button>
+    <button class="btn ghost" data-act="reset">Reset</button>
+  </div>
+  <div class="arrivals"><span class="small">kolejność przybycia (czas zdarzenia w s):</span> <span class="queue"></span></div>
+  <svg class="diagram wm" viewBox="0 0 1000 235" role="img" aria-label="Oś czasu zdarzeń z oknami 10-sekundowymi, zdarzeniami i aktualnym watermarkiem"></svg>
+  <p class="stat"></p>
+  <p class="hint verdict"></p>
+</div>
+</div>
+<aside class="notes">Uproszczenie: watermark liczony po każdym zdarzeniu (W = max − opóźnienie), okno [s, e) zamyka się, gdy W ≥ e. We Flinku watermark jest okresowy (200 ms) i odejmuje się jeszcze 1 ms. Porównaj opóźnienie 0 s, 2 s i 10 s.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Okna (windows)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead">Okna dzielą nieskończony strumień na skończone <strong>kubełki</strong>, w których można policzyć agregat.</p>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+(stream.key_by(lambda r: r[0])      # osobno dla kluczy
+       .window(&lt;WindowAssigner&gt;)    # przydział do okien
+       .reduce(...))                # albo aggregate / process
+
+stream.window_all(&lt;WindowAssigner&gt;) # bez klucza: 1 wątek!
+</code></pre>
+<ul class="points side">
+<li><strong>Okna czasowe</strong> (czas zdarzenia albo przetwarzania): tumbling, sliding, session.</li>
+<li><strong>Okna liczące</strong>: <code>count_window(100)</code>, co 100 elementów.</li>
+<li><strong>Okno globalne</strong>: jedno na klucz, wymaga własnego wyzwalacza.</li>
+</ul>
+</div>
+<div>
+<p class="lead"><strong>Cykl życia okna</strong></p>
+<ul class="points side">
+<li>okno powstaje, gdy przyjdzie <strong>pierwszy element</strong>, który do niego należy (puste okna nie istnieją),</li>
+<li><strong>wyzwalacz</strong> (trigger) decyduje, kiedy policzyć wynik: domyślnie gdy watermark minie koniec okna,</li>
+<li>okno jest usuwane, gdy czas minie <strong>koniec okna + allowed lateness</strong>.</li>
+</ul>
+<div class="note"><p>Przykład: okna 5-minutowe, allowed lateness 1 min. Okno [12:00, 12:05) powstaje z pierwszym elementem z tego przedziału, a znika, gdy watermark przekroczy 12:06.</p></div>
+<p class="small">Okna znamy już ze Streamz (wykład 9): <code>sliding_window(3)</code> to okno liczące, <code>timed_window(2)</code> to okno w czasie przetwarzania.</p>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Rodzaje okien: symulacja</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="sim" id="winsim">
+  <div class="simctl">
+    <label>okno: <select class="wtype">
+      <option value="t10">tumbling 10 s</option><option value="t20">tumbling 20 s</option>
+      <option value="s20_10">sliding 20 s co 10 s</option><option value="s20_5">sliding 20 s co 5 s</option>
+      <option value="g5">session, przerwa 5 s</option><option value="g8">session, przerwa 8 s</option>
+    </select></label>
+    <button class="btn ghost" data-act="rand">Losuj zdarzenia</button>
+    <button class="btn ghost" data-act="clear">Wyczyść</button>
+    <button class="btn ghost" data-act="reset">Przykład</button>
+  </div>
+  <svg class="diagram win" viewBox="0 0 1000 330" role="img" aria-label="Zdarzenia trzech kluczy na osi czasu i okna, do których trafiają"></svg>
+  <p class="hint verdict"></p>
+</div>
+</div>
+<aside class="notes">Kliknięcie na linii klucza dodaje zdarzenie. Pokaż: tumbling - każde zdarzenie w dokładnie jednym oknie; sliding 20/5 - w czterech; session - okna różne dla każdego klucza, bez stałych granic.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Okna w PyFlink</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from pyflink.common import Types, WatermarkStrategy, Duration, Time
+from pyflink.datastream.functions import ProcessWindowFunction
+from pyflink.datastream.window import TumblingEventTimeWindows
+
+class Srednia(ProcessWindowFunction):
+    def process(self, key, context, elements):
+        temps = [t for _, t, _ in elements]
+        w = context.window()
+        yield f"{key} [{w.start // 1000}s, {w.end // 1000}s) " \
+              f"n={len(temps)} avg={sum(temps) / len(temps):.1f}"
+
+odczyty = env.from_collection(
+    [("s1", 21.0, 1_000), ("s2", 30.0, 2_000), ("s1", 23.0, 7_000),
+     ("s1", 25.0, 4_000), ("s2", 34.0, 12_000), ("s1", 27.0, 13_000)],
+    type_info=Types.TUPLE([Types.STRING(), Types.FLOAT(),
+                           Types.LONG()]))
+
+(odczyty.assign_timestamps_and_watermarks(strategia)  # opóźnienie 2 s
+        .key_by(lambda r: r[0], key_type=Types.STRING())
+        .window(TumblingEventTimeWindows.of(Time.seconds(10)))
+        .process(Srednia(), output_type=Types.STRING())
+        .print())
+</code></pre>
+<div>
+<pre class="out">s1 [0s, 10s) n=3 avg=23.0
+s2 [0s, 10s) n=1 avg=30.0
+s2 [10s, 20s) n=1 avg=34.0
+s1 [10s, 20s) n=1 avg=27.0</pre>
+<p class="small">Odczyt <code>("s1", 25.0, 4 000)</code> przyszedł po 7 000, ale mieści się w opóźnieniu 2 s, więc trafił do okna [0 s, 10 s).</p>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+SlidingEventTimeWindows.of(Time.seconds(10),
+                           Time.seconds(5))
+EventTimeSessionWindows.with_gap(Time.minutes(30))
+</code></pre>
+<div class="note warn"><p>W PyFlink 2.3 okna przyjmują <code>pyflink.common.Time</code>, a watermarki <code>Duration</code>. Dokumentacja pokazuje <code>Duration</code> także dla okien, ale to nie działa. W Javie wszędzie jest <code>Duration</code>.</p></div>
+</div>
+</div>
+</div>
+<aside class="notes">Pełny skrypt (z klasą CzasZdarzenia i strategią ze slajdu o watermarkach) uruchomiony w PyFlink 2.3.0.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Funkcje okien</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<ul class="points side">
+<li><code>reduce</code> i <code>aggregate</code> liczą <strong>przyrostowo</strong>: okno trzyma tylko akumulator, nie wszystkie elementy.</li>
+<li><code>process</code> (<code>ProcessWindowFunction</code>) dostaje <strong>wszystkie</strong> elementy okna i metadane (początek, koniec), ale zajmuje więcej pamięci.</li>
+<li>Można je łączyć: <code>aggregate(Srednia(), DodajOkno())</code>, czyli przyrostowy akumulator plus metadane okna.</li>
+</ul>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+spoznione = OutputTag("spoznione")
+okna = TumblingEventTimeWindows.of(Time.seconds(10))
+wynik = (keyed
+    .window(okna)
+    .allowed_lateness(5_000)      # w ms: okno żyje 5 s dłużej
+    .side_output_late_data(spoznione)
+    .reduce(lambda a, b: a if a[1] &gt;= b[1] else b))
+wynik.get_side_output(spoznione).print("spóźnione")
+</code></pre>
+</div>
+<div>
+<p class="small"><code>AggregateFunction</code> w Javie (wejście, akumulator, wynik):</p>
+<pre class="code-wrap sm"><code class="language-java" data-trim data-noescape>
+public class Srednia implements AggregateFunction&lt;
+        Odczyt, Tuple2&lt;Double, Long&gt;, Double&gt; {
+  public Tuple2&lt;Double, Long&gt; createAccumulator() {
+    return Tuple2.of(0.0, 0L);
+  }
+  public Tuple2&lt;Double, Long&gt; add(Odczyt o,
+                                  Tuple2&lt;Double, Long&gt; acc) {
+    return Tuple2.of(acc.f0 + o.temp, acc.f1 + 1);
+  }
+  public Double getResult(Tuple2&lt;Double, Long&gt; acc) {
+    return acc.f0 / acc.f1;
+  }
+  public Tuple2&lt;Double, Long&gt; merge(Tuple2&lt;Double, Long&gt; a,
+                                    Tuple2&lt;Double, Long&gt; b) {
+    return Tuple2.of(a.f0 + b.f0, a.f1 + b.f1);
+  }
+}
+</code></pre>
+<p class="small"><code>merge</code> jest potrzebne przy oknach sesji, które łączą się w miarę napływu danych.</p>
+</div>
+</div>
+</div>
+<aside class="notes">W PyFlink 2.3 OutputTag z typem złożonym (Types.TUPLE) nie daje się zserializować (TypeError: cannot pickle RLock); bez typu działa.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Okna w SQL</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+t_env.execute_sql("""
+    CREATE TABLE odczyty (
+        czujnik STRING,
+        temp    DOUBLE,
+        ts      TIMESTAMP(3),
+        WATERMARK FOR ts AS ts - INTERVAL '2' SECOND
+    ) WITH ('connector' = 'filesystem',
+            'path' = 'odczyty.csv', 'format' = 'csv')
+""")
+wynik = t_env.sql_query("""
+    SELECT czujnik, window_start, window_end, AVG(temp) AS srednia
+    FROM TABLE(TUMBLE(TABLE odczyty, DESCRIPTOR(ts), INTERVAL '10' SECOND))
+    GROUP BY czujnik, window_start, window_end
+""").execute()
+with wynik.collect() as wiersze:
+    for w in wiersze:
+        print(w.get_row_kind(), w[0], w[1].time(), w[2].time(), w[3])
+</code></pre>
+<div>
+<pre class="out">+I s1 12:00:00 12:00:10 23.0
++I s2 12:00:00 12:00:10 30.0
++I s2 12:00:10 12:00:20 34.0
++I s1 12:00:10 12:00:20 27.0</pre>
+<ul class="points side">
+<li>Okienkowe funkcje tabelaryczne (window TVF): <code>TUMBLE</code>, <code>HOP</code> (sliding), <code>SESSION</code>, <code>CUMULATE</code>.</li>
+<li><code>WATERMARK FOR</code> w DDL to odpowiednik <code>WatermarkStrategy</code>.</li>
+<li>Wynik okna jest <strong>ostateczny</strong> (same <code>+I</code>), więc można go zapisać do ujścia append-only.</li>
+</ul>
+</div>
+</div>
+</div>
+<aside class="notes">Te same dane co w przykładzie PyFlink DataStream (plik CSV z czasami 12:00:01 ... 12:00:13). Uruchomione w PyFlink 2.3.</aside>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się: czas i okna</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="quiz compact"><p class="q">Okno sliding: rozmiar 10 s, przesunięcie 5 s. Do ilu okien trafia każde zdarzenie?</p><div class="opts"><button class="opt" data-ok="0">1</button><button class="opt" data-ok="1">2</button><button class="opt" data-ok="0">5</button><button class="opt" data-ok="0">10</button></div><p class="explain">Rozmiar / przesunięcie = 10 / 5 = 2. Okna nakładają się, więc ten sam element jest liczony w dwóch oknach.</p></div><div class="quiz compact"><p class="q">Okno sesji z przerwą 30 min. Zdarzenia jednego użytkownika: 10:00, 10:20, 11:00, 11:10. Ile sesji?</p><div class="opts"><button class="opt" data-ok="0">1</button><button class="opt" data-ok="1">2</button><button class="opt" data-ok="0">3</button><button class="opt" data-ok="0">4</button></div><p class="explain">10:00 i 10:20 (przerwa 20 min) to jedna sesja. Między 10:20 a 11:00 mija 40 min, więc 11:00 i 11:10 tworzą drugą.</p></div><div class="quiz compact"><p class="q">Opóźnienie watermarku 2 s, największy dotąd czas zdarzenia to 15 s. Przychodzi zdarzenie z czasem 8 s. Okna 10 s, allowed lateness 0. Co się z nim stanie?</p><div class="opts"><button class="opt" data-ok="0">trafi do okna [0, 10)</button><button class="opt" data-ok="1">zostanie odrzucone jako spóźnione (albo trafi do side output)</button><button class="opt" data-ok="0">trafi do okna [10, 20)</button></div><p class="explain">Watermark ≈ 13 s, więc okno [0 s, 10 s) zostało już policzone i usunięte. Zdarzenie jest spóźnione: bez <code>allowed_lateness</code> zostanie pominięte albo trafi do <code>side_output_late_data</code>.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Ćwiczenie: watermarki i okna</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="blanks">
+<p class="lead">Uzupełnij potok: maksymalna temperatura z ostatnich 10 minut, aktualizowana co minutę. Zdarzenia mogą się spóźniać do 3 s.</p>
+<pre class="exo">(odczyty.assign_timestamps_and_watermarks(
+        WatermarkStrategy.<input class="blank" size="27" data-re="^for_bounded_out_of_orderness$" data-sol="for_bounded_out_of_orderness" aria-label="strategia">(Duration.of_seconds(3))
+                         .with_timestamp_assigner(CzasZdarzenia()))
+    .key_by(<span class="k">lambda</span> r: r[0])
+    .window(<input class="blank" size="23" data-re="^SlidingEventTimeWindows$" data-sol="SlidingEventTimeWindows" aria-label="rodzaj okna">.of(Time.minutes(10), Time.minutes(<input class="blank" size="2" data-re="^1$" data-sol="1" aria-label="przesunięcie">)))
+    .reduce(<span class="k">lambda</span> a, b: a <span class="k">if</span> a[1] &gt;= b[1] <span class="k">else</span> b))</pre>
+<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
+<p class="fb"></p>
+<p class="explain">Okno przesuwne 10 min co 1 min: każdy odczyt trafia do 10 okien. Sprawdzone w PyFlink 2.3 (wariant z sekundami).</p>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff" data-keywords="Stan">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Operacje stanowe</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead">Wiele operacji patrzy na jedno zdarzenie naraz (np. <code>filter</code> wykrywający alarm). Inne muszą <strong>pamiętać</strong> informacje z wielu zdarzeń: okna, średnie, liczniki. Takie operacje są <strong>stanowe</strong>.</p>
+<ul class="points side">
+<li>wyszukiwanie wzorców zdarzeń: stan to dotychczasowa sekwencja zdarzeń,</li>
+<li>agregaty na minutę, godzinę, dzień: stan to niedokończone agregaty,</li>
+<li>uczenie modelu ML na strumieniu: stan to bieżące parametry modelu,</li>
+<li>deduplikacja: stan to zbiór już widzianych identyfikatorów.</li>
+</ul>
+</div>
+<div>
+<table class="simple">
+<tr><th>Backend stanu</th><th>Gdzie jest stan</th><th>Kiedy</th></tr>
+<tr><td><code>hashmap</code> (domyślny)</td><td>obiekty na stercie JVM</td><td>mały stan, najszybszy dostęp</td></tr>
+<tr><td><code>rocksdb</code></td><td>lokalny dysk (RocksDB)</td><td>duży stan, checkpointy przyrostowe</td></tr>
+<tr><td><code>forst</code> (2.x)</td><td>zdalny magazyn (S3, HDFS) + lokalny cache</td><td>bardzo duży stan, chmura</td></tr>
+</table>
+<div class="note"><p>Stan należy do Flinka, a nie do zmiennych w naszym programie. Dzięki temu Flink może go zapisać w checkpoincie, odtworzyć po awarii i rozdzielić na nowo przy zmianie równoległości.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Stan z kluczem (keyed state)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Stan z kluczem jest dostępny tylko na <strong>KeyedStream</strong> (<code>stream.key_by(…)</code>, w Javie <code>keyBy</code>). Każdy klucz ma <strong>osobną</strong> wartość stanu, a Flink sam podstawia tę dla klucza bieżącego elementu.</p>
+<div class="cols wl">
+<table class="simple">
+<tr><th>Typ stanu</th><th>Przechowuje</th><th>Metody (PyFlink)</th></tr>
+<tr><td><code>ValueState</code></td><td>jedną wartość</td><td><code>value()</code>, <code>update(v)</code>, <code>clear()</code></td></tr>
+<tr><td><code>ListState</code></td><td>listę</td><td><code>add(v)</code>, <code>add_all(l)</code>, <code>get()</code>, <code>update(l)</code></td></tr>
+<tr><td><code>MapState</code></td><td>słownik</td><td><code>get(k)</code>, <code>put(k, v)</code>, <code>contains(k)</code>, <code>remove(k)</code>, <code>items()</code></td></tr>
+<tr><td><code>ReducingState</code></td><td>jedną wartość (redukcja dodawanych)</td><td><code>add(v)</code>, <code>get()</code></td></tr>
+<tr><td><code>AggregatingState</code></td><td>wynik <code>AggregateFunction</code></td><td><code>add(v)</code>, <code>get()</code></td></tr>
+</table>
+<div>
+<div class="note"><p>Uchwyt stanu tworzymy z <strong>deskryptora</strong>: nazwa stanu, typ wartości i czasem funkcja (np. <code>ReduceFunction</code>). Np. <code>ValueStateDescriptor("ostatnia", Types.FLOAT())</code>, <code>ListStateDescriptor</code>, <code>MapStateDescriptor</code>, <code>ReducingStateDescriptor</code>, <code>AggregatingStateDescriptor</code>.</p></div>
+<div class="note"><p><strong>TTL</strong> (<code>StateTtlConfig</code>) usuwa stan kluczy, które dawno się nie pojawiły. Bez tego stan może rosnąć bez końca.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Stan w praktyce: KeyedProcessFunction</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape data-line-numbers="|6-9|11-16|23-25">
+from pyflink.common import Types
+from pyflink.datastream import StreamExecutionEnvironment
+from pyflink.datastream.functions import KeyedProcessFunction
+from pyflink.datastream.state import ValueStateDescriptor
+
+class SkokTemperatury(KeyedProcessFunction):
+    def open(self, ctx):
+        opis = ValueStateDescriptor("ostatnia", Types.FLOAT())
+        self.ostatnia = ctx.get_state(opis)   # osobno dla klucza
+
+    def process_element(self, value, ctx):
+        czujnik, temp = value
+        poprzednia = self.ostatnia.value()    # None na początku
+        if poprzednia is not None and temp - poprzednia &gt; 5:
+            yield f"ALARM {czujnik}: {poprzednia} -&gt; {temp}"
+        self.ostatnia.update(temp)
+
+env = StreamExecutionEnvironment.get_execution_environment()
+env.set_parallelism(1)
+odczyty = env.from_collection(
+    [("s1", 20.0), ("s2", 30.0), ("s1", 22.0),
+     ("s2", 37.0), ("s1", 29.0)],
+    type_info=Types.TUPLE([Types.STRING(), Types.FLOAT()]))
+(odczyty.key_by(lambda r: r[0], key_type=Types.STRING())
+        .process(SkokTemperatury(), output_type=Types.STRING())
+        .print())
+env.execute("stan")
+</code></pre>
+<div>
+<pre class="out">ALARM s2: 30.0 -&gt; 37.0
+ALARM s1: 22.0 -&gt; 29.0</pre>
+<ul class="points side">
+<li>Dla s1: 20 → 22 (+2), 22 → 29 (+7, alarm). Wartości s2 nie mieszają się z s1, bo stan jest per klucz.</li>
+<li>Zwykły atrybut <code>self.ostatnia_temp = temp</code> byłby wspólny dla <strong>wszystkich</strong> kluczy w podzadaniu i zniknąłby po awarii.</li>
+<li><code>KeyedProcessFunction</code> ma też <strong>timery</strong> (<code>ctx.timer_service()</code>), np. „alarm, gdy czujnik milczy 1 min”.</li>
+</ul>
+</div>
+</div>
+</div>
+<aside class="notes">Nawiązanie do symulacji czujnika z wykładu 1 i potoku generatorów z wykładu 2 (alarm powyżej 30 stopni).</aside>
+</section>
+<section data-background-color="#ffffff" data-keywords="Checkpointy">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Checkpointy: migawki stanu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<svg class="diagram" viewBox="0 0 1000 235" role="img" aria-label="Bariery checkpointu płyną razem z danymi; gdy bariera dotrze do operatora, zapisuje on swój stan do trwałego magazynu">
+<defs><marker id="arC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker><marker id="arS" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#53ae12"/></marker></defs>
+<rect x="10" y="40" width="150" height="70" rx="10" fill="#ffe082" stroke="#e8a50a" stroke-width="2"/><text x="85" y="70" text-anchor="middle">źródło</text><text x="85" y="94" text-anchor="middle" fill="#666" style="font-size:14px">offset = 1042</text>
+<rect x="430" y="40" width="160" height="70" rx="10" fill="#ffe082" stroke="#e8a50a" stroke-width="2"/><text x="510" y="70" text-anchor="middle">operator</text><text x="510" y="94" text-anchor="middle" fill="#666" style="font-size:14px">stan: liczniki</text>
+<rect x="840" y="40" width="150" height="70" rx="10" fill="#ffe082" stroke="#e8a50a" stroke-width="2"/><text x="915" y="80" text-anchor="middle">ujście</text>
+<line x1="160" y1="75" x2="425" y2="75" stroke="#666" stroke-width="2" marker-end="url(#arC)"/>
+<line x1="590" y1="75" x2="835" y2="75" stroke="#666" stroke-width="2" marker-end="url(#arC)"/>
+<rect x="190" y="64" width="20" height="22" rx="3" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><rect x="225" y="64" width="20" height="22" rx="3" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><rect x="300" y="64" width="20" height="22" rx="3" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><rect x="335" y="64" width="20" height="22" rx="3" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><rect x="370" y="64" width="20" height="22" rx="3" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><rect x="620" y="64" width="20" height="22" rx="3" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><rect x="655" y="64" width="20" height="22" rx="3" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><rect x="760" y="64" width="20" height="22" rx="3" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><rect x="795" y="64" width="20" height="22" rx="3" fill="#e8f0fe" stroke="#1a73d9" stroke-width="1.5"/><line x1="272" y1="52" x2="272" y2="98" stroke="#d93025" stroke-width="4"/><text x="272" y="45" text-anchor="middle" fill="#d93025" style="font-size:14px">bariera n+1</text><line x1="720" y1="52" x2="720" y2="98" stroke="#d93025" stroke-width="4"/><text x="720" y="45" text-anchor="middle" fill="#d93025" style="font-size:14px">bariera n</text>
+<rect x="300" y="170" width="420" height="55" rx="8" fill="#f3faee" stroke="#53ae12" stroke-width="2"/>
+<text x="510" y="203" text-anchor="middle">trwały magazyn (S3, HDFS): checkpoint n</text>
+<line x1="85" y1="112" x2="330" y2="168" stroke="#53ae12" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#arS)"/>
+<line x1="510" y1="112" x2="510" y2="166" stroke="#53ae12" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#arS)"/>
+<text x="140" y="160" fill="#53ae12" style="font-size:14px">offset źródła</text><text x="520" y="145" fill="#53ae12" style="font-size:14px">migawka stanu</text>
+</svg>
+<ul class="points side">
+<li>JobManager co jakiś czas wstrzykuje do źródeł <strong>barierę</strong>. Bariera płynie razem z danymi. Gdy dotrze do operatora, ten zapisuje migawkę swojego stanu (asynchronicznie, bez zatrzymywania strumienia). To wariant algorytmu Chandy'ego-Lamporta.</li>
+<li>Checkpoint <em>n</em> zawiera stan wszystkich operatorów po przetworzeniu dokładnie tych rekordów, które były przed barierą <em>n</em>, oraz offsety źródeł.</li>
+</ul>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Awaria, savepointy i exactly-once</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<ul class="points side">
+<li>Po awarii Flink wczytuje ostatni kompletny checkpoint i <strong>cofa źródło</strong> do zapisanego offsetu (np. w Kafce). Rekordy po checkpoincie są przetwarzane ponownie, ale każdy wpływa na stan <strong>dokładnie raz</strong> (exactly-once).</li>
+<li><strong>Savepoint</strong>: migawka robiona ręcznie (<code>flink stop --savepointPath …</code>), np. przed aktualizacją kodu, zmianą równoległości albo migracją klastra.</li>
+<li>Exactly-once <strong>end-to-end</strong> wymaga też ujścia transakcyjnego (two-phase commit), np. <code>KafkaSink</code> z <code>DeliveryGuarantee.EXACTLY_ONCE</code>: wykład 12.</li>
+</ul>
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from pyflink.common import Configuration
+from pyflink.datastream import (StreamExecutionEnvironment,
+                                CheckpointingMode)
+
+conf = Configuration()
+conf.set_string("state.backend.type", "rocksdb")
+conf.set_string("execution.checkpointing.dir",
+                "file:///tmp/checkpointy")
+env = StreamExecutionEnvironment.get_execution_environment(conf)
+env.enable_checkpointing(10_000, CheckpointingMode.EXACTLY_ONCE)
+</code></pre>
+<div class="note"><p>Bez checkpointów (domyślnie wyłączone) stan po awarii przepada, a zadanie startuje od zera.</p></div>
+</div>
+</div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się: stan i odporność na błędy</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="quiz multi compact"><p class="q">W <code>KeyedProcessFunction</code> zapisujemy ostatnią temperaturę w <code>self.ostatnia_temp</code> zamiast w <code>ValueState</code>. Co jest nie tak? (zaznacz wszystkie)</p><div class="opts"><button class="opt" data-ok="1">wartość jest wspólna dla wszystkich kluczy obsługiwanych przez podzadanie</button><button class="opt" data-ok="1">wartość zniknie po awarii, bo nie trafia do checkpointu</button><button class="opt" data-ok="0">nie da się jej odczytać w process_element</button><button class="opt" data-ok="1">Flink nie rozdzieli jej poprawnie przy zmianie równoległości</button></div><button class="btn check">Sprawdź</button><p class="explain">Flink nie wie o zwykłym atrybucie: nie dzieli go po kluczach, nie zapisuje w checkpoincie i nie przenosi przy skalowaniu.</p></div><div class="quiz compact"><p class="q">Ostatni checkpoint jest z 12:00:00, awaria nastąpiła o 12:00:07. Co z rekordami z tych 7 sekund?</p><div class="opts"><button class="opt" data-ok="0">przepadają</button><button class="opt" data-ok="1">źródło zostaje cofnięte i są przetwarzane ponownie, a stan nie liczy ich podwójnie</button><button class="opt" data-ok="0">Flink trzyma je w pamięci JobManagera</button></div><p class="explain">Stan wraca do migawki z 12:00:00, a źródło do zapisanego offsetu, więc rekordy są czytane ponownie. Ujście nietransakcyjne może dostać część wyników dwa razy.</p></div><div class="quiz compact"><p class="q">Aplikacja ma 500 GB stanu (np. deduplikacja po identyfikatorach). Który backend stanu?</p><div class="opts"><button class="opt" data-ok="0">hashmap</button><button class="opt" data-ok="1">rocksdb lub forst</button><button class="opt" data-ok="0">stan nie jest potrzebny</button></div><p class="explain"><code>hashmap</code> trzyma stan na stercie JVM, więc musi się zmieścić w pamięci. RocksDB trzyma go na dysku (checkpointy przyrostowe), a ForSt w zdalnym magazynie.</p></div>
+</div>
+</section>
+<section data-background-color="#ffffff">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Podsumowanie wykładu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<ul class="points">
+<li><strong>Flink</strong>: rozproszony silnik stanowych obliczeń na strumieniach ograniczonych i nieograniczonych. JobManager koordynuje, TaskManagery wykonują podzadania w slotach (wątkach).</li>
+<li>Program to <strong>graf</strong>: źródło (<code>from_source</code>) → transformacje → ujście (<code>sink_to</code>, <code>print</code>), uruchamiany leniwie przez <code>execute()</code>.</li>
+<li><code>key_by</code> partycjonuje strumień: wszystkie zdarzenia klucza trafiają do jednego podzadania, więc stan per klucz nie wymaga zamków.</li>
+<li><strong>Table API / SQL</strong>: zapytania ciągłe na tabelach dynamicznych, wynik jako changelog (<code>+I</code>, <code>-U</code>, <code>+U</code>).</li>
+<li><strong>Czas zdarzenia + watermarki</strong> dają powtarzalne wyniki mimo zdarzeń spóźnionych. Okna: tumbling, sliding, session.</li>
+<li><strong>Checkpointy</strong> (bariery) zapisują stan i offsety źródeł, co daje exactly-once po awarii.</li>
+</ul>
+<div class="note"><p><strong>Laboratoria:</strong> PyFlink (Python 3.12 w osobnym venv): DataStream API, okna czasowe, stan.</p>
+<p><strong>Dalej:</strong> Apache Kafka (wykład 12), czyli źródło i ujście, z którym Flink pracuje najczęściej.</p></div>
+</div>
+</section>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@4.6.0/chalkboard/plugin.js"></script>
+<script>
+// ---------- copy buttons (raw text is captured before highlighting adds line numbers) ----------
+document.querySelectorAll('pre.code-wrap > code').forEach(code => {
+  const lines = code.textContent.replace(/^\s*\n/, '').replace(/\s+$/, '').split('\n');
+  const indent = Math.min(...lines.filter(l => l.trim()).map(l => l.match(/^ */)[0].length));
+  const raw = lines.map(l => l.slice(indent)).join('\n') + '\n';
+  const btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'copy-btn'; btn.textContent = 'Kopiuj';
+  btn.addEventListener('click', () => {
+    const done = ok => {
+      btn.textContent = ok ? 'Skopiowano!' : 'Błąd kopiowania'; btn.classList.toggle('copied', ok);
+      clearTimeout(btn._t); btn._t = setTimeout(() => { btn.textContent = 'Kopiuj'; btn.classList.remove('copied'); }, 1500);
+    };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(raw).then(() => done(true), () => done(false));
+    else {
+      const ta = document.createElement('textarea'); ta.value = raw; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { done(document.execCommand('copy')); } catch (e) { done(false); } finally { ta.remove(); }
+    }
+  });
+  code.parentNode.appendChild(btn);
+});
+</script>
+<script>
+  Reveal.initialize({
+    width: 1280, height: 720, margin: 0.02,
+    center: false, hash: true, slideNumber: 'c/t',
+    transition: 'slide',
+    chalkboard: { boardmarkerWidth: 4, chalkWidth: 5 },
+    plugins: [RevealNotes, RevealHighlight, RevealChalkboard]
+  });
+</script>
+<script>
+// ---------- quizzes ----------
+document.querySelectorAll('.quiz').forEach(q => {
+  const opts = [...q.querySelectorAll('.opt')];
+  const reveal = () => {
+    opts.forEach(o => {
+      if (o.dataset.ok === '1') o.classList.add('good');
+      else if (o.classList.contains('sel')) o.classList.add('bad');
+    });
+    q.classList.add('done');
+  };
+  if (q.classList.contains('multi')) {
+    opts.forEach(o => o.addEventListener('click', () => { if (!q.classList.contains('done')) o.classList.toggle('sel'); }));
+    q.querySelector('.check').addEventListener('click', reveal);
+  } else {
+    opts.forEach(o => o.addEventListener('click', () => {
+      if (q.classList.contains('done')) return;
+      o.classList.add('sel'); reveal();
+    }));
+  }
+});
+
+// ---------- fill in the blanks (whitespace is ignored, data-re lists accepted answers) ----------
+document.querySelectorAll('.blanks').forEach(b => {
+  const inputs = [...b.querySelectorAll('input.blank')];
+  const fb = b.querySelector('.fb');
+  const check = () => {
+    let good = 0;
+    inputs.forEach(i => {
+      const ok = new RegExp(i.dataset.re).test(i.value.replace(/\s+/g, ''));
+      i.classList.toggle('good', ok); i.classList.toggle('bad', !ok); good += ok;
+    });
+    const all = good === inputs.length;
+    b.classList.toggle('done', all);
+    fb.textContent = all ? '' : inputs.length > 1 ? `Poprawne: ${good} z ${inputs.length}. Spróbuj jeszcze raz.` : 'Jeszcze nie. Spróbuj ponownie.';
+  };
+  b.querySelector('.check').addEventListener('click', check);
+  b.querySelector('.show').addEventListener('click', () => {
+    inputs.forEach(i => { i.value = i.dataset.sol; });
+    check();
+  });
+  inputs.forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') check(); }));
+});
+
+// ---------- keyBy partitioning (Flink: key group = murmur(hashCode) % 128, subtask = keyGroup * P / 128) ----------
+const keySim = (() => {
+  const root = document.getElementById('keysim'); if (!root) return null;
+  const KEYS = ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8'], MAXP = 128;
+  const javaHash = s => { let h = 0; for (const c of s) h = (Math.imul(31, h) + c.charCodeAt(0)) | 0; return h; };
+  const rotl = (x, r) => (x << r) | (x >>> (32 - r));
+  const murmur = code => {
+    code = Math.imul(code, 0xcc9e2d51); code = rotl(code, 15); code = Math.imul(code, 0x1b873593);
+    code = rotl(code, 13); code = (Math.imul(code, 5) + 0xe6546b64) | 0; code ^= 4;
+    code ^= code >>> 16; code = Math.imul(code, 0x85ebca6b); code ^= code >>> 13; code = Math.imul(code, 0xc2b2ae35); code ^= code >>> 16;
+    return code >= 0 ? code : code !== -2147483648 ? -code : 0;
+  };
+  const keyGroup = k => murmur(javaHash(k)) % MAXP;
+  const SEQ = (() => { let x = 2463534242; const out = []; for (let i = 0; i < 80; i++) { x ^= x << 13; x ^= x >>> 17; x ^= x << 5; out.push(KEYS[(x >>> 0) % KEYS.length]); } return out; })();
+  let P, mode, pos, rr, state, last, timer = null;
+  const $ = c => root.querySelector(c);
+  const render = () => {
+    $('.queue').innerHTML = SEQ.slice(pos, pos + 12).map(k => `<span class="chip">${k}</span>`).join('') || '<span class="small">koniec danych</span>';
+    const owners = {};
+    state.forEach((m, i) => Object.keys(m).forEach(k => { (owners[k] = owners[k] || []).push(i); }));
+    $('.subs').innerHTML = [0, 1, 2, 3].map(i => {
+      const keys = Object.keys(state[i] || {}).sort();
+      return `<div class="sub${i >= P ? ' off' : ''}${last && last.t === i ? ' hit' : ''}"><h4>podzadanie ${i + 1}</h4>` +
+        (keys.length ? keys.map(k => `<span class="kv${owners[k].length > 1 ? ' dup' : ''}${last && last.t === i && last.k === k ? ' new' : ''}">${k}: ${state[i][k]}</span>`).join('') : '<span class="small">stan pusty</span>') + '</div>';
+    }).join('');
+    if (!last) $('.route').textContent = 'Kliknij „Zdarzenie”: element z początku kolejki trafi do jednego z podzadań operatora liczącego zdarzenia per czujnik.';
+    else if (mode === 'key') { const g = keyGroup(last.k); $('.route').textContent = `${last.k}: grupa kluczy = murmur(hash("${last.k}")) % 128 = ${g} → podzadanie ⌊${g}·${P}/128⌋ + 1 = ${last.t + 1}`; }
+    else $('.route').textContent = `${last.k}: rebalance (round-robin) → podzadanie ${last.t + 1}, niezależnie od klucza`;
+    const dups = Object.keys(owners).filter(k => owners[k].length > 1).sort();
+    let v = '';
+    if (mode === 'rr' && dups.length) v = `Klucze ${dups.join(', ')} są liczone w kilku podzadaniach naraz: żadne nie zna pełnej liczby zdarzeń czujnika. Do agregacji per klucz potrzebny jest <code>key_by</code>.`;
+    else if (mode === 'key' && pos >= 12) {
+      const empty = [...Array(P).keys()].filter(i => !Object.keys(state[i]).length);
+      v = 'Każdy klucz ma dokładnie jednego właściciela, więc jego licznik jest kompletny i nie wymaga synchronizacji.' +
+        (empty.length ? ` Przy tej równoległości podzadanie ${empty.map(i => i + 1).join(', ')} nie dostało żadnego klucza: kluczy jest mało, a rozkład zależy od haszy (data skew).` :
+          P > 1 ? ' Policz klucze w podzadaniach: rozkład nie musi być równy (data skew).' : '');
+    }
+    $('.verdict').innerHTML = v;
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const step = () => {
+    if (pos >= SEQ.length) { stop(); return; }
+    const k = SEQ[pos++];
+    const t = mode === 'key' ? Math.floor(keyGroup(k) * P / MAXP) : (rr++ % P);
+    state[t][k] = (state[t][k] || 0) + 1; last = { k, t };
+    render();
+  };
+  const reset = () => {
+    stop(); P = +$('.par').value; mode = root.querySelector('input[name=keymode]:checked').value;
+    pos = 0; rr = 0; last = null; state = [{}, {}, {}, {}]; render();
+  };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'step') { stop(); step(); }
+    if (a === 'play') { if (timer) stop(); else timer = setInterval(step, 450); }
+    if (a === 'reset') reset();
+  });
+  root.addEventListener('change', reset);
+  reset();
+  return { stop };
+})();
+
+// ---------- watermarks and late events (simplified: W = max - delay after each event, window [s, e) fires when W >= e) ----------
+const wmSim = (() => {
+  const root = document.getElementById('wmsim'); if (!root) return null;
+  const EV = [2, 5, 3, 8, 12, 6, 15, 11, 19, 9, 23, 17, 26, 14, 29, 22];
+  const X = t => 60 + t * 29, svg = root.querySelector('svg.wm');
+  let delay, late, pos, maxTs, W, wins, status, ended, msg, timer = null;
+  const $ = c => root.querySelector(c);
+  const fmt = w => w === Infinity ? '+∞' : w === -Infinity ? '−∞' : `${w} s`;
+  const fire = () => Object.values(wins).forEach(w => {
+    if (!w.fired && W >= w.e) { w.fired = true; w.res = w.items.length; }
+    if (W >= w.e + late) w.purged = true;
+  });
+  const render = () => {
+    let s = '<line x1="60" y1="180" x2="935" y2="180" stroke="#666" stroke-width="2"/>';
+    for (let t = 0; t <= 30; t += 5) s += `<line x1="${X(t)}" y1="176" x2="${X(t)}" y2="186" stroke="#666" stroke-width="2"/><text x="${X(t)}" y="200" text-anchor="middle" style="font-size:15px">${t}</text>`;
+    s += '<text x="0" y="200" fill="#666" style="font-size:14px">czas [s]</text>';
+    Object.values(wins).forEach(w => {
+      const fill = w.fired ? '#e6f4da' : '#e8f0fe', stroke = w.fired ? '#53ae12' : '#1a73d9';
+      s += `<rect x="${X(w.s) + 2}" y="10" width="${X(w.e) - X(w.s) - 4}" height="160" rx="6" fill="${fill}" stroke="${stroke}" stroke-width="2"${w.purged ? ' stroke-dasharray="6 4"' : ''}/>`;
+      s += `<text x="${(X(w.s) + X(w.e)) / 2}" y="32" text-anchor="middle" style="font-size:15px">[${w.s}, ${w.e})</text>`;
+      const st = w.fired ? `wynik: n=${w.items.length}${w.items.length !== w.res ? ' (poprawiony)' : ''}${w.purged ? ', usunięte' : ''}` : `otwarte: n=${w.items.length}`;
+      s += `<text x="${(X(w.s) + X(w.e)) / 2}" y="160" text-anchor="middle" fill="${w.fired ? '#2d6a0a' : '#1a73d9'}" style="font-size:15px">${st}</text>`;
+    });
+    for (let i = 0; i < pos; i++) {
+      const ts = EV[i], y = 52 + (i % 5) * 19, st = status[i];
+      const col = st === 'drop' ? '#d93025' : st === 'lateok' ? '#e8710a' : '#1a73d9';
+      s += `<circle cx="${X(ts)}" cy="${y}" r="${i === pos - 1 ? 9 : 7}" fill="${st === 'drop' ? '#fce8e6' : '#fff'}" stroke="${i === pos - 1 ? '#e8710a' : col}" stroke-width="${i === pos - 1 ? 4 : 2.5}"/>`;
+      s += `<text x="${X(ts) + 12}" y="${y + 5}" fill="${col}" style="font-size:13px">${ts}${st === 'drop' ? ' ✗' : ''}</text>`;
+    }
+    if (W > -Infinity) {
+      const x = X(Math.min(Math.max(W, 0), 30.6));
+      s += `<line x1="${x}" y1="4" x2="${x}" y2="212" stroke="#d93025" stroke-width="3" stroke-dasharray="8 5"/>`;
+      s += `<text x="${Math.min(x + 6, 930)}" y="${W === Infinity ? 100 : 228}" fill="#d93025" text-anchor="${W === Infinity ? 'end' : 'start'}" style="font-size:15px" font-weight="bold">W = ${fmt(W)}</text>`;
+    }
+    svg.innerHTML = s;
+    $('.queue').innerHTML = EV.map((t, i) => `<span class="chip ${i < pos ? status[i] : 'todo'}${i === pos - 1 ? ' cur' : ''}">${t}</span>`).join('');
+    const drops = status.filter(x => x === 'drop').length;
+    $('.stat').innerHTML = pos === 0 ? 'Jeszcze nic nie przyszło. Okna mają 10 s.' : ended ? `Koniec strumienia ograniczonego: watermark skacze do +∞ i zamyka wszystkie okna. Odrzucone: ${drops} z ${EV.length}.` :
+      `max czas zdarzenia = ${maxTs} s, watermark W = ${maxTs} − ${delay} = ${fmt(W)}, odrzucone (side output): ${drops}`;
+    $('.verdict').innerHTML = msg;
+  };
+  const stop = () => { clearInterval(timer); timer = null; };
+  const step = () => {
+    if (pos < EV.length) {
+      const ts = EV[pos], w = wins[Math.floor(ts / 10) * 10];
+      if (W >= w.e + late) { status[pos] = 'drop'; msg = `Zdarzenie ${ts} s przyszło, gdy W = ${fmt(W)} ≥ koniec okna [${w.s}, ${w.e})${late ? ` + ${late} s` : ''}: jest <b>spóźnione</b> i zostaje odrzucone (albo trafia do side output).`; }
+      else if (w.fired) { status[pos] = 'lateok'; w.items.push(ts); msg = `Zdarzenie ${ts} s jest spóźnione, ale mieści się w allowed lateness: okno [${w.s}, ${w.e}) emituje <b>poprawiony</b> wynik.`; }
+      else { status[pos] = 'ok'; w.items.push(ts); msg = ts < maxTs ? `Zdarzenie ${ts} s przyszło nie po kolei (max = ${maxTs} s), ale okno [${w.s}, ${w.e}) jest jeszcze otwarte.` : `Zdarzenie ${ts} s trafia do okna [${w.s}, ${w.e}).`; }
+      maxTs = Math.max(maxTs, ts); W = maxTs - delay;
+      const before = Object.values(wins).filter(x => x.fired).length; fire();
+      const closed = Object.values(wins).filter(x => x.fired).length;
+      if (closed > before) msg += ` Watermark ${fmt(W)} minął koniec okna, więc okno zostaje policzone.`;
+      pos++;
+    } else if (!ended) {
+      ended = true; W = Infinity; fire();
+      msg = delay < 5 ? 'Przy małym opóźnieniu wyniki pojawiają się szybko, ale część zdarzeń przepadła. Zwiększ opóźnienie albo allowed lateness i porównaj.' :
+        'Przy dużym opóźnieniu nic (lub prawie nic) nie przepadło, ale okna zamykały się później: kompromis między kompletnością a opóźnieniem wyników.';
+      stop();
+    } else stop();
+    render();
+  };
+  const reset = () => {
+    stop(); delay = +$('.delay').value; late = +$('.late').value;
+    pos = 0; maxTs = -Infinity; W = -Infinity; status = []; ended = false; msg = '';
+    wins = {}; [0, 10, 20].forEach(s => { wins[s] = { s, e: s + 10, items: [], fired: false, purged: false, res: 0 }; });
+    render();
+  };
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'step') { stop(); step(); }
+    if (a === 'play') { if (timer) stop(); else { if (ended) reset(); timer = setInterval(step, 700); } }
+    if (a === 'reset') reset();
+  });
+  root.addEventListener('change', reset);
+  reset();
+  return { stop };
+})();
+
+// ---------- window types: tumbling / sliding / session ----------
+(() => {
+  const root = document.getElementById('winsim'); if (!root) return;
+  const svg = root.querySelector('svg.win');
+  const KEYS = ['A', 'B', 'C'], COL = ['#1a73d9', '#53ae12', '#e8710a', '#9334e6'];
+  const DEF = { A: [2, 4, 5, 13, 21, 22, 23, 38, 47, 52], B: [1, 9, 17, 19, 30, 31, 33, 34, 55], C: [6, 7, 26, 41, 43, 44, 58] };
+  const X = t => 80 + t * 15, laneY = i => 35 + i * 95;
+  let ev;
+  const cfg = () => {
+    const v = root.querySelector('.wtype').value;
+    if (v[0] === 't') return { kind: 'tumbling', size: +v.slice(1) };
+    if (v[0] === 's') { const [a, b] = v.slice(1).split('_').map(Number); return { kind: 'sliding', size: a, slide: b }; }
+    return { kind: 'session', gap: +v.slice(1) };
+  };
+  const assign = (c, ts) => {
+    const m = new Map();
+    const add = (s, e, t) => { const k = s + ':' + e; if (!m.has(k)) m.set(k, { s, e, n: 0 }); m.get(k).n++; };
+    if (c.kind === 'tumbling') ts.forEach(t => { const s = Math.floor(t / c.size) * c.size; add(s, s + c.size, t); });
+    else if (c.kind === 'sliding') ts.forEach(t => { for (let s = Math.floor(t / c.slide) * c.slide; s > t - c.size; s -= c.slide) add(s, s + c.size, t); });
+    else {
+      const out = []; [...ts].sort((a, b) => a - b).forEach(t => {
+        const w = out[out.length - 1];
+        if (w && t < w.e) { w.e = Math.max(w.e, t + c.gap); w.n++; } else out.push({ s: t, e: t + c.gap, n: 1 });
+      });
+      return out;
+    }
+    return [...m.values()];
+  };
+  const render = () => {
+    const c = cfg();
+    let s = `<line x1="${X(0)}" y1="312" x2="${X(60)}" y2="312" stroke="#666" stroke-width="2"/>`;
+    for (let t = 0; t <= 60; t += 10) s += `<line x1="${X(t)}" y1="308" x2="${X(t)}" y2="316" stroke="#666" stroke-width="2"/><text x="${X(t)}" y="330" text-anchor="middle" style="font-size:14px">${t} s</text>`;
+    let nWin = 0, nEv = 0, nAssign = 0;
+    KEYS.forEach((k, i) => {
+      const y = laneY(i), ts = ev[k], wins = assign(c, ts);
+      nWin += wins.length; nEv += ts.length; nAssign += wins.reduce((a, w) => a + w.n, 0);
+      const rows = c.kind === 'sliding' ? c.size / c.slide : 1;
+      wins.forEach(w => {
+        const row = c.kind === 'sliding' ? (((w.s / c.slide) % rows) + rows) % rows : 0;
+        const x0 = X(Math.max(w.s, 0)), x1 = X(Math.min(w.e, 60)), yy = y + 14 + row * 15, col = COL[row % COL.length];
+        s += `<rect x="${x0 + 1}" y="${yy}" width="${Math.max(x1 - x0 - 2, 2)}" height="12" rx="3" fill="${col}" fill-opacity=".25" stroke="${col}" stroke-width="1.5"/>`;
+        if (x1 - x0 > 18) s += `<text x="${(x0 + x1) / 2}" y="${yy + 10}" text-anchor="middle" style="font-size:11px" font-weight="bold" fill="${col}">${w.n}</text>`;
+      });
+      s += `<text x="0" y="${y + 6}" style="font-size:16px">klucz ${k}</text>`;
+      s += `<line x1="${X(0)}" y1="${y}" x2="${X(60)}" y2="${y}" stroke="#bbb" stroke-width="2"/>`;
+      s += `<rect x="${X(0)}" y="${y - 20}" width="${X(60) - X(0)}" height="${c.kind === 'sliding' ? 95 : 50}" fill="transparent" data-lane="${k}"/>`;
+      ts.forEach(t => { s += `<circle cx="${X(t)}" cy="${y}" r="7" fill="#9334e6" stroke="#fff" stroke-width="1.5" pointer-events="none"/>`; });
+    });
+    svg.innerHTML = s;
+    const avg = nEv ? (nAssign / nEv).toFixed(1) : 0;
+    const desc = c.kind === 'tumbling' ? `Okna tumbling ${c.size} s: stały rozmiar, bez nakładania, wspólne granice dla wszystkich kluczy. Każde zdarzenie jest w dokładnie jednym oknie.` :
+      c.kind === 'sliding' ? `Okna sliding ${c.size} s co ${c.slide} s nakładają się: każde zdarzenie trafia do ${c.size / c.slide} okien (kolory to kolejne przesunięcia).` :
+        `Okna sesji z przerwą ${c.gap} s: zamykają się po ${c.gap} s ciszy, granice są inne dla każdego klucza. Zmniejsz przerwę, a sesje się rozpadną.`;
+    root.querySelector('.verdict').innerHTML = `${desc} Okien z danymi: <b>${nWin}</b>, zdarzeń: <b>${nEv}</b>, średnio okien na zdarzenie: <b>${avg}</b>. Kliknij na linii klucza, żeby dodać zdarzenie. Puste okna nie powstają.`;
+  };
+  svg.addEventListener('click', e => {
+    const lane = e.target.dataset && e.target.dataset.lane; if (!lane) return;
+    const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+    const q = p.matrixTransform(svg.getScreenCTM().inverse());
+    const t = Math.round((q.x - 80) / 15);
+    if (t < 0 || t > 60 || ev[lane].includes(t)) return;
+    ev[lane].push(t); ev[lane].sort((a, b) => a - b); render();
+  });
+  root.addEventListener('click', e => {
+    const a = e.target.dataset.act;
+    if (a === 'rand') { ev = {}; KEYS.forEach(k => { const n = 5 + Math.floor(Math.random() * 6), set = new Set(); while (set.size < n) set.add(Math.floor(Math.random() * 60)); ev[k] = [...set].sort((x, y) => x - y); }); render(); }
+    if (a === 'clear') { ev = { A: [], B: [], C: [] }; render(); }
+    if (a === 'reset') { ev = JSON.parse(JSON.stringify(DEF)); render(); }
+  });
+  root.querySelector('.wtype').addEventListener('change', render);
+  ev = JSON.parse(JSON.stringify(DEF)); render();
+})();
+
+Reveal.on('slidechanged', () => {
+  if (keySim) keySim.stop();
+  if (wmSim) wmSim.stop();
+});
+
+</script>
+</body>
+</html>
