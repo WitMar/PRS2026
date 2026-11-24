@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Przetwarzanie równoległe i strumieniowe - Wykład 11: szeregi czasowe i biblioteka Kats</title>
+<title>Przetwarzanie równoległe i strumieniowe - Wykład 11: szeregi czasowe i biblioteka Darts</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
@@ -175,7 +175,7 @@
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el text" style="left:2.179%;top:23.733%;width:61.002%;height:40%;"><p><span style="font-size:1.5em"><strong>Wykład 11</strong></span></p>
 
-<p><span style="font-size:1.5em"><strong>Analiza szeregów czasowych: biblioteka Kats</strong></span></p>
+<p><span style="font-size:1.5em"><strong>Analiza szeregów czasowych: biblioteka Darts</strong></span></p>
 </div>
 <div class="el img" style="left:64.270%;top:21.576%;width:23.125%;height:40.000%;"><img src="images/image-CjtUUtTA.jpg" alt="UAM"></div>
 <div class="el img" style="left:47.930%;top:66.885%;width:19.608%;height:25.820%;"><img src="images/image-TbBRY920.png" alt=""></div>
@@ -190,12 +190,12 @@
 <div class="agenda">
   <div class="ag"><b>1</b>Szeregi czasowe<p>czym są, składowe (trend, sezonowość, szum), stacjonarność, autokorelacja, narzędzia pandas</p></div>
   <div class="ag"><b>2</b>Prognozowanie<p>podział w czasie, błędy MAE i MAPE, prognozy bazowe, wygładzanie wykładnicze, ARIMA, Prophet</p></div>
-  <div class="ag"><b>3</b>Kats: prognozy<p>TimeSeriesData, wspólne API modeli, backtesting, zespoły modeli</p></div>
-  <div class="ag"><b>4</b>Kats: detekcja i cechy<p>wzrosty i spadki poziomu (CUSUM, BOCPD), trendy (Mann-Kendall), wartości odstające, sezonowość, TsFeatures, Kats w potoku Streamz</p></div>
+  <div class="ag"><b>3</b>Darts od zera<p>TimeSeries, fit/predict, NaiveSeasonal, metryki, podział train/test, lags</p></div>
+  <div class="ag"><b>4</b>Darts w praktyce<p>Holt-Winters, backtesting, modele ML i sieci, anomalie, CUSUM, Streamz</p></div>
 </div>
 <div class="note"><p><strong>Co już znamy:</strong> strumień danych z czujników (wykład 8) i model uczony po jednym zdarzeniu (River, wykład 9). Dziś patrzymy na te same dane jak na <strong>szereg czasowy</strong>: całą historię, którą analizujemy naraz, w oknach.</p></div>
 </div>
-<aside class="notes">Wykład 9 to uczenie online, dziś podejście wsadowe na oknach historii. Kats to zestaw narzędzi od Meta, który zbiera w jednym miejscu prognozy, detektory i cechy szeregów.</aside>
+<aside class="notes">Wykład 9 to uczenie online, dziś podejście wsadowe na oknach historii. Darts (Unit8) to aktywnie rozwijana biblioteka z jednym API dla modeli statystycznych, uczenia maszynowego i sieci neuronowych.</aside>
 </section>
 
 <section data-background-color="#ffffff" data-keywords="Szereg czasowy">
@@ -230,7 +230,7 @@
 <div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Strumień danych a szereg czasowy</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<svg class="diagram" viewBox="0 0 1180 150" style="width:100%;height:150px" role="img" aria-label="Strumień zdarzeń trafia do okna, okno staje się szeregiem czasowym analizowanym przez Kats albo zdarzenie trafia do modelu online River">
+<svg class="diagram" viewBox="0 0 1180 150" style="width:100%;height:150px" role="img" aria-label="Strumień zdarzeń trafia do okna, okno staje się szeregiem czasowym analizowanym przez Darts albo zdarzenie trafia do modelu online River">
 <defs><marker id="ar11" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs>
 <rect x="10" y="45" width="220" height="60" rx="8" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="120" y="72" text-anchor="middle" font-weight="bold">strumień zdarzeń</text><text x="120" y="94" text-anchor="middle" style="font-size:15px" fill="#666">MQTT, Kafka, Streamz</text>
 <line x1="235" y1="60" x2="395" y2="30" stroke="#666" stroke-width="2" marker-end="url(#ar11)"/>
@@ -238,7 +238,7 @@
 <rect x="400" y="5" width="300" height="55" rx="8" fill="#f3faee" stroke="#53ae12" stroke-width="2"/><text x="550" y="29" text-anchor="middle" font-weight="bold">każde zdarzenie osobno</text><text x="550" y="50" text-anchor="middle" style="font-size:15px" fill="#666">model online, np. River</text>
 <rect x="400" y="92" width="300" height="55" rx="8" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="550" y="116" text-anchor="middle" font-weight="bold">okno ostatnich N pomiarów</text><text x="550" y="137" text-anchor="middle" style="font-size:15px" fill="#666">szereg czasowy</text>
 <line x1="705" y1="120" x2="800" y2="120" stroke="#666" stroke-width="2" marker-end="url(#ar11)"/>
-<rect x="805" y="92" width="365" height="55" rx="8" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="987" y="116" text-anchor="middle" font-weight="bold">analiza całego okna</text><text x="987" y="137" text-anchor="middle" style="font-size:15px" fill="#666">Kats: prognoza, punkt zmiany, cechy</text>
+<rect x="805" y="92" width="365" height="55" rx="8" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="987" y="116" text-anchor="middle" font-weight="bold">analiza całego okna</text><text x="987" y="137" text-anchor="middle" style="font-size:15px" fill="#666">Darts: prognoza, anomalie, wzrosty i spadki</text>
 </svg>
 <div class="cols">
 <ul class="points side">
@@ -323,7 +323,7 @@
 </div>
 </div>
 </div>
-<aside class="notes">Formalne testy: ADF (statsmodels.tsa.stattools.adfuller) i KPSS. Kats ma ich wyniki wśród cech TsFeatures (unitroot_kpss).</aside>
+<aside class="notes">Formalne testy: ADF (statsmodels.tsa.stattools.adfuller) i KPSS. W Darts: stationarity_test_adf i stationarity_test_kpss z darts.utils.statistics.</aside>
 </section>
 
 <section data-background-color="#ffffff" data-keywords="pandas">
@@ -360,7 +360,7 @@ print(df)
 <li><code>rolling(n)</code> to okno przesuwne z wykładu 8, tyle że na gotowej historii.</li>
 <li><code>resample('h').mean()</code> agreguje nieregularne pomiary do stałej częstotliwości, a <code>asfreq</code> + <code>interpolate()</code> uzupełnia braki.</li>
 </ul>
-<div class="note"><p>Kats przyjmuje dane właśnie jako <code>DataFrame</code> z kolumną czasu, więc przygotowanie danych robimy w pandas.</p></div>
+<div class="note"><p>Darts tworzy szereg właśnie z <code>DataFrame</code> z kolumną czasu (<code>TimeSeries.from_dataframe</code>), więc przygotowanie danych robimy w pandas.</p></div>
 </div>
 </div>
 </div>
@@ -451,9 +451,9 @@ sezonowa naiwna  MAE =  71.3  MAPE = 15.5%</pre>
 <ul class="points side">
 <li>Sama sezonowość zmniejsza błąd o jedną trzecią: wiemy, że latem lata się więcej.</li>
 <li>Sezonowa naiwna nie zna jednak <strong>trendu</strong>: zakłada, że w 1959 i 1960 r. będzie tyle pasażerów co w 1958.</li>
-<li>To jest poprzeczka. Każdy model z Kats musi mieć <strong>MAPE poniżej 15,5%</strong> na tym samym podziale, inaczej nie warto go używać.</li>
+<li>To jest poprzeczka. Każdy model z Darts musi mieć <strong>MAPE poniżej 15,5%</strong> na tym samym podziale, inaczej nie warto go używać.</li>
 </ul>
-<p class="small">Plik <code>air_passengers.csv</code> jest w repozytorium Kats (<code>kats/data/</code>).</p>
+<p class="small">Te same dane są wbudowane w Darts: <code>darts.datasets.AirPassengersDataset</code>.</p>
 </div>
 </div>
 </div>
@@ -465,15 +465,15 @@ sezonowa naiwna  MAE =  71.3  MAPE = 15.5%</pre>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <table class="simple">
-<tr><th>model</th><th>idea</th><th>trend / sezon</th><th>w Kats</th></tr>
-<tr><td>średnia ruchoma</td><td>prognoza = średnia ostatnich <code>n</code> wartości</td><td>nie / nie</td><td>(pandas)</td></tr>
-<tr><td>wygładzanie wykładnicze (SES)</td><td>średnia ważona, nowsze pomiary ważą więcej (waga <code>α</code>)</td><td>nie / nie</td><td rowspan="2"><code>HoltWintersModel</code></td></tr>
+<tr><th>model</th><th>idea</th><th>trend / sezon</th><th>w Darts</th></tr>
+<tr><td>średnia ruchoma</td><td>prognoza = średnia ostatnich <code>n</code> wartości</td><td>nie / nie</td><td><code>NaiveMovingAverage</code></td></tr>
+<tr><td>wygładzanie wykładnicze (SES)</td><td>średnia ważona, nowsze pomiary ważą więcej (waga <code>α</code>)</td><td>nie / nie</td><td rowspan="2"><code>ExponentialSmoothing</code></td></tr>
 <tr><td>Holt, Holt-Winters</td><td>osobno wygładzany poziom (<code>α</code>), trend (<code>β</code>) i sezon (<code>γ</code>)</td><td>tak / tak</td></tr>
-<tr><td>ARIMA(p, d, q), SARIMA</td><td>regresja na własnych opóźnieniach (p) i błędach (q) po d różnicowaniach; S dodaje część sezonową</td><td>tak / tak (SARIMA)</td><td><code>ARIMAModel</code>, <code>SARIMAModel</code></td></tr>
-<tr><td>Theta</td><td>połączenie prostego trendu i wygładzania wykładniczego; mocny punkt odniesienia</td><td>tak / po desezonalizacji</td><td><code>ThetaModel</code></td></tr>
-<tr><td>Prophet</td><td>krzywa = trend + sezony (Fouriera) + święta; odporny na braki</td><td>tak / wiele sezonów</td><td><code>ProphetModel</code></td></tr>
-<tr><td>LSTM</td><td>sieć rekurencyjna uczona na oknach historii</td><td>uczy się sama</td><td><code>LSTMModel</code></td></tr>
-<tr><td>VAR</td><td>wiele szeregów naraz, każdy zależy od opóźnień wszystkich</td><td>wielowymiarowy</td><td><code>VARModel</code></td></tr>
+<tr><td>ARIMA(p, d, q), SARIMA</td><td>regresja na własnych opóźnieniach (p) i błędach (q) po d różnicowaniach; S dodaje część sezonową</td><td>tak / tak (SARIMA)</td><td><code>ARIMA</code>, <code>AutoARIMA</code></td></tr>
+<tr><td>Theta</td><td>połączenie prostego trendu i wygładzania wykładniczego; mocny punkt odniesienia</td><td>tak / po desezonalizacji</td><td><code>Theta</code>, <code>FourTheta</code></td></tr>
+<tr><td>Prophet</td><td>krzywa = trend + sezony (Fouriera) + święta; odporny na braki</td><td>tak / wiele sezonów</td><td><code>Prophet</code></td></tr>
+<tr><td>LSTM</td><td>sieć rekurencyjna uczona na oknach historii</td><td>uczy się sama</td><td><code>RNNModel(model='LSTM')</code></td></tr>
+<tr><td>VAR</td><td>wiele szeregów naraz, każdy zależy od opóźnień wszystkich</td><td>wielowymiarowy</td><td><code>VARIMA</code></td></tr>
 </table>
 <p class="small">Holt-Winters: poziom <code>lₜ = α·yₜ/sₜ₋ₘ + (1−α)(lₜ₋₁ + bₜ₋₁)</code>, prognoza <code>ŷₜ₊ₕ = (lₜ + h·bₜ)·sₜ₊ₕ₋ₘ</code> (wersja multiplikatywna, okres <code>m</code>).</p>
 </div>
@@ -504,309 +504,757 @@ sezonowa naiwna  MAE =  71.3  MAPE = 15.5%</pre>
 <aside class="notes">Kolejno: naiwna (23,6%), sezonowa naiwna (15,5%), SES (płaska linia, nie zna sezonu), Holt (prosta, bez sezonu), Holt-Winters (ok. 7%). Zabawa suwakami: duże α robi prognozę nerwową, duże β przesadza z trendem.</aside>
 </section>
 
-<section data-background-color="#ffffff" data-keywords="Kats">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kats: narzędzia do szeregów czasowych</strong></span></p></div>
+<section data-background-color="#ffffff" data-keywords="Darts">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Darts: szeregi czasowe w Pythonie</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <div class="cols">
 <div>
 <ul class="points side">
-<li><strong>Kats</strong> = <em>Kits to Analyze Time Series</em>. Biblioteka Pythona od Meta (zespół Infrastructure Data Science), otwarta w 2021 r., licencja MIT.</li>
-<li>Cel: <strong>jedno API</strong> zamiast osobnych bibliotek do prognoz, detekcji i cech. Pod spodem używa m.in. statsmodels, Prophet i PyTorch.</li>
-<li>Instalacja: <code>pip install kats</code>, wersja lekka bez części zależności: <code>MINIMAL_KATS=1 pip install kats</code>.</li>
+<li><strong>Darts</strong>: biblioteka firmy <strong>Unit8</strong>, otwarta od 2020 r., licencja Apache 2.0, aktywnie rozwijana.</li>
+<li>Jedna klasa danych <code>TimeSeries</code> i jedno API w stylu scikit-learn: <code>fit()</code> i <code>predict(n)</code> dla kilkudziesięciu modeli.</li>
+<li>Modele od naiwnych, przez ARIMA i Holt-Winters, po LightGBM, N-BEATS i TFT. Do tego backtesting, metryki, anomalie (<code>darts.ad</code>).</li>
+<li>Instalacja: <code>pip install darts</code> albo lżej <code>pip install u8darts</code> (bez sieci neuronowych).</li>
 </ul>
-<div class="note warn"><p><strong>Stan w 2026:</strong> ostatnie wydanie na PyPI to 0.2.0 (2022). Z najnowszym Pythonem, NumPy i pandas instalacja często się nie udaje. Najlepiej osobne środowisko (conda z Pythonem 3.8–3.9) albo kontener Docker.</p></div>
 </div>
 <div>
-<p class="lead"><strong>Cztery obszary</strong></p>
 <table class="simple">
-<tr><th>moduł</th><th>co robi</th></tr>
-<tr><td><code>kats.models</code></td><td>prognozy: ARIMA, SARIMA, Holt-Winters, Prophet, Theta, LSTM, VAR, zespoły modeli</td></tr>
-<tr><td><code>kats.detectors</code></td><td>punkty zmiany, wartości odstające, trend, sezonowość</td></tr>
-<tr><td><code>kats.tsfeatures</code></td><td>ok. 40 cech opisujących szereg (do klasteryzacji, klasyfikacji, wyboru modelu)</td></tr>
-<tr><td><code>kats.utils</code></td><td>backtesting, strojenie parametrów, dekompozycja, symulator danych</td></tr>
+<tr><th>rodzina</th><th>przykłady w Darts</th></tr>
+<tr><td>bazowe</td><td><code>NaiveSeasonal</code>, <code>NaiveDrift</code>, <code>NaiveMean</code></td></tr>
+<tr><td>statystyczne</td><td><code>ExponentialSmoothing</code>, <code>ARIMA</code>, <code>AutoARIMA</code>, <code>Theta</code>, <code>Prophet</code></td></tr>
+<tr><td>regresyjne (ML)</td><td><code>LinearRegressionModel</code>, <code>LightGBMModel</code>, <code>XGBModel</code></td></tr>
+<tr><td>sieci</td><td><code>RNNModel</code>, <code>NBEATSModel</code>, <code>NHiTSModel</code>, <code>TFTModel</code></td></tr>
 </table>
+<div class="note"><p>Modele statystyczne są <strong>lokalne</strong> (jeden szereg). Modele ML i sieci mogą być <strong>globalne</strong>: jeden model na wielu szeregach.</p></div>
 </div>
 </div>
 </div>
-<aside class="notes">Kats nie jest biblioteką do uczenia online. Działa na całym szeregu (albo oknie) naraz. Dla Was to narzędzie do analizy historii i okresowego przeliczania prognoz i detekcji.</aside>
+<aside class="notes">Darts to dziś jedna z najpopularniejszych bibliotek do szeregów w Pythonie. Dziś uczymy się jej krok po kroku, od kilku liczb.</aside>
 </section>
 
-<section data-background-color="#ffffff" data-keywords="TimeSeriesData">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>TimeSeriesData: podstawowa struktura Kats</strong></span></p></div>
+<section data-background-color="#ffffff" data-keywords="Wstęp TimeSeries">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Jak działa Darts? Od liczb do TimeSeries</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead">Najpierw zamieniamy listę liczb w obiekt <code>TimeSeries</code>.</p>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from darts import TimeSeries
+
+# szereg bez kalendarza: indeks 0, 1, 2, …
+s = TimeSeries.from_values([10, 12, 15, 14, 13, 18])
+print(len(s), s.n_components)
+print(s.values().ravel())
+</code></pre>
+<pre class="out sm">6 1
+[10. 12. 15. 14. 13. 18.]</pre>
+</div>
+<div>
+<ul class="points side">
+<li><code>from_values</code> to najprostszy konstruktor: lista albo tablica NumPy.</li>
+<li><code>len(s)</code> = liczba punktów w czasie.</li>
+<li><code>n_components</code> = ile wielkości mierzymy naraz (tu 1).</li>
+<li><code>values()</code> zwraca tablicę NumPy; <code>.ravel()</code> spłaszcza ją do wektora.</li>
+<li>Obiekt jest <strong>niezmienny</strong>: operacje zwracają nowy szereg.</li>
+</ul>
+<div class="quiz compact"><p class="q">Ile punktów ma <code>TimeSeries.from_values([1, 2, 3])</code>?</p><div class="opts"><button class="opt" data-ok="0">1</button><button class="opt" data-ok="1">3</button><button class="opt" data-ok="0">2</button></div><p class="explain">Każda liczba to jeden punkt w czasie, więc długość to 3.</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="TimeSeries z pandas">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>TimeSeries z pandas: prawdziwe daty</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <div class="cols wl">
 <div>
 <pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
 import pandas as pd
-from kats.consts import TimeSeriesData
+from darts import TimeSeries
 
-df = pd.read_csv('air_passengers.csv', header=0,
-                 names=['time', 'value'])
-ts = TimeSeriesData(df)          # kolumna czasu: 'time'
+df = pd.DataFrame({
+    'time': pd.date_range('2026-03-01', periods=7, freq='D'),
+    'sprzedaz': [10, 12, 15, 11, 18, 20, 17]})
 
-print(len(ts), ts.is_univariate())
-print(ts[:3])                    # wycinek to też TimeSeriesData
+s = TimeSeries.from_dataframe(
+    df, time_col='time', value_cols='sprzedaz')
+
+print(s.freq_str)
+print(s.start_time(), '->', s.end_time())
+print(s.values().ravel())
 </code></pre>
-<pre class="out sm">144 True
-        time  value
-0 1949-01-01    112
-1 1949-02-01    118
-2 1949-03-01    132</pre>
-<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
-# inna nazwa kolumny czasu albo osobne serie
-ts = TimeSeriesData(df2, time_col_name='ds')
-ts = TimeSeriesData(time=df['time'], value=df['value'])
-</code></pre>
+<pre class="out sm">D
+2026-03-01 00:00:00 -&gt; 2026-03-07 00:00:00
+[10. 12. 15. 11. 18. 20. 17.]</pre>
 </div>
 <div>
 <ul class="points side">
-<li>Każdy model i detektor w Kats przyjmuje <code>TimeSeriesData</code>: kolumna czasu + jedna lub więcej kolumn wartości.</li>
-<li>Kilka kolumn wartości = szereg <strong>wielowymiarowy</strong> (np. dla <code>VARModel</code>).</li>
-<li>Przydatne: <code>ts.time</code>, <code>ts.value</code>, <code>ts.to_dataframe()</code>, <code>ts.plot(cols=['value'])</code>, <code>ts.interpolate()</code> do uzupełniania braków.</li>
-<li>Czas zamieniany jest na typ daty pandas; częstotliwość Kats próbuje rozpoznać sam.</li>
+<li><code>time_col</code> to kolumna z datami, <code>value_cols</code> to wartość (albo lista kolumn).</li>
+<li><code>freq_str == 'D'</code> oznacza dane dzienne. Dla miesięcznych: <code>'MS'</code>, godzinowych: <code>'h'</code>.</li>
+<li>Kilka kolumn wartości = szereg <strong>wielowymiarowy</strong>.</li>
+<li>Gotowe zbiory: <code>from darts.datasets import AirPassengersDataset</code>, potem <code>.load()</code>.</li>
+<li>Eksport z powrotem: <code>s.to_dataframe()</code> (w starszych wersjach <code>pd_dataframe()</code>).</li>
 </ul>
 </div>
 </div>
 </div>
 </section>
 
-<section data-background-color="#ffffff" data-keywords="Prognoza Kats">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Prognoza w Kats: Params i Model</strong></span></p></div>
+<section data-background-color="#ffffff" data-keywords="fit predict intuicja">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>fit i predict: co one robią?</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols wl">
+<svg class="diagram" viewBox="0 0 1100 100" style="width:100%;height:100px" role="img" aria-label="fit uczy na historii, predict generuje n kolejnych punktów">
+<rect x="10" y="25" width="420" height="50" rx="8" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="220" y="55" text-anchor="middle" font-weight="bold">historia: fit(series)</text>
+<text x="470" y="55" style="font-size:28px" fill="#666">→</text>
+<rect x="510" y="25" width="420" height="50" rx="8" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="720" y="55" text-anchor="middle" font-weight="bold">przyszłość: predict(n=3)</text>
+</svg>
+<div class="cols">
 <div>
-<pre class="code-wrap"><code class="language-python" data-trim data-noescape>
-from kats.models.prophet import ProphetModel, ProphetParams
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from darts import TimeSeries
+from darts.models import NaiveSeasonal
 
-params = ProphetParams(seasonality_mode='multiplicative')
-m = ProphetModel(ts, params)     # dane + parametry
-m.fit()
-
-fcst = m.predict(steps=24, freq='MS')   # 24 miesiące
-m.plot()
-print(fcst.columns.tolist())
+s = TimeSeries.from_values([1, 2, 3, 4, 5, 6])
+model = NaiveSeasonal(K=2)   # "jak 2 kroki temu"
+model.fit(s)
+pred = model.predict(n=3)    # 3 kroki naprzód
+print(pred.values().ravel())
 </code></pre>
-<pre class="out">['time', 'fcst', 'fcst_lower', 'fcst_upper']</pre>
+<pre class="out sm">[5. 6. 5.]</pre>
 </div>
 <div>
 <ul class="points side">
-<li>Każdy model ma parę klas: <code>XxxParams</code> (hiperparametry) i <code>XxxModel</code> (dane + parametry).</li>
-<li><code>fit()</code> uczy, <code>predict(steps, freq)</code> zwraca <code>DataFrame</code> z prognozą punktową i przedziałem niepewności.</li>
-<li><code>freq='MS'</code> to częstotliwość pandas: początek miesiąca. Dla danych dziennych <code>'D'</code>, godzinowych <code>'h'</code>.</li>
-<li>Zmiana modelu = zmiana dwóch nazw klas. Reszta kodu zostaje.</li>
+<li><code>fit(s)</code>: model zapamiętuje historię (tu: cykl ostatnich 2 wartości).</li>
+<li><code>predict(n=3)</code>: nie dostaje macierzy <code>X</code>. Dostaje <strong>horyzont</strong>: „podaj 3 kolejne punkty”.</li>
+<li><code>NaiveSeasonal(K=2)</code> powtarza ostatnie 2 wartości: 5, 6, potem znowu 5.</li>
+<li>Wynik to też <code>TimeSeries</code>, od razu po końcu historii.</li>
 </ul>
 </div>
 </div>
 </div>
-<aside class="notes">Tak wygląda przykład z oficjalnego tutoriala Kats 201 (forecasting). Prophet musi być zainstalowany osobno, w pełnej instalacji Kats jest zależnością.</aside>
+<aside class="notes">Wynik policzony definicją NaiveSeasonal: cykl = ostatnie K punktów historii. To nie jest wynik uruchomionego Darts, ale dokładnie to, co robi ten model.</aside>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Ćwiczenie fit predict">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zrób to sam: predict(n)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div class="blanks">
+<p class="small" style="margin-bottom:.3em">Szereg: <code>[8, 9, 10, 11]</code>. Model: <code>NaiveSeasonal(K=2)</code>.</p>
+<pre class="exo">model.fit(TimeSeries.from_values([8, 9, 10, 11]))
+pred = model.predict(n=4)
+<span class="c"># jakie 4 wartości?</span>
+print(pred.values().ravel())  <span class="c"># </span><input class="blank" size="14" data-re="^\[?10[, ]+11[, ]+10[, ]+11\]?$" data-sol="[10. 11. 10. 11.]" aria-label="prognoza"></pre>
+<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
+<p class="fb"></p>
+<p class="explain">Ostatnie <code>K=2</code> wartości to 10 i 11. Prognoza powtarza ten cykl: 10, 11, 10, 11.</p>
+</div>
+<div>
+<div class="quiz compact"><p class="q">Co oznacza <code>n</code> w <code>predict(n=12)</code>?</p><div class="opts"><button class="opt" data-ok="0">12 epok uczenia</button><button class="opt" data-ok="1">12 kroków naprzód po końcu historii</button><button class="opt" data-ok="0">12 cech wejściowych</button></div><p class="explain">W Darts <code>n</code> to horyzont prognozy, nie liczba cech ani epok.</p></div>
+<div class="quiz compact"><p class="q"><code>NaiveSeasonal(K=7)</code> na danych dziennych oznacza:</p><div class="opts"><button class="opt" data-ok="1">„jutro jak tydzień temu”</button><button class="opt" data-ok="0">„jutro jak wczoraj”</button><button class="opt" data-ok="0">średnią z 7 dni</button></div><p class="explain">Okres 7 to tydzień. Model kopiuje wartość sprzed 7 dni.</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Podział train test">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Podział train / test w czasie</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from darts import TimeSeries
+
+# 21 dni: 3 tygodnie sprzedaży
+y = [10,12,15,14,13,18,9,
+     11,13,16,15,14,19,10,
+     12,14,17,16,15,20,11]
+s = TimeSeries.from_values(y)
+
+train, test = s.split_before(0.67)   # ~2/3 historii
+print(len(train), len(test))
+print('test:', test.values().ravel())
+</code></pre>
+<pre class="out sm">14 7
+test: [12. 14. 17. 16. 15. 20. 11.]</pre>
+<p class="small">Można też: <code>split_before(pd.Timestamp('1959-01-01'))</code> albo <code>s[:14]</code>, <code>s[14:]</code>.</p>
+</div>
+<div>
+<ul class="points side">
+<li>Train to <strong>przeszłość</strong>, test to <strong>przyszłość</strong>. Nigdy nie tasujemy wierszy.</li>
+<li><code>split_before(0.67)</code> tnie szereg po 67% długości.</li>
+<li>Model widzi tylko <code>train</code>. Na <code>test</code> sprawdzamy, czy trafił.</li>
+</ul>
+<svg class="diagram" viewBox="0 0 480 70" style="width:100%;height:70px"><rect x="10" y="15" width="280" height="35" rx="6" fill="#e8f0fe" stroke="#1a73d9"/><text x="150" y="38" text-anchor="middle">train (14)</text><rect x="295" y="15" width="140" height="35" rx="6" fill="#fff4e5" stroke="#e8710a"/><text x="365" y="38" text-anchor="middle">test (7)</text></svg>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="NaiveSeasonal przykład">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Przykład: NaiveSeasonal na małym szeregu</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from darts.models import NaiveSeasonal, NaiveMean
+from darts.metrics import mae, mape
+
+model = NaiveSeasonal(K=7)          # tydzień
+model.fit(train)
+pred = model.predict(n=len(test))
+
+print('prawda:   ', test.values().ravel())
+print('prognoza: ', pred.values().ravel())
+print(f'MAE  = {mae(test, pred):.1f}')
+print(f'MAPE = {mape(test, pred):.1f}%')
+
+naive = NaiveMean(); naive.fit(train)
+print(f'MAPE średniej = {mape(test, naive.predict(len(test))):.1f}%')
+</code></pre>
+<pre class="out sm">prawda:    [12. 14. 17. 16. 15. 20. 11.]
+prognoza:  [11. 13. 16. 15. 14. 19. 10.]
+MAE  = 1.0
+MAPE = 6.9%
+MAPE średniej = 16.8%</pre>
+</div>
+<div>
+<ul class="points side">
+<li>Sezonowa naiwna kopiuje <strong>poprzedni tydzień</strong> z treningu: prawie trafia (błąd 1 na dzień).</li>
+<li><code>NaiveMean</code> przewiduje samą średnią treningu (13,5): MAPE 16,8%. Sezonowość tu wygrywa wyraźnie.</li>
+<li>Metryki Darts: <code>mae(prawda, prognoza)</code>, <code>mape(...)</code>. Kolejność: najpierw prawda.</li>
+<li>To jest poprzeczka: każdy „mądry” model powinien być <strong>nie gorszy</strong>.</li>
+</ul>
+</div>
+</div>
+</div>
+<aside class="notes">Wyniki policzone definicją NaiveSeasonal/NaiveMean i wzorami MAE/MAPE (Node), zgodne z tym, co zrobi Darts dla tych modeli bazowych.</aside>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="AirPassengers Darts">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>AirPassengers w Darts</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+import pandas as pd
+from darts.datasets import AirPassengersDataset
+from darts.models import NaiveSeasonal
+from darts.metrics import mape
+
+series = AirPassengersDataset().load()
+train, test = series.split_before(
+    pd.Timestamp('1959-01-01'))          # 120 + 24
+
+model = NaiveSeasonal(K=12)
+model.fit(train)
+pred = model.predict(n=24)
+print(f'MAPE = {mape(test, pred):.1f}%')
+</code></pre>
+<pre class="out sm">MAPE = 15.5%</pre>
+</div>
+<div>
+<ul class="points side">
+<li>Ten sam podział i ta sama sezonowa naiwna co wcześniej w pandas: <strong>15,5%</strong>.</li>
+<li>Kod jest krótszy: nie budujemy ręcznie <code>np.tile</code>.</li>
+<li>Dalej: porównamy z <code>ExponentialSmoothing</code> (Holt-Winters).</li>
+</ul>
+<div class="note"><p>Wynik 15,5% to ten sam, który policzyliśmy na slajdzie o prognozach bazowych. Darts dla <code>NaiveSeasonal</code> robi dokładnie to samo.</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="ExponentialSmoothing">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Holt-Winters: ExponentialSmoothing</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from darts.models import ExponentialSmoothing
+from darts.utils.utils import SeasonalityMode
+
+hw = ExponentialSmoothing(
+    seasonal=SeasonalityMode.MULTIPLICATIVE,
+    seasonal_periods=12)
+hw.fit(train)
+pred_hw = hw.predict(n=24)
+
+print('sezonowa naiwna:', f'{mape(test, pred):.1f}%')
+print('Holt-Winters:   ', f'{mape(test, pred_hw):.1f}%')
+test.plot(label='prawda')
+pred_hw.plot(label='Holt-Winters')
+</code></pre>
+<p class="small">Parametry α, β, γ Darts (przez statsmodels) dobiera sam. W naszej symulacji ręcznie dobrane dawały ok. <strong>7%</strong> MAPE.</p>
+</div>
+<div>
+<ul class="points side">
+<li>To ten sam model co w symulacji prognoz: poziom + trend + sezon multiplikatywny.</li>
+<li>Zmiana modelu = zmiana jednej klasy. Reszta (<code>fit</code>, <code>predict</code>, <code>mape</code>) bez zmian.</li>
+<li>Uruchomcie kod i porównajcie wynik z 15,5%. Potem spróbujcie <code>SeasonalityMode.ADDITIVE</code>.</li>
+</ul>
+<div class="note warn"><p>Dokładnej liczby MAPE z <code>ExponentialSmoothing</code> tu nie wpisujemy: zależy od wersji statsmodels. Spodziewajcie się wyniku wyraźnie lepszego niż 15,5%.</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="TimeSeries API">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>TimeSeries: przydatne operacje</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+s = TimeSeries.from_values([10, 12, 15, 11, 18, 20, 17])
+
+print(s[:3].values().ravel())     # wycinek
+print(s.diff().values().ravel())  # różnicowanie
+print((s / 10).values().ravel())  # skalowanie
+</code></pre>
+<pre class="out sm">[10. 12. 15.]
+[ 2.  3. -4.  7.  2. -3.]
+[1.  1.2 1.5 1.1 1.8 2.  1.7]</pre>
+</div>
+<div>
+<table class="simple">
+<tr><th>operacja</th><th>metoda</th></tr>
+<tr><td>wycinek</td><td><code>s[:n]</code>, <code>s[a:b]</code>, <code>slice</code></td></tr>
+<tr><td>podział</td><td><code>split_before</code></td></tr>
+<tr><td>różnicowanie</td><td><code>diff()</code></td></tr>
+<tr><td>sklejanie</td><td><code>append</code>, <code>stack</code></td></tr>
+<tr><td>braki</td><td><code>from_dataframe(..., fill_missing_dates=True)</code></td></tr>
+<tr><td>wykres</td><td><code>s.plot()</code></td></tr>
+</table>
+<p class="small"><code>diff()</code> skraca szereg o 1: pierwszego przyrostu nie ma.</p>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Statystyka Darts">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Analiza szeregu: sezonowość i ACF</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from darts.utils.statistics import (
+    check_seasonality, plot_acf,
+    extract_trend_and_seasonality)
+from darts.utils.utils import ModelMode
+
+for m in range(2, 25):
+    jest, okres = check_seasonality(series, m=m)
+    if jest:
+        print(f'sezonowość o okresie {okres}')
+
+plot_acf(series, m=12, alpha=0.05)
+
+trend, sezon = extract_trend_and_seasonality(
+    series, freq=12,
+    model=ModelMode.MULTIPLICATIVE)
+</code></pre>
+<pre class="out sm">sezonowość o okresie 12</pre>
+</div>
+<div>
+<ul class="points side">
+<li><code>check_seasonality</code> szuka istotnego szczytu ACF. Dla AirPassengers: okres <strong>12</strong>.</li>
+<li><code>plot_acf</code> rysuje słupki jak w naszej symulacji dekompozycji.</li>
+<li><code>extract_trend_and_seasonality</code> rozkłada szereg na trend i sezon.</li>
+<li>Test stacjonarności: <code>stationarity_test_adf(series)</code>.</li>
+</ul>
+</div>
+</div>
+</div>
+<aside class="notes">Pętla po m pochodzi z Quickstart Darts. Wynik „okres 12” jest pewny dla AirPassengers.</aside>
 </section>
 
 <section data-background-color="#ffffff" data-keywords="Wiele modeli">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Ten sam kod, różne modele</strong></span></p></div>
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wiele modeli w jednej pętli</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <div class="cols wl">
 <div>
 <pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
-from kats.models.holtwinters import HoltWintersModel, HoltWintersParams
-from kats.models.sarima import SARIMAModel, SARIMAParams
-from kats.models.theta import ThetaModel, ThetaParams
+from darts.models import (AutoARIMA, ExponentialSmoothing,
+                          NaiveDrift, NaiveSeasonal, Theta)
 
-train_ts, test_ts = ts[:120], ts[120:]
-
-kandydaci = {
-    'holt-winters': (HoltWintersModel, HoltWintersParams(
-        trend='add', seasonal='mul', seasonal_periods=12)),
-    'sarima': (SARIMAModel, SARIMAParams(
-        p=2, d=1, q=1, trend='ct', seasonal_order=(1, 0, 1, 12))),
-    'theta': (ThetaModel, ThetaParams(m=12)),
-}
-
-for nazwa, (Model, params) in kandydaci.items():
-    m = Model(train_ts, params)
-    m.fit()
-    fcst = m.predict(steps=24, freq='MS')
-    print(nazwa, mape(fcst['fcst'].values))   # mape z poprzedniego slajdu
+modele = [
+    NaiveSeasonal(K=12),
+    NaiveDrift(),
+    ExponentialSmoothing(),
+    AutoARIMA(),
+    Theta(),
+]
+for model in modele:
+    model.fit(train)
+    pred = model.predict(n=len(test))
+    print(f'{model.__class__.__name__:22} '
+          f'MAPE = {mape(test, pred):.1f}%')
 </code></pre>
 </div>
 <div>
+<table class="simple">
+<tr><th>scikit-learn</th><th>Darts</th></tr>
+<tr><td><code>fit(X, y)</code></td><td><code>fit(series)</code></td></tr>
+<tr><td><code>predict(X)</code></td><td><code>predict(n=12)</code></td></tr>
+<tr><td><code>cross_val_score</code></td><td><code>backtest</code></td></tr>
+</table>
 <ul class="points side">
-<li>Wspólny interfejs pozwala porównać modele <strong>w jednej pętli</strong>, na tym samym podziale w czasie.</li>
-<li><code>ts[:120]</code> to lata 1949–1958, <code>ts[120:]</code> to test 1959–1960, jak w przykładzie z prognozami bazowymi.</li>
-<li><code>seasonal_order=(P, D, Q, m)</code>: część sezonowa SARIMA z okresem <code>m = 12</code>.</li>
-<li>Wybieramy model, który na teście najwyraźniej bije sezonową naiwną (15,5%).</li>
+<li>Zmiana modelu = jedna linijka. To główna zaleta Darts.</li>
+<li><code>NaiveDrift</code>: prosta przez pierwszy i ostatni punkt (trend, bez sezonu).</li>
+<li><code>Theta</code>: prosty i zaskakująco mocny punkt odniesienia.</li>
 </ul>
-<div class="note warn"><p>Jeden podział to jedna próba. Wynik może zależeć od przypadku, dlatego w praktyce używamy <strong>backtestingu</strong>.</p></div>
 </div>
 </div>
 </div>
 </section>
 
-<section data-background-color="#ffffff" data-keywords="Backtesting">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Backtesting: ocena na wielu oknach</strong></span></p></div>
+<section data-background-color="#ffffff" data-keywords="Backtesting intuicja">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Backtesting: intuicja na małym szeregu</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <div class="cols">
 <div>
-<svg class="diagram" viewBox="0 0 560 150" style="width:100%;height:150px" role="img" aria-label="Okno rozszerzające: kolejne foldy mają coraz dłuższy trening i test tuż po nim">
-<text x="0" y="16" style="font-size:15px" fill="#666">okno rozszerzające (expanding window)</text>
-<rect x="10" y="28" width="200" height="22" fill="#e8f0fe" stroke="#1a73d9"/><rect x="212" y="28" width="80" height="22" fill="#fff4e5" stroke="#e8710a"/>
-<rect x="10" y="58" width="280" height="22" fill="#e8f0fe" stroke="#1a73d9"/><rect x="292" y="58" width="80" height="22" fill="#fff4e5" stroke="#e8710a"/>
-<rect x="10" y="88" width="360" height="22" fill="#e8f0fe" stroke="#1a73d9"/><rect x="372" y="88" width="80" height="22" fill="#fff4e5" stroke="#e8710a"/>
-<rect x="10" y="118" width="440" height="22" fill="#e8f0fe" stroke="#1a73d9"/><rect x="452" y="118" width="80" height="22" fill="#fff4e5" stroke="#e8710a"/>
+<p class="lead" style="font-size:.95em">Szereg <code>[2,4,3,5,4,6,5,7,6,8]</code>. Model: <code>NaiveSeasonal(K=2)</code>, horyzont 1. Stoimy w kolejnych chwilach i prognozujemy 1 krok.</p>
+<table class="simple">
+<tr><th>widzimy do indeksu</th><th>prognoza</th><th>prawda</th><th>|błąd|</th></tr>
+<tr><td>0..3 → [2,4,3,5]</td><td>3</td><td>4</td><td>1</td></tr>
+<tr><td>0..4 → [2,4,3,5,4]</td><td>5</td><td>6</td><td>1</td></tr>
+<tr><td>0..5</td><td>4</td><td>5</td><td>1</td></tr>
+<tr><td>0..6</td><td>6</td><td>7</td><td>1</td></tr>
+<tr><td>0..7</td><td>5</td><td>6</td><td>1</td></tr>
+<tr><td>0..8</td><td>7</td><td>8</td><td>1</td></tr>
+</table>
+<p class="small">Średni MAE = 1,0. Prognoza = wartość sprzed 2 kroków (ostatni cykl <code>K=2</code>).</p>
+</div>
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+model = NaiveSeasonal(K=2)
+hist = model.historical_forecasts(
+    s, start=0.4, forecast_horizon=1,
+    stride=1, retrain=True)
+print(mae(s, hist))
+</code></pre>
+<pre class="out sm">1.0</pre>
+<ul class="points side">
+<li><code>historical_forecasts</code> robi właśnie tę tabelę automatycznie.</li>
+<li><code>backtest(..., metric=mape)</code> zwraca od razu średni błąd.</li>
+<li><code>retrain=True</code>: trening w każdym kroku.</li>
+</ul>
+</div>
+</div>
+</div>
+<aside class="notes">Tabela i MAE=1 policzone ręcznie definicją NaiveSeasonal. historical_forecasts w Darts robi to samo dla modeli bazowych.</aside>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Backtesting Darts">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>historical_forecasts i backtest</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<svg class="diagram" viewBox="0 0 560 130" style="width:100%;height:130px" role="img" aria-label="Okno rozszerzające się w czasie">
+<text x="0" y="16" style="font-size:15px" fill="#666">start przesuwa się, horyzont stały</text>
+<rect x="10" y="28" width="200" height="22" fill="#e8f0fe" stroke="#1a73d9"/><rect x="212" y="28" width="60" height="22" fill="#fff4e5" stroke="#e8710a"/>
+<rect x="10" y="58" width="260" height="22" fill="#e8f0fe" stroke="#1a73d9"/><rect x="272" y="58" width="60" height="22" fill="#fff4e5" stroke="#e8710a"/>
+<rect x="10" y="88" width="320" height="22" fill="#e8f0fe" stroke="#1a73d9"/><rect x="332" y="88" width="60" height="22" fill="#fff4e5" stroke="#e8710a"/>
 </svg>
 <pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
-from kats.models.arima import ARIMAModel, ARIMAParams
-from kats.utils.backtesters import BackTesterSimple
+hist = model.historical_forecasts(
+    series, start=pd.Timestamp('1957-01-01'),
+    forecast_horizon=3, stride=1, retrain=True)
+print(mape(series, hist))
 
-bt = BackTesterSimple(
-    error_methods=['mape', 'mae'],
-    data=ts,
-    params=ARIMAParams(p=2, d=1, q=1),
-    train_percentage=75, test_percentage=25,
-    model_class=ARIMAModel)
-bt.run_backtest()
-print(bt.errors)          # {'mape': ..., 'mae': ...}
+blad = model.backtest(
+    series, start=0.7, forecast_horizon=3,
+    metric=mape)
 </code></pre>
 </div>
 <div>
 <ul class="points side">
-<li><code>BackTesterSimple</code>: jeden podział procentowy, ale liczy wiele miar naraz.</li>
-<li><code>BackTesterExpandingWindow</code>: trening rośnie, test zawsze tuż za nim (rysunek). <code>BackTesterRollingWindow</code>: trening stałej długości przesuwa się w czasie.</li>
-<li>Średni błąd z wielu okien jest pewniejszy niż wynik jednego podziału.</li>
+<li>Udajemy, że stoimy w kolejnych miesiącach przeszłości i prognozujemy kilka kroków naprzód.</li>
+<li>Średni błąd z wielu okien jest pewniejszy niż jeden podział train/test.</li>
+<li><code>start=0.7</code>: zaczynamy po 70% szeregu.</li>
 </ul>
-<div class="quiz compact"><p class="q">Dlaczego nie używamy zwykłej walidacji krzyżowej z losowym podziałem na foldy?</p><div class="opts"><button class="opt" data-ok="0">bo jest za wolna</button><button class="opt" data-ok="1">bo model uczyłby się na danych z przyszłości względem testu</button><button class="opt" data-ok="0">bo szeregi są za krótkie</button></div><p class="explain">Losowy fold miesza przeszłość z przyszłością. Wynik wychodzi zbyt optymistyczny, a w produkcji przyszłości nie znamy.</p></div>
+<div class="quiz compact"><p class="q">Dlaczego nie losowa walidacja krzyżowa?</p><div class="opts"><button class="opt" data-ok="0">bo jest za wolna</button><button class="opt" data-ok="1">bo model uczyłby się na przyszłości względem testu</button><button class="opt" data-ok="0">bo Darts jej nie ma</button></div><p class="explain">Losowy fold miesza przeszłość z przyszłością. Wynik wychodzi zbyt optymistyczny.</p></div>
 </div>
 </div>
 </div>
 </section>
 
-<section data-background-color="#ffffff" data-keywords="Zespoły">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zespoły modeli i wybór modelu</strong></span></p></div>
+<section data-background-color="#ffffff" data-keywords="Lags intuicja">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Intuicja: opóźnienia (lags)</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<p class="lead">Modele ML w Darts nie dostają „magicznie” szeregu. Zamieniają go w <strong>tabelę cech</strong>: „co było 1, 2, … kroków temu?”.</p>
+<div class="cols">
+<div>
+<table class="simple">
+<tr><th>czas</th><th>y</th><th>lag 1 (wczoraj)</th><th>cel (dziś)</th></tr>
+<tr><td>1</td><td>10</td><td>—</td><td>—</td></tr>
+<tr><td>2</td><td>12</td><td>10</td><td>12</td></tr>
+<tr><td>3</td><td>15</td><td>12</td><td>15</td></tr>
+<tr><td>4</td><td>14</td><td>15</td><td>14</td></tr>
+<tr><td>5</td><td>13</td><td>14</td><td>13</td></tr>
+<tr><td>6</td><td>18</td><td>13</td><td>18</td></tr>
+</table>
+</div>
+<div>
+<ul class="points side">
+<li><code>lags=1</code>: jedna cecha = wartość z poprzedniego kroku.</li>
+<li><code>lags=12</code>: 12 cech = ostatni rok (dla danych miesięcznych).</li>
+<li>Model uczy się: <em>z tych cech przewidź kolejne wartości</em>.</li>
+<li>To ten sam pomysł co <code>shift(1)</code> w pandas, tylko zautomatyzowany.</li>
+</ul>
+<div class="quiz compact"><p class="q">Dane godzinowe, rytm dobowy. Ile lagów warto zacząć?</p><div class="opts"><button class="opt" data-ok="0">2</button><button class="opt" data-ok="1">24</button><button class="opt" data-ok="0">365</button></div><p class="explain">Doba to 24 godziny: model powinien widzieć przynajmniej jeden pełny cykl.</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Regresja">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Model regresyjny: LinearRegressionModel</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <div class="cols wl">
 <div>
 <pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
-from kats.models import arima, holtwinters, prophet, theta
-from kats.models.ensemble.ensemble import BaseModelParams, EnsembleParams
-from kats.models.ensemble.kats_ensemble import KatsEnsemble
+from darts.models import LinearRegressionModel
 
-modele = EnsembleParams([
-    BaseModelParams('arima', arima.ARIMAParams(p=1, d=1, q=1)),
-    BaseModelParams('holtwinters', holtwinters.HoltWintersParams()),
-    BaseModelParams('prophet', prophet.ProphetParams()),
-    BaseModelParams('theta', theta.ThetaParams(m=12)),
-])
-ens = KatsEnsemble(data=ts, params={
-    'models': modele,
-    'aggregation': 'median',            # albo 'weightedavg'
-    'seasonality_length': 12,
-    'decomposition_method': 'multiplicative',
-})
-ens.fit()
-fcst = ens.predict(steps=24)
-ens.aggregate()
+model = LinearRegressionModel(
+    lags=12,                    # 12 ostatnich miesięcy
+    output_chunk_length=12,     # prognoza 12 kroków naraz
+    add_encoders={
+        'datetime_attribute': {'future': ['month']}})
+model.fit(train)
+pred = model.predict(n=24)
+print(mape(test, pred))
 </code></pre>
 </div>
 <div>
 <ul class="points side">
-<li><strong>Zespół</strong>: kilka modeli prognozuje osobno, wynik to mediana albo średnia ważona (wagi z błędów na danych historycznych). Zwykle stabilniejszy niż najlepszy pojedynczy model.</li>
-<li>Kats najpierw usuwa sezonowość (dekompozycja), prognozuje resztę modelami, potem sezon dokłada z powrotem.</li>
-<li><strong>Metauczenie</strong> (<code>kats.models.metalearner</code>): na podstawie cech szeregu (TsFeatures) przewiduje, który model i jakie parametry sprawdzą się najlepiej. Przydaje się, gdy szeregów są tysiące.</li>
+<li>Darts buduje tabelę opóźnień i uczy zwykłą regresję liniową (scikit-learn).</li>
+<li><code>add_encoders</code>: automatyczna cecha kalendarza (numer miesiąca) jako <strong>kowariata przyszła</strong>.</li>
+<li><strong>Kowariaty przeszłe</strong> (<code>past_covariates</code>): znane tylko do teraz (zmierzona wilgotność).</li>
+<li><strong>Kowariaty przyszłe</strong> (<code>future_covariates</code>): znane naprzód (plan podlewania, święta).</li>
+</ul>
+<div class="note warn"><p>Drzewa (LightGBM) nie ekstrapolują trendu. Przy rosnącym szeregu lepiej regresja liniowa albo uczenie na <code>series.diff()</code>.</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Ćwiczenie lags">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zrób to sam: lags i kowariaty</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div class="blanks">
+<p class="small" style="margin-bottom:.3em">Uzupełnij kod modelu na dane miesięczne z sezonem rocznym.</p>
+<pre class="exo">model = LinearRegressionModel(
+    lags=<input class="blank" size="3" data-re="^12$" data-sol="12" aria-label="lags">,
+    output_chunk_length=<input class="blank" size="3" data-re="^12$" data-sol="12" aria-label="chunk">)
+model.<input class="blank" size="10" data-re="^fit\(train\)$" data-sol="fit(train)" aria-label="fit">
+pred = model.predict(n=<input class="blank" size="3" data-re="^24$" data-sol="24" aria-label="n">)</pre>
+<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
+<p class="fb"></p>
+<p class="explain">Rok = 12 miesięcy opóźnień i 12 kroków wyjścia. Horyzont testu AirPassengers to 24 miesiące.</p>
+</div>
+<div>
+<div class="quiz compact"><p class="q">Znasz z góry plan podlewania na przyszły tydzień. Jak go podać?</p><div class="opts"><button class="opt" data-ok="0"><code>past_covariates</code></button><button class="opt" data-ok="1"><code>future_covariates</code></button><button class="opt" data-ok="0">nie da się</button></div><p class="explain">Plan jest znany także w przyszłości, więc to kowariata przyszła.</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Sieci">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sieci neuronowe i modele globalne</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+from darts.dataprocessing.transformers import Scaler
+from darts.models import NBEATSModel
+
+scaler = Scaler()
+train_s = scaler.fit_transform(train)
+
+model = NBEATSModel(
+    input_chunk_length=24,
+    output_chunk_length=12,
+    n_epochs=100, random_state=42)
+model.fit(train_s)
+pred = scaler.inverse_transform(
+    model.predict(n=24))
+</code></pre>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+# jeden model, wiele czujników
+model.fit([c1, c2, c3])
+model.predict(n=12, series=c_nowy)
+</code></pre>
+</div>
+<div>
+<ul class="points side">
+<li>Sieć uczy się na parach okien: wejście → wyjście.</li>
+<li>Dane trzeba <strong>skalować</strong>, a prognozę odskalować.</li>
+<li><strong>Model globalny</strong>: wspólne wzorce z wielu szeregów; działa też dla nowego czujnika.</li>
+<li>144 punkty AirPassengers to za mało dla sieci. Sieci wygrywają przy długich lub wielu szeregach.</li>
 </ul>
 </div>
 </div>
 </div>
-<aside class="notes">Przykład na podstawie tutoriala Kats 201. Meta używała metauczenia do automatycznej prognozy wielu metryk infrastruktury bez ręcznego strojenia każdego szeregu.</aside>
 </section>
 
-<section data-background-color="#ffffff" data-keywords="Ćwiczenie Kats">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Zrób to sam: prognoza Holt-Winters w Kats</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols wl">
-<div class="blanks">
-<p class="small" style="margin-bottom:.3em">Uzupełnij kod, który robi prognozę miesięczną na rok naprzód.</p>
-<pre class="exo"><span class="k">from</span> kats.consts <span class="k">import</span> TimeSeriesData
-<span class="k">from</span> kats.models.holtwinters <span class="k">import</span> (
-    HoltWintersModel, HoltWintersParams)
-
-ts = <input class="blank" size="14" data-re="^TimeSeriesData$" data-sol="TimeSeriesData" aria-label="klasa danych">(df)       <span class="c"># df: kolumny time, value</span>
-params = HoltWintersParams(trend=<span class="k">'add'</span>, seasonal=<span class="k">'mul'</span>,
-                           seasonal_periods=<input class="blank" size="3" data-re="^12$" data-sol="12" aria-label="okres">)
-m = HoltWintersModel(ts, params)
-m.<input class="blank" size="4" data-re="^fit\(\)$" data-sol="fit()" aria-label="uczenie">
-fcst = m.predict(steps=<input class="blank" size="3" data-re="^12$" data-sol="12" aria-label="horyzont">, freq=<span class="k">'MS'</span>)</pre>
-<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
-<p class="fb"></p>
-<p class="explain">Dane opakowujemy w <code>TimeSeriesData</code>. Sezon roczny dla danych miesięcznych ma okres 12. Najpierw <code>fit()</code>, potem prognoza 12 kroków (miesięcy) naprzód.</p>
-</div>
-<div>
-<div class="quiz compact"><p class="q">Dane z czujnika są godzinowe, z wyraźnym rytmem dobowym. Jaki <code>seasonal_periods</code> ustawić?</p><div class="opts"><button class="opt" data-ok="0">7</button><button class="opt" data-ok="0">12</button><button class="opt" data-ok="1">24</button></div><p class="explain">Doba to 24 pomiary godzinowe. Dla rytmu tygodniowego na danych godzinowych byłoby 168.</p></div>
-</div>
-</div>
-</div>
-</section>
-
-<section data-background-color="#ffffff" data-keywords="Detekcja">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Detekcja: co dzieje się w szeregu?</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<svg class="diagram" viewBox="0 0 1180 140" style="width:100%;height:140px" role="img" aria-label="Cztery typy zdarzeń: punkt zmiany, wartość odstająca, trend, sezonowość" id="detsvg"></svg>
-<table class="simple">
-<tr><th>pytanie</th><th>detektor w Kats</th><th>przykład</th></tr>
-<tr><td>czy poziom się zmienił? (punkt zmiany)</td><td><code>CUSUMDetector</code>, <code>BOCPDetector</code>, <code>RobustStatDetector</code></td><td>po aktualizacji serwera CPU rośnie z 30% do 45%</td></tr>
-<tr><td>czy są pojedyncze dziwne pomiary?</td><td><code>OutlierDetector</code>, <code>ProphetDetector</code></td><td>czujnik raz pokazał −40 °C</td></tr>
-<tr><td>czy jest trend?</td><td><code>MKDetector</code> (test Manna-Kendalla)</td><td>wilgotność w szklarni powoli spada</td></tr>
-<tr><td>czy jest sezonowość i jaki okres?</td><td><code>ACFDetector</code>, <code>FFTDetector</code></td><td>rytm dobowy zużycia prądu</td></tr>
-</table>
-</div>
-</section>
-
-<section data-background-color="#ffffff" data-keywords="CUSUM">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>CUSUM: sumowanie odchyleń</strong></span></p></div>
+<section data-background-color="#ffffff" data-keywords="Probabilistyczne">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Prognozy probabilistyczne</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <div class="cols">
 <div>
-<p class="lead">Pojedyncze odchylenie może być szumem. Jeśli jednak <strong>wiele kolejnych</strong> pomiarów jest nieco powyżej normy, ich suma rośnie i zdradza zmianę.</p>
-<p style="font-size:.85em;text-align:center"><code>S⁺ₜ = max(0, S⁺ₜ₋₁ + (yₜ − μ₀ − k))</code>, alarm gdy <code>S⁺ₜ &gt; h</code></p>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+model = ExponentialSmoothing()
+model.fit(train)
+pred = model.predict(n=24, num_samples=500)
+
+pred.plot(low_quantile=0.05, high_quantile=0.95)
+mediana = pred.quantile(0.5)
+</code></pre>
 <ul class="points side">
-<li><code>μ₀</code>: oczekiwany poziom, <code>k</code>: tolerancja (ignorujemy małe odchylenia), <code>h</code>: próg alarmu. Analogicznie <code>S⁻</code> dla spadków.</li>
-<li>To klasyczny CUSUM Page'a (1954): działa <strong>online</strong>, pamięta jedną liczbę.</li>
-<li><code>CUSUMDetector</code> w Kats działa <strong>na całym szeregu</strong>: szuka punktu, który najlepiej dzieli go na część „przed” i „po” o różnych średnich, i sprawdza testem statystycznym, czy różnica jest istotna.</li>
+<li>Zamiast jednej liczby: <strong>przedział</strong>, w którym wynik znajdzie się z prawdopodobieństwem 90%.</li>
+<li>Darts trzyma wiele trajektorii jako próbki w <code>TimeSeries</code>.</li>
 </ul>
 </div>
 <div>
+<div class="quiz compact"><p class="q">Pasmo 5–95% na jutro: 18–24 °C. Czujnik pokazuje 31 °C. Co to sugeruje?</p><div class="opts"><button class="opt" data-ok="1">anomalie: pomiar daleko poza przedziałem</button><button class="opt" data-ok="0">zwykły szum</button><button class="opt" data-ok="0">że model trzeba trenować rzadziej</button></div><p class="explain">Wartość daleko poza pasmem 90% to kandydat na awarię albo nagłą zmianę.</p></div>
+<div class="note"><p>Zastosowania: zapas magazynowy, rezerwa mocy, wykrywanie anomalii przez porównanie z pasmem.</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Anomalie intuicja">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Anomalie: trzy kroki</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<svg class="diagram" viewBox="0 0 1180 90" style="width:100%;height:90px" role="img" aria-label="model, scorer, detektor">
+<defs><marker id="ar13" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#666"/></marker></defs>
+<rect x="10" y="15" width="250" height="60" rx="8" fill="#e8f0fe" stroke="#1a73d9" stroke-width="2"/><text x="135" y="41" text-anchor="middle" font-weight="bold">1. model</text><text x="135" y="63" text-anchor="middle" style="font-size:15px" fill="#666">co powinno być?</text>
+<line x1="265" y1="45" x2="345" y2="45" stroke="#666" stroke-width="2" marker-end="url(#ar13)"/>
+<rect x="350" y="15" width="250" height="60" rx="8" fill="#fff4e5" stroke="#e8710a" stroke-width="2"/><text x="475" y="41" text-anchor="middle" font-weight="bold">2. scorer</text><text x="475" y="63" text-anchor="middle" style="font-size:15px" fill="#666">jak bardzo odbiega?</text>
+<line x1="605" y1="45" x2="685" y2="45" stroke="#666" stroke-width="2" marker-end="url(#ar13)"/>
+<rect x="690" y="15" width="250" height="60" rx="8" fill="#f3faee" stroke="#53ae12" stroke-width="2"/><text x="815" y="41" text-anchor="middle" font-weight="bold">3. detektor</text><text x="815" y="63" text-anchor="middle" style="font-size:15px" fill="#666">czy to już alarm?</text>
+<line x1="945" y1="45" x2="1025" y2="45" stroke="#666" stroke-width="2" marker-end="url(#ar13)"/>
+<rect x="1030" y="15" width="140" height="60" rx="8" fill="#fce8e6" stroke="#d93025" stroke-width="2"/><text x="1100" y="51" text-anchor="middle" font-weight="bold">0 / 1</text>
+</svg>
+<div class="cols">
+<ul class="points side">
+<li><strong>Model</strong> prognozuje normalne zachowanie.</li>
+<li><strong>Scorer</strong> liczy odległość prawdy od prognozy (np. |błąd|).</li>
+<li><strong>Detektor</strong> porównuje wynik z progiem (kwantyl, stała) i zwraca 0/1.</li>
+</ul>
+<ul class="points side">
+<li>Przykład intuicyjny: prognoza 20, pomiar 21 → wynik mały. Pomiar 40 → wynik duży → alarm.</li>
+<li>To samo robiliśmy „ręcznie” w River (z-score). Darts daje gotowy potok.</li>
+</ul>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Anomalie kod">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Anomalie w kodzie: darts.ad</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
 <pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
-import numpy as np, pandas as pd
-from kats.consts import TimeSeriesData
-from kats.detectors.cusum_detection import CUSUMDetector
+from darts.ad import (ForecastingAnomalyModel,
+                      NormScorer, QuantileDetector)
+from darts.models import LinearRegressionModel
 
-np.random.seed(10)
-df = pd.DataFrame({
-    'time': pd.date_range('2019-01-01', '2019-03-01'),
-    'value': np.concatenate([np.random.normal(1, 0.2, 30),
-                             np.random.normal(1.5, 0.2, 30)])})
+am = ForecastingAnomalyModel(
+    model=LinearRegressionModel(lags=24),
+    scorer=NormScorer(ord=1))
+am.fit(train, allow_model_training=True)
 
-detector = CUSUMDetector(TimeSeriesData(df))
-cps = detector.detector(change_directions=['increase'])
-for cp in cps:
-    print(cp.start_time, cp.direction, cp.confidence)
-detector.plot(cps)
+scores = am.score(test)              # |prawda − prognoza|
+det = QuantileDetector(high_quantile=0.99)
+det.fit(am.score(train))             # próg z normalnych danych
+anomalie = det.detect(scores)        # TimeSeries 0/1
 </code></pre>
-<p class="small">Zmiana średniej z 1,0 na 1,5 następuje 31 stycznia (indeks 30), więc wykryty punkt powinien wypaść w okolicy tej daty (przykład z tutoriala Kats 202).</p>
+</div>
+<div>
+<ul class="points side">
+<li><code>NormScorer(ord=1)</code>: suma wartości bezwzględnych błędu.</li>
+<li><code>QuantileDetector(0.99)</code>: alarm, gdy wynik &gt; 99. percentyla z treningu.</li>
+<li>Są też <code>KMeansScorer</code>, <code>PyODScorer</code>, <code>ThresholdDetector</code>.</li>
+</ul>
+<div class="note warn"><p>Nazwy metod w <code>darts.ad</code> bywały zmieniane między wersjami. Przed zajęciami sprawdźcie dokumentację zainstalowanej wersji.</p></div>
 </div>
 </div>
 </div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Wzrosty i spadki">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wzrosty i spadki: CUSUM na resztach</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols">
+<div>
+<p class="lead" style="font-size:.9em">Reszta = prawda − prognoza. Długo dodatnie reszty = <strong>wzrost</strong> poziomu, długo ujemne = <strong>spadek</strong>.</p>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+def cusum(x, k=0.5, h=3.0):
+    s_up = s_dn = 0.0
+    for i, r in enumerate(x):
+        s_up = max(0.0, s_up + r - k)
+        s_dn = max(0.0, s_dn - r - k)
+        if s_up &gt; h:
+            yield i, 'wzrost'; s_up = s_dn = 0.0
+        elif s_dn &gt; h:
+            yield i, 'spadek'; s_up = s_dn = 0.0
+
+reszty = [0.2, -0.4, 0.1, 1.5, 1.8, 1.2, 1.6,
+          -0.3, -1.9, -2.2, -1.7]
+for i, kierunek in cusum(reszty):
+    print(i, kierunek)
+</code></pre>
+<pre class="out sm">6 wzrost
+9 spadek</pre>
+</div>
+<div>
+<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
+model = LinearRegressionModel(lags=24)
+model.fit(train)
+reszty = model.residuals(
+    series, start=test.start_time(),
+    forecast_horizon=1, retrain=False)
+r = reszty.values().ravel()
+for i, k in cusum(r / r.std()):
+    print(reszty.time_index[i], k)
+</code></pre>
+<ul class="points side">
+<li><code>residuals</code> w Darts: prognozy historyczne na 1 krok minus prawda.</li>
+<li>Dzielimy przez odchylenie std., żeby <code>k</code> i <code>h</code> były w „sigmach”.</li>
+<li>Pojedynczy pik zwykle nie alarmuje; CUSUM reaguje na <strong>trwałą</strong> zmianę.</li>
+</ul>
+</div>
+</div>
+</div>
+<aside class="notes">Wynik 6 wzrost / 9 spadek policzony tym samym algorytmem. CUSUM Page'a (1954); w Darts nie ma gotowej klasy, ale reszty są idealnym wejściem.</aside>
 </section>
 
 <section data-background-color="#ffffff" data-keywords="Symulacja CUSUM">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Symulacja: CUSUM wykrywa zmianę</strong></span></p></div>
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Symulacja: CUSUM wykrywa wzrosty i spadki</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <div class="sim" id="cusumsim">
@@ -826,356 +1274,93 @@ detector.plot(cps)
 </div>
 <aside class="notes">Pojedynczy skok: S+ podskakuje, ale wraca do zera, alarmu brak (przy h=5). Przesunięcie o 1 sigma: alarm po kilkunastu punktach. Małe h: szybciej, ale fałszywe alarmy na samym szumie. Duże k: przegapia małe zmiany. Kolor linii alarmu pokazuje kierunek: pomarańczowa to wzrost (S⁺), fioletowa to spadek (S⁻).</aside>
 </section>
-<section data-background-color="#ffffff" data-keywords="Wzrosty i spadki CUSUM">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wzrosty i spadki poziomu: CUSUM</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols wl">
-<div>
-<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
-import numpy as np, pandas as pd
-from kats.consts import TimeSeriesData
-from kats.detectors.cusum_detection import CUSUMDetector
 
-np.random.seed(0)
-czas = pd.date_range('2026-05-01', periods=96, freq='h')
-wilg = np.concatenate([np.random.normal(70, 1.5, 48),   # wilgotność %
-                       np.random.normal(62, 1.5, 48)])  # awaria zraszaczy
-ts = TimeSeriesData(pd.DataFrame({'time': czas, 'value': wilg}))
-
-det = CUSUMDetector(ts)
-cps = det.detector(change_directions=['increase', 'decrease'],
-                   threshold=0.01)       # poziom istotności testu
-for cp in cps:
-    print(cp.start_time, cp.direction, round(cp.confidence, 3),
-          f'{cp.mu0:.1f} -&gt; {cp.mu1:.1f}')
-det.plot(cps)
-</code></pre>
-<p class="small">Spodziewamy się jednego punktu <code>'decrease'</code> w okolicy 3 maja 00:00 (indeks 48), ze średnią przed ok. 70 i po ok. 62. Dla temperatury, która skacze w górę, ten sam kod zwróci <code>'increase'</code>.</p>
-</div>
-<div>
-<ul class="points side">
-<li><code>change_directions</code>: <code>['increase']</code> tylko wzrosty, <code>['decrease']</code> tylko spadki, obie wartości (domyślnie) oba kierunki.</li>
-<li>Każdy wynik to <code>CUSUMChangePoint</code>: <code>start_time</code> (kiedy), <code>direction</code> (wzrost czy spadek), <code>confidence</code> (pewność, 1 − p-wartość), <code>mu0</code> i <code>mu1</code> (średnia przed i po zmianie).</li>
-<li><code>threshold</code> to poziom istotności: mniejszy oznacza mniej fałszywych alarmów, ale słabsze zmiany zostaną pominięte.</li>
-<li>Detektor zwraca <strong>najwyżej jeden punkt na kierunek</strong> dla całego szeregu. Kilka zmian wykrywamy na oknach przesuwnych albo zawężamy szukanie: <code>interest_window=[start, koniec]</code> (indeksy punktów).</li>
-</ul>
-</div>
-</div>
-</div>
-<aside class="notes">Wyniku liczbowego Kats celowo nie pokazujemy, uruchomcie kod sami. Parametry magnitude_quantile i magnitude_ratio pozwalają dodatkowo odrzucać zmiany o zbyt małej wielkości; szczegóły w docstringu CUSUMDetector.detector.</aside>
-</section>
-<section data-background-color="#ffffff" data-keywords="Trend MK">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Trend rosnący i malejący: MKDetector</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols wl">
-<div>
-<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
-from kats.detectors.trend_mk import MKDetector
-
-np.random.seed(1)
-czas = pd.date_range('2026-04-01', periods=60, freq='D')
-temp = np.r_[np.random.normal(22, 0.8, 30),            # stabilnie
-             22 + 0.2 * np.arange(30)                  # +0,2 °C dziennie
-                + np.random.normal(0, 0.8, 30)]
-ts = TimeSeriesData(pd.DataFrame({'time': czas, 'value': temp}))
-
-mk = MKDetector(data=ts, threshold=0.8)   # minimalna siła trendu
-wyniki = mk.detector(direction='up',      # 'down' albo 'both'
-                     window_size=20)      # okno: 20 punktów (dni)
-for w in wyniki:
-    print(w.start_time, w.end_time)
-mk.plot(wyniki)
-</code></pre>
-<p class="small"><strong>Test Manna-Kendalla</strong> w każdym oknie liczy pary punktów: <code>S = Σ sign(yⱼ − yᵢ)</code> dla <code>i &lt; j</code>, a <code>Tau = S / (liczba par)</code>. Tau = +1: każdy punkt wyższy od wcześniejszych, −1: każdy niższy. Próg <code>threshold=0.8</code> przepuszcza tylko silne trendy.</p>
-</div>
-<div>
-<ul class="points side">
-<li><code>direction</code>: <code>'up'</code> szuka wzrostów, <code>'down'</code> spadków, <code>'both'</code> obu.</li>
-<li>Wynik to lista okresów z trendem: <code>start_time</code> i <code>end_time</code>. Kierunek trendu i Tau są w metadanych wyniku.</li>
-<li>Gdy dane mają sezon (np. tygodniowy), parametr <code>freq</code> pozwala go usunąć przed testem, żeby sezon nie udawał trendu.</li>
-</ul>
-<table class="simple">
-<tr><th>co widać w danych</th><th>detektor</th></tr>
-<tr><td>nagły skok poziomu w górę lub w dół</td><td>CUSUM, BOCPD</td></tr>
-<tr><td>powolny, systematyczny wzrost lub spadek</td><td>MKDetector</td></tr>
-<tr><td>pojedynczy pik</td><td>OutlierDetector</td></tr>
-</table>
-</div>
-</div>
-</div>
-<aside class="notes">Mann-Kendall jest nieparametryczny: patrzy tylko na znaki różnic, więc nie zakłada liniowości ani rozkładu normalnego i jest odporny na pojedyncze piki.</aside>
-</section>
-<section data-background-color="#ffffff" data-keywords="RobustStat StatSig">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Wzrost czy spadek metryki?</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols">
-<div>
-<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
-from kats.detectors.robust_stat_detection import (
-    RobustStatDetector)
-
-det = RobustStatDetector(ts)
-cps = det.detector(p_value_cutoff=0.01,
-                   smoothing_window_size=5,
-                   comparison_window=-2)
-</code></pre>
-<p class="small"><strong>RobustStatDetector</strong>: wygładza szereg średnią ruchomą, liczy zmianę względem wartości sprzed kilku kroków i zgłasza punkty, w których ta zmiana jest nietypowo duża (z-score, p-wartość). Kierunek odczytujemy z wartości przed i po punkcie.</p>
-<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
-from kats.detectors.stat_sig_detector import StatSigDetectorModel
-
-model = StatSigDetectorModel(n_control=7, n_test=7)
-odp = model.fit_predict(data=ts_ostatnie,
-                        historical_data=ts_historia)
-odp.scores       # statystyka testu t: znak = kierunek zmiany
-</code></pre>
-<p class="small"><strong>StatSig</strong>: porównuje okno testowe (ostatnie 7 punktów) z kontrolnym (7 wcześniejszych) testem t. Wynik dodatni to wzrost, ujemny to spadek.</p>
-</div>
-<div>
-<div class="blanks">
-<p class="small" style="margin-bottom:.3em">Zrób to sam: wykryj <strong>tylko spadki</strong> wilgotności i <strong>tylko trendy malejące</strong> temperatury.</p>
-<pre class="exo">cps = CUSUMDetector(ts_wilg).detector(
-    change_directions=[<input class="blank" size="10" data-re="^['&quot;]decrease['&quot;]$" data-sol="'decrease'" aria-label="kierunek CUSUM">])
-
-trendy = MKDetector(data=ts_temp).detector(
-    direction=<input class="blank" size="6" data-re="^['&quot;]down['&quot;]$" data-sol="'down'" aria-label="kierunek MK">, window_size=20)
-
-<span class="k">for</span> cp <span class="k">in</span> cps:
-    print(cp.start_time, cp.<input class="blank" size="9" data-re="^direction$" data-sol="direction" aria-label="pole kierunku">)</pre>
-<button class="btn check">Sprawdź</button><button class="btn ghost show">Rozwiązanie</button>
-<p class="fb"></p>
-<p class="explain">CUSUM przyjmuje listę kierunków: <code>['decrease']</code>. MKDetector przyjmuje napis <code>'down'</code>. Kierunek wykrytej zmiany jest w polu <code>direction</code> (<code>'increase'</code> albo <code>'decrease'</code>).</p>
-</div>
-</div>
-</div>
-</div>
-<aside class="notes">StatSig przydaje się do monitorowania metryk: „czy ostatni tydzień jest istotnie wyższy lub niższy niż poprzedni”. RobustStat jest prosty i szybki, dobry na długie szeregi z wieloma zmianami.</aside>
-</section>
-
-<section data-background-color="#ffffff" data-keywords="BOCPD i outliery">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Detektory: BOCPD i wartości odstające</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols">
-<div>
-<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
-from kats.detectors.bocpd import BOCPDetector, BOCPDModelType
-
-bocpd = BOCPDetector(ts)
-cps = bocpd.detector(
-    model=BOCPDModelType.NORMAL_KNOWN_MODEL,
-    changepoint_prior=0.01)       # jak często zmiany a priori
-</code></pre>
-<p class="small"><strong>BOCPD</strong> (Bayesian Online Change Point Detection): po każdym punkcie liczy rozkład „ile czasu minęło od ostatniej zmiany”. Daje prawdopodobieństwo zmiany i, w przeciwieństwie do CUSUM, wykrywa <strong>wiele zmian</strong> w jednym szeregu, zarówno w górę, jak i w dół.</p>
-<div class="note"><p>Kierunek zmiany z BOCPD odczytujemy, porównując średnią szeregu przed i po każdym wykrytym punkcie, np. <code>df.value[:i].tail(20).mean()</code> i <code>df.value[i:].head(20).mean()</code>.</p></div>
-</div>
-<div>
-<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
-from kats.detectors.outlier import OutlierDetector
-
-od = OutlierDetector(ts, 'multiplicative')
-od.detector()
-print(od.outliers[0])        # znaczniki czasu odstających
-
-ts_czysty = od.remover(interpolate=True)
-</code></pre>
-<p class="small"><strong>OutlierDetector</strong>: rozkłada szereg na trend i sezon, a odstające to punkty, których reszta wykracza daleko poza typowy rozrzut (rozstęp międzykwartylowy). <code>remover</code> zastępuje je interpolacją, co poprawia późniejszą prognozę.</p>
-<div class="quiz compact"><p class="q">Czujnik raz na tydzień wysyła błędny odczyt 0. Co zrobić przed prognozą?</p><div class="opts"><button class="opt" data-ok="1">wykryć i usunąć odstające, potem prognozować</button><button class="opt" data-ok="0">szukać punktów zmiany CUSUM</button><button class="opt" data-ok="0">zwiększyć horyzont prognozy</button></div><p class="explain">Pojedyncze błędne odczyty to wartości odstające, nie trwała zmiana poziomu. Psują model, więc je usuwamy.</p></div>
-</div>
-</div>
-</div>
-</section>
-
-<section data-background-color="#ffffff" data-keywords="Sezonowość">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sezonowość i dekompozycja w Kats</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols">
-<div>
-<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
-from kats.detectors.seasonality import ACFDetector, FFTDetector
-
-ACFDetector(ts).detector(lags=24, diff=1, alpha=0.05)
-FFTDetector(ts).detector()
-# wynik: słownik {'seasonality_presence': True/False,
-#                 'seasonalities': [wykryte okresy]}
-</code></pre>
-<ul class="points side">
-<li><strong>ACF</strong>: szuka opóźnień o istotnie wysokiej autokorelacji (jak w symulacji dekompozycji).</li>
-<li><strong>FFT</strong>: transformata Fouriera rozkłada szereg na fale; wyraźne szczyty mocy to okresy sezonowe.</li>
-</ul>
-</div>
-<div>
-<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
-from kats.utils.decomposition import TimeSeriesDecomposition
-
-dec = TimeSeriesDecomposition(ts, decomposition='multiplicative')
-wynik = dec.decomposer()
-# trzy obiekty TimeSeriesData:
-wynik['trend'], wynik['seasonal'], wynik['rem']
-dec.plot()
-</code></pre>
-<ul class="points side">
-<li>Rozkład na trend, sezon i resztę (domyślnie metodą STL z statsmodels).</li>
-<li>Reszta <code>rem</code> to dobry materiał do wykrywania anomalii: bez trendu i sezonu odchylenia widać wyraźniej.</li>
-</ul>
-</div>
-</div>
-</div>
-</section>
-
-<section data-background-color="#ffffff" data-keywords="TsFeatures">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>TsFeatures: szereg opisany liczbami</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols wl">
-<div>
-<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
-from kats.tsfeatures.tsfeatures import TsFeatures
-
-cechy = TsFeatures().transform(ts)        # słownik ok. 40 cech
-wybrane = TsFeatures(selected_features=[
-    'mean', 'var', 'trend_strength', 'seasonality_strength',
-    'entropy', 'spikiness']).transform(ts)
-</code></pre>
-<table class="simple">
-<tr><th>cecha</th><th>znaczenie</th></tr>
-<tr><td><code>trend_strength</code>, <code>seasonality_strength</code></td><td>jaką część zmienności wyjaśnia trend / sezon (0–1)</td></tr>
-<tr><td><code>entropy</code></td><td>przewidywalność: niska dla regularnych, wysoka dla szumu</td></tr>
-<tr><td><code>lumpiness</code>, <code>stability</code></td><td>jak zmienia się wariancja i średnia w kolejnych oknach</td></tr>
-<tr><td><code>level_shift_size</code></td><td>największy skok średniej między oknami</td></tr>
-<tr><td><code>y_acf1</code>, <code>firstzero_ac</code></td><td>autokorelacja: pierwsze opóźnienie, pierwsze zero</td></tr>
-<tr><td><code>hw_alpha</code>, <code>hw_gamma</code></td><td>parametry dopasowanego modelu Holt-Winters</td></tr>
-</table>
-</div>
-<div>
-<p class="lead"><strong>Po co?</strong></p>
-<ul class="points side">
-<li>Tysiące szeregów (np. czujników) zamieniamy w <strong>tabelę</strong>: wiersz = szereg, kolumny = cechy.</li>
-<li>Na tej tabeli działa zwykłe uczenie maszynowe: <strong>klasteryzacja</strong> podobnych czujników, klasyfikacja („czujnik uszkodzony?”), wyszukiwanie podobnych szeregów.</li>
-<li>Cechy są wejściem metauczenia, które wybiera model prognozy.</li>
-<li>Liczenie cech dla wielu szeregów łatwo <strong>zrównoleglić</strong>, np. <code>ProcessPoolExecutor</code> z wykładu 5: każdy szereg osobno.</li>
-</ul>
-</div>
-</div>
-</div>
-<aside class="notes">Lista cech jest inspirowana pakietem R tsfeatures (Hyndman i in.). Pełna lista w dokumentacji klasy TsFeatures.</aside>
-</section>
-
-<section data-background-color="#ffffff" data-keywords="Streamz + Kats">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kats w potoku strumieniowym</strong></span></p></div>
-<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
-<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="cols wl">
-<div>
-<pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
-import itertools
-import pandas as pd
-from streamz import Stream
-from kats.consts import TimeSeriesData
-from kats.detectors.cusum_detection import CUSUMDetector
-
-licznik = itertools.count()
-zgloszone = set()
-
-def wykryj(okno):                    # krotka 240 słowników
-    df = pd.DataFrame(list(okno))[['time', 'value']]
-    cps = CUSUMDetector(TimeSeriesData(df)).detector()
-    return [cp.start_time for cp in cps]
-
-def nowe(czasy):
-    swieze = [t for t in czasy if t not in zgloszone]
-    zgloszone.update(swieze)
-    return swieze
-
-source = Stream()                    # np. Stream.from_mqtt(...)
-(source.sliding_window(240, return_partial=False)  # 4 h
-       .filter(lambda okno: next(licznik) % 15 == 0)  # co 15 min
-       .map(wykryj)
-       .map(nowe)
-       .filter(len)
-       .sink(lambda t: print('ZMIANA POZIOMU', t)))
-</code></pre>
-</div>
-<div>
-<ul class="points side">
-<li>Streamz zbiera okno (wykład 8), Kats analizuje je w całości.</li>
-<li>Detekcja na oknie jest droga, więc nie liczymy jej przy każdym zdarzeniu, tylko co 15 nowych pomiarów.</li>
-<li>Kolejne okna nakładają się, więc ten sam punkt zmiany zostałby zgłoszony wiele razy: <code>zgloszone</code> to stan potoku, który temu zapobiega.</li>
-<li>Przy wielu czujnikach: osobne okno na czujnik, analiza w puli procesów albo w Dask (<code>Stream(asynchronous=True).scatter()</code>).</li>
-</ul>
-<div class="note"><p>To samo w Flinku: okno przesuwne + funkcja okna (<code>ProcessWindowFunction</code>), która woła kod Pythona (PyFlink).</p></div>
-</div>
-</div>
-</div>
-<aside class="notes">Wzorzec mikrowsadowy: strumień tnie się na okna, a na oknach działają metody wsadowe. Zwracamy uwagę na koszt i duplikaty.</aside>
-</section>
-
-<section data-background-color="#ffffff" data-keywords="Kats online">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Czy Kats ma tryb online?</strong></span></p></div>
+<section data-background-color="#ffffff" data-keywords="Darts online">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Czy Darts ma tryb online?</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <div class="cols">
 <div>
 <p class="lead"><strong>Krótko: nie w sensie River.</strong></p>
 <ul class="points side">
-<li>Nie ma <code>learn_one</code>: modele prognoz uczą się metodą <code>fit()</code> na całym <code>TimeSeriesData</code>. Nowe dane oznaczają <strong>ponowny trening</strong> na oknie historii.</li>
-<li>BOCPD jest z natury algorytmem online, ale implementacja w Kats i tak przetwarza cały podany szereg naraz.</li>
-<li><strong>Najbliżej trybu online</strong> są modele detektorów (<code>StatSigDetectorModel</code>, <code>CUSUMDetectorModel</code>, <code>ProphetDetectorModel</code>) z metodą <code>fit_predict(data, historical_data)</code>: podajemy nowe punkty i historię, dostajemy wynik dla <strong>każdego nowego punktu</strong>.</li>
-<li>Stan detektora można zapisać (<code>serialize()</code>) i odtworzyć po restarcie (<code>serialized_model=...</code>).</li>
+<li>Nie ma <code>learn_one</code>. Modele uczą się przez <code>fit()</code> na całym szeregu (albo wielu szeregach).</li>
+<li>Nowe dane = okresowy <strong>ponowny trening</strong> (np. co noc) i podmiana pliku modelu.</li>
+<li><strong>Modele globalne</strong> (regresyjne, sieci): trenujemy offline, w strumieniu tylko <code>predict(n, series=okno)</code> — to trwa milisekundy.</li>
+<li><strong>Modele lokalne</strong> (Holt-Winters, Theta): trzeba <code>fit</code> na każdym oknie, więc rzadziej.</li>
 </ul>
 </div>
 <div>
+<div class="quiz compact"><p class="q">Pomiar co sekundę, model ma się uczyć po każdym pomiarze. Co wybrać?</p><div class="opts"><button class="opt" data-ok="1">River: <code>learn_one</code></button><button class="opt" data-ok="0">Darts: <code>fit()</code> po każdym pomiarze</button></div><p class="explain">Darts nie uczy się przyrostowo. Darts prognozuje na oknach; River nadąża za dryfem po każdym zdarzeniu.</p></div>
+<div class="note"><p>Dobry podział ról: River do szybkich alarmów, Darts co kilka minut / co noc do dokładniejszej prognozy na historii.</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<section data-background-color="#ffffff" data-keywords="Streamz + Darts">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Darts w potoku Streamz</strong></span></p></div>
+<div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
+<div class="el box" style="left:2%;top:20%;width:96%;height:78%">
+<div class="cols wl">
+<div>
 <pre class="code-wrap sm"><code class="language-python" data-trim data-noescape>
-from kats.detectors.stat_sig_detector import StatSigDetectorModel
+import pandas as pd
+from streamz import Stream
+from darts import TimeSeries
+from darts.models import LinearRegressionModel
 
-model = StatSigDetectorModel(n_control=60, n_test=10)
-historia = ts_start                  # np. ostatnie 2 godziny
+model = LinearRegressionModel.load('model_temp.pkl')
 
-for nowe in paczki_co_10_min():      # nowe punkty
-    odp = model.fit_predict(data=nowe, historical_data=historia)
-    if (odp.scores.value.abs() &gt; 3).any():   # |t| &gt; 3
-        print('ALARM', nowe.time.iloc[-1])
-    historia.extend(nowe)            # dopisz nowe punkty
-    historia = historia[-600:]       # trzymaj ograniczone okno
+def prognoza(okno):              # 48 ostatnich pomiarów
+    df = pd.DataFrame(list(okno))
+    s = TimeSeries.from_dataframe(
+        df, time_col='time', value_cols='temp', freq='min')
+    pred = model.predict(n=10, series=s)
+    return float(pred.values().max())
+
+source = Stream()
+(source.sliding_window(48, return_partial=False)
+       .map(prognoza)
+       .filter(lambda t: t &gt; 35)
+       .sink(lambda t: print('ZA 10 MIN ZA GORĄCO', t)))
 </code></pre>
-<p class="small">To wciąż <strong>mikrowsad</strong>: paczka nowych punktów + okno historii, ale opóźnienie to tylko długość paczki.</p>
-<div class="quiz compact"><p class="q">Pomiar co sekundę, każdy trzeba ocenić w kilka milisekund. Co wybrać?</p><div class="opts"><button class="opt" data-ok="1">River: model online, <code>score_one</code> po każdym pomiarze</button><button class="opt" data-ok="0">Kats: <code>fit()</code> modelu po każdym pomiarze</button></div><p class="explain">Ponowny trening Kats przy każdym zdarzeniu jest za drogi. Dobry podział ról: River do szybkich alarmów na bieżąco, Kats co kilka minut do dokładniejszej analizy okna.</p></div>
+</div>
+<div>
+<ul class="points side">
+<li>Trening offline → <code>save</code>. W potoku tylko predykcja na oknie.</li>
+<li>Okno musi mieć co najmniej tyle punktów, ile wynosi <code>lags</code>.</li>
+<li>Przy wielu czujnikach: osobne okno, ten sam model globalny.</li>
+</ul>
 </div>
 </div>
 </div>
-<aside class="notes">Kats powstał w Meta do monitorowania metryk infrastruktury, gdzie detektory uruchamia się okresowo (np. co kilka minut) na nowych punktach z historią, a nie zdarzenie po zdarzeniu. Interfejs fit_predict z historical_data jest właśnie pod taki tryb.</aside>
+<aside class="notes">Wzorzec mikrowsadowy: Streamz tnie strumień na okna, Darts analizuje okno.</aside>
 </section>
 
 <section data-background-color="#ffffff" data-keywords="Porównanie">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Kats na tle innych bibliotek (2026)</strong></span></p></div>
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Darts na tle innych bibliotek (2026)</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <table class="simple">
 <tr><th>biblioteka</th><th>tryb</th><th>mocne strony</th><th>uwagi</th></tr>
-<tr><td><strong>Kats</strong> (Meta)</td><td>wsadowy</td><td>prognozy, detektory, cechy i backtesting w jednym API</td><td>brak nowych wydań od 2022, trudna instalacja</td></tr>
-<tr><td><strong>River</strong></td><td>online</td><td>uczenie po jednym zdarzeniu, ADWIN, Holt-Winters, SNARIMAX</td><td>prostsze modele, mało narzędzi analizy</td></tr>
-<tr><td><strong>statsmodels</strong></td><td>wsadowy</td><td>ARIMA, ETS, STL, testy ADF i KPSS</td><td>fundament wielu bibliotek, także Kats</td></tr>
-<tr><td><strong>Prophet</strong></td><td>wsadowy</td><td>jeden model: trend + sezony + święta</td><td>Kats go opakowuje</td></tr>
-<tr><td><strong>Darts</strong>, <strong>sktime</strong></td><td>wsadowy</td><td>jednolite API dla modeli klasycznych i sieci neuronowych, backtesting</td><td>aktywnie rozwijane</td></tr>
-<tr><td><strong>StatsForecast</strong> (Nixtla)</td><td>wsadowy</td><td>bardzo szybkie AutoARIMA i ETS dla tysięcy szeregów</td><td>aktywnie rozwijane</td></tr>
-<tr><td>modele bazowe: <strong>Chronos</strong>, <strong>TimesFM</strong></td><td>wsadowy</td><td>prognoza bez trenowania (zero-shot), uczone na ogromnych zbiorach szeregów</td><td>wymagają GPU dla dużych danych</td></tr>
+<tr><td><strong>Darts</strong> (Unit8)</td><td>wsadowy</td><td>jedno API dla modeli statystycznych, ML i sieci; backtesting, kowariaty, anomalie</td><td>aktywnie rozwijana</td></tr>
+<tr><td><strong>River</strong></td><td>online</td><td>uczenie po jednym zdarzeniu, ADWIN, Holt-Winters online</td><td>prostsze modele</td></tr>
+<tr><td><strong>statsmodels</strong></td><td>wsadowy</td><td>ARIMA, ETS, STL, testy ADF/KPSS</td><td>fundament wielu bibliotek</td></tr>
+<tr><td><strong>StatsForecast</strong></td><td>wsadowy</td><td>bardzo szybkie AutoARIMA/ETS dla tysięcy szeregów</td><td>tylko modele statystyczne</td></tr>
+<tr><td><strong>sktime</strong></td><td>wsadowy</td><td>API sklearn także dla klasyfikacji szeregów</td><td>szeroka, bardziej złożona</td></tr>
+<tr><td><strong>Prophet</strong></td><td>wsadowy</td><td>trend + sezony + święta</td><td>dostępny też w Darts</td></tr>
 </table>
-<p class="small">Pojęcia z dzisiejszego wykładu (dekompozycja, backtesting, prognozy bazowe, punkty zmiany) są wspólne dla wszystkich tych bibliotek. Kats dobrze je porządkuje.</p>
 </div>
-<aside class="notes">Uczciwie: w nowym projekcie produkcyjnym w 2026 częściej wybierzemy Darts, StatsForecast albo sktime. Kats wciąż jest dobrym przykładem kompletnego zestawu narzędzi, a jego detektory i TsFeatures są rzadkie w innych bibliotekach.</aside>
 </section>
 
-<section data-background-color="#ffffff" data-keywords="Quiz Kats">
-<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się: szeregi czasowe i Kats</strong></span></p></div>
+<section data-background-color="#ffffff" data-keywords="Quiz Darts">
+<div class="el text" style="left:2.179%;top:2.158%;width:93.682%;height:10.788%;"><p><span style="font-size:2.25em"><strong>Sprawdź się: szeregi czasowe i Darts</strong></span></p></div>
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
-<div class="quiz compact"><p class="q">Jak trzeba podzielić szereg na trening i test?</p><div class="opts"><button class="opt" data-ok="0">losowo, 80/20</button><button class="opt" data-ok="1">chronologicznie: test to najnowszy fragment</button><button class="opt" data-ok="0">co drugi punkt do testu</button></div><p class="explain">Test ma udawać przyszłość. Każdy inny podział przecieka informacją z przyszłości do treningu.</p></div>
-<div class="quiz compact"><p class="q">Jaki obiekt przyjmują modele i detektory Kats?</p><div class="opts"><button class="opt" data-ok="0">listę słowników</button><button class="opt" data-ok="1"><code>TimeSeriesData</code></button><button class="opt" data-ok="0">macierz NumPy bez czasu</button></div><p class="explain"><code>TimeSeriesData</code> łączy kolumnę czasu z jedną lub wieloma kolumnami wartości.</p></div>
-<div class="quiz compact"><p class="q">Filtr w szklarni powoli się zapycha: przepływ wody spada o ok. 1% dziennie. Co wykryje to najlepiej?</p><div class="opts"><button class="opt" data-ok="0">CUSUM, tylko wzrosty</button><button class="opt" data-ok="1">MKDetector, <code>direction='down'</code></button><button class="opt" data-ok="0">OutlierDetector</button></div><p class="explain">Nie ma tu jednego skoku ani pojedynczego piku. Jest powolny, systematyczny spadek, czyli trend malejący.</p></div>
-<div class="quiz multi compact"><p class="q">Które narzędzia Kats służą do detekcji? (zaznacz wszystkie)</p><div class="opts"><button class="opt" data-ok="1"><code>CUSUMDetector</code></button><button class="opt" data-ok="0"><code>ProphetParams</code></button><button class="opt" data-ok="1"><code>OutlierDetector</code></button><button class="opt" data-ok="1"><code>ACFDetector</code></button><button class="opt" data-ok="0"><code>BackTesterSimple</code></button></div><button class="btn check">Sprawdź</button><p class="explain">CUSUM szuka punktów zmiany, OutlierDetector wartości odstających, ACFDetector sezonowości. ProphetParams to parametry modelu prognozy, a BackTesterSimple służy do oceny prognoz.</p></div>
+<div class="quiz compact"><p class="q">Jak podzielić szereg na trening i test?</p><div class="opts"><button class="opt" data-ok="0">losowo 80/20</button><button class="opt" data-ok="1">chronologicznie, np. <code>split_before</code></button><button class="opt" data-ok="0">co drugi punkt do testu</button></div><p class="explain">Test ma udawać przyszłość.</p></div>
+<div class="quiz compact"><p class="q">Co oznacza <code>model.predict(n=12)</code>?</p><div class="opts"><button class="opt" data-ok="0">predykcję dla 12 wierszy X</button><button class="opt" data-ok="1">12 kroków naprzód po historii</button><button class="opt" data-ok="0">12 epok uczenia</button></div><p class="explain"><code>n</code> to horyzont prognozy.</p></div>
+<div class="quiz compact"><p class="q"><code>NaiveSeasonal(K=2)</code> na <code>[1,2,3,4,5,6]</code>, <code>predict(n=3)</code> daje:</p><div class="opts"><button class="opt" data-ok="0">[6, 6, 6]</button><button class="opt" data-ok="1">[5, 6, 5]</button><button class="opt" data-ok="0">[4, 5, 6]</button></div><p class="explain">Ostatni cykl to 5, 6; potem znowu 5.</p></div>
+<div class="quiz multi compact"><p class="q">Które zdania są prawdziwe? (zaznacz wszystkie)</p><div class="opts"><button class="opt" data-ok="1">jedno API <code>fit</code>/<code>predict</code> dla wielu modeli</button><button class="opt" data-ok="0">Darts ma <code>learn_one</code> jak River</button><button class="opt" data-ok="1">model globalny uczy się na wielu szeregach</button><button class="opt" data-ok="1"><code>historical_forecasts</code> służy do backtestingu</button></div><button class="btn check">Sprawdź</button><p class="explain">Darts nie uczy się przyrostowo. Pozostałe zdania są prawdziwe.</p></div>
 </div>
 </section>
 
@@ -1184,11 +1369,11 @@ for nowe in paczki_co_10_min():      # nowe punkty
 <div class="el shape horizontal-line" style="left:1.089%;top:15.103%;width:96.950%;height:3.098%;"><div style="border-top:0.625em solid rgb(83, 174, 18)"></div></div>
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <ul class="points">
-<li><strong>Szereg czasowy:</strong> pomiary uporządkowane w czasie. Składa się z trendu, sezonowości i reszty; ACF i różnicowanie pomagają je rozpoznać i usunąć.</li>
-<li><strong>Prognozy:</strong> podział chronologiczny, miary MAE i MAPE, zawsze porównanie z prognozą naiwną. Holt-Winters na AirPassengers: ok. 7% MAPE wobec 15,5% sezonowej naiwnej.</li>
-<li><strong>Kats:</strong> <code>TimeSeriesData</code> + para <code>Params</code> / <code>Model</code> z <code>fit</code> i <code>predict</code>; backtesting, zespoły i metauczenie.</li>
-<li><strong>Detekcja i cechy:</strong> skoki w górę i w dół wykrywa CUSUM (<code>change_directions</code>, pole <code>direction</code>) i BOCPD, powolne trendy Mann-Kendall (<code>direction='up'/'down'</code>), dodatkowo OutlierDetector, ACF/FFT dla sezonu; TsFeatures zamienia szereg w wektor cech.</li>
-<li><strong>W strumieniu:</strong> Kats nie ma trybu online jak River; działa mikrowsadowo: okno przesuwne w Streamz lub Flinku albo <code>fit_predict(data, historical_data)</code> detektora na kolejnych paczkach, z deduplikacją wyników.</li>
+<li><strong>Szereg czasowy:</strong> pomiary w czasie; trend, sezonowość, reszta; ACF i różnicowanie.</li>
+<li><strong>Prognozy:</strong> podział chronologiczny, MAE/MAPE, zawsze porównanie z naiwną (AirPassengers: 15,5%).</li>
+<li><strong>Darts:</strong> <code>TimeSeries</code> → <code>fit</code> → <code>predict(n)</code>; modele bazowe, statystyczne, ML (lags, kowariaty) i sieci; backtesting.</li>
+<li><strong>Anomalie i zmiany:</strong> <code>darts.ad</code>; CUSUM na resztach wykrywa trwałe wzrosty i spadki.</li>
+<li><strong>Strumień:</strong> Darts nie jest online; trenujemy offline, w Streamz wołamy <code>predict(series=okno)</code>.</li>
 </ul>
 </div>
 </section>
@@ -1199,20 +1384,21 @@ for nowe in paczki_co_10_min():      # nowe punkty
 <div class="el box" style="left:2%;top:20%;width:96%;height:78%">
 <div class="cols">
 <ul class="points side" style="overflow-wrap:anywhere">
-<li>https://facebookresearch.github.io/Kats/</li>
-<li>https://github.com/facebookresearch/Kats (tutoriale: 201 forecasting, 202 detection, 203 tsfeatures)</li>
-<li>R. J. Hyndman, G. Athanasopoulos, Forecasting: Principles and Practice, wyd. 3, https://otexts.com/fpp3/</li>
-<li>E. S. Page, Continuous inspection schemes, Biometrika 41 (1954) (CUSUM)</li>
+<li>https://unit8co.github.io/darts/</li>
+<li>https://github.com/unit8co/darts</li>
+<li>J. Herzen i in., Darts: User-Friendly Modern Machine Learning for Time Series, JMLR 23 (2022)</li>
+<li>R. J. Hyndman, G. Athanasopoulos, Forecasting: Principles and Practice, https://otexts.com/fpp3/</li>
 </ul>
 <ul class="points side" style="overflow-wrap:anywhere">
-<li>R. P. Adams, D. J. C. MacKay, Bayesian online changepoint detection, arXiv:0710.3742 (2007)</li>
-<li>S. J. Taylor, B. Letham, Forecasting at scale, The American Statistician 72 (2018) (Prophet)</li>
-<li>G. E. P. Box, G. M. Jenkins, Time Series Analysis: Forecasting and Control (ARIMA)</li>
+<li>B. N. Oreshkin i in., N-BEATS, ICLR 2020</li>
+<li>V. Assimakopoulos, K. Nikolopoulos, The theta model, IJF 16 (2000)</li>
+<li>E. S. Page, Continuous inspection schemes, Biometrika 41 (1954)</li>
 <li>https://pandas.pydata.org/docs/user_guide/timeseries.html</li>
 </ul>
 </div>
 </div>
 </section>
+
 
 </div>
 </div>
